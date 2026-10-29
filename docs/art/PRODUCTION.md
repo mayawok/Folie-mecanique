@@ -19,9 +19,9 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | validé (croix rouge délavée en gris par Claude) | `batiments/` |
 | 7 | Survivants : 6 poses | 1 planche | validé (« course » à la place de « assis ») | `personnages/` |
 | 8 | Faune : meute, prédateur, nuée | 1 planche | validé | `faune/` |
-| 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part (cadre différent, à harmoniser) | `carte/` |
+| 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part, cadre harmonisé | `carte/` |
 | 10 | Calques de dégâts et effets | 1 planche | validé (10 éléments) | `fx/` |
-| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a, 11b, 11c reçus et découpés (assemblage sur gabarit à faire) ; **11d en cours** ; 11e à 11i à faire | `vehicules/<id>/art/` |
+| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a à 11f reçus et découpés (assemblage sur gabarit à faire) ; **11g à 11i en cours** : chars refusés par ChatGPT, demandés pièce par pièce en termes neutres, une image à la fois | `vehicules/<id>/art/` |
 | 12 | Icônes d'actions de l'interface | — | bloqué : écrans pas encore conçus | `ui/` |
 | 13 | Illustrations de récit (6 à 8) | — | bloqué : système 8 (récit) | `recit/` |
 
@@ -164,6 +164,12 @@ complet sert d'épave de décor (`decor/epave_*.png`), les petites pièces de bu
 - 11b Traction Avant : 5 pièces conformes. La transmission inclut un arbre long (toléré).
 - 11c T23 : `cabine`, `plateau`, `chassis`, `roue`, `moteur`, `transmission`.
   Pseudo-lettrage du pneu effacé par Claude.
+- 11d Diamond T : `caisse`, `grue`, `chassis`, `roue`, `moteur`, `transmission`.
+- 11e DUKW : `caisse` (coque), `chassis`, `roue`, `helice`, `moteur`, `transmission`.
+- 11f Half-Track : `caisse`, `roue`, `chenille`, `galet`, `mitrailleuse`, `moteur`, `transmission`.
+- Moteur et transmission identiques sur 11d, 11e, 11f (acceptable, pièces partagées possibles).
+- ChatGPT refuse les chars nommés et ne produit qu'une image par demande : chars demandés
+  sans nom de modèle, une pièce ou une petite planche à la fois.
 - Reste à faire par Claude : `gabarit.json` et `assemblage.png` de chaque véhicule.
 
 ### Lot 10 — Dégâts et effets
