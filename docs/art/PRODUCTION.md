@@ -18,7 +18,7 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | validé | `batiments/` |
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | validé (croix rouge délavée en gris par Claude) | `batiments/` |
 | 7 | Survivants : 6 poses | 1 planche | validé (« course » à la place de « assis ») | `personnages/` |
-| 7b | Survivantes : 6 poses | 1 planche | **en cours** | `personnages/` |
+| 7b | Survivantes : 6 poses | 1 planche | validé | `personnages/` |
 | 8 | Faune : meute, prédateur, nuée | 1 planche | validé | `faune/` |
 | 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part, cadre harmonisé | `carte/` |
 | 10 | Calques de dégâts et effets | 1 planche | validé (10 éléments) | `fx/` |
@@ -180,6 +180,8 @@ complet sert d'épave de décor (`decor/epave_*.png`), les petites pièces de bu
 - ChatGPT refuse les chars nommés et ne produit qu'une image par demande : chars demandés
   sans nom de modèle, une pièce ou une petite planche à la fois.
 - Assemblages faits le 2026-10-29 par `tools/specs_vehicules.py` (cotes de prototypage).
+  Roues recalées le 2026-10-29 : centres sur les passages de roue mesurés sur chaque caisse,
+  moyeux du châssis alignés sur les roues.
   Le panier du BMW est presque caché par la moto en vue de profil (normal).
 - Reste à faire par Claude (chars seulement) : `gabarit.json` et `assemblage.png` de chaque véhicule.
 

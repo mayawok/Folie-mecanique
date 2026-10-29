@@ -16,35 +16,37 @@ SLOTS = {"caisse": "carrosserie", "cabine": "carrosserie", "plateau": "carrosser
 
 # véhicule : (nom, longueur, hauteur, {pièce: (x, y, w)}, [(pièce, décalage x, z), ...])
 SPECS = {
+    # Roues : centres calés sur les passages de roue mesurés sur chaque caisse (fraction de largeur),
+    # moyeux du châssis alignés sur les centres de roue. Voir PRODUCTION.md.
     "bmw_r75": ("BMW R75 side-car", 2.35, 1.2, {
-        "panier": (0.30, 0.30, 1.70), "mitrailleuse": (1.05, 0.88, 1.15), "chassis": (0.25, 0.25, 1.80),
-        "transmission": (0.45, 0.28, 0.80), "moteur": (0.95, 0.22, 0.55), "roue": (0.17, 0.0, 0.66),
-        "caisse": (0.05, 0.28, 2.25)},
-        [("panier", 0, 0), ("roue", 0.75, 1), ("mitrailleuse", 0, 2), ("chassis", 0, 3), ("transmission", 0, 4),
+        "panier": (0.35, 0.30, 1.70), "mitrailleuse": (1.05, 0.88, 1.15), "chassis": (0.34, 0.26, 1.70),
+        "transmission": (0.45, 0.28, 0.80), "moteur": (0.82, 0.41, 0.55), "roue": (0.12, 0.0, 0.66),
+        "caisse": (0.10, 0.25, 2.05)},
+        [("panier", 0, 0), ("roue", 0.80, 1), ("mitrailleuse", 0, 2), ("chassis", 0, 3), ("transmission", 0, 4),
          ("moteur", 0, 5), ("roue", 0, 6), ("roue", 1.45, 6), ("caisse", 0, 7)]),
-    "citroen_traction": ("Citroën Traction Avant", 4.45, 1.52, {
-        "chassis": (0.30, 0.18, 3.90), "transmission": (1.90, 0.22, 1.80), "moteur": (3.05, 0.30, 0.95),
-        "roue": (0.52, 0.0, 0.66), "caisse": (0.0, 0.15, 4.45)},
-        [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("roue", 2.91, 4), ("caisse", 0, 5)]),
+    "citroen_traction": ("Citroën Traction Avant", 4.75, 1.52, {
+        "chassis": (0.50, 0.19, 3.90), "transmission": (2.10, 0.22, 1.80), "moteur": (3.30, 0.30, 0.95),
+        "roue": (0.66, 0.0, 0.70), "caisse": (0.30, 0.13, 4.45)},
+        [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("roue", 2.98, 4), ("caisse", 0, 5)]),
     "citroen_t23": ("Citroën T23", 5.6, 2.4, {
-        "chassis": (0.10, 0.40, 5.40), "transmission": (2.10, 0.45, 2.30), "moteur": (4.40, 0.75, 0.90),
-        "roue": (0.70, 0.0, 0.95), "plateau": (0.0, 0.95, 3.30), "cabine": (3.30, 0.72, 2.30)},
+        "chassis": (0.45, 0.36, 5.14), "transmission": (2.20, 0.45, 2.30), "moteur": (4.30, 0.80, 0.90),
+        "roue": (0.775, 0.0, 0.95), "plateau": (0.0, 1.00, 3.30), "cabine": (3.26, 0.53, 2.30)},
         [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("roue", 3.60, 4),
          ("plateau", 0, 5), ("cabine", 0, 6)]),
     "diamond_t": ("Diamond T 969 dépanneuse", 7.42, 3.0, {
-        "chassis": (0.40, 0.20, 6.60), "transmission": (4.50, 0.80, 0.80), "moteur": (5.70, 0.90, 1.10),
-        "roue": (1.05, 0.0, 1.10), "caisse": (0.20, 0.72, 7.20), "grue": (0.05, 1.20, 2.60)},
-        [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("roue", 1.40, 4),
-         ("roue", 4.95, 4), ("caisse", 0, 5), ("grue", 0, 6)]),
+        "chassis": (0.83, 0.15, 6.67), "transmission": (4.50, 0.80, 0.80), "moteur": (5.65, 0.62, 0.95),
+        "roue": (0.51, 0.0, 1.10), "caisse": (0.20, 0.22, 7.20), "grue": (0.10, 0.80, 2.60)},
+        [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("roue", 1.30, 4),
+         ("roue", 4.97, 4), ("grue", 0, 4.5), ("caisse", 0, 5)]),
     "dukw": ("DUKW", 9.45, 2.7, {
-        "chassis": (1.70, 0.10, 6.20), "transmission": (5.00, 0.80, 0.80), "moteur": (6.30, 1.00, 1.10),
-        "helice": (0.25, 0.35, 0.40), "roue": (1.75, 0.0, 1.10), "caisse": (0.0, 0.55, 9.45)},
+        "chassis": (1.64, 0.25, 6.20), "transmission": (5.00, 0.80, 0.80), "moteur": (6.30, 1.00, 1.10),
+        "helice": (0.25, 0.35, 0.40), "roue": (2.27, 0.0, 1.10), "caisse": (0.0, 0.55, 9.45)},
         [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("helice", 0, 4), ("roue", 0, 4),
-         ("roue", 1.25, 4), ("roue", 4.80, 4), ("caisse", 0, 5)]),
+         ("roue", 1.92, 4), ("roue", 3.78, 4), ("caisse", 0, 5)]),
     "m3_half_track": ("M3 Half-Track", 6.17, 2.26, {
-        "transmission": (3.80, 0.60, 0.70), "moteur": (4.60, 0.70, 1.00), "chenille": (0.45, 0.0, 3.00),
-        "galet": (0.95, 0.06, 0.32), "roue": (4.70, 0.0, 0.95), "caisse": (0.0, 0.45, 6.17),
-        "mitrailleuse": (2.10, 1.90, 0.90)},
+        "transmission": (3.80, 0.60, 0.70), "moteur": (4.70, 0.55, 0.85), "chenille": (0.30, 0.0, 3.00),
+        "galet": (0.74, 0.12, 0.32), "roue": (4.765, 0.0, 0.95), "caisse": (0.0, 0.36, 6.17),
+        "mitrailleuse": (2.10, 1.72, 0.90)},
         [("transmission", 0, 1), ("moteur", 0, 2), ("chenille", 0, 3), ("galet", 0, 4), ("galet", 0.6, 4),
          ("galet", 1.2, 4), ("galet", 1.8, 4), ("roue", 0, 4), ("caisse", 0, 5), ("mitrailleuse", 0, 6)]),
 }
@@ -59,8 +61,10 @@ def main():
             rect = [[bx, by], [bx + bw, by], [bx + bw, by + bh], [bx, by + bh]]
             images.append({"id": pid, "slot": SLOTS[pid], "box": [bx, by, bw, bh], "shapes": [{"poly": rect}]})
         top = max(i["box"][1] + i["box"][3] for i in images)
+        bw = {i["id"]: i["box"][0] + i["box"][2] for i in images}
+        right = max(bw[p] + dx / CELL for p, dx, z in inst)
         g = {"vehicle": vid, "name": name, "cell_m": CELL, "px_per_cell": 64,
-             "size_cells": [L / CELL + 1, max(H / CELL, top) + 1],
+             "size_cells": [max(L / CELL, right) + 1, max(H / CELL, top) + 1],
              "note": "Généré par tools/specs_vehicules.py. Cotes de prototypage, à affiner sur plans.",
              "images": images,
              "instances": [{"id": f"{p}_{n}", "image": p, "dx": dx / CELL, "z": z} for n, (p, dx, z) in enumerate(inst)]}
