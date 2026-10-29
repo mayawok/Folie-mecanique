@@ -21,7 +21,8 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Décisions ouvertes
 
-- Vision, boucle de jeu, monétisation, périmètre de la première version.
+- Mode des expéditions (action ou tactique), achats intégrés, liste des 10 véhicules.
+- Incohérence : `contenu_depart_p0.csv` sépare essence et diesel alors que la règle impose un stock unique `stocks.fuel`.
 - Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
 
 ## Prochaines étapes
