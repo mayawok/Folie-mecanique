@@ -1,10 +1,11 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-29 (DEC-021). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-29 (prototype jouable). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
-- Phase : conception, revue complète avant tout développement (DEC-002).
+- Phase : conception ; **premier prototype jouable** dans `game/` (boucle base → expédition →
+  combat auto, sans horloge réelle), publié sur GitHub Pages (`game/LISEZMOI.md`).
 - Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
 - Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0.
 - Simulations 30 jours v2.0 : 3 000 parties, 3 profils (prudent, équilibré, agressif).
