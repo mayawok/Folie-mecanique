@@ -4,7 +4,8 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Où on en est
 
-- Phase : conception. Aucun code, aucun prototype jouable, moteur non choisi.
+- Phase : conception, revue complète avant tout développement (DEC-002).
+- Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
 - Règles canoniques v1.7, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0.
 - Simulations 30 jours v2.0 : 3 000 parties, 3 profils (prudent, équilibré, agressif).
 
@@ -20,12 +21,12 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Décisions ouvertes
 
-- Moteur et langage (bloque ARCH-001 à QA-001).
+- Vision, boucle de jeu, monétisation, périmètre de la première version.
 - Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
 
 ## Prochaines étapes
 
-1. Choisir le moteur.
+1. Revue de conception thème par thème.
 2. Rééquilibrer l'économie de départ, relancer la simulation.
 3. DATA-001 : schémas de données versionnés.
 4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).
