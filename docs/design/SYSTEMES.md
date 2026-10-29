@@ -118,3 +118,29 @@ rapport, réservation des vivres et du carburant.
 - Liste et placement des 10 à 12 points d'intérêt.
 - Vitesse de reconstitution des lieux.
 - Consommation de carburant par véhicule et par terrain.
+
+## 5. Combat automatique — validé (DEC-018)
+
+Calcul **déterministe** avec graine : même résultat connecté ou en rattrapage hors ligne ;
+la vue V2 rejouera ce même calcul (DEC-009).
+
+### Règles
+
+- **Tours courts sur une ligne** ; ordre du convoi fixé au départ (chars devant,
+  camions derrière). La tête encaisse le plus.
+- **Statistiques issues des composants** : blindage (carrosserie), puissance de feu
+  (armement), mobilité (moteur, roulement).
+- **Dégâts localisés** par emplacement : roulement touché = immobilisé ; armement touché =
+  ne tire plus ; trop de dégâts = épave, remorquable si le convoi l'emporte.
+- **Munitions** consommées par tir ; à court, le convoi cesse le feu et se replie.
+- **Ordres de combat** (ordres permanents) : éviter / se replier à la première perte /
+  jusqu'au bout. Retraite toujours possible sauf véhicule immobilisé.
+- **Équipage** : véhicule détruit = équipage blessé (infirmerie). Mort de survivants
+  seulement si tout le convoi est perdu.
+- **Pillards** : mêmes règles de véhicules que le joueur. Faune : système 6.
+- **Rapport V1** : résumé écrit + schéma simple de la file du convoi.
+
+### Ouvert
+
+- Formules de dégâts, précision, nombre de tours.
+- Profils de pillards par cercle de distance.

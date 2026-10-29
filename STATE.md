@@ -33,8 +33,8 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
    Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
    Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
    Thème 4 (périmètre V1) : `docs/design/PERIMETRE_V1.md` (DEC-013).
-   Thème 5 (systèmes) : `docs/design/SYSTEMES.md` — systèmes 1 ressources (DEC-014) 2 travailleurs (DEC-015) 3 véhicules (DEC-016) et 4 expéditions (DEC-017) validés.
-   **Prochain : système 5, combat automatique**, puis 6 à 8 ; ensuite thème 6 (graphismes, partir de `docs/art/ART_PIPELINE.md`).
+   Thème 5 (systèmes) : `docs/design/SYSTEMES.md` — systèmes 1 ressources (DEC-014) 2 travailleurs (DEC-015) 3 véhicules (DEC-016) 4 expéditions (DEC-017) et 5 combat (DEC-018) validés.
+   **Prochain : système 6, faune**, puis 7 et 8 ; ensuite thème 6 (graphismes, partir de `docs/art/ART_PIPELINE.md`).
 2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
    planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.
