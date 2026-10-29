@@ -19,7 +19,10 @@ Cotes de prototypage (L 3,36 m, H 1,78 m pare-brise relevé), à affiner sur pla
 
 ## Pièces
 
-Caisse validée le 2026-10-29 (crochet et pare-chocs inclus, boîte ajustée à l'image).
+Validées le 2026-10-29 : caisse (crochet et pare-chocs inclus), chassis (avec ressorts et
+moyeux d'essieux, calé sur les centres de roues), roue, mitrailleuse (dessinée vers la
+gauche puis retournée ; ressemble à une M2 calibre .50 plutôt qu'à une .30, à trancher
+en gameplay). Les boîtes de `gabarit.json` sont ajustées aux images.
 
 Échelle source : 64 px par cellule de 25 cm (1 m = 256 px). L'affichage en jeu reste
 zoomable (`echelle_et_grille.csv`).
