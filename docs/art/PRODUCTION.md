@@ -13,8 +13,8 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 |---|---|---|---|---|
 | 1 | Willys MB : moteur, transmission | 1 planche | validé | `vehicules/willys_mb/art/` |
 | 2 | Icônes des 6 ressources | 1 planche | validé | `ui/` |
-| 3 | Décor désert, 4 couches | 4 images | **en cours** | `decor/` |
-| 4 | Bâtiments A : atelier (référence de style des bâtiments) | 1 image | à faire | `batiments/` |
+| 3 | Décor désert, 4 couches | 4 images | validé | `decor/` |
+| 4 | Bâtiments A : atelier (référence de style des bâtiments) | 1 image | **en cours** | `batiments/` |
 | 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | à faire | `batiments/` |
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | à faire | `batiments/` |
 | 7 | Survivants : 6 poses | 1 planche | à faire | `personnages/` |
@@ -67,7 +67,13 @@ fait bleu vif et nuageux, il a été désaturé et voilé de brume de sable. Les
 doivent s'accorder à cette version : **joindre `bg_desert_ciel.png`**, lumière chaude
 et poussiéreuse, contrastes adoucis par la brume de chaleur, pas de ciel bleu.
 
-Couches 2 à 4 sur fond magenta. Aucun bâtiment, aucun véhicule entier, aucun personnage.
+Couches 2 à 4 sur fond magenta.
+
+**Lot validé le 2026-10-29.** Les 4 couches sont étalonnées (désaturation, brume plus
+forte au loin) et raccordables. Montage de référence dans un cadre 1920 × 1080, couches
+mises à 1920 px de large : ciel plein cadre, bas de `lointain` à 860 px, bas de `moyen`
+à 960 px, bas de `sol` à 1080 px. Limite : 1 820 px de large, un peu flou en plein écran
+sur iPhone récent ; suffisant pour le prototype, à régénérer plus large avant publication. Aucun bâtiment, aucun véhicule entier, aucun personnage.
 
 ### Lots 4 à 6 — Bâtiments (niveau 1)
 
