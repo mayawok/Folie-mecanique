@@ -21,7 +21,7 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 8 | Faune : meute, prédateur, nuée | 1 planche | validé | `faune/` |
 | 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part, cadre harmonisé | `carte/` |
 | 10 | Calques de dégâts et effets | 1 planche | validé (10 éléments) | `fx/` |
-| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a à 11f reçus et découpés (assemblage sur gabarit à faire) ; **11g à 11i en cours** : chars refusés par ChatGPT, demandés pièce par pièce en termes neutres, une image à la fois | `vehicules/<id>/art/` |
+| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a à 11f reçus, découpés et assemblés (`vehicules/assemblages_v2-7.png`) ; **11g à 11i en cours** : chars refusés par ChatGPT, demandés pièce par pièce en termes neutres, une image à la fois | `vehicules/<id>/art/` |
 | 12 | Icônes d'actions de l'interface | — | bloqué : écrans pas encore conçus | `ui/` |
 | 13 | Illustrations de récit (6 à 8) | — | bloqué : système 8 (récit) | `recit/` |
 
@@ -170,7 +170,9 @@ complet sert d'épave de décor (`decor/epave_*.png`), les petites pièces de bu
 - Moteur et transmission identiques sur 11d, 11e, 11f (acceptable, pièces partagées possibles).
 - ChatGPT refuse les chars nommés et ne produit qu'une image par demande : chars demandés
   sans nom de modèle, une pièce ou une petite planche à la fois.
-- Reste à faire par Claude : `gabarit.json` et `assemblage.png` de chaque véhicule.
+- Assemblages faits le 2026-10-29 par `tools/specs_vehicules.py` (cotes de prototypage).
+  Le panier du BMW est presque caché par la moto en vue de profil (normal).
+- Reste à faire par Claude (chars seulement) : `gabarit.json` et `assemblage.png` de chaque véhicule.
 
 ### Lot 10 — Dégâts et effets
 
