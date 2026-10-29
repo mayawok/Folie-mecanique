@@ -15,7 +15,7 @@ toi, tu dessines **une pièce à la fois**.
 
 ## Règles impératives
 
-- Une seule pièce par image, isolée, rien d'une autre pièce (pas de roue dans la caisse).
+- Chaque pièce est complète et isolée : rien d'une autre pièce (pas de roue dans la caisse).
 - Vue de profil stricte, orientée vers la droite, sans perspective.
 - Lumière du haut à gauche, ombres douces, rendu peint semi-réaliste.
 - Fond uni magenta pur `#FF00FF`, ou transparent si possible. Pas d'ombre au sol.
