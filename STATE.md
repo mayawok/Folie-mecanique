@@ -21,7 +21,6 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Décisions ouvertes
 
-- Achats intégrés (thème 3).
 - Incohérence : `contenu_depart_p0.csv` sépare essence et diesel alors que la règle impose un stock unique `stocks.fuel`.
 - Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
 
@@ -29,10 +28,11 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 1. Revue de conception thème par thème. Thème 1 (vision) : `docs/design/VISION.md`.
    Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
-   **Prochain : thème 3, achats intégrés**, puis 4 périmètre V1,
+   Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
+   **Prochain : thème 4, périmètre V1**, puis
    5 systèmes un par un (dont faune, captivité), 6 direction artistique.
 2. Rééquilibrer l'économie de départ, relancer la simulation avec jour/nuit,
-   planchers d'absence et profil « joueur absent » (voir `BOUCLE.md`).
+   planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.
 4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).
 

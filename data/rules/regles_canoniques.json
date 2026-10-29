@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6",
+  "schema_version": "1.7",
   "project": "Jeu iPhone post-apocalyptique",
   "status": "Conception uniquement — aucun prototype",
   "design_principles": {
@@ -9,7 +9,8 @@
     "offline_progression": "Maximum 12 hours; return summary; no silent death or irreversible base destruction.",
     "vehicle_model_vs_instance": "Static vehicle model separate from each owned/recovered vehicle instance.",
     "transactions": "Atomic, idempotent, journaled mutations; versioned and migratable saves.",
-    "no_prototype": "No playable prototype or demo. Internal mathematical simulations and design tests are allowed when requested; deliver documentation/results only."
+    "no_prototype": "No playable prototype or demo. Internal mathematical simulations and design tests are allowed when requested; deliver documentation/results only.",
+    "monetization": "Free-to-play, no ads, no premium currency, no loot boxes. Sell comfort and cosmetics only, never power or scarcity."
   },
   "captivity": {
     "reputation_scale": {
@@ -1031,5 +1032,57 @@
       "confirmer les pertes irréversibles au retour",
       "séparer portes, segments de mur et état de brèche"
     ]
+  },
+  "monetization": {
+    "model": "comfort_and_cosmetics",
+    "premium_currency": false,
+    "random_rewards": false,
+    "ads": false,
+    "guardrails": {
+      "forbidden": [
+        "grant_resources",
+        "grant_or_unlock_or_upgrade_vehicle",
+        "grant_or_upgrade_building_or_defense",
+        "alter_combat_expeditions_events_wildlife",
+        "alter_absence_floors_or_shortage",
+        "speed_up_expedition_repair_healing_or_shortage_recovery"
+      ],
+      "rule": "Any purchase must pass this list before entering the backlog."
+    },
+    "offers": {
+      "subscription_commandant": {
+        "recurring": true,
+        "benefits": [
+          "second_build_queue",
+          "advanced_standing_orders",
+          "detailed_morning_report",
+          "fine_alerts"
+        ]
+      },
+      "cosmetics": {
+        "recurring": false
+      },
+      "founder_pack": {
+        "one_time": true,
+        "benefits": [
+          "exclusive_cosmetics",
+          "extra_convoy_slot",
+          "exclusive_narrative_chronicle"
+        ]
+      },
+      "build_accelerator": {
+        "max_per_day": 1,
+        "scope": [
+          "construction_only"
+        ]
+      }
+    },
+    "open": [
+      "prices",
+      "accelerator_amount",
+      "advanced_standing_orders_scope",
+      "subscriber_simulation_profile"
+    ],
+    "source": "docs/design/ACHATS.md"
   }
 }

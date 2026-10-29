@@ -49,5 +49,5 @@ Statut : en revue (thème 1). Distingue ce qui est **décidé** de ce qui reste 
 
 ## Ouvert
 
-- Nature des achats intégrés.
+- ~~Nature des achats intégrés~~ : décidé, voir `ACHATS.md`.
 - Méthode de production des images.
