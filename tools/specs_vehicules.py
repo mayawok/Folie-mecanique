@@ -30,7 +30,7 @@ SPECS = {
         [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("caisse", 0, 4), ("roue", 0, 4.2), ("roue", 3.07, 4.2)]),
     "citroen_t23": ("Citroën T23", 5.6, 2.4, {
         "chassis": (0.45, 0.36, 5.14), "transmission": (2.20, 0.45, 2.30), "moteur": (4.30, 0.80, 0.90),
-        "roue": (0.775, 0.0, 0.95), "plateau": (0.0, 1.00, 3.30), "cabine": (3.26, 0.53, 2.30)},
+        "roue": (0.775, 0.0, 0.95), "plateau": (0.0, 0.87, 3.30), "cabine": (3.26, 0.53, 2.30)},
         [("chassis", 0, 1), ("transmission", 0, 2), ("moteur", 0, 3), ("roue", 0, 4), ("plateau", 0, 5), ("cabine", 0, 6),
          ("roue", 3.60, 6.2)]),
     "diamond_t": ("Diamond T 969 dépanneuse", 7.42, 3.0, {
@@ -58,12 +58,17 @@ PASSAGES = {"bmw_r75": "caisse", "citroen_traction": "caisse", "citroen_t23": "c
             "diamond_t": "caisse", "m3_half_track": "caisse"}
 RAYON = 0.96
 
+# Garde au sol ajoutée : tout le véhicule monte, sauf roues, chenille et galets (débattement visible).
+LEVE = {"bmw_r75": 0.04, "citroen_traction": 0.07, "citroen_t23": 0.10, "diamond_t": 0.12,
+        "dukw": 0.08, "m3_half_track": 0.05}
+
 def main():
     root = Path("docs/art/vehicules")
     for vid, (name, L, H, pieces, inst) in SPECS.items():
         images = []
         for pid, (x, y, w) in pieces.items():
             pw, ph = Image.open(root / vid / "art" / f"{pid}.png").size
+            if SLOTS[pid] != "roulement": y += LEVE.get(vid, 0)
             bx, by, bw, bh = x / CELL, y / CELL, w / CELL, w * ph / pw / CELL
             rect = [[bx, by], [bx + bw, by], [bx + bw, by + bh], [bx, by + bh]]
             images.append({"id": pid, "slot": SLOTS[pid], "box": [bx, by, bw, bh], "shapes": [{"poly": rect}]})
