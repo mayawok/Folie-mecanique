@@ -1,6 +1,6 @@
 # Graphismes — Folie Mécanique
 
-Statut : validé (thème 6, DEC-020). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
+Statut : validé (thème 6, DEC-020, DEC-021). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
 Complète `docs/art/ART_PIPELINE.md` (règles du registre d'assets).
 
 ## Choix du porteur de projet
@@ -32,17 +32,22 @@ une consigne fixe, conservée dans `docs/art/prompts/` avec chaque image produit
 | Format de génération | Paysage, la plus haute résolution disponible |
 | Contenu interdit | Texte, logos, marques visibles, personnages reconnaissables |
 
-## Méthode de production
+## Méthode de production (DEC-021 : pièce par pièce)
 
-1. Générer le véhicule **entier** de profil avec la consigne fixe.
-2. Le **détourer** (fond retiré) dans un outil gratuit (GIMP, Photopea).
-3. Le **découper** en 5 pièces selon un gabarit commun.
-4. Exporter en PNG transparent, enregistrer dans le registre `asset-register.csv`.
-5. Saisir les points d'accroche dans les données.
+1. Pour chaque véhicule, Claude rédige un **cahier des charges** par pièce et produit un
+   **gabarit** (silhouette aux bonnes proportions) : `docs/art/vehicules/<vehicule>/`.
+2. Le porteur de projet fait dessiner **chaque pièce séparément** par ChatGPT, en joignant
+   le gabarit et la consigne. La première pièce validée (la caisse) sert ensuite de
+   référence de style pour les suivantes.
+3. Détourage (fond transparent), enregistrement dans `art/`, consigne archivée.
+4. `tools/gabarits_vehicule.py` **recombine** le véhicule historique à partir des pièces.
+
+**Échelle** : grille de 25 cm (`echelle_et_grille.csv`, inchangé) ; images sources à
+**64 px par cellule** (1 m = 256 px). L'affichage en jeu reste zoomable.
 
 **Validation obligatoire avant toute production en série** : le Willys MB est produit
-et découpé en premier, puis testé dans le prototype d'atelier. Si les pièces ne
-s'emboîtent pas proprement, la méthode est revue avant les 9 autres véhicules.
+et recombiné en premier (`docs/art/vehicules/willys_mb/CAHIER.md`), puis testé dans le
+prototype d'atelier. Si les pièces ne s'emboîtent pas, la méthode est revue.
 
 Les images provisoires (formes simples, dimensions et accroches correctes) sont
 produites en SVG pour que le prototype d'atelier n'attende pas l'art final.
@@ -66,7 +71,7 @@ produites en SVG pour que le prototype d'atelier n'attende pas l'art final.
 
 | Groupe | Nombre |
 |---|---|
-| Pièces de véhicules (10 × 5) | 50 |
+| Pièces de véhicules (10 × ≈ 6, roues partagées) | ≈ 60 |
 | Bâtiments (≈ 8 × 3 niveaux) | 24 |
 | Décor désert (parallaxe) | 4 |
 | Icônes de lieux | 12 |
@@ -90,7 +95,7 @@ produites en SVG pour que le prototype d'atelier n'attende pas l'art final.
 ## Ouvert
 
 - Outil d'IA retenu et vérification de ses conditions commerciales.
-- Gabarit de découpe et échelle commune des véhicules (1 case de grille = n pixels).
+- Cahiers des charges des 9 autres véhicules (après validation du pilote).
 - Noms et apparence des espèces animales (système 6).
 - Catalogue cosmétique de lancement.
 - Vérification juridique des noms de véhicules.
