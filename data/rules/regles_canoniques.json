@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.7",
+  "schema_version": "1.8",
   "project": "Jeu iPhone post-apocalyptique",
   "status": "Conception uniquement — aucun prototype",
   "design_principles": {
@@ -383,6 +383,17 @@
     ]
   },
   "economy": {
+    "v1_resources": {
+      "ids": ["water_l", "food", "fuel_l", "metal", "materials", "ammo"],
+      "metal_includes": ["scrap", "metal"],
+      "materials_includes": ["wood", "electronics", "parts"],
+      "ammo_includes": ["ammo_small", "ammo_heavy"],
+      "excluded_v1": ["medicine"],
+      "starting_population": 2,
+      "starting_autonomy_days": [3, 4],
+      "tick": "hourly",
+      "source": "DEC-014"
+    },
     "resource_ids": [
       "food",
       "water_l",

@@ -1,12 +1,12 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-29 (DEC-014). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
 - Phase : conception, revue complète avant tout développement (DEC-002).
 - Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
-- Règles canoniques v1.7, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0.
+- Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0.
 - Simulations 30 jours v2.0 : 3 000 parties, 3 profils (prudent, équilibré, agressif).
 
 ## Constats clés
@@ -25,7 +25,6 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
 
 ## Décisions ouvertes
 
-- Incohérence : `contenu_depart_p0.csv` sépare essence et diesel alors que la règle impose un stock unique `stocks.fuel`.
 - Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
 
 ## Prochaines étapes
@@ -34,7 +33,8 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
    Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
    Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
    Thème 4 (périmètre V1) : `docs/design/PERIMETRE_V1.md` (DEC-013).
-   **Prochain : thème 5, systèmes** un par un (dans le périmètre V1), 6 direction artistique.
+   Thème 5 (systèmes) : `docs/design/SYSTEMES.md` — système 1 ressources validé (DEC-014).
+   **Prochain : système 2, travailleurs et bâtiments**, puis 3 à 8 ; ensuite thème 6 (graphismes, partir de `docs/art/ART_PIPELINE.md`).
 2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
    planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.

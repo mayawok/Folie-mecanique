@@ -1,8 +1,7 @@
 ID,Référence,Type,Nom UI,Quantité / niveau,Capacité / cible,Unité,Priorité,Note de conception
-RES-WATER,water,Ressource,Eau,1200,2000,L,P0,Départ hypothétique
-RES-FOOD,food,Ressource,Nourriture,160,500,unité,P0,Ressource abstraite unique
-RES-GAS,fuel_gasoline,Ressource,Essence,80,200,L,P0,Stock distinct du diesel
-RES-DIESEL,fuel_diesel,Ressource,Diesel,0,150,L,P0,Stock initial nul; premier véhicule de départ essence
+RES-WATER,water,Ressource,Eau,35,2000,L,P0,≈3,5 jours pour 2 survivants (DEC-014)
+RES-FOOD,food,Ressource,Nourriture,7,500,unité,P0,≈3,5 jours pour 2 survivants (DEC-014)
+RES-FUEL,fuel,Ressource,Carburant,80,200,L,P0,Stock unique essence+diesel (DEC-014)
 BLD-CMD-01,command_center,Bâtiment,Centre de commandement,1,1,niveau,P0,Bâtiment de départ
 BLD-WELL-01,water_well,Bâtiment,Puits mécanique,1,1,niveau,P0,Production selon hypothèse et terrain
 BLD-TANK-01,water_tank,Bâtiment,Réservoir d’eau,1,1,niveau,P0,Capacité eau incluse dans capacité globale
