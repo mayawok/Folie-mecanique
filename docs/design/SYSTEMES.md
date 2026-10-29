@@ -63,3 +63,34 @@ Avec 2 survivants au départ, faire grandir la communauté est un objectif centr
 - Niveaux et coûts des bâtiments (tables `niveaux_et_couts_batiments.csv`).
 - Capacités de stockage par niveau de cuve et d'entrepôt.
 - Fréquence et coût du recrutement (nourriture supplémentaire, risque).
+
+## 3. Véhicules — validé (DEC-016)
+
+Cœur du jeu : mécanique et customisation. Les composants restent modulaires
+(tables `catalogue_composants.csv`, `grille_et_chevauchements.csv`).
+
+### Règles
+
+- **5 types d'emplacement** : moteur, transmission, roulement (roues/chenilles),
+  armement, carrosserie/blindage. Chaque composant se récupère, se stocke et se remonte
+  séparément.
+- **Épave** = véhicule avec composants manquants ou abîmés.
+  - Réparable si le châssis est présent et s'il manque **au plus 2 composants**
+    (valeur à tester) ; les manquants se remplacent par des composants compatibles du stock.
+  - Sinon : démontage seulement (composants intacts + métal). Irréversible.
+- **Atelier** : modèles uniques construits sur grille aimantée 2D, vue de profil.
+- **Les 10 véhicules historiques** s'obtiennent en réparant leurs épaves ;
+  le Tiger I est l'objectif final.
+- **Gros composants** (moteur, transmission, canon) : **récupération uniquement** en V1.
+  Métal et matériaux servent au châssis, à la carrosserie et aux réparations.
+- **Remorquage** des épaves lourdes : dépanneuse Diamond T obligatoire.
+
+### Risque technique
+
+L'éditeur d'atelier est la partie la plus difficile à programmer : premier prototype Godot.
+
+### Ouvert
+
+- Sous-ensemble de composants V1 parmi les 29 du catalogue.
+- Règles de compatibilité simplifiées (poids, puissance, emplacement).
+- Coûts et durées d'atelier.
