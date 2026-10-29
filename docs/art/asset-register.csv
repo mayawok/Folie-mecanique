@@ -11,4 +11,4 @@ ui_res_carburant,icone,ui,docs/art/ui/ui_res_carburant.png,PNG RGBA,256,256,aucu
 ui_res_metal,icone,ui,docs/art/ui/ui_res_metal.png,PNG RGBA,256,256,aucune,validé,"Généré par ChatGPT (OpenAI), conditions commerciales à vérifier",interface,"Lot 2"
 ui_res_materiaux,icone,ui,docs/art/ui/ui_res_materiaux.png,PNG RGBA,256,256,aucune,validé,"Généré par ChatGPT (OpenAI), conditions commerciales à vérifier",interface,"Lot 2"
 ui_res_munitions,icone,ui,docs/art/ui/ui_res_munitions.png,PNG RGBA,256,256,aucune,validé,"Généré par ChatGPT (OpenAI), conditions commerciales à vérifier",interface,"Lot 2"
-bg_desert_ciel,decor,decor,docs/art/decor/bg_desert_ciel.png,PNG RGB,1667,727,aucune (nuit par éclairage Godot),validé,"Généré par ChatGPT (OpenAI), conditions commerciales à vérifier",base;combat;expedition,"Étalonné et rendu raccordable par Claude"
+bg_desert_ciel,decor,decor,docs/art/decor/bg_desert_ciel.png,PNG RGB,1733,756,aucune (nuit par éclairage Godot),validé,"Généré par ChatGPT (OpenAI), conditions commerciales à vérifier",base;combat;expedition,"Étalonné et rendu raccordable par Claude"
