@@ -26,6 +26,11 @@ range les images. Le porteur de projet te donne le feu vert.
 
 - **Vue de profil stricte, sans perspective**, sujets orientés vers la droite.
   Seule exception : les icônes d'interface et de carte (3/4 autorisé).
+- **Bâtiments : élévation de façade orthographique**, comme un dessin d'architecte :
+  façade parallèle à l'écran, **aucune face latérale ni toit vu de dessus**, aucune
+  dalle ni sol, bord inférieur droit et horizontal (le bâtiment se pose sur une ligne).
+  Rien autour (pas de lampadaire, château d'eau, caisses ou véhicules en dehors du
+  bâtiment) : les éléments décoratifs seront des images séparées.
 - Fond uni magenta pur `#FF00FF`, ou transparent si possible. Pas d'ombre au sol,
   pas de sol dessiné (sauf couche `sol` du décor).
 - Respecter les proportions données en mètres ou en cellules
