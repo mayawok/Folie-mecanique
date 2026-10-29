@@ -47,4 +47,9 @@ range les images. Le porteur de projet te donne le feu vert.
 
 ## Livraison
 
+- **Nom de fichier** : si tu peux renommer le fichier téléchargeable, nomme-le
+  `lot<numéro>_<contenu>.png` (ex. `lot11d_diamond_t_caisse.png`). Sinon, termine ta
+  réponse par une ligne « Fichier : lot11d_diamond_t_caisse » que l'utilisateur recopie.
+- **Une planche par lot** (deux pour un véhicule de plus de 5 m), jamais d'image en plus.
+
 Tu n'écris pas dans le dépôt. L'utilisateur télécharge l'image et la transmet à Claude.
