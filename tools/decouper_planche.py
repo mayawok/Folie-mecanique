@@ -52,3 +52,17 @@ def main(src, dst):
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
+
+
+def vrac(src, dst, min_area=1500, fusion=6):
+    """Planche en désordre : une pièce par composante connexe (petits écarts fusionnés)."""
+    from scipy import ndimage
+    a = detourer(src); mask = a[..., 3] > 128
+    lab, n = ndimage.label(ndimage.binary_dilation(mask, iterations=fusion))
+    dst = Path(dst); dst.mkdir(parents=True, exist_ok=True); k = 0
+    objs = [(i + 1, sl) for i, sl in enumerate(ndimage.find_objects(lab))]
+    for lid, sl in sorted(objs, key=lambda o: (o[1][0].start // 150, o[1][1].start)):
+        sub = a[sl].copy(); sub[..., 3] = np.where(mask[sl] & (lab[sl] == lid), sub[..., 3], 0)
+        if (sub[..., 3] > 128).sum() < min_area: continue
+        k += 1; Image.fromarray(sub).save(dst / f"piece_{k:03d}.png")
+    return k
