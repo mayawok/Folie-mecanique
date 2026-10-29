@@ -1,0 +1,13 @@
+ID,Facteur,Effet attendu,Information affichée au joueur,Contre-mesures possibles,Statut
+RISK-01,Menace locale,Augmente la fréquence ou la gravité des rencontres hostiles,Niveau de menace et source du renseignement,"Reconnaissance, détour, escorte, réduction du bruit",À équilibrer
+RISK-02,Itinéraire inconnu,"Augmente l’incertitude sur terrain, durée et événements",Zone non cartographiée / estimation large,"Éclaireur, carte, information d’une faction",Validé
+RISK-03,Terrain difficile,"Augmente durée, consommation, usure ou risque de panne",Type de terrain et pénalité estimée,"Véhicule adapté, détour, vitesse réduite",À équilibrer
+RISK-04,Charge élevée,"Peut augmenter consommation, freinage, usure et risque de panne",Charge utilisée / capacité totale,"Répartir la cargaison, véhicule de transport",Validé
+RISK-05,État mécanique dégradé,Augmente probabilité de panne et gravité des incidents,État et défauts connus,"Réparation, pièces de rechange, véhicule de secours",Validé
+RISK-06,Bruit / vitesse,Peut attirer les menaces mais réduire la durée de transit,Niveau de bruit et compromis vitesse/discrétion,"Ralentir, couper moteur, détour discret",À équilibrer
+RISK-07,Météo / visibilité,"Modifie perception, vitesse et navigation",Prévision fiable ou incertitude météo,"Attendre, équipement, route alternative",À équilibrer
+RISK-08,Cargaison attractive,Peut attirer pillards ou contrôles ciblés,Risque de convoi ciblé si connu,"Dissimuler, escorte, itinéraire secondaire",À équilibrer
+RISK-09,Réputation locale,"Peut modifier accueil, troc, péages ou hostilité",Réputation connue de la faction,"Diplomatie, biens d’échange, éviter la zone",À équilibrer
+RISK-10,Faune dangereuse,"Risque contextuel selon biome, saison et bruit","Signes observés, danger connu ou probable","Éviter, sécuriser camp, arme si nécessaire",À équilibrer
+RISK-11,Réserve carburant faible,Réduit les options et rend le repli plus risqué,Autonomie estimée et réserve de sécurité,"Ravitaillement confirmé, abandon d’objectif, repli anticipé",Validé
+RISK-12,Équipage épuisé / blessé,Réduit capacité d’action et augmente conséquences d’incident,État général de l’équipage,"Repos, rotation, équipement médical",À équilibrer

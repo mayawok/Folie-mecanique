@@ -1,0 +1,19 @@
+Famille provisoire,Architecture / type,Exemples de véhicules,Carburant / refroidissement,Règle gameplay recommandée,Vérification
+MAYBACH-HL120,V12,"Panzer III tardif, Panzer IV tardif, StuG III/IV, Jagdpanzer IV, Brummbär, Nashorn (selon variantes)","Essence, liquide","Famille commune possible, mais supports, embrayage, boîte et implantation à vérifier.",Plusieurs modèles documentés ; compatibilités précises à contrôler.
+MAYBACH-HL230,V12,"Panther, Tiger II, Jagdpanther, Sturmtiger","Essence, liquide",Moteur lourd et puissant ; exige refroidissement et transmission adaptés.,Documenté sur plusieurs familles.
+MAYBACH-HL210,V12,Premiers Tiger I,"Essence, liquide","Variante distincte du HL230, même famille générale mais pièces non garanties interchangeables.",À distinguer par série.
+FORD-GAA,V8,"M4A3 Sherman, M36 Jackson, T28/T95 projet","Essence, liquide","V8 puissant, large et lourd ; bon moteur de véhicule lourd.",M4A3 documenté par National WWII Museum.
+CONTINENTAL-R975,9 cylindres en étoile,"M4/M4A1 Sherman, M3 Lee/Grant, M18 Hellcat, M7 Priest, M8 Scott","Essence, air",Moteur radial : silhouette et refroidissement différents d'un moteur en ligne.,Famille utilisée dans plusieurs véhicules ; vérifier chaque version.
+GM-6046,2 x 6 cylindres en ligne,"M4A2 Sherman, M10 selon variante, Sexton selon version","Diesel, liquide","Deux blocs couplés ; dans le jeu, représenter comme un ensemble multimoteur ou deux modules appariés.",Variantes par véhicule à vérifier.
+CADILLAC-V8-TWIN,2 V8,"M5 Stuart, M24 Chaffee","Essence, liquide",Deux moteurs V8 compacts avec transmission adaptée ; une excellente mécanique de construction personnalisée.,Famille à vérifier par variante.
+BEDFORD-FLAT12,12 cylindres à plat,"Churchill, Bishop (selon variantes)","Essence, liquide",Moteur bas et large ; compatibilité limitée par l'encombrement.,Famille documentée sur les Churchill.
+ROLLS-ROYCE-METEOR,V12 dérivé aviation,"Cromwell, Comet","Essence, liquide",Moteur de forte puissance ; famille emblématique à rendre rare et recherchée.,Documenté.
+V-2-DIESEL,V12,"T-34, SU-85, SU-100, SU-122, plusieurs variantes soviétiques","Diesel, liquide","Famille soviétique majeure ; variations V-2, V-2-34, V-2K et V-2-IS à conserver comme sous-versions.",Documenté mais codes de variante à détailler.
+GAZ-203,2 x 6 cylindres en ligne,"T-70, T-80, SU-76","Essence, liquide",Deux moteurs d'automobile couplés ; modèle intéressant de propulsion multimoteur.,"Documenté sur T-70/SU-76, vérifier sous-versions."
+LIBERTY-L12,V12,"BT-2/BT-5/BT-7 premières variantes, chars de croisière britanniques selon modèle","Essence, liquide",Moteur d'origine aéronautique ; vérifier chaque application et sa variante.,Compatibilités historiques hétérogènes.
+PRAGA-EPA,6 cylindres en ligne,"Panzer 38(t), Hetzer, Marder III et variantes","Essence, liquide","Famille tchèque pouvant être partagée dans le jeu entre véhicules sur base 38(t), avec interfaces contrôlées.",Documenté sur plusieurs dérivés.
+SKODA-T11,6 cylindres en ligne,"LT vz. 35, Panzer 35(t), TACAM R-2","Essence, liquide",Famille tchèque ; utile pour récupérer des pièces sur véhicules capturés.,Documenté.
+MITSUBISHI-A6120VD,6 cylindres en ligne diesel,Type 95 Ha-Go,"Diesel, liquide",Famille japonaise spécifique ; pièces rares hors zones de provenance.,Documenté.
+SPA-8T,8 cylindres en V diesel,"M11/39, M13/40, certaines versions Semovente","Diesel, liquide","Famille italienne partagée par châssis apparentés, sous-versions à distinguer.",À vérifier précisément.
+SAURER-VBLDB,6 cylindres en ligne diesel,7TP polonais,"Diesel, liquide",Moteur diesel compact pour char léger ; pièce rare et recherchée.,Documenté en première passe.
+WEISS-MANFRED,V8 essence,Toldi/Turán selon variante,"Essence, liquide",Famille hongroise à détailler par modèle et licence de moteur.,À vérifier.

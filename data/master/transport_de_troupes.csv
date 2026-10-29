@@ -1,0 +1,6 @@
+Type / règle,Configuration,Capacité indicative,Protection,Compromis,Ordres / comportement
+Camion transport de troupes,Module de bancs / caisse adaptée,8–12,Faible à moyenne,Bonne capacité ; vulnérable aux tirs.,"Débarquer, défendre, rembarquer, suivre le convoi."
+Camion protégé,Caisse blindée et accès latéral/arrière,6–10,Moyenne à bonne,"Moins de capacité, meilleure protection, masse supérieure.","Même commandes, sortie plus lente si accès endommagé."
+Semi-chenillé transport,Compartiment arrière ouvert,8–10,Moyenne,Bonne mobilité hors route ; vulnérable par le dessus.,Débarquement possible à l'arrêt ou à faible vitesse.
+Véhicule de commandement,Cabine et places équipage,2–5,Variable,Coordination et bonus d'ordres éventuels à définir.,Ne remplace pas un transport de troupe.
+Règle de débarquement,Ordre tactique,Escouade affectée,Selon couverture,Délai court ; soldats vulnérables pendant la sortie.,"Ordres initiaux : suivre, débarquer, défendre, rembarquer."

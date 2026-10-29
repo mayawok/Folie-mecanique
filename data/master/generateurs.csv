@@ -1,0 +1,5 @@
+Modèle gameplay,Puissance (unités),Consommation,Unité,Usage,Règle
+Petit groupe,1,1.5,L/h à charge moyenne,Éclairage et petit atelier.,Carburant consommé uniquement quand actif ; consommation réduite à faible charge.
+Groupe moyen,4,4,L/h à charge moyenne,Pompes et ateliers standards.,Priorité d'alimentation configurable.
+Gros générateur,12,10,L/h à charge moyenne,"Ascenseur, pompes industrielles, garage souterrain.",Peut être dédié à un circuit prioritaire.
+Groupe industriel,30,23,L/h à charge moyenne,Plusieurs bâtiments lourds.,Coût d'exploitation élevé et maintenance plus exigeante.

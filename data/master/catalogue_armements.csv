@@ -1,0 +1,12 @@
+Famille gameplay,Exemples historiques,Rôle en jeu,Difficulté de récupération,Règle de compatibilité
+Mitrailleuse légère,FM 24/29; Bren; BAR; DP-27; Type 96/99,Anti-personnel; faible contre blindage,Faible à moyenne,Montage sur affût adapté; compatibilité de calibre et alimentation
+Mitrailleuse polyvalente,MG 34; MG 42; Vickers K; Besa selon rôle,Anti-personnel; tir soutenu,Moyenne,Affût/coaxial différent selon installation; certaines armes demandent un poste de tir
+Mitrailleuse lourde,"Browning M2 12,7 mm; DShK 12,7 mm",Anti-personnel et véhicules légers,Moyenne à élevée,Affût renforcé; masse et recul limitent les supports
+Canon automatique léger,20 mm KwK 30/38; Oerlikon 20 mm; Hispano-Suiza 20 mm,"Anti-personnel, véhicules légers, parfois aérien",Élevée,Tourelle/affût et approvisionnement en munitions adaptés
+Canon antichar léger,25 mm SA 35; 37 mm SA 18/SA 38; 40 mm 2-pdr; 45 mm 20-K,"Bon contre véhicules légers, limité contre blindage lourd",Élevée,"Nécessite affût, recul, espace et munitions compatibles"
+Canon moyen,47 mm SA 35/SA 37; 50 mm KwK 38/39; 57 mm 6-pdr/ZiS-4,Polyvalent; bon contre blindés moyens selon modèle,Très élevée,Compatibilité liée à la tourelle/casemate et au berceau
+Canon de char moyen,75 mm KwK 37/KwK 40; M3; F-34; 76 mm M1; 85 mm ZiS-S-53,Combat contre blindés et positions; dépend du type d'obus,Très élevée,"Ne pas échanger uniquement sur le calibre : recul, culasse, berceau et tourelle comptent"
+Canon lourd / antichar,"88 mm KwK 36/43, PaK 43; 90 mm M3; 100 mm D-10",Très puissant contre blindés; lourd et coûteux en munitions,Extrême,"Châssis, tourelle/casemate et recul doivent être compatibles"
+Obusier / canon d'appui,"75 mm, 105 mm leFH 18; 122 mm; 150/152 mm",Dégâts élevés contre positions et groupes; faible cadence,Très élevée à extrême,Munition et affût spécifiques; parfois non conçu pour le tir antichar
+Mortier / lance-roquettes,Mortier de 81 mm; RW 61 de 380 mm sur Sturmtiger,Tir indirect ou arme spécialisée,Élevée à extrême,Système complet requis; ne pas le traiter comme un canon standard
+Arme absente / emplacement vide,"Épave dépouillée, véhicule civil, transport logistique",Aucune puissance de feu tant qu'il n'est pas équipé,Nulle,Ne pas créer artificiellement une arme à partir du seul type de véhicule

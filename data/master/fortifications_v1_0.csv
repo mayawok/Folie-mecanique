@@ -1,0 +1,11 @@
+Système,Élément,Règle de conception,Coût/contrepartie
+Accès,Porte gauche,"Porte indépendante, améliorable, réparable, ouvrable/fermable","Matériaux, temps, réparations"
+Accès,Porte droite,"Porte indépendante, améliorable, réparable, ouvrable/fermable","Matériaux, temps, réparations"
+Mur,Segments de mur,Renforcement par segment ; intégrité et brèches locales,Matériaux et maintenance
+Personnel,Soldats sur mur,"Affectation par segment, porte ou poste d’arme",Effectifs indisponibles pour expéditions
+Arme fixe,Canon,"Emplacement, munitions, équipage, ligne de vue","Coût élevé, cadence limitée"
+Arme fixe,Mitrailleuse lourde,"Poste renforcé, munitions et servants",Munitions et exposition
+Véhicule,Char extérieur,"Position défensive extérieure, opérationnel requis",Ne peut partir en expédition ; risque de dégâts
+Véhicule,Blindé / half-track / camion armé,Position extérieure dédiée,Immobilisation et entretien
+Détection,Miradors / éclairage,"Détection plus précoce, bonus de visibilité",Coût de construction et énergie éventuelle
+Combat,Phases d’attaque,"Détection, fermeture, approche, tirs, brèche/repli, bilan",Résolution tactique ; pas de victoire automatique

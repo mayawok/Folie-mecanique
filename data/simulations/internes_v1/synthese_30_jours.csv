@@ -1,0 +1,4 @@
+Scénario,Trajectoires,Traj. avec pénurie nourriture (%),Traj. avec pénurie eau (%),Jours moyens pénurie nourriture,Jours moyens pénurie eau,Nourriture médiane J30,Eau médiane J30 (L),Ferraille médiane J30
+Sous-dimensionné,2000,0,12.25,0,0.2955,34,25,375
+Équilibré,2000,0,0,0,0,150,605,479
+Sécurisé,2000,0,0,0,0,208,895,459

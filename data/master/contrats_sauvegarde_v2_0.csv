@@ -1,0 +1,9 @@
+Objet,Champs obligatoires,Responsabilité,Invariant
+vehicle_instance,"id, model_id, condition, component_states, fuel_l, location_id, owner_state, crew_ids, cargo, version",Instance persistante distincte du modèle catalogue.,Un véhicule récupéré ne modifie jamais la fiche canonique.
+crew_member,"id, skills, health_state, morale, loyalty, assigned_role, location_id, version","Personne, compétences, état, rôle et emplacement.",Un soldat affecté à la défense ne peut pas être en expédition.
+building_instance,"id, building_type_id, level, condition, workers, input_buffer, output_buffer, storage, powered, version",Bâtiment construit et son état.,"Panne, amélioration et stockage doivent survivre au rechargement."
+captive_group,"id, origin_faction_id, count, facility_id, status, needs, security_level, version",Groupe de captifs et son origine.,Besoins et incidents suivent la capacité et la sécurité de la détention.
+faction_state,"id, reputation, threat, trust, fear, trade_access, known_events, version",État diplomatique par faction.,Événements témoins peuvent être découverts avec retard.
+expedition,"id, seed, stage, vehicle_ids, crew_ids, resources_committed, encounter_ids, resolved_events, version",Expédition active ou archivée.,Seed et événements résolus empêchent de relancer le hasard au rechargement.
+command_journal,"command_id, event_id, timestamp, entity_ids, before_hash, after_hash, status",Journal d'événements idempotent.,Un command_id déjà validé ne peut pas être appliqué une seconde fois.
+save_meta,"schema_version, save_version, checksum, checkpoint_id, created_at",Métadonnées et intégrité de sauvegarde.,Migration déterministe obligatoire à chaque changement de schéma.

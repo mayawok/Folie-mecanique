@@ -1,0 +1,10 @@
+Objet,Champs essentiels,Règle de persistance
+ResourceStock,"resource_type_id, quantity, capacity, production_per_day, consumption_per_day, last_updated_at",Pas de valeurs négatives; quantité plafonnée à la capacité
+BuildingInstance,"building_instance_id, building_type_id, level, state, location_id, condition, assigned_population, last_simulated_at",Production recalculée à partir du niveau et de l’état
+VehicleModel,"vehicle_model_id, variant_id, historical_specs, historical_sources, confidence, gameplay_stats, compatibility_profile_id",Données historiques immuables dans une version publiée; balance séparée
+VehicleInstance,"vehicle_instance_id, vehicle_model_id, variant_id, condition, fuel_type, fuel_quantity, components[], cargo[], location_id, owner_id",Chaque exemplaire a son état; pièces absentes restent absentes
+VehicleComponentInstance,"component_instance_id, component_type_id, condition, location_id, installed_on_vehicle_id, salvageable, origin_event_id",Unicité des pièces récupérées; une pièce ne peut être simultanément installée et en stock
+Expedition,"expedition_id, state, vehicle_instance_id, crew[], destination_id, manifest[], risk_profile, event_log[], departure_at, expected_return_at",Une expédition ne peut partir si autonomie ou équipage sont invalides
+Faction,"faction_id, name_key, specialties[], relationship_score, territory_id, stock[], trade_rules",Le stock de faction est déduit seulement à la confirmation du troc
+Incident,"incident_id, type_id, severity, created_at, status, decision_options[], resolution_id",Résolution idempotente; événement daté
+SaveGame,"schema_version, content_version, simulation_timestamp, resources[], buildings[], vehicles[], expeditions[], factions[], incidents[]",Migrations atomiques; sauvegarde de secours avant changement de schéma

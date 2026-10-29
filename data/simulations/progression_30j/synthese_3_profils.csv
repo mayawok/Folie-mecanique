@@ -1,0 +1,4 @@
+Profil,Parties,Nourriture finale médiane,Eau finale médiane (L),Carburant final médian (L),Moral final médian,Menace finale médiane,Expéditions médianes,Taux de pénurie alimentaire,Taux de pénurie d'eau,Taux de pénurie de carburant,Taux de brèche,État final médian porte (%),État final médian mur (%),État véhicule médian (%),Parties signalées irrécupérables
+cautious,1000,140.5,853,76,55,19.9,3,0,0,0,0,94.1,95.8,69.3,0
+balanced,1000,148.8,894.5,56.8,55,23,4,0,0,0.4,0,93.6,95.5,55.7,0
+aggressive,1000,138.6,857.5,32.4,48.7,35.9,6,0,0,2.9,0,84.3,88.8,47.3,0

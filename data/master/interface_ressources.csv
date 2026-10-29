@@ -1,0 +1,6 @@
+Élément UI,Affichage,Unité,Exemple,Règle,Emplacement / usage
+Jauge Eau,Stock actuel / capacité totale,L,Ex. 12 400 / 20 000 L,"Alerte sous 25 %, urgence sous 10 %.",Toujours visible sur l'écran de base.
+Jauge Carburant,Stock actuel / capacité totale,L,Ex. 8 750 / 15 000 L,"Alerte sous 25 %, urgence sous 10 %.",Toujours visible sur l'écran de base.
+Production,Débit de production par heure,L/h,Ex. +180 L/h,Affichée séparément du stock.,Un puits peut produire sans que la cuve soit pleine.
+Consommation,Débit utilisé par heure,L/h,Ex. -45 L/h,Inclut bâtiments actifs et générateurs.,Estimation de durée restante si tendance stable.
+Expéditions,Réserves embarquées,L,Carburant et eau du convoi,Déduites du stock au départ.,Afficher autonomie estimée et réserve de sécurité.

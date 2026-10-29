@@ -1,0 +1,7 @@
+ID,État de l’épave,Action possible,Prérequis,Conséquence,Règle anti-duplication,Statut
+WRECK-01,"Véhicule complet, endommagé",Réparer vers configuration d’origine,"Toutes pièces requises présentes, pièces/outils et atelier ou réparation terrain autorisée",Véhicule récupéré avec état amélioré,"Les pièces installées restent sur le véhicule, non ajoutées à l’inventaire",Validé
+WRECK-02,Véhicule incomplet,Démonter les composants présents,Outils et temps ; espace de chargement,Composants réellement présents ajoutés à l’inventaire,Chaque composant reçoit un état récupéré/retiré ; impossible de le reprendre,Validé
+WRECK-03,Épave lourdement détruite,Récupération partielle,"Outillage adapté, temps et accès sûrs",Rendement réduit et pièces potentiellement inutilisables,État de l’épave évolue après chaque action,À équilibrer
+WRECK-04,Épave en zone hostile,Marquer / sécuriser / récupérer plus tard,Carte ou moyen de marquage ; la position doit être retrouvable,Nouvel objectif d’expédition ou récupération différée,Le site reste le même et conserve son état,Validé
+WRECK-05,Épave remorquable,Remorquer vers un dépôt ou la base,"Véhicule tracteur compatible, capacité, attelage et terrain adaptés",Consommation et durée augmentées ; mobilité du tracteur modifiée,"Le véhicule remorqué change d’emplacement, ne se duplique pas",À équilibrer
+WRECK-06,Épave inaccessible / trop lourde,Laisser sur place ou démonter sur place,Aucun moyen de remorquage adapté,Pièces sélectionnées uniquement ; certains composants perdus,Tout composant extrait est marqué retiré,Validé

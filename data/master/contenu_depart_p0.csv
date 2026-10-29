@@ -1,0 +1,16 @@
+ID,Référence,Type,Nom UI,Quantité / niveau,Capacité / cible,Unité,Priorité,Note de conception
+RES-WATER,water,Ressource,Eau,1200,2000,L,P0,Départ hypothétique
+RES-FOOD,food,Ressource,Nourriture,160,500,unité,P0,Ressource abstraite unique
+RES-GAS,fuel_gasoline,Ressource,Essence,80,200,L,P0,Stock distinct du diesel
+RES-DIESEL,fuel_diesel,Ressource,Diesel,0,150,L,P0,Stock initial nul; premier véhicule de départ essence
+BLD-CMD-01,command_center,Bâtiment,Centre de commandement,1,1,niveau,P0,Bâtiment de départ
+BLD-WELL-01,water_well,Bâtiment,Puits mécanique,1,1,niveau,P0,Production selon hypothèse et terrain
+BLD-TANK-01,water_tank,Bâtiment,Réservoir d’eau,1,1,niveau,P0,Capacité eau incluse dans capacité globale
+BLD-DORM-01,dormitory,Bâtiment,Abri de ferme,1,1,niveau,P0,Population de départ faible
+BLD-WORK-01,mechanical_workshop,Bâtiment,Atelier rudimentaire,0,1,niveau,P0,À construire ou débloquer
+BLD-GAR-01,vehicle_garage,Bâtiment,Garage rudimentaire,1,1,niveau,P0,Emplacement pour véhicules récupérés
+VEH-START-01,WILLYS_MB_1942,VehicleModel,Willys MB de départ,1,1,instance,P0,État partiellement fonctionnel; variante gameplay dédiée
+CMP-START-ENG,CMP-ENGINE,Composant,Moteur L134,1,1,pièce,P0,Présent mais état à définir
+CMP-START-COOL,CMP-COOLING,Composant,Radiateur/refroidissement,1,1,pièce,P0,État endommagé
+CMP-START-TIRE,CMP-WHEELS,Composant,Roues/pneus,4,4,pièce,P0,Pneus usés; quatre roues représentées par un ensemble
+EXP-INTRO-01,farm_supply_run,Expedition,Première sortie vers la ferme,1,1,mission,P0,Tutoriel scénarisé après introduction

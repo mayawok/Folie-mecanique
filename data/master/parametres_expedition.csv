@@ -1,0 +1,11 @@
+ID,Paramètre,Unité / type,Utilisation,Valeur actuelle,Statut,Note
+PAR-EXP-01,Réserve de carburant au départ,% d’autonomie estimée,Marge de sécurité pour l’aller-retour,Non défini,À équilibrer,La règle de briefing doit avertir si l’aller-retour n’est pas couvert.
+PAR-EXP-02,Consommation eau / survivant,L / personne / jour,Calcul des réserves du convoi,À reprendre du modèle économie,À harmoniser,Ne pas créer de valeur concurrente dans ce tableau.
+PAR-EXP-03,Consommation nourriture / survivant,unité abstraite / personne / jour,Calcul des réserves du convoi,À reprendre du modèle économie,À harmoniser,La nourriture reste une ressource abstraite unique.
+PAR-EXP-04,Consommation véhicule,L / distance,Carburant par véhicule,Par véhicule à définir,À équilibrer,"Modificateurs : terrain, charge, état, vitesse si applicable."
+PAR-EXP-05,Plafond hors ligne,heures,Simulation après fermeture de l’application,Non défini,À décider,Les événements majeurs peuvent attendre la reprise du joueur.
+PAR-EXP-06,Échelle du risque,qualitatif,Information du briefing,Faible / modéré / élevé / critique,Structure validée,Toujours donner les raisons connues de la classification.
+PAR-EXP-07,Rendement épave,% ou catégories de pièces,Récupération après dégâts,Non défini,À équilibrer,"Dépend de l’état, des outils et du temps investi."
+PAR-EXP-08,Seuil de panne critique,état / condition,Départ ou incident mécanique,Non défini,À décider,Doit être cohérent entre expédition simulée et jouée.
+PAR-EXP-09,Durée d’étape,heures de jeu,Temps de transit et d’événement,Selon distance/terrain,À équilibrer,La durée réelle doit être montrée dans le bilan.
+PAR-EXP-10,Probabilité / fréquence d’événement,par segment ou étape,Génération des événements contextuels,Non définie,À équilibrer,Ne pas exposer une précision factice si les informations sont inconnues.

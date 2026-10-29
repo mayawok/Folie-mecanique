@@ -1,0 +1,11 @@
+Classe véhicule,Moteur,Transmission,Refroidissement,Carburant,Roues/chenilles,Direction/ponts,Suspension,Freins,Électricité,Carrosserie,Blindage,Arme/affût,Munitions / système arme,Équipement spécialisé,Temps atelier relatif,Règle de conception
+Moto / side-car,1,1,1,0,1,1,0,1,1,1,0,0,0,0,Très faible,"Éclaireur, très vulnérable"
+Voiture légère 4x4,2,2,2,1,2,2,1,2,1,1,1,0,0,0,Faible,Moteur compact; pièces relativement simples
+Camion léger,3,3,3,2,3,3,2,3,2,2,1,1,0,0,Faible à moyen,Réparation plus lente si charge lourde
+Camion moyen 4x4/6x6,4,4,4,3,4,4,3,4,3,3,2,1,0,0,Moyen,"Pneus, ponts et transmission plus coûteux"
+Camion lourd / dépannage,6,6,6,4,6,6,5,6,4,4,3,2,1,1,Élevé,"Treuils, flèches et châssis renforcé"
+Automitrailleuse,5,5,5,4,5,5,4,5,4,4,3,2,2,1,Élevé,Tourelle/arme augmentent coût et spécialisation
+Char léger,5,5,5,5,5,5,4,5,4,4,3,2,2,1,Élevé,Chenilles/galets et moteur spécifiques
+Char moyen,8,8,8,7,8,8,7,8,6,6,5,4,4,2,Très élevé,Masse et chenilles; atelier avancé recommandé
+Char lourd,12,12,12,10,12,12,10,12,8,8,7,6,6,3,Extrême,"Nécessite atelier industriel, engin de levage et pièces rares"
+Amphibie,6,6,6,5,6,6,5,6,4,4,3,2,2,3,Élevé,Étanchéité et propulsion aquatique en plus des systèmes terrestres

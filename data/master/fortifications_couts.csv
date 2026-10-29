@@ -1,0 +1,16 @@
+ID,Élément,Niveau,Intégrité PV,Temps amélioration (j),Ferraille,Bois,Métal,Électronique,Règle / contrepartie
+GATE-L,Grande porte gauche,1,500,2,80,40,25,0,"Porte indépendante; état, réparations et brèches propres."
+GATE-L,Grande porte gauche,2,850,3,120,20,65,0,"Porte indépendante; état, réparations et brèches propres."
+GATE-L,Grande porte gauche,3,1300,5,180,10,110,10,"Porte indépendante; état, réparations et brèches propres."
+GATE-R,Grande porte droite,1,500,2,80,40,25,0,"Porte indépendante; état, réparations et brèches propres."
+GATE-R,Grande porte droite,2,850,3,120,20,65,0,"Porte indépendante; état, réparations et brèches propres."
+GATE-R,Grande porte droite,3,1300,5,180,10,110,10,"Porte indépendante; état, réparations et brèches propres."
+WALL,Segment de mur,1,300,1,30,25,0,0,Dégâts localisés; le segment détruit crée une brèche.
+WALL,Segment de mur,2,550,1,50,10,20,0,Dégâts localisés; le segment détruit crée une brèche.
+WALL,Segment de mur,3,900,1,70,0,55,0,Dégâts localisés; le segment détruit crée une brèche.
+TOWER,Tour de guet,1,,2,55,25,10,0,2 gardes; améliore détection et tir depuis le secteur.
+BUNKER,Bunker,1,,3,80,0,60,0,2 gardes; réduit l'exposition des défenseurs.
+LIGHT,Éclairage défensif,1,,1,15,0,0,8,Consomme 2 unités d'énergie par nuit.
+WPN-MG,Mitrailleuse lourde fixe,1,,2,70,0,35,5,"Équipe 2; consommation/attaque 40 unités. Bonne cadence, consommation élevée de munitions."
+WPN-CAN,Canon de défense,1,,2,100,0,80,8,"Équipe 3; consommation/attaque 12 unités. Fort contre véhicules et brèches; lent, munitions coûteuses."
+WPN-MOR,Mortier,1,,2,90,0,55,10,Équipe 3; consommation/attaque 8 unités. Tire indirectement; efficacité réduite à courte portée et risque de dégâts collatéraux.

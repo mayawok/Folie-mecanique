@@ -1,0 +1,17 @@
+Bâtiment,Implantation,Fonction,Améliorations,Coûts / consommations,Règle de conception
+Mairie / centre de commandement,Surface / étage,"Gestion de base, ordres, population, diplomatie, priorités.","Communications, coordination d'expéditions.",Matériaux ; composants électroniques à haut niveau.,Communications → administration → centre de commandement renforcé.
+Logements / dortoirs,Surface / étage / sous-sol ventilé,Capacité de lits et confort des survivants.,"Augmenter lits, qualité de vie et sécurité.",Matériaux ; population consomme eau et nourriture.,La population ne dépasse pas durablement la capacité de lits.
+École,Zone sécurisée,Abriter les enfants et suivre leur croissance.,"Capacité, sécurité, encadrement.",Matériaux ; besoins indirects en eau et nourriture.,Les enfants restent à l'école jusqu'à l'âge adulte.
+Puits d'eau,Surface / forage,Produire de l'eau si le territoire dispose d'une nappe.,Manuel → mécanique → électrique → industriel / filtration.,"Matériaux, pièces ; électricité pour pompes électriques.",Le débit dépend du gisement et de l'amélioration.
+Cuve d'eau,Surface / étage renforcé / sous-sol,Stockage d'eau en litres.,"Capacité, filtration, compartimentage.",Matériaux.,Stock affiché en L ; ne dépasse jamais la capacité.
+Puits de pétrole,Gisement uniquement,Produire du brut local.,"Forage, pompe, tête renforcée.","Matériaux, pièces mécaniques, énergie selon niveau.",Ne produit rien sans gisement exploitable.
+Raffinerie artisanale,Surface industrielle ventilée,Transformer le brut en carburant utilisable.,"Rendement, capacité, sécurité incendie.","Brut, énergie, pièces.",Conversion avec pertes de matière.
+Cuve de carburant,Surface sécurisée / sous-sol spécialisé,Stockage de carburant en litres.,"Capacité, compartimentage, protection incendie.",Matériaux ; risque incendie si endommagée.,Stock affiché en L ; capacité séparée du débit de production.
+Générateur,Local ventilé,Alimenter un réseau de bâtiments.,"Puissance, rendement, fiabilité.",Carburant en L/h selon charge.,Les bâtiments électriques ne brûlent pas directement le carburant.
+Atelier mécanique,Surface / sous-sol,Réparer et recycler pièces.,"Outillage, machines, banc moteur.","Électricité, ferraille, pièces récupérées.",Ne crée pas de pièces rares à partir de rien.
+Garage / dépôt véhicules,Surface / sous-sol avec accès,Stocker et gérer les véhicules récupérés.,"Places, réparation, manutention.","Matériaux, espace, énergie éventuelle.",Accès compatible avec gabarit et masse.
+Atelier de construction automobile,Grande cellule,Assembler châssis et modules.,"Pont, grue, assemblage lourd.","Pièces, matériaux, énergie.",Capacité limitée par atelier et personnel.
+Dépôt de munitions,Zone séparée,Stocker munitions et pièces d'armement.,Capacité et compartiments sécurisés.,Matériaux.,Risque en cas d'incendie ou de raid.
+Infirmerie,Zone protégée,Soigner les blessés.,"Lits, matériel, capacité.","Médicaments, eau, énergie.",Réduit le temps de récupération.
+Défenses,Périmètre / points d'accès,"Barricades, barbelés, postes de tir, tourelles.","Portée, blindage, munitions, automatisation.","Matériaux, munitions, parfois énergie.",La défense reste principalement préparée et automatique.
+Ventilation et drainage,Sous-sol obligatoire,Maintenir les niveaux habitables et secs.,"Filtres, redondance, pompes.","Électricité, entretien.",Panne prolongée : pénalités et risque d'évacuation.

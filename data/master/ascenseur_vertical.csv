@@ -1,0 +1,5 @@
+Niveau,Charge / capacité,Véhicules admissibles,Prérequis,Limites
+A0 — Monte-charge,Personnes et petites cargaisons,Aucun véhicule,"Moteur simple, rails et commande.",Départ de progression.
+A1 — Charge lourde,Groupes et gros lots de ressources,Moto et pièces,"Renforts, treuil et alimentation stable.",Augmente la logistique verticale.
+A2 — Plateforme véhicule,Un véhicule léger par trajet,"Moto, 4×4 léger","Fosse élargie, rails, gros générateur.",Contrôle de dimensions et masse.
+A3 — Ascenseur industriel,Un véhicule moyen compatible,Camion selon gabarit,"Structure renforcée, contrôle de charge, alimentation dédiée.",Chars lourds nécessitent un ouvrage spécifique.

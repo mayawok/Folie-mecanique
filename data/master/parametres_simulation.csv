@@ -1,0 +1,26 @@
+Paramètre,Valeur prototype,Unité,Justification / effet
+Population de départ,20,survivants,Base moyenne de début/milieu de partie.
+Consommation eau par survivant,12,L/personne/jour,Eau potable et usage quotidien simplifiés ; ne simule pas toute l'hygiène séparément.
+Consommation nourriture par survivant,1,unité/personne/jour,"Unité abstraite de ration, toutes denrées confondues."
+Consommation carburant générateurs,10,L/jour,"Hypothèse de base : gros générateur en charge partielle sur une durée limitée, pas 24 h à pleine puissance."
+Autres consommations carburant base,5,L/jour,"Petits véhicules utilitaires, manutention ou essais ; expéditions exclues."
+Production puits eau,500,L/jour,"Puits de niveau intermédiaire à pompe mécanique, avant éventuelles améliorations."
+Production nourriture élevage net,8,unités/jour,Hypothèse combinée d'un poulailler de niveau 2 après déduction de son entretien.
+Production nourriture potager net,12,unités/jour,"Potager de niveau 2 en conditions correctes, après prise en compte simplifiée de l'eau et du travail."
+Production carburant nette,0,L/jour,"Aucune production sans gisement, extraction et raffinage ; on ne crédite pas de carburant par défaut."
+Marge sécurité eau,3,jours,Alerte lorsque le stock estimé passe sous trois jours de consommation nette.
+Marge sécurité nourriture,3,jours,Alerte lorsque le stock estimé passe sous trois jours de consommation nette.
+Marge sécurité carburant,5,jours,Alerte si le stock est inférieur à cinq jours de consommation prévisible.
+Stock initial eau,12400,L,"Exemple de départ pour le test, capacité de cuves 20 000 L."
+Stock initial nourriture,350,unités,"Exemple de départ, capacité de stockage 1 000 unités."
+Stock initial carburant,8750,L,"Exemple de départ, capacité de cuves 15 000 L."
+Capacité eau,20000,L,Réservoirs installés.
+Capacité nourriture,1000,unités,Réserves et stockage alimentaire.
+Capacité carburant,15000,L,Cuves installées.
+Règle importante,"Les valeurs sont des hypothèses de gameplay. Le bilan quotidien doit être recalculé dynamiquement selon les bâtiments, la population, la météo, les expéditions et les dégâts.",,
+Seuil alerte ressource,0.25,fraction de capacité,Alerte lorsque le stock passe sous 25 % de la capacité.
+Seuil critique ressource,0.1,fraction de capacité,Alerte critique sous 10 % de la capacité.
+Délai avertissement pénurie,3,jours,Le HUD annonce l'autonomie estimée et avertit avant la pénurie.
+Pertes fuite mineure,0.05,fraction du stock,Valeur initiale de test ; perte ponctuelle si la fuite n'est pas contenue.
+Baisse production mauvaise récolte,0.3,fraction,Valeur centrale d'un incident de mauvaise récolte.
+Baisse production élevage malade,0.5,fraction,Réduction temporaire sur une durée limitée.

@@ -1,0 +1,25 @@
+Entité,Champ,Type,Obligatoire,Exemple / domaine,Validation
+Entité,Champ,Type,Obligatoire,Exemple / domaine,Règle de validation
+ResourceStock,resource_type_id,string,Oui,water / food / fuel_gasoline / fuel_diesel,Doit référencer un type connu
+ResourceStock,quantity,number,Oui,1200,0 ≤ quantity ≤ capacity; pas de NaN
+ResourceStock,capacity,number,Oui,2000,capacity ≥ 0; quantity ne peut pas dépasser capacity
+ResourceStock,production_per_day,number,Oui,260,Valeur nette ou préciser production brute; ne jamais mélanger les deux
+ResourceStock,consumption_per_day,number,Oui,210,Valeur positive; afficher les consommateurs majeurs
+VehicleModel,model_id,string,Oui,VEH-012,Stable et unique; ne pas dépendre du nom affiché
+VehicleModel,variant_id,string,Oui,WILLYS_MB_1942,"Distinct si carburant, moteur, armes, gabarit ou pièces changent"
+VehicleModel,historical_data,object,Oui,"dimensions, engine, armor, source refs",Chaque champ peut être inconnu; inclure source et confiance
+VehicleModel,gameplay_stats,object,Oui,"cost, handling, durability, fuel use",Ne pas écraser la donnée historique par l’équilibrage
+VehicleInstance,instance_id,string,Oui,VH-0001,Unique pour chaque exemplaire récupéré/construit
+VehicleInstance,model_id / variant_id,string,Oui,VEH-012 / WILLYS_MB_1942,Références vers modèle existant
+VehicleInstance,condition,enum,Oui,intact / damaged / immobilized / wreck,État global et états composants cohérents
+VehicleInstance,fuel_type / fuel_quantity,enum + number,Oui,gasoline / 18,Quantité bornée par capacité; carburant compatible
+VehicleInstance,components,array,Oui,"engine present, radiator damaged",Aucun composant critique ne doit être recréé au retour
+BuildingInstance,building_id,string,Oui,BLD-0001,Unique
+BuildingInstance,building_type_id,string,Oui,water_well,Type existant
+BuildingInstance,level / state,integer + enum,Oui,1 / active,Niveau dans la plage autorisée; state active/broken/inactive
+Expedition,state,enum,Oui,preparing / active / return_pending / complete,Transitions validées; aucune téléportation de cargo
+Expedition,manifest,array,Oui,"water, food, fuel, parts",Le chargement ne peut excéder capacité de fret
+Expedition,event_log,array,Oui,"departure, encounter, damage, loot, return",Événements ordonnés et idempotents
+Incident,resolution_state,enum,Oui,pending / resolved / expired,Une résolution n’est appliquée qu’une fois
+SaveGame,schema_version,string,Oui,1.0.0,Migrations versionnées; préserver sauvegardes après mise à jour
+SaveGame,simulation_timestamp,datetime,Oui,UTC timestamp,Hors ligne plafonné; journaliser le temps réellement simulé

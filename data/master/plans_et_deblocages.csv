@@ -1,0 +1,6 @@
+ID plan,Famille,Déblocage accordé,Prérequis d’atelier,Ressources/pièces nécessaires,Sources possibles,Doublon,Statut
+PLAN-VEH-001,Véhicules légers,Accès aux opérations de remise en état et construction sur gabarit léger,Garage/atelier de base,Selon le véhicule et les composants,Épave documentée ; atelier abandonné ; troc,À définir,Catégorie à concevoir
+PLAN-LOG-001,Logistique,Accès à une amélioration de capacité de chargement ou d’arrimage,Atelier mécanique,"Métal, pièces mécaniques et fixations",Dépôt logistique ; faction commerçante,À définir,Catégorie à concevoir
+PLAN-WAT-001,Eau,Accès à une amélioration de pompage ou de filtration,Atelier mécanique ou plomberie de base,"Pièces de pompe, matériaux, éventuellement composants électriques",Installation technique ; communauté spécialisée,À définir,Catégorie à concevoir
+PLAN-ENE-001,Énergie,Accès à une amélioration de production ou de distribution électrique,Atelier électrique,"Générateur ou pièces compatibles, câblage, composants",Site industriel ; archives techniques ; troc,À définir,Catégorie à concevoir
+PLAN-DEF-001,Défense,Accès à une amélioration de fortification ou de poste d’arme,Atelier mécanique et/ou militaire,"Métal, outillage, composants et munitions selon l’amélioration",Poste défensif ; faction armée ; dépôt militaire,À définir,Catégorie à concevoir

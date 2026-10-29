@@ -1,0 +1,7 @@
+Niveau,Coût construction (× surface),Coût maintenance (× surface),Protection indicative,Contraintes,Usage recommandé
+Surface,1,1,Élevée,"Exposée aux tirs, incendies, animaux et raids.",Construction de départ et production courante.
+Étage aérien +1,1.15,1.05,Moyenne,"Demande supports, accès et parfois monte-charge.",Densifie la base et améliore la surveillance.
+Étage aérien +2 et plus,1.3,1.1,Moyenne à faible,Coûts de renfort et accès croissants.,Limite provisoire de prototype à valider.
+Sous-sol -1,1.5,1.2,Bonne,"Excavation, renforts et drainage.",Protégé de la plupart des attaques terrestres directes.
+Sous-sol -2,1.9,1.35,Bonne,"Ventilation, drainage et énergie indispensables.",Coût croissant ; accès critique.
+Sous-sol -3 et plus,2.5,1.6,Très bonne si fonctionnel,"Infrastructure spécialisée, pompes et renforts redondants.",Réservé à la progression avancée.

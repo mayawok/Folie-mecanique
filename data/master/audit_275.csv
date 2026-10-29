@@ -1,0 +1,13 @@
+Domaine,Indicateur / règle,Valeur,Interprétation
+Périmètre,Nombre de fiches importées,275,Une ligne par entrée du catalogue initial ; variantes doivent ensuite être normalisées.
+Données,Dimensions complètes (L/l/h),,Valeurs absentes = à documenter ; certaines fiches sont estimatives.
+Données,Masse renseignée,,"Distinguer masse à vide, en ordre de marche et combat."
+Données,Puissance renseignée,,Valeur historique doit être liée à la variante moteur.
+Données,Capacité carburant renseignée,,Donnée importante pour l’autonomie de gameplay.
+Données,Source technique dédiée,,Une source par champ idéalement ; la source générale de la ligne ne suffit pas toujours.
+Qualité,Priorité P1,,Véhicules prioritaires pour les premières mécaniques et la direction artistique.
+Qualité,À compléter,,La complétude ne signifie pas que toutes les données sont vérifiées.
+Règle,Variantes,Une fiche par variante jouable distincte,"Si le moteur, la masse, les dimensions, l’armement ou les ancrages changent significativement, créer une variante séparée."
+Règle,Données historiques vs gameplay,Ne jamais mélanger les deux,Les valeurs historiques sourcées alimentent les calculs de départ ; les modificateurs de gameplay sont stockés dans des champs séparés.
+Règle,Confiance,Élevé / moyen / faible / non renseigné,Chaque champ critique doit avoir une source et un niveau de confiance avant d’être utilisé comme référence définitive.
+Règle,Statut prototype,Prototype / véhicule de série / conversion / projet,Un prototype ou projet historique ne doit pas être présenté comme un véhicule de série.

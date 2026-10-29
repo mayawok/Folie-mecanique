@@ -1,0 +1,10 @@
+Domaine,Règle de référence,Éléments à ne pas modéliser
+Réalisme,Semi-réaliste ; statistiques compréhensibles et effets visibles.,Simulation exhaustive de chaque petite pièce.
+Composants,Inventaire limité aux modules majeurs.,"Boulons, durites et consommables mineurs comme composants individuels."
+Refroidissement,Un module unique : fonctionnel / endommagé / absent.,"Radiateur, durites, pompe, ventilateur et thermostat séparés."
+Supports moteur,Compatibilité directe ou kit d’adaptation générique.,Supports moteur individuels dans l’inventaire.
+Carburant,Un stock générique en litres ; le type essence/diesel reste un attribut du moteur.,Stocks et réservoirs séparés essence/diesel.
+Économie,"Niveau intermédiaire : production, consommation, capacités, échanges.",Étapes de production sans choix intéressant.
+Combat,"Tactique détaillée : équipage, munitions, composants majeurs, repli.",Micro-dégâts sur chaque pièce mineure.
+Hors ligne,"Maximum 12 h, puis résumé détaillé à la reprise.",Accumulation illimitée ou destruction silencieuse.
+Construction,Modulaire avec compromis puissance/consommation/protection/capacité/mobilité/fiabilité.,Compatibilités arbitrairement strictes sans intérêt de jeu.

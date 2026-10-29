@@ -1,0 +1,12 @@
+Installation,Niveau,Coût matériaux,Coût métal,Coût initial nourriture,Coût eau initiale (L),Carburant (L),Composants électroniques,Pièces mécaniques,Production nourriture / jour (unités),Règle de conception
+Poulailler,1,10,20,10,5,0,0,0,2,"Démarrage simple ; production de nourriture après délai de croissance, avec entretien quotidien."
+Poulailler,2,20,40,18,10,0,0,0,4,Plus d'animaux et meilleure capacité ; demande davantage de nourriture et d'eau.
+Poulailler,3,40,80,32,18,0,0,1,7,"Production plus régulière, sensible aux maladies et aux attaques."
+Porcherie,1,15,30,25,10,0,0,0,3,Investissement initial élevé en nourriture ; gain différé après croissance des porcs.
+Porcherie,2,30,60,45,18,0,0,0,6,Capacité doublée ; demande plus de nourriture et d'eau.
+Porcherie,3,60,120,80,32,0,0,2,10,"Production plus importante, avec risques sanitaires et besoins de stockage."
+Potager,1,10,15,0,0,0,0,0,3,Production saisonnière ; eau et temps de travail nécessaires.
+Potager,2,20,30,0,0,0,0,0,6,Surface productive accrue.
+Potager,3,35,50,0,0,0,0,1,10,Production renforcée si le territoire et l'eau le permettent.
+Hypothèse de simulation,0,0,0,0,0,0,0,0,8,"Production nette estimée d'un poulailler niv. 2, après entretien ; valeur provisoire."
+Hypothèse de simulation,0,0,0,0,0,0,0,0,12,"Production nette estimée d'un potager niv. 2, après entretien ; valeur provisoire."

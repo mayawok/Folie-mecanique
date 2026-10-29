@@ -1,0 +1,16 @@
+Entité,État initial,Événement,État cible,Garde / règle
+Expedition,preparing,depart,active,"Véhicule valide, équipage affecté, manifeste et autonomie vérifiés"
+Expedition,preparing,cancel,cancelled,Aucun coût de départ n’est appliqué si le départ n’a pas eu lieu
+Expedition,active,encounter,encounter_pending,Événement d’expédition journalisé une fois
+Expedition,active,return_started,returning,"Retour avec cargaison, dommages et temps restants"
+Expedition,encounter_pending,engage,combat,Munitions et état du véhicule contrôlés
+Expedition,encounter_pending,retreat,retreating,"Perte éventuelle de temps/butin, jamais perte arbitraire sans journal"
+Expedition,combat,victory,returning,Butin et pertes enregistrés sans duplication
+Expedition,combat,defeat,retreating / disabled / captured,Résultat dépendant du contexte et du rapport de combat
+Expedition,returning,arrive,complete,Manifeste déchargé une fois; véhicules et équipage reviennent selon résultat
+VehicleInstance,operational,damage,damaged,Dégradation d’un ou plusieurs composants
+VehicleInstance,damaged,critical_part_missing,immobilized,Ne peut pas être réparé à l’origine sans pièce critique
+VehicleInstance,immobilized,tow_or_repair,repairing / towed,Capacité de dépannage et véhicule tracteur vérifiés
+VehicleInstance,wreck,salvage,salvaging,Inventaire de pièces restantes figé avant démontage
+Incident,pending,choose_option,resolved,Effets appliqués une seule fois et consignés
+Incident,pending,defer,pending,Reste visible; pas d’expiration silencieuse si décision requise

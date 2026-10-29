@@ -1,0 +1,26 @@
+Type d’entité,ID / champ principal,Nature,Unité,Valeur initiale / défaut,Contraintes,Dépendances,Règle / sens métier,Priorité
+ResourceType,water,Ressource,L,0,Capacité bâtiment/réservoir,Aucune,"Stock courant, capacité, production/jour, consommation/jour, autonomie estimée",P0
+ResourceType,food,Ressource,unité abstraite,0,Capacité de stockage,Aucune,Une seule ressource nourriture; ne pas séparer viande/légumes/œufs en inventaires distincts,P0
+ResourceType,fuel_gasoline,Ressource,L,0,Capacité de réservoir essence,Essence uniquement,Type séparé en logique; l’UI peut agréger seulement si la compatibilité reste visible,P0
+ResourceType,fuel_diesel,Ressource,L,0,Capacité de réservoir diesel,Diesel uniquement,Type séparé en logique; véhicule diesel uniquement,P0
+ResourceType,construction_material,Ressource,unité,0,Capacité inventaire,Aucune,Matériau de construction abstrait,P0
+ResourceType,metal,Ressource,unité,0,Capacité inventaire,Aucune,Matériau métallique pour bâtiments et réparations,P0
+ResourceType,electronics,Ressource,unité,0,Capacité inventaire,Aucune,Ressource rare pour équipements électriques/automatisation,P1
+ResourceType,mechanical_parts,Ressource,unité,0,Capacité inventaire,Aucune,Pièces mécaniques récupérées ou fabriquées,P0
+ResourceType,ammo_small_arms,Ressource,cartouche/lot abstrait,0,Stockage sécurisé,Calibre et type d’arme,Munitions typées; pas de conversion automatique entre calibres,P1
+BuildingType,command_center,Bâtiment,niveau,1,Emplacement base,Énergie selon niveau,"Débloque gestion, carte, capacité de population",P0
+BuildingType,water_well,Bâtiment,niveau,0,Territoire/gisement d’eau,Pompe mécanique ou électrique,Production conditionnée par terrain et alimentation,P0
+BuildingType,water_tank,Bâtiment,niveau,0,Capacité en L,Structure + raccordement,Stockage d’eau uniquement; ne crée pas d’eau,P0
+BuildingType,generator,Bâtiment,niveau,0,Puissance kW,Essence ou diesel compatible avec modèle,"Consomme carburant selon charge, produit de l’électricité",P0
+BuildingType,dormitory,Bâtiment,niveau,0,Capacité de population,Matériaux,"Augmente la capacité d’accueil, pas la population automatiquement",P0
+BuildingType,mechanical_workshop,Bâtiment,niveau,0,Postes atelier,Énergie/outillage selon niveau,"Répare les composants, avec temps et pièces",P0
+BuildingType,vehicle_garage,Bâtiment,niveau,0,Emplacements véhicules,Matériaux/métal,Stocke les véhicules récupérés; ne les répare pas seul,P0
+BuildingType,vehicle_assembly,Bâtiment,niveau,0,Postes assemblage,Atelier avancé et plan,Permet montage modulaire des véhicules,P1
+BuildingType,refinery,Bâtiment,niveau,0,Débit de raffinage,Pétrole brut + énergie,Convertit le brut en produits avec pertes; ne crée pas de carburant,P2
+VehicleInstance,vehicle_instance_id,Entité,identifiant,—,Modèle historique + variante,Composants requis,Chaque exemplaire a son état propre; ne pas confondre modèle et instance récupérée,P0
+VehicleModel,vehicle_model_id,Entité catalogue,identifiant,—,Modèle + variante,Source / niveau de preuve,Données historiques séparées des paramètres d’équilibrage,P0
+VehicleComponentInstance,component_instance_id,Entité,identifiant,—,Famille de composant,Véhicule ou stock pièces,"Chaque pièce est présente, absente, endommagée ou démontée",P0
+Expedition,expedition_id,Entité,identifiant,—,Véhicule + destination + durée,Autonomie + équipage,"Coûts avant départ; retour, pertes et butin journalisés",P0
+Faction,faction_id,Entité,identifiant,—,Territoire et relations,Offre/demande de marchandises,"Échanges en marchandises, pas de monnaie universelle",P1
+Incident,incident_id,Entité,identifiant,—,"Date, contexte, gravité",Décision joueur ou règle automatique,Journal d’événements; aucune perte cachée,P0
+BuildingInstance,building_instance_id,Entité,identifiant,—,Type + niveau + emplacement,Ressources et prérequis,"État actif, panne, capacité et production dérivés des données",P0

@@ -1,0 +1,9 @@
+Champ UI,Exemple / règle,Comportement
+Nom du modèle,BMW R75,Nom exact du véhicule récupéré.
+Description courte,"Moto militaire avec side-car, conçue pour la reconnaissance et les déplacements rapides. Faible capacité d'emport, mais facile à déplacer et à ravitailler.","2 à 3 phrases maximum, affichées dans le panneau latéral."
+État mécanique,À calculer,"État moteur, transmission, roues, armes et équipements."
+Carburant requis,Essence,Propriété du moteur ; le stock global reste « Carburant » en litres au prototype.
+Carburant dans le réservoir,À calculer en L,"Affichage de la quantité présente, séparée du stock de base."
+Pièces manquantes,À calculer,Liste des pièces nécessaires à la remise en état.
+Emplacement,Cour de récupération / expédition / garage,Indique où le véhicule se trouve.
+Actions,"Examiner, réparer si complet, démanteler, équiper, déplacer",Les actions dépendent de l'état réel et des règles de récupération.

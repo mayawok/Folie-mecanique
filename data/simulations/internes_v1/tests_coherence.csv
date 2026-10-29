@@ -1,0 +1,9 @@
+Cas,Résultat attendu
+Stock nourriture exactement nul,Le stock ne devient jamais négatif; alerte critique et rationnement explicitement journalisé.
+Deux raids le même jour,Chaque raid possède un event_id unique; pas de double application au rechargement.
+Véhicule immobilisé avec inventaire,"Retour interdit sans option de récupération, remorquage, sauvetage ou abandon explicite."
+Panne de ventilation hors ligne,Avertissement et pénalité progressive; pas de mort instantanée ou destruction silencieuse.
+Sauvegarde pendant transaction,Écriture atomique: l’état chargé est l’ancien état complet ou le nouvel état complet.
+Rechargement après récompense,Même expedition_id + encounter_id ne peut accorder le butin qu’une seule fois.
+Soldat affecté à une mitrailleuse,Indisponible simultanément pour expédition; l’interface doit montrer ce conflit avant validation.
+Carburant partagé,"Un seul stock fuel_l; consommation déduite en litres, compatibilité gérée sur le moteur."

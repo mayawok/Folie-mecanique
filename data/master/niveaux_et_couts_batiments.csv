@@ -1,0 +1,81 @@
+Bâtiment,Niveau,Nom du niveau,Matériaux de construction,Métal,Carburant (L),Eau (L),Composants électroniques,Pièces mécaniques / ferraille,Effet / capacité visée,Règle
+Mairie / centre de commandement,1,Poste de commandement,20,8,0,0,2,0,"Débloque la gestion de base, les ordres et les expéditions.",Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Mairie / centre de commandement,2,Bureau renforcé,35,16,0,100,4,2,Améliore la coordination et la capacité de gestion.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Mairie / centre de commandement,3,Centre de communications,55,28,2,250,8,5,Améliore les échanges et la connaissance des factions.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Mairie / centre de commandement,4,Centre de commandement fortifié,90,50,5,500,15,10,Résiste mieux aux raids et coordonne davantage d'opérations.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Mairie / centre de commandement,5,Quartier général,140,85,10,1000,25,20,Niveau avancé de commandement et de coordination.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Logements / dortoirs,1,Abri sommaire,12,2,0,0,0,0,Capacité de départ : 6 lits.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Logements / dortoirs,2,Dortoir,22,8,0,100,0,0,Capacité indicative : 12 lits.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Logements / dortoirs,3,Logement isolé,35,15,0,250,1,0,"Capacité indicative : 20 lits, meilleure protection.",Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Logements / dortoirs,4,Bloc résidentiel,60,28,1,500,3,0,Capacité indicative : 32 lits.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Logements / dortoirs,5,Complexe résidentiel,95,45,2,1000,6,2,Capacité indicative : 48 lits.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+École,1,Salle aménagée,15,3,0,0,0,0,Abrite les enfants et suit leur croissance.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+École,2,École sécurisée,25,10,0,100,0,1,Augmente la capacité et la sécurité.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+École,3,École équipée,40,18,0,250,1,3,Améliore l'encadrement.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+École,4,École renforcée,65,30,1,500,3,5,Meilleure protection en cas d'attaque.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+École,5,Centre éducatif,100,50,2,1000,6,8,Capacité avancée pour une grande population.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits d'eau,1,Puits manuel,10,2,0,0,0,0,Production indicative : 100 L/jour si nappe exploitable.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits d'eau,2,Puits approfondi,18,8,0,100,0,0,Production : 250 L/jour selon la nappe.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits d'eau,3,Pompe mécanique,28,14,0,250,0,1,Production : 600 L/jour ; demande entretien.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits d'eau,4,Pompe électrique,45,22,0,500,0,3,Production : 1 500 L/jour ; consomme de l'énergie.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits d'eau,5,Station de pompage,75,40,1,1000,2,8,Production : 3 500 L/jour ; exige nappe abondante et énergie.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve d'eau,1,Réservoir 500 L,8,2,0,0,0,0,Capacité : 500 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve d'eau,2,Cuve 2 000 L,14,6,0,100,0,0,Capacité : 2 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve d'eau,3,Cuve 8 000 L,25,12,0,250,0,1,Capacité : 8 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve d'eau,4,Réserve 20 000 L,45,24,0,500,0,3,Capacité : 20 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve d'eau,5,Citerne 50 000 L,75,42,1,1000,2,6,Capacité : 50 000 L ; protection renforcée.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits de pétrole,1,Forage exploratoire,25,12,0,0,0,0,Confirme la présence d'un gisement ; débit faible.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits de pétrole,2,Tête de puits,40,22,2,100,0,1,Production indicative : 20 L de brut/jour.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits de pétrole,3,Pompe mécanique,60,35,4,250,0,3,Production : 60 L de brut/jour.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits de pétrole,4,Pompe électrique,90,55,8,500,0,6,Production : 150 L de brut/jour ; demande énergie.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Puits de pétrole,5,Installation industrielle,140,90,15,1000,3,12,Production : 300 L de brut/jour si le gisement le permet.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Raffinerie artisanale,1,Alambic de fortune,25,10,1,0,0,0,Transforme une petite quantité de brut avec pertes importantes.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Raffinerie artisanale,2,Raffinerie rudimentaire,40,20,2,100,0,1,Capacité : 50 L de brut/jour.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Raffinerie artisanale,3,Raffinerie équipée,65,35,4,250,1,3,Capacité : 150 L de brut/jour.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Raffinerie artisanale,4,Raffinerie renforcée,100,55,7,500,3,6,Capacité : 350 L de brut/jour.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Raffinerie artisanale,5,Unité de raffinage,160,90,12,1000,6,12,Capacité : 700 L de brut/jour ; entretien coûteux.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve de carburant,1,Réservoir 250 L,10,3,0,0,0,0,Capacité : 250 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve de carburant,2,Cuve 1 000 L,18,8,0,100,0,0,Capacité : 1 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve de carburant,3,Cuve 5 000 L,32,18,0,250,1,1,Capacité : 5 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve de carburant,4,Réserve 15 000 L,55,32,1,500,2,4,Capacité : 15 000 L.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Cuve de carburant,5,Dépôt 40 000 L,95,60,3,1000,5,10,Capacité : 40 000 L ; compartimentage et protection incendie.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Générateur,1,Petit groupe,12,4,0,0,0,0,"1 unité d'énergie ; environ 1,5 L/h à charge moyenne.",Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Générateur,2,Groupe moyen,25,12,0,100,0,1,4 unités ; environ 4 L/h à charge moyenne.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Générateur,3,Groupe renforcé,45,25,1,250,1,3,8 unités ; environ 7 L/h à charge moyenne.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Générateur,4,Gros générateur,75,45,3,500,3,6,12 unités ; environ 10 L/h à charge moyenne.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Générateur,5,Groupe industriel,125,80,6,1000,8,12,30 unités ; environ 23 L/h à charge moyenne.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier mécanique,1,Établi,15,5,0,0,0,0,Réparations simples et démontage.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier mécanique,2,Atelier outillé,28,14,0,100,0,1,Réparation de composants courants.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier mécanique,3,Atelier mécanique,45,25,1,250,2,3,Révision de moteurs et transmissions.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier mécanique,4,Atelier spécialisé,75,45,3,500,5,8,Refabrication de modules simples depuis des matériaux disponibles.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier mécanique,5,Atelier industriel,120,75,8,1000,10,15,Assemblage de pièces lourdes ; nécessite plans et composants rares.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Garage / dépôt véhicules,1,Abri de véhicules,18,6,0,0,0,0,Stockage de 2 véhicules légers.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Garage / dépôt véhicules,2,Garage couvert,32,16,0,100,1,1,Stockage de 4 véhicules légers ou 2 moyens.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Garage / dépôt véhicules,3,Garage avec treuil,55,30,1,250,3,3,Stockage et manutention de véhicules moyens.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Garage / dépôt véhicules,4,Garage lourd,90,55,4,500,6,8,Accueille les camions et véhicules lourds compatibles.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Garage / dépôt véhicules,5,Garage souterrain,150,95,8,1000,12,15,Grand dépôt protégé ; nécessite accès vertical adapté.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier de construction automobile,1,Zone d'assemblage,25,10,0,0,0,0,Assemblage de véhicules légers avec modules simples.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier de construction automobile,2,Atelier modulaire,45,25,1,100,2,2,Châssis et carrosseries plus complexes.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier de construction automobile,3,Atelier motorisé,75,45,3,250,5,5,Pont et moyens de levage.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier de construction automobile,4,Atelier lourd,120,75,6,500,10,10,Assemblage de camions et blindés légers.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Atelier de construction automobile,5,Complexe industriel,200,130,12,1000,18,20,Assemblage de véhicules lourds ; coûteux en énergie et composants.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Infirmerie,1,Poste de soins,15,4,0,0,0,0,Soins de base pour quelques blessés.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Infirmerie,2,Infirmerie,28,12,0,100,0,1,Plus de lits et meilleure récupération.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Infirmerie,3,Infirmerie équipée,45,22,1,250,1,3,Prise en charge de blessures plus graves.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Infirmerie,4,Centre médical,75,40,2,500,3,6,Capacité accrue et soins plus efficaces.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Infirmerie,5,Hôpital de base,120,70,5,1000,8,12,Grand nombre de lits ; forte demande en ressources.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Défenses,1,Barricades,12,4,0,0,0,0,Protection rudimentaire du périmètre.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Défenses,2,Barbelés et postes,22,12,0,100,0,1,Ralentit les assaillants.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Défenses,3,Poste fortifié,40,24,1,250,1,3,Meilleure protection des points d'accès.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Défenses,4,Ligne défensive,70,45,3,500,4,6,Défenses renforcées et positions de tir.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Défenses,5,Périmètre fortifié,120,80,6,1000,8,12,Protection avancée ; entretien et munitions nécessaires.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ventilation et drainage,1,Conduit simple,12,4,0,0,0,0,Ventilation minimale d'un niveau souterrain.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ventilation et drainage,2,Ventilation motorisée,25,12,0,100,0,1,Consomme de l'énergie ; réduit l'humidité.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ventilation et drainage,3,Ventilation filtrée,42,22,1,250,1,3,Améliore la qualité de l'air.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ventilation et drainage,4,Pompes de drainage,65,38,2,500,2,5,Réduit les risques d'inondation.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ventilation et drainage,5,Réseau redondant,100,65,5,1000,5,10,Systèmes de secours ; coûteux mais fiable.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ascenseur vertical,1,Monte-charge,20,8,0,0,0,0,Personnes et petites cargaisons.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ascenseur vertical,2,Monte-charge renforcé,35,18,0,100,1,2,Groupes et lots de ressources ; moto démontée ou pièces.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ascenseur vertical,3,Plateforme légère,60,35,2,250,3,5,Transport d'une moto ou d'un 4×4 léger compatible.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ascenseur vertical,4,Ascenseur industriel,100,65,5,500,8,10,Transport de camion moyen selon dimensions et charge.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.
+Ascenseur vertical,5,Puits véhicule lourd,180,120,12,1000,15,20,Véhicules lourds compatibles ; ouvrage spécialisé et très coûteux.,Coûts de prototype à ajuster ; ressources déduites lors du lancement de l'amélioration.

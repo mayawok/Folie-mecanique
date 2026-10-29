@@ -1,0 +1,10 @@
+Champ,Valeur
+But,Simulation de conception uniquement; aucun code jouable livré.
+Nombre de parties,3000
+Durée,30 jours par partie
+Profils,"Prudent, équilibré, agressif"
+Graine,Déterministe par profil et index de partie
+Limites,"Production, raids et expéditions simplifiés; ne remplace pas des tests du moteur final."
+Consommation survivant,1 nourriture et 5 L eau/jour
+Production de départ,"7,5 nourriture et 43 L eau/jour"
+Objectif,"Détecter tendances et risques, pas déclarer un équilibrage validé."

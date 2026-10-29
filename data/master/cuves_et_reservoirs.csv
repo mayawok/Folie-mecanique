@@ -1,0 +1,9 @@
+Liquide,Taille,Capacité (L),Volume indicatif (m³),Règle de conception
+Eau,S,500,0.5,Petit réservoir de bâtiment.
+Eau,M,2000,2,Réserve de petite base.
+Eau,L,8000,8,Réserve principale.
+Eau,XL,20000,20,Grande réserve de base.
+Carburant,S,250,0.25,Stock tampon pour petit générateur ou véhicules légers.
+Carburant,M,1000,1,Réserve d'atelier ou d'expédition.
+Carburant,L,5000,5,Réserve principale de base.
+Carburant,XL,15000,15,Réserve de grande base ; protection incendie recommandée.

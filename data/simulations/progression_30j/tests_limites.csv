@@ -1,0 +1,9 @@
+Test,Attendu,Résultat,Statut
+Pénurie eau + nourriture,"Alerte critique, pénalités graduelles, pas de mort silencieuse hors validation du rapport de retour",À formaliser; le modèle actuel applique une pénalité morale et plafonne les stocks à zéro,Partiel
+Véhicule immobilisé après échec,"Réparation sur place, remorquage, mission de secours ou abandon explicite",Règle canonique présente; simulation actuelle modélise uniquement état véhicule et coût de réparation,Partiel
+Raid pendant réparation,La réparation consomme ressources/temps; le raid peut interrompre le chantier sans supprimer les ressources déjà consommées,À modéliser dans la simulation de calendrier,À faire
+Rechargement de sauvegarde,Événement unique appliqué une fois via event_id idempotent,Contrat documentaire; pas de moteur de sauvegarde exécutable dans cette passe,Documenté
+Stock négatif après transaction,Transaction rejetée atomiquement ou état d'urgence explicite,Le modèle de simulation plafonne les stocks; l'implémentation finale devra valider la transaction avant commit,À faire
+Récupération après pénurie,"Reprise possible avec production positive, commerce, mission courte ou aide de faction","Mécanisme de récupération documenté, pas encore équilibré",À faire
+Équipage affecté à deux endroits,"Affectation exclusive: défense, arme, atelier ou expédition",Règle à imposer dans les contrats d'affectation,À faire
+Véhicule déployé et défense simultanés,Une instance véhicule ne peut être dans deux lieux à la fois,Règle à imposer via état d'occupation exclusif,À faire

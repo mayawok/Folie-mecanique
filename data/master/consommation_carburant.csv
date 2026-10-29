@@ -1,0 +1,21 @@
+Classe / paramètre,Valeur,Unité,Référence / portée,Règle de conception
+Moto avec side-car,6,L/100 km,BMW R75,Référence prototype ; sensible au terrain et à la charge.
+4×4 léger,16,L/100 km,Willys MB,Valeur de gameplay moyenne sur route.
+Camion logistique moyen,38,L/100 km,GMC CCKW 353,Charge et état mécanique influencent fortement la consommation.
+Camion lourd de dépannage,50,L/100 km,Diamond T 969 Wrecker,Grue/treuil et masse élevée.
+Semi-chenillé,60,L/100 km,M3 Half Track,"Meilleure mobilité hors route, consommation élevée."
+Blindé de reconnaissance à roues,65,L/100 km,M8 Greyhound,"Référence de classe, à ajuster selon variante."
+Char léger,130,L/100 km,M3 Stuart,Forte variabilité selon terrain et modèle.
+Char moyen,240,L/100 km,M4 Sherman,Valeur de classe pour le prototype.
+Char lourd,400,L/100 km,Tiger I,Coût logistique majeur.
+Transport amphibie,55,L/100 km route,DUKW,La navigation utilisera un coefficient distinct.
+Route entretenue,1,multiplicateur,Tous véhicules,Base de calcul.
+Piste,1.25,multiplicateur,Tous véhicules,Sol meuble ou route dégradée.
+Terrain difficile,1.6,multiplicateur,Tous véhicules,"Boue, forêt dense, débris."
+Terrain extrême,2.2,multiplicateur,Tous véhicules,"Marais profond, forte pente, terrain très accidenté."
+Charge importante,1.15,multiplicateur,Tous véhicules,En plus du facteur de terrain.
+Surcharge,1.35,multiplicateur,Tous véhicules,Ajoute aussi pénalité d'accélération et fiabilité.
+Moteur/transmission dégradé,1.15–1.5,multiplicateur,Tous véhicules,Selon gravité de la panne.
+Conduite prudente,0.9,multiplicateur,Tous véhicules,Vitesse réduite si nécessaire.
+Conduite normale,1,multiplicateur,Tous véhicules,Référence.
+Conduite agressive,1.2,multiplicateur,Tous véhicules,Accélérations et pertes de traction.

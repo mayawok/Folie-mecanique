@@ -1,0 +1,7 @@
+Domaine,Contenu consolidé,Règle de référence,À faire ensuite
+Expéditions,"Cycle en 10 phases, du choix d’objectif au traitement à la base",Phases expédition,"Équilibrer durée, consommations, coûts et récompenses"
+Risque,12 facteurs de risque et contre-mesures possibles,Facteurs de risque,Définir les modificateurs chiffrés
+Événements,9 familles d’événements contextuels et persistants,Événements expédition,Créer des événements détaillés et tester les conséquences
+Épaves,"Réparation, démontage, remorquage, récupération partielle",Récupération épaves,Créer des états de composants et rendements
+Hors ligne,Simulation plafonnée et sans pertes arbitraires dues à la fermeture,Paramètres expédition,Décider le plafond et les événements différés
+Compatibilité,Même modèle pour expédition simulée et scène jouée,Cahier des charges v3.9,Formaliser la résolution tactique et l’interface de briefing

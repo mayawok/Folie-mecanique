@@ -1,0 +1,9 @@
+ID,Niveau/système,Délai,Coût,Déblocages/fonction,Contraintes
+BASE-SURFACE,Surface,Base initiale,"Portes gauche/droite, mur, cour véhicules, positions extérieures, entrée commerce, ateliers de surface",Aucun coût d'excavation,Exposition aux raids; accès direct aux véhicules
+BASE-L1,Sous-sol -1,4 jours,"90 ferraille, 30 bois, 35 métal","Stockage protégé, atelier léger, détention sécurisée",Drainage et ventilation obligatoires pour pièces concernées
+BASE-L2,Niveau industriel -2,7 jours,"140 ferraille, 20 bois, 90 métal, 8 électronique","Atelier lourd, pièces, générateur principal, réserves protégées",Besoin électrique et risque fumée/incendie plus élevé
+BASE-L3,Noyau profond -3,12 jours,"220 ferraille, 10 bois, 150 métal, 20 électronique","Centre de commandement, soins avancés, stockage stratégique","Ventilation, drainage et réparation coûteux"
+ELEVATOR,Ascenseur,4 jours,"80 ferraille, 45 métal, 8 électronique","Transport personnes, charges et véhicule selon gabarit",1 énergie par trajet; capacité poids/gabarit; amélioration lourde requise pour gros véhicules
+VENTILATION,Ventilation,2 jours,"25 ferraille, 15 métal, 8 électronique","Ateliers, générateur, détention, soins et niveaux habités",Panne réduit efficacité; incidents fumée doivent être signalés
+DRAINAGE,Pompe de drainage,2 jours,"25 ferraille, 25 métal, 3 électronique",Niveaux -1 et plus profonds,2 énergie/jour; panne entraîne accumulation d'eau progressive
+POWER,Priorité énergie,Continu,Production d'énergie et consommation par bâtiment,"Pompes/ventilation, soins, défenses, ateliers, confort",Délestage des priorités basses lors de pénurie

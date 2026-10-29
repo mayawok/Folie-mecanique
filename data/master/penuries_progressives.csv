@@ -1,0 +1,11 @@
+Ressource,Durée du déficit,Effet sur les survivants,Effet sur les bâtiments,Avertissement / possibilité d'action,Règle
+Nourriture,0 à 1 jour,Pas de pénalité grave ; alerte et rationnement possible,Aucun effet direct,Alerte stock bas + autonomie en jours,Éviter une mort immédiate après une seule journée.
+Nourriture,2 à 3 jours,Moral et efficacité de travail réduits légèrement,Production des bâtiments -10 %,"Conseiller collecte, commerce ou réduction de ration",Pénalité cumulée mais plafonnée.
+Nourriture,4 à 6 jours,Fatigue et risque de maladie accrus,Production des bâtiments -25 %,"Alerte critique, priorité aux enfants et blessés selon règles de jeu",Réversible si le stock revient.
+Nourriture,7 jours et plus,Malnutrition grave ; risque de décès seulement après durée prolongée et avertissements,Absences et baisse de production importante,Dernière alerte explicite ; solutions d'urgence proposées,Ne jamais tuer silencieusement des survivants hors ligne.
+Eau,0 à 1 jour,"Alerte urgente, priorités de consommation",Usages non essentiels réduits automatiquement si option activée,"Réparer puits, distribuer réserves, couper usages non vitaux",L'eau potable est prioritaire.
+Eau,2 à 3 jours,Fatigue et baisse de rendement,Ateliers et élevages -15 %,Alerte critique et estimation du temps avant épuisement,Réversible si approvisionnement rétabli.
+Eau,4 jours et plus,Risque sanitaire élevé,Élevages/potagers fortement pénalisés ; logements deviennent difficiles à maintenir,Demander une aide commerciale ou lancer une collecte d'urgence,Conséquences graves mais annoncées.
+Carburant,Stock sous 25 %,Aucun effet direct sur la santé,Usages énergétiques non prioritaires recommandés à l'arrêt,Alerte stock bas et estimation d'autonomie,Le joueur choisit la priorité du réseau.
+Carburant,Stock sous 10 %,Aucun effet direct immédiat,Ascenseur et ateliers lourds limités si générateur thermique unique,"Alerte critique, options de délestage affichées",Garder une réserve d'urgence configurable.
+Carburant,Stock épuisé,Aucun effet direct sur la population,Générateurs thermiques à l'arrêt ; véhicules sans carburant immobilisés,"Récupération manuelle, commerce, groupe de secours si disponible",Ne pas retirer le carburant déjà présent dans les réservoirs des véhicules.

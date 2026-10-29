@@ -1,0 +1,7 @@
+Règle,Base généraliste,Base spécialisée,Note de conception
+Eau,Production faible et locale,Production importante dans une base spécialisée dans l'eau,"La capacité dépend du territoire, des installations et de l'approvisionnement."
+Nourriture,Production faible et locale,Production importante dans une base agricole/alimentaire,"Rendements dépendants du terrain, de l'eau et des installations."
+Pétrole / carburant,Production ou récupération locale faible,Production/raffinage important dans une base spécialisée,Le carburant raffiné peut demander des intrants et des infrastructures.
+Munitions,"Production faible, sous réserve de composants disponibles",Production importante uniquement avec une infrastructure industrielle/militaire dédiée et des intrants rares,Ne pas permettre la fabrication illimitée à partir de ferraille générique.
+Pièces mécaniques et électroniques,"Réparation, tri et recyclage limités",Pas de production massive à partir de rien,"Les pièces rares proviennent surtout du démontage, de la récupération et du commerce."
+Matériaux de construction,Transformation limitée de matériaux disponibles,Volume dépendant des ressources du territoire,À équilibrer selon la base et le biome.

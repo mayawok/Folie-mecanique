@@ -1,0 +1,24 @@
+ID provisoire,Famille / architecture,Exemples de véhicules,Carburant / refroidissement,Règle de compatibilité initiale,État
+I4-CIT-7-11,4 cylindres en ligne Citroën 7/11,Traction Avant 7/11; Citroën Type 23 essence,"Essence, refroidissement liquide","Famille partagée en jeu à confirmer selon carter, boîte, sens de montage et supports.","Documenté, détails à vérifier"
+I6-CIT-15,6 cylindres en ligne Citroën 15 Six,Traction Avant 15 Six,"Essence, refroidissement liquide",Ne pas fusionner avec les moteurs I4 Citroën.,Documenté
+I4-PGT-TG,4 cylindres en ligne Peugeot TG,Peugeot 202,"Essence, refroidissement liquide",Famille dédiée ; adaptation vers d'autres véhicules à tester.,Documenté
+I4-PGT-402,4 cylindres en ligne Peugeot 402,Peugeot 402 / 402 B,"Essence, refroidissement liquide",Variantes 402/402B à distinguer avant compatibilité commune.,Documenté
+I4-REN-488,4 cylindres en ligne Renault 488,Renault Juvaquatre,"Essence, refroidissement liquide",Moteur compact à soupapes latérales ; vérifier supports et boîte.,Documenté
+I4-REN-PRIMA,4 cylindres en ligne Renault Primaquatre,Renault Primaquatre séries KZ/ACL/BDF/BFP,"Essence, refroidissement liquide",Les séries ne sont pas automatiquement interchangeables.,"Documenté, sous-types à détailler"
+I4-FORD-T,4 cylindres en ligne Ford Model T,Ford Model T,"Essence, refroidissement liquide",Famille ancienne dédiée.,Documenté
+I4-FORD-A,4 cylindres en ligne Ford Model A,Ford Model A,"Essence, refroidissement liquide",Ne pas fusionner avec Model T.,Source dédiée à ajouter
+V8-FORD-FLATHEAD,V8 Ford à soupapes latérales (Flathead),Ford V8 années 1930,"Essence, refroidissement liquide",Famille de gameplay avec variantes de fixation/accessoires.,Documenté
+I6-CHEV-STOVE,6 cylindres en ligne Chevrolet Stovebolt,Chevrolet Master / Special Deluxe,"Essence, refroidissement liquide",Millésime exact à définir ; compatibilité avec utilitaires GM à rechercher.,Sous-modèles à préciser
+I6-DODGE-WC,6 cylindres en ligne Dodge flathead,Dodge WC-1 / WC-12,"Essence, refroidissement liquide",Code moteur exact par variante WC à confirmer.,À vérifier
+I4-L134,4 cylindres en ligne Willys/Ford L134,Willys MB; Ford GPW,"Essence, refroidissement liquide",Même famille de gameplay ; accessoires/numéros peuvent varier.,Documenté
+F4-VW-AIR,4 cylindres à plat Volkswagen refroidi par air,Kübelwagen Type 82; Schwimmwagen Type 166,"Essence, refroidissement par air","Famille commune ; les versions 1,0 et 1,1 L et les adaptations de transmission restent distinctes.",Documenté
+I4-MB-M136,4 cylindres en ligne Mercedes M136,Mercedes-Benz 170 V,"Essence, refroidissement liquide",Famille Mercedes spécifique ; adaptation selon montage.,Documenté
+I4-OPEL-OLY,4 cylindres en ligne Opel Olympia,Opel Olympia première génération,"Essence, refroidissement liquide",Variantes selon année à préciser.,Documenté
+V8-HORCH,V8 Horch,Horch 830; Horch 901 à vérifier,"Essence, refroidissement liquide",Ne pas considérer 830/901 interchangeables avant recherche complémentaire.,Partiel
+I6-BMW-326,6 cylindres en ligne BMW 326,BMW 326,"Essence, refroidissement liquide",Famille spécifique BMW.,Documenté
+I4-FIAT-108,4 cylindres en ligne Fiat 508 type 108,Fiat 508 Balilla,"Essence, refroidissement liquide",Distinct de la Fiat 508 C/1100.,"Documenté, variantes à préciser"
+I4-FIAT-108C,4 cylindres en ligne Fiat 108C,Fiat 508 C / Fiat 1100 initiale,"Essence, refroidissement liquide",Famille commune initiale à confirmer par version.,Documenté
+V4-LANCIA-APR,V4 étroit Lancia,Lancia Aprilia,"Essence, refroidissement liquide","Architecture spécifique, non interchangeable avec V4 classiques.",Documenté
+I4-AUSTIN-TEN,4 cylindres en ligne Austin Ten,Austin 10,"Essence, refroidissement liquide",Famille compacte britannique ; ne pas fusionner sans preuve.,Documenté
+I4-MORRIS-UB,4 cylindres en ligne Morris UB,Morris 8,"Essence, refroidissement liquide",Famille compacte britannique.,Documenté
+I4-CIT-23-D,4 cylindres diesel Citroën Type 23,Citroën Type 23 diesel,"Diesel, refroidissement liquide",Famille distincte des moteurs essence ; code exact à documenter.,Documenté

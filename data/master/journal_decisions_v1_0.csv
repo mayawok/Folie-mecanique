@@ -1,0 +1,7 @@
+ID,Domaine,Décision,Statut,Précision
+DEC-001,Véhicules,Compléter les champs utiles avec valeurs plausibles arrondies; éviter les cases vides qui bloquent le gameplay.,Validé par l'utilisateur,Les valeurs estimées doivent être marquées et ne pas être présentées comme données constructeur exactes.
+DEC-002,Captivité,"Capacité stricte, consommation d'eau/nourriture, surveillance, risque d'évasion, réputation et représailles.",Proposition chiffrée v1.0,Les valeurs sont des hypothèses de balance.
+DEC-003,Économie,Stock de carburant unifié en litres; type moteur séparé comme propriété technique.,Décision confirmée,Pas de stocks essence/diesel séparés.
+DEC-004,Hors ligne,Progression plafonnée à 12 h; bilan au retour; pas de perte irréversible silencieuse.,Décision confirmée,
+DEC-005,Prototype,Aucun prototype tant que l'utilisateur ne le demande pas explicitement.,Instruction explicite,Conception et données seulement.
+DEC-006,Fortifications,"Deux grandes portes indépendantes, murs segmentés, affectation des soldats, armes fixes et véhicules extérieurs.",Validé en conception,Les véhicules en défense ne peuvent pas être en expédition simultanément.

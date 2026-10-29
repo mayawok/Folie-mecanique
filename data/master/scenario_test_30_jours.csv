@@ -1,0 +1,31 @@
+Jour,Événement de test,Effet temporaire,Réponse attendue,Résultat attendu / point à vérifier
+1,Début de partie,Aucun,Observer les jauges et les bilans,"Le joueur comprend stocks, capacité et autonomie."
+2,Panne de pompe mécanique,Production d'eau à 0 pendant 1 jour,Réparer avec pièces ou consommer le stock,La panne est visible et réparable.
+3,Pompe réparée,Retour à la production normale,Reprendre la production,L'eau ne tombe pas instantanément à zéro.
+4,Aucun événement,Production normale,Aucune action nécessaire,Vérifier stabilité du bilan.
+5,Prévision météo défavorable,Potager annoncé à -30 % sur le prochain cycle,Préparer une réserve ou accepter une baisse,L'information donne un temps de réaction.
+6,Mauvaise récolte,Production nourriture réduite de 30 %,Activer rationnement léger ou commerce,La nourriture baisse mais n'est pas immédiatement épuisée.
+7,Récolte suivante normale,Retour progressif,Reconstituer les réserves,Le système permet de se remettre d'un incident.
+8,Alerte carburant,Autonomie inférieure au seuil de sécurité,Couper les usages non essentiels,Le joueur peut préserver le carburant.
+9,Générateur secondaire activé,Consommation réduite sur le circuit principal mais capacité moindre,Choisir les bâtiments prioritaires,Le réseau électrique a des compromis.
+10,Éclaireurs de pillards détectés,Avertissement avant raid,Affecter des survivants et préparer les défenses,La préparation réduit les dégâts.
+11,Raid de pillards,Dégâts sur une défense et petite perte de matériaux,Réparer et récupérer les débris,L'attaque coûte des ressources sans détruire automatiquement la base.
+12,Réparation des défenses,Consommation de matériaux/métal,Lancer les réparations,Le coût de la sécurité est visible.
+13,Élevage malade,Poulailler produit -50 % pendant 2 jours,Utiliser médicaments ou attendre,La production a des aléas contrôlables.
+14,Traitement de l'élevage,Retour progressif,Dépenser ressources de soin,Le traitement vaut le coût si les stocks le permettent.
+15,Bilan intermédiaire,Aucun,Consulter les tendances sur 15 jours,Le tableau de bord aide à planifier.
+16,Fuite mineure de cuve,Perte de 5 % du carburant stocké si non isolée,Isoler la cuve et réparer,Le carburant est précieux et la réparation urgente.
+17,Cuve réparée,Pertes arrêtées,Reprendre la gestion normale,La fuite ne persiste pas après réparation.
+18,Panne d'ascenseur,Transport vertical bloqué,Réparer ou utiliser accès secondaire,Les véhicules restent stockés et récupérables.
+19,Ascenseur réparé,Accès rétabli,Reprendre les transports,La logistique verticale a une vraie valeur.
+20,Échange commercial retardé,Convoi consomme plus de réserves,"Attendre, changer route ou soutien",Le risque de trajet est lisible.
+21,Retour de l'échange,Ressources partiellement livrées selon résultat,Ajuster la production,Le commerce peut compléter la production locale.
+22,Production stable,Aucun,Maintenir la réserve de sécurité,Le joueur doit éviter de dépenser tout le stock.
+23,Consommation accrue,Arrivée de nouveaux survivants : +5 habitants,Augmenter nourriture/eau ou limiter les admissions,Les nouveaux habitants ont un coût récurrent.
+24,Alerte nourriture,Autonomie réduite par hausse de population,Lancer une production ou collecte,La croissance démographique demande une décision.
+25,Récolte normale,Retour à rendement normal,Reconstituer les stocks,Les effets ne sont pas permanents.
+26,Puits de pétrole découvert,"Gisement local révélé, pas encore exploitable",Investir dans forage et raffinage,Découverte ne signifie pas production gratuite.
+27,Début des travaux,"Coûts de matériaux, métal et pièces",Construire les installations,L'autonomie énergétique exige un investissement.
+28,Raffinerie prête,Petite production de carburant après mise en service,Gérer le rendement et l'énergie,Le brut n'est pas directement utilisable par tous les moteurs.
+29,Bilan ressources,Aucun,Comparer production et consommation,Identifier les déficits structurels.
+30,Rapport mensuel,"Résumé des stocks, incidents, pertes et améliorations",Planifier le mois suivant,Le joueur comprend les conséquences de ses décisions.

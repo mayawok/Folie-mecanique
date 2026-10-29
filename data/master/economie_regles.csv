@@ -1,0 +1,10 @@
+Système,Indicateur,Valeur,Unité / définition,Règle
+Population,Nourriture,1,unité/personne/jour,Alerte sous 2 jours de stock; critique sous 1 jour.
+Population,Eau,5,L/personne/jour,L'eau reste un stock unique mesuré en litres.
+Captif,Nourriture,1,unité/captif/jour,"Toujours consommée, même si le captif ne travaille pas."
+Captif,Eau,4,L/captif/jour,Ne pas faire de la captivité une ressource gratuite.
+Véhicule,Carburant,,L/100 km par classe et moteur,Un seul stock de carburant; moteur garde son type et sa compatibilité.
+Expédition,Rapport,,Champs obligatoires,"Distance, temps, carburant, provisions, munitions, dégâts, blessures, butin, réputation."
+Hors ligne,Plafond,12,heures,Résumé au retour; aucune mort/perte majeure silencieuse.
+Alerte stocks,Pré-alerte,2,jours d'autonomie,Calculée sur consommation prévisionnelle réelle.
+Alerte stocks,Critique,1,jour d'autonomie,Afficher rationnement ou production à prioriser.

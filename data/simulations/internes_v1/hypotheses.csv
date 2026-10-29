@@ -1,0 +1,12 @@
+Paramètre,Valeur
+Trajectoires par scénario,2000
+Durée,30
+Survivants,8
+Stock initial nourriture,100
+Stock initial eau (L),500
+Production équilibrée nourriture/j,10
+Production équilibrée eau L/j,45
+Consommation nourriture/personne/j,1
+Consommation eau/personne/j,5
+Graine aléatoire,20261029
+Statut,"Simulation simplifiée, non testée en jeu"

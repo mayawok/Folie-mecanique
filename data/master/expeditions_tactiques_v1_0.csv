@@ -1,0 +1,9 @@
+ID phase,Phase,Décisions joueur,Règle de résolution
+EXP-01,Préparation,"Choisir équipage, véhicule, charge utile, carburant, eau, nourriture, munitions et objectif.",Aucun départ si ressources négatives; avertissement si autonomie estimée < aller-retour + 25% réserve.
+EXP-02,Détection,"Observer, contourner, embusquer ou poursuivre.",L'observation coûte du temps; peut réduire l'incertitude du risque.
+EXP-03,Contact,"Afficher classe de menace, terrain, lignes de vue et risque estimé.",Afficher une bande de risque plutôt qu'une fausse précision.
+EXP-04,Engagement,"Tirer, se couvrir, manœuvrer, compétence, rompre le contact.",Munitions par type; tir impossible sans munitions compatibles.
+EXP-05,Dégâts,"Appliquer dégâts localisés à moteur, refroidissement, transmission, roues/chenilles, suspension, carburant, blindage, arme et équipage.",État >=70% opérationnel; 30–69% dégradé; <30% désactivé.
+EXP-06,Objectif,"Fouiller, secourir, récupérer épave, prendre captifs, négocier ou repartir.",Chaque action consomme temps; le bruit et la visibilité peuvent attirer une rencontre.
+EXP-07,Retraite,"Se replier avec butin partiel, tenter remorquage ou lancer secours.",Consomme temps et carburant; risque de poursuite; butin peut être abandonné.
+EXP-08,Retour,"Bilan de consommation, blessures, dégâts, butin, réputation et menaces futures.",Événement résolu ne doit jamais se rejouer au rechargement.

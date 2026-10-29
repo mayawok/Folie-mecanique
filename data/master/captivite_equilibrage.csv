@@ -1,0 +1,7 @@
+ID,Élément,Niveau,Capacité,Durée (j),Coût ferraille,Coût bois,Coût métal,Coût électronique,Nourriture/captif/j,Eau L/captif/j,Gardes / 4 captifs,Évasion %/jour,Incident %/jour,Notes
+DET-01,Enclos improvisé,1,4,1,45,30,10,0,1,4,1,5,6,Faible sécurité; inconfort et incidents fréquents.
+DET-02,Bloc de cellules renforcé,2,8,3,90,20,55,5,1,4,1,2.5,3,Sécurité correcte; nécessite une surveillance organisée.
+DET-03,Quartier de détention sécurisé,3,16,6,150,20,110,15,1,4,1,1,1.5,Plus coûteux; réduit les évasions mais attire l'attention.
+CAP-WORK,Production indicative par captif/jour,,,,2,1,0.5,0,,,,,,Scrap + bois + métal; seulement si affecté et surveillé.
+CAP-RAID,Capture village pacifique,,,,,,,,,,,,,Moral -12; réputation -15; menace +12; rupture durable de relation.
+CAP-ENEMY,Capture survivants ennemis (par captif),,,,,,,,,,,,,Moral -4; réputation -3; menace +3; ajuster selon faction et témoins.

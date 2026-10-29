@@ -1,0 +1,6 @@
+ID,Archétype,Priorité,Déclencheurs de réaction,Effets systémiques
+FACTION-SETTLERS,Communautés,"Survie, commerce, protection",Commerce équitable; aide; attaque de village; traitement des captifs,"Réputation, confiance, accès aux échanges, informations"
+FACTION-RAIDERS,Pilleurs,"Butin, faiblesse, représailles","Valeur du convoi, pertes infligées, intimidations, embuscades","Menace, raids, poursuites et vol de cargaison"
+FACTION-MILITIA,Milices organisées,"Territoire, ordre, armement","Expansion territoriale, armes lourdes, alliances, fortifications","Postes de contrôle, conflits territoriaux, pactes"
+FACTION-TRADERS,Réseaux marchands,Fiabilité et routes sûres,"Contrats honorés, sécurité des routes, pénuries, réputation","Prix, rareté, contrats et accès aux marchés"
+FACTION-INDUSTRIAL,Enclaves industrielles,"Pièces, carburant, machines, savoir-faire","Échange de pièces, attaques d'ateliers, plans techniques","Réparations, plans, composants rares et savoir technique"

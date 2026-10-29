@@ -1,0 +1,1035 @@
+{
+  "schema_version": "1.6",
+  "project": "Jeu iPhone post-apocalyptique",
+  "status": "Conception uniquement — aucun prototype",
+  "design_principles": {
+    "historical_vehicle_data": "Use the most plausible value when a blank prevents gameplay; explicitly mark estimated values and preserve uncertainty.",
+    "gameplay_values": "Starting balance values; tune after playtesting, not claims about historical reality.",
+    "fuel": "One shared inventory stock in liters; engine fuel type remains a compatibility/stat property.",
+    "offline_progression": "Maximum 12 hours; return summary; no silent death or irreversible base destruction.",
+    "vehicle_model_vs_instance": "Static vehicle model separate from each owned/recovered vehicle instance.",
+    "transactions": "Atomic, idempotent, journaled mutations; versioned and migratable saves.",
+    "no_prototype": "No playable prototype or demo. Internal mathematical simulations and design tests are allowed when requested; deliver documentation/results only."
+  },
+  "captivity": {
+    "reputation_scale": {
+      "min": -100,
+      "max": 100,
+      "neutral": 0
+    },
+    "reputation_bands": [
+      {
+        "min": 60,
+        "max": 100,
+        "label": "Respecté",
+        "effects": "Meilleurs échanges, plus d'informations; communautés plus enclines à aider."
+      },
+      {
+        "min": 20,
+        "max": 59,
+        "label": "Toléré",
+        "effects": "Relations normales à favorables."
+      },
+      {
+        "min": -19,
+        "max": 19,
+        "label": "Neutre",
+        "effects": "Pas de modificateur global."
+      },
+      {
+        "min": -59,
+        "max": -20,
+        "label": "Craint / hostile",
+        "effects": "Prix plus élevés, renseignements plus rares, patrouilles hostiles plus fréquentes."
+      },
+      {
+        "min": -100,
+        "max": -60,
+        "label": "Paria / terreur",
+        "effects": "Coalitions, embuscades, sanctions commerciales et raids de représailles plus probables."
+      }
+    ],
+    "choices": {
+      "capture_enemy_survivors": {
+        "morale_delta": -4,
+        "reputation_delta": -3,
+        "threat_delta": 3,
+        "notes": "Par captif capturé; ajuster selon faction et témoins."
+      },
+      "raid_peaceful_village": {
+        "morale_delta": -12,
+        "reputation_delta": -15,
+        "threat_delta": 12,
+        "notes": "Par événement; déclenche une rupture majeure et peut créer des ennemis durables."
+      },
+      "trade_or_negotiate": {
+        "morale_delta": 0,
+        "reputation_delta": 2,
+        "threat_delta": 0
+      },
+      "release_captives": {
+        "morale_delta": 3,
+        "reputation_delta": 5,
+        "threat_delta": -2
+      },
+      "voluntary_recruitment": {
+        "morale_delta": 2,
+        "reputation_delta": 2,
+        "threat_delta": 0,
+        "notes": "Nécessite consentement, capacité de logement et conditions d'accueil."
+      }
+    },
+    "facilities": [
+      {
+        "id": "DET-01",
+        "name": "Enclos improvisé",
+        "tier": 1,
+        "capacity": 4,
+        "build_days": 1,
+        "cost": {
+          "scrap": 45,
+          "wood": 30,
+          "metal": 10
+        },
+        "daily": {
+          "food_per_captive": 1,
+          "water_l_per_captive": 4,
+          "guard_per_4_captives": 1
+        },
+        "escape_risk_pct_per_day": 5,
+        "incident_risk_pct_per_day": 6,
+        "notes": "Faible sécurité; inconfort et incidents fréquents."
+      },
+      {
+        "id": "DET-02",
+        "name": "Bloc de cellules renforcé",
+        "tier": 2,
+        "capacity": 8,
+        "build_days": 3,
+        "cost": {
+          "scrap": 90,
+          "wood": 20,
+          "metal": 55,
+          "electronics": 5
+        },
+        "daily": {
+          "food_per_captive": 1,
+          "water_l_per_captive": 4,
+          "guard_per_4_captives": 1
+        },
+        "escape_risk_pct_per_day": 2.5,
+        "incident_risk_pct_per_day": 3,
+        "notes": "Sécurité correcte; nécessite une surveillance organisée."
+      },
+      {
+        "id": "DET-03",
+        "name": "Quartier de détention sécurisé",
+        "tier": 3,
+        "capacity": 16,
+        "build_days": 6,
+        "cost": {
+          "scrap": 150,
+          "wood": 20,
+          "metal": 110,
+          "electronics": 15
+        },
+        "daily": {
+          "food_per_captive": 1,
+          "water_l_per_captive": 4,
+          "guard_per_4_captives": 1
+        },
+        "escape_risk_pct_per_day": 1,
+        "incident_risk_pct_per_day": 1.5,
+        "notes": "Plus coûteux; réduit les évasions mais attire l'attention."
+      }
+    ],
+    "work_output": {
+      "status": "Valeurs de gameplay provisoires; les captifs ne sont pas des ouvriers gratuits.",
+      "per_captive_per_day": {
+        "scrap": 2,
+        "wood": 1,
+        "metal": 0.5
+      },
+      "requirements": [
+        "affectation à une tâche",
+        "surveillance minimale",
+        "nourriture et eau fournies",
+        "capacité de tâche disponible"
+      ],
+      "risk": "Sous-alimentation, surpopulation ou surveillance insuffisante réduisent la production et augmentent incidents, sabotage et évasion.",
+      "ethical_tradeoff": "Le travail forcé augmente la production à court terme mais détériore moral, réputation et sécurité; la libération ou l'intégration volontaire peuvent réduire les risques."
+    },
+    "events": [
+      {
+        "id": "CAP-E01",
+        "name": "Tentative d'évasion",
+        "trigger": "Jet quotidien selon niveau de sécurité, surpopulation et gardes",
+        "effects": "Perte temporaire de capacité de travail; blessure ou fuite possible; alerte accrue."
+      },
+      {
+        "id": "CAP-E02",
+        "name": "Sabotage discret",
+        "trigger": "Surveillance insuffisante ou moral de base bas",
+        "effects": "Petite panne, stock perdu ou porte fragilisée; jamais de destruction majeure silencieuse."
+      },
+      {
+        "id": "CAP-E03",
+        "name": "Rumeur dans les routes",
+        "trigger": "Capture de villageois avec témoins",
+        "effects": "Baisse de réputation locale et risque de coalition de représailles."
+      },
+      {
+        "id": "CAP-E04",
+        "name": "Raid de libération",
+        "trigger": "Réputation très basse et captifs nombreux",
+        "effects": "Raid ciblant d'abord la détention, les gardes et les accès; avertissement préalable si possible."
+      }
+    ],
+    "anti_exploit": [
+      "La capacité de détention est un plafond dur.",
+      "Les captifs consomment eau et nourriture même sans production.",
+      "Les captifs ne peuvent pas être affectés à la garde, aux expéditions ou aux armes.",
+      "Un raid contre un village pacifique est une décision majeure, pas une interaction de troc ordinaire.",
+      "Aucun effet irréversible ne se produit pendant la progression hors ligne sans résumé/avertissement."
+    ]
+  },
+  "fortifications": {
+    "gates": [
+      {
+        "id": "GATE-L",
+        "name": "Grande porte gauche",
+        "levels": [
+          {
+            "level": 1,
+            "hp": 500,
+            "cost": {
+              "scrap": 80,
+              "wood": 40,
+              "metal": 25
+            },
+            "upgrade_days": 2
+          },
+          {
+            "level": 2,
+            "hp": 850,
+            "cost": {
+              "scrap": 120,
+              "wood": 20,
+              "metal": 65
+            },
+            "upgrade_days": 3
+          },
+          {
+            "level": 3,
+            "hp": 1300,
+            "cost": {
+              "scrap": 180,
+              "wood": 10,
+              "metal": 110,
+              "electronics": 10
+            },
+            "upgrade_days": 5
+          }
+        ]
+      },
+      {
+        "id": "GATE-R",
+        "name": "Grande porte droite",
+        "levels": [
+          {
+            "level": 1,
+            "hp": 500,
+            "cost": {
+              "scrap": 80,
+              "wood": 40,
+              "metal": 25
+            },
+            "upgrade_days": 2
+          },
+          {
+            "level": 2,
+            "hp": 850,
+            "cost": {
+              "scrap": 120,
+              "wood": 20,
+              "metal": 65
+            },
+            "upgrade_days": 3
+          },
+          {
+            "level": 3,
+            "hp": 1300,
+            "cost": {
+              "scrap": 180,
+              "wood": 10,
+              "metal": 110,
+              "electronics": 10
+            },
+            "upgrade_days": 5
+          }
+        ]
+      }
+    ],
+    "wall_segments": [
+      {
+        "level": 1,
+        "hp": 300,
+        "cost": {
+          "scrap": 30,
+          "wood": 25
+        }
+      },
+      {
+        "level": 2,
+        "hp": 550,
+        "cost": {
+          "scrap": 50,
+          "wood": 10,
+          "metal": 20
+        }
+      },
+      {
+        "level": 3,
+        "hp": 900,
+        "cost": {
+          "scrap": 70,
+          "metal": 55
+        }
+      }
+    ],
+    "posts": {
+      "watchtower": {
+        "cost": {
+          "scrap": 55,
+          "wood": 25,
+          "metal": 10
+        },
+        "guards": 2
+      },
+      "bunker": {
+        "cost": {
+          "scrap": 80,
+          "metal": 60
+        },
+        "guards": 2
+      },
+      "lighting": {
+        "cost": {
+          "scrap": 15,
+          "electronics": 8
+        },
+        "power_per_night": 2
+      }
+    },
+    "weapons": [
+      {
+        "id": "WPN-MG",
+        "name": "Mitrailleuse lourde fixe",
+        "crew": 2,
+        "ammo_per_attack": 40,
+        "cost": {
+          "scrap": 70,
+          "metal": 35,
+          "electronics": 5
+        },
+        "effect": "Bonne cadence, consommation élevée de munitions."
+      },
+      {
+        "id": "WPN-CAN",
+        "name": "Canon de défense",
+        "crew": 3,
+        "ammo_per_attack": 12,
+        "cost": {
+          "scrap": 100,
+          "metal": 80,
+          "electronics": 8
+        },
+        "effect": "Fort contre véhicules et brèches; lent, munitions coûteuses."
+      },
+      {
+        "id": "WPN-MOR",
+        "name": "Mortier",
+        "crew": 3,
+        "ammo_per_attack": 8,
+        "cost": {
+          "scrap": 90,
+          "metal": 55,
+          "electronics": 10
+        },
+        "effect": "Tire indirectement; efficacité réduite à courte portée et risque de dégâts collatéraux."
+      }
+    ],
+    "exterior_vehicle_slots": {
+      "armored_car": 1,
+      "half_track": 1,
+      "tank": 1,
+      "armed_truck": 1,
+      "requirements": [
+        "véhicule opérationnel",
+        "équipage dédié",
+        "carburant et munitions",
+        "non disponible pour expédition simultanée"
+      ],
+      "risk": "immobilisation ou perte si le secteur extérieur est submergé."
+    },
+    "combat_phases": [
+      "Détection",
+      "Alerte et fermeture des portes",
+      "Approche",
+      "Échange de tirs",
+      "Brèche ou repli",
+      "Bilan, réparations et soins"
+    ]
+  },
+  "economy": {
+    "resource_ids": [
+      "food",
+      "water_l",
+      "fuel_l",
+      "scrap",
+      "wood",
+      "metal",
+      "electronics",
+      "medicine",
+      "ammo_small",
+      "ammo_heavy",
+      "parts"
+    ],
+    "fuel_inventory": "Single shared stock fuel_l. Engine fuel type affects consumption/compatibility; no separate gasoline/diesel inventory.",
+    "baseline_population_daily": {
+      "food_per_person": 1,
+      "water_l_per_person": 5
+    },
+    "production_policy": "Every building has input, output, staffing, storage cap and upkeep; avoid free passive production.",
+    "scarcity": "When stocks fall below 2 days of forecast demand, show warning; below 1 day, show critical warning and suggested rationing.",
+    "building_economy_model": "Each building has construction_cost, construction_days, input_per_day, output_per_day, storage_capacity, staffing, maintenance_per_day, power_demand and state.",
+    "shortage_states": [
+      "normal",
+      "strained",
+      "critical",
+      "offline"
+    ],
+    "shortage_thresholds": {
+      "warning_days": 2,
+      "critical_days": 1,
+      "building_output_below_critical_stock": 0.5
+    },
+    "repair_policy": "Repair costs scale with damage and class; a destroyed building requires reconstruction rather than a free reset.",
+    "resource_storage": "Every resource has a global stock plus optional per-building capacity; total usable stock cannot exceed combined available storage.",
+    "production_order": [
+      "consume_upkeep_and_inputs",
+      "apply_staffing_and_power",
+      "produce_outputs",
+      "apply_storage_caps",
+      "emit_shortage_alerts"
+    ],
+    "daily_resolution": "Run daily simulation in a deterministic order and journal all changes."
+  },
+  "expeditions": {
+    "stages": [
+      "Preparation",
+      "Departure",
+      "Route event",
+      "Point of interest",
+      "Decision",
+      "Return or retreat",
+      "Recovery and report"
+    ],
+    "minimum_report": [
+      "time",
+      "distance",
+      "fuel spent",
+      "food/water spent",
+      "ammo spent",
+      "damage by component",
+      "injuries",
+      "loot",
+      "reputation changes",
+      "next risk"
+    ],
+    "retreat": "Retreat is always an available decision unless the vehicle/group is immobilized or trapped; those cases need a recovery/rescue option.",
+    "losses": "Permanent losses allowed in active expeditions after clear risk presentation; offline progression must not silently destroy the player's group.",
+    "combat_model": {
+      "phases": [
+        {
+          "id": "detect",
+          "name": "Détection",
+          "decision": "Observer, contourner, tendre une embuscade ou poursuivre."
+        },
+        {
+          "id": "contact",
+          "name": "Contact",
+          "decision": "Identifier menace et terrain; risque estimé présenté."
+        },
+        {
+          "id": "engage",
+          "name": "Engagement",
+          "decision": "Tirer, avancer, se couvrir, utiliser compétence ou rompre le contact."
+        },
+        {
+          "id": "damage",
+          "name": "Dégâts et blessures",
+          "decision": "Appliquer dégâts localisés, munitions, blessures et moral."
+        },
+        {
+          "id": "objective",
+          "name": "Objectif",
+          "decision": "Continuer, fouiller, secourir, récupérer une épave ou battre en retraite."
+        },
+        {
+          "id": "return",
+          "name": "Retour",
+          "decision": "Retour normal, remorquage, récupération ou sauvetage."
+        }
+      ],
+      "damage_locations": [
+        "engine",
+        "cooling",
+        "transmission",
+        "wheels_tracks",
+        "suspension",
+        "fuel_system",
+        "hull_armor",
+        "weapon",
+        "crew"
+      ],
+      "component_state_thresholds": {
+        "operational_min": 70,
+        "degraded_min": 30,
+        "disabled_below": 30
+      },
+      "crew_injury_states": [
+        "healthy",
+        "wounded",
+        "incapacitated",
+        "dead"
+      ],
+      "ammo_rules": "Each weapon has its own ammo class; no firing without compatible ammunition; reload consumes time and may expose crew.",
+      "retreat_cost": "Retreat consumes time and fuel; may leave loot behind and can trigger a pursuit check.",
+      "risk_presentation": "Before an irreversible active expedition decision, show expected threat band, possible losses and retreat availability.",
+      "combat_resolution": "Use deterministic seed derived from expedition_id and encounter_id so reloads do not reroll a resolved event."
+    },
+    "report_fields": [
+      "expedition_id",
+      "start_time",
+      "duration",
+      "distance_km",
+      "fuel_before_l",
+      "fuel_spent_l",
+      "food_spent",
+      "water_spent_l",
+      "ammo_by_type",
+      "vehicle_damage_by_component",
+      "crew_injuries",
+      "crew_fatalities",
+      "loot",
+      "captives",
+      "reputation_deltas",
+      "threat_delta",
+      "retreat_or_success",
+      "next_risk"
+    ],
+    "recovery_options": [
+      {
+        "id": "self_recovery",
+        "name": "Réparation sur place",
+        "requirements": "Pièces, outil et temps; exposition prolongée."
+      },
+      {
+        "id": "tow",
+        "name": "Remorquage",
+        "requirements": "Véhicule tracteur compatible et capacité de remorquage suffisante."
+      },
+      {
+        "id": "rescue",
+        "name": "Mission de secours",
+        "requirements": "Équipage de secours, carburant et coût de ressources; risques additionnels."
+      },
+      {
+        "id": "abandon",
+        "name": "Abandonner l'épave",
+        "requirements": "Décision explicite; véhicule reste récupérable plus tard si le lieu n'est pas perdu."
+      }
+    ]
+  },
+  "vehicles": {
+    "catalog_size": 275,
+    "approach": "Best plausible values are acceptable for game content. Each field has an evidence grade: A documented, B strong consensus, C plausible estimate, D gameplay fallback.",
+    "grades": {
+      "A": "source/variant strongly established",
+      "B": "well-known typical value; variant differences possible",
+      "C": "best plausible estimate; expect roughly ±10–20% depending on field",
+      "D": "gameplay fallback; do not present as exact historical fact"
+    },
+    "rules": [
+      "Keep variant-specific values where they materially affect gameplay.",
+      "Use rounded values rather than false precision.",
+      "Do not block content on low-priority details.",
+      "Keep a separate confidence/evidence grade per field or data group.",
+      "If a field is estimated, UI may show rounded value without implying factory-exact precision."
+    ]
+  },
+  "save_system": {
+    "schema_version": 2,
+    "atomic_mutations": true,
+    "idempotent_events": true,
+    "migration_required": true,
+    "offline_cap_hours": 12,
+    "offline_never_silent_irreversible_loss": true,
+    "entity_ids": "Stable IDs generated once; never use array index as persistent identity.",
+    "minimum_entity_models": {
+      "vehicle_instance": [
+        "id",
+        "model_id",
+        "condition",
+        "component_states",
+        "fuel_l",
+        "location_id",
+        "owner_state",
+        "crew_ids",
+        "cargo",
+        "version"
+      ],
+      "crew_member": [
+        "id",
+        "skills",
+        "health_state",
+        "morale",
+        "loyalty",
+        "assigned_role",
+        "location_id",
+        "version"
+      ],
+      "building_instance": [
+        "id",
+        "building_type_id",
+        "level",
+        "condition",
+        "workers",
+        "input_buffer",
+        "output_buffer",
+        "storage",
+        "powered",
+        "version"
+      ],
+      "captive_group": [
+        "id",
+        "origin_faction_id",
+        "count",
+        "facility_id",
+        "status",
+        "needs",
+        "security_level",
+        "version"
+      ],
+      "faction_state": [
+        "id",
+        "reputation",
+        "threat",
+        "trust",
+        "trade_access",
+        "known_events",
+        "version"
+      ],
+      "expedition": [
+        "id",
+        "seed",
+        "stage",
+        "vehicle_ids",
+        "crew_ids",
+        "resources_committed",
+        "encounter_ids",
+        "resolved_events",
+        "version"
+      ]
+    },
+    "transaction_contract": [
+      "validate preconditions",
+      "reserve costs",
+      "apply all entity changes",
+      "write event journal",
+      "commit save version",
+      "rollback all on failure"
+    ],
+    "idempotency": "Each command/event has command_id/event_id; replayed IDs must not apply twice.",
+    "migration_contract": "Every schema bump provides a deterministic migration from the previous version and preserves unknown optional fields.",
+    "save_integrity": "Checkpoint before major expedition/death/raid resolution; checksum and fallback to last valid checkpoint.",
+    "offline_simulation": "Advance at most 12 hours; process deterministic production/upkeep and low-risk events; defer high-stakes raid, death, captive escape or permanent vehicle loss to an explicit return summary/confirmation."
+  },
+  "factions": {
+    "reputation_scale": {
+      "min": -100,
+      "max": 100
+    },
+    "separate_axes": {
+      "reputation": "Opinion of the player group's actions; affects commerce, diplomacy and rumors.",
+      "threat": "How strongly the faction prioritizes attacking or obstructing the player.",
+      "trust": "Willingness to negotiate, share information or honor agreements.",
+      "fear": "Short-term compliance from intimidation; can rise while trust/reputation fall."
+    },
+    "faction_archetypes": [
+      {
+        "id": "FACTION-SETTLERS",
+        "name": "Communautés",
+        "priority": "Survival, trade and protection",
+        "reacts_to": "Trade fairness, aid, attacks on villages, treatment of captives."
+      },
+      {
+        "id": "FACTION-RAIDERS",
+        "name": "Pilleurs",
+        "priority": "Loot, weakness and retaliation",
+        "reacts_to": "Convoy strength, visible cargo, defeats, intimidation and ambushes."
+      },
+      {
+        "id": "FACTION-MILITIA",
+        "name": "Milices organisées",
+        "priority": "Territory, order and weapons",
+        "reacts_to": "Territorial expansion, fortified posts, heavy weapons and alliances."
+      },
+      {
+        "id": "FACTION-TRADERS",
+        "name": "Réseaux marchands",
+        "priority": "Reliable deals and safe routes",
+        "reacts_to": "Broken contracts, route safety, reputation and resource scarcity."
+      },
+      {
+        "id": "FACTION-INDUSTRIAL",
+        "name": "Enclaves industrielles",
+        "priority": "Parts, fuel, machinery and technical knowledge",
+        "reacts_to": "Trade in parts, raids on workshops, repair services and technical plans."
+      }
+    ],
+    "thresholds": [
+      {
+        "min": 60,
+        "max": 100,
+        "label": "Allié fiable",
+        "effects": "Trade discounts, information and possible aid; agreements still cost resources."
+      },
+      {
+        "min": 20,
+        "max": 59,
+        "label": "Partenaire",
+        "effects": "Normal trade and occasional contracts."
+      },
+      {
+        "min": -19,
+        "max": 19,
+        "label": "Neutre",
+        "effects": "Basic access; limited information."
+      },
+      {
+        "min": -59,
+        "max": -20,
+        "label": "Hostile",
+        "effects": "Higher prices, checkpoints, ambush and patrol risk."
+      },
+      {
+        "min": -100,
+        "max": -60,
+        "label": "Ennemi déclaré",
+        "effects": "Coordinated attacks and trade embargo; attack frequency also depends on threat and distance."
+      }
+    ],
+    "event_effects": {
+      "fair_trade": {
+        "reputation": 2,
+        "trust": 3,
+        "threat": 0,
+        "fear": 0
+      },
+      "aid_settlement": {
+        "reputation": 5,
+        "trust": 5,
+        "threat": -1,
+        "fear": 0
+      },
+      "break_contract": {
+        "reputation": -8,
+        "trust": -15,
+        "threat": 5,
+        "fear": 0
+      },
+      "attack_convoy": {
+        "reputation": -8,
+        "trust": -10,
+        "threat": 8,
+        "fear": 2
+      },
+      "capture_enemy_survivor": {
+        "reputation": -3,
+        "trust": -4,
+        "threat": 3,
+        "fear": 2
+      },
+      "raid_peaceful_village": {
+        "reputation": -15,
+        "trust": -20,
+        "threat": 12,
+        "fear": 8
+      },
+      "release_captives": {
+        "reputation": 5,
+        "trust": 4,
+        "threat": -2,
+        "fear": -2
+      }
+    },
+    "retaliation_model": "Raid probability is a function of threat, hostile reputation, distance, faction capability, recent player losses and visible captives; do not use reputation alone.",
+    "memory_of_actions": "Faction reaction is stored as stable event records; actions can be discovered later through witnesses, survivors, traders or intercepted messages.",
+    "diplomacy_actions": [
+      "trade",
+      "request_information",
+      "offer_aid",
+      "pay_toll",
+      "negotiate_truce",
+      "exchange_prisoners",
+      "release_captives",
+      "break_contract"
+    ],
+    "anti_snowball": "Repeated attacks raise threat but also increase faction losses and recovery time; faction raids have cooldowns and telegraphed warning events."
+  },
+  "vertical_base": {
+    "layout": "Base is a vertical cross-section with surface level plus modular underground floors; player can pan/zoom the base view.",
+    "surface_modules": [
+      "left_gate",
+      "right_gate",
+      "perimeter_wall",
+      "vehicle_yard",
+      "outer_vehicle_positions",
+      "watchtowers",
+      "trade_entrance",
+      "surface_workshops"
+    ],
+    "underground_levels": [
+      {
+        "level": -1,
+        "name": "Sous-sol de service",
+        "unlocks": "Stockage protégé, ateliers légers, cellule de détention sécurisée",
+        "excavation_cost": {
+          "scrap": 90,
+          "wood": 30,
+          "metal": 35
+        },
+        "build_days": 4,
+        "risks": [
+          "water ingress",
+          "ventilation demand"
+        ]
+      },
+      {
+        "level": -2,
+        "name": "Niveau industriel",
+        "unlocks": "Atelier lourd, pièces, générateur principal, réserve protégée",
+        "excavation_cost": {
+          "scrap": 140,
+          "wood": 20,
+          "metal": 90,
+          "electronics": 8
+        },
+        "build_days": 7,
+        "risks": [
+          "higher power draw",
+          "drainage",
+          "fire/smoke spread"
+        ]
+      },
+      {
+        "level": -3,
+        "name": "Noyau profond",
+        "unlocks": "Centre de commandement, soins avancés, stockage stratégique",
+        "excavation_cost": {
+          "scrap": 220,
+          "wood": 10,
+          "metal": 150,
+          "electronics": 20
+        },
+        "build_days": 12,
+        "risks": [
+          "high ventilation need",
+          "drainage failure",
+          "expensive repairs"
+        ]
+      }
+    ],
+    "systems": {
+      "elevator": {
+        "levels": 1,
+        "initial_cost": {
+          "scrap": 80,
+          "metal": 45,
+          "electronics": 8
+        },
+        "build_days": 4,
+        "power_per_trip": 1,
+        "capacity": "One vehicle or defined cargo/personnel load per trip; upgrade for heavy vehicles."
+      },
+      "ventilation": {
+        "required_for": [
+          "workshop",
+          "generator_room",
+          "detention_block",
+          "medical_room",
+          "deep_storage"
+        ],
+        "failure_effect": "Work and recovery penalties; smoke/toxic buildup in relevant incidents; no instant death during offline progression."
+      },
+      "drainage": {
+        "required_from_level": -1,
+        "pump_power_per_day": 2,
+        "failure_effect": "Water accumulation reduces storage/workshop efficiency; prolonged failure can damage stock and components after warning."
+      },
+      "power": {
+        "priority_order": [
+          "life_support_and_pumps",
+          "medical",
+          "defenses_and_lighting",
+          "workshops",
+          "comfort"
+        ],
+        "brownout": "Lower priority modules pause or operate at reduced efficiency; notify player."
+      }
+    },
+    "vertical_transport_rules": [
+      "Vehicles only use elevator if width/length/weight fit current rating.",
+      "An oversized vehicle must remain on surface or use a dedicated heavy lift upgrade.",
+      "Elevator disabled means personnel use stairs but vehicles/cargo heavy enough are blocked.",
+      "Floor construction is sequential; support and drainage upgrades are required before deeper excavation."
+    ],
+    "underground_tradeoffs": [
+      "More secure from direct raids",
+      "Higher construction and maintenance costs",
+      "Dependence on ventilation, drainage and electricity",
+      "Failures can affect multiple connected rooms"
+    ],
+    "upgrade_policy": "No underground level grants free storage or production; each module has footprint, power, staffing, maintenance and prerequisites."
+  },
+  "content_pipeline": {
+    "catalog_data_contract": "Vehicle static model and recovered vehicle instance are separate. Catalog estimates may be used as defaults, but damage/condition belong only to the instance.",
+    "priority_fields": [
+      "stable_id",
+      "display_name",
+      "class",
+      "mass_kg",
+      "length_m",
+      "width_m",
+      "height_m",
+      "engine_family",
+      "power_hp",
+      "fuel_type",
+      "tank_l",
+      "consumption_l_100km",
+      "speed_kmh",
+      "range_km",
+      "crew_count",
+      "confidence_grade"
+    ],
+    "estimation_policy": "Fill key gameplay fields with best plausible rounded estimates. Keep evidence grade and note; do not imply exact historical precision.",
+    "validation_rules": [
+      "IDs unique",
+      "dimensions positive",
+      "mass positive",
+      "crew count at least 1",
+      "fuel tank nonnegative",
+      "consumption nonnegative",
+      "range nonnegative",
+      "fuel type belongs to enum",
+      "estimated values retain confidence grade"
+    ]
+  },
+  "simulation_findings": {
+    "latest_simulation": "progression_30_jours_v1_0",
+    "date": "2026-10-29",
+    "runs": 3000,
+    "days": 30,
+    "profiles": [
+      {
+        "profile": "Prudent",
+        "runs": 1000,
+        "median_food": 102.5,
+        "median_water_L": 523.2,
+        "median_fuel_L": 77.7,
+        "median_scrap": 201.5,
+        "median_morale": 47.0,
+        "median_expeditions": 5.0,
+        "mean_success_rate_pct": 70.7,
+        "runs_with_food_shortage_pct": 0.9,
+        "runs_with_water_shortage_pct": 0.5,
+        "runs_with_disabled_vehicle_pct": 26.0,
+        "runs_with_breach_pct": 25.1,
+        "median_raids": 3.0,
+        "median_buildings": 3.0
+      },
+      {
+        "profile": "Equilibré",
+        "runs": 1000,
+        "median_food": 57.5,
+        "median_water_L": 318.9,
+        "median_fuel_L": 39.9,
+        "median_scrap": 133.8,
+        "median_morale": 38.0,
+        "median_expeditions": 5.0,
+        "mean_success_rate_pct": 72.6,
+        "runs_with_food_shortage_pct": 8.8,
+        "runs_with_water_shortage_pct": 5.7,
+        "runs_with_disabled_vehicle_pct": 21.3,
+        "runs_with_breach_pct": 48.2,
+        "median_raids": 5.0,
+        "median_buildings": 3.0
+      },
+      {
+        "profile": "Agressif",
+        "runs": 1000,
+        "median_food": 6.0,
+        "median_water_L": 31.5,
+        "median_fuel_L": 7.2,
+        "median_scrap": 41.4,
+        "median_morale": -24.5,
+        "median_expeditions": 3.0,
+        "mean_success_rate_pct": 71.1,
+        "runs_with_food_shortage_pct": 69.0,
+        "runs_with_water_shortage_pct": 67.0,
+        "runs_with_disabled_vehicle_pct": 14.1,
+        "runs_with_breach_pct": 81.6,
+        "median_raids": 8.0,
+        "median_buildings": 3.0
+      }
+    ],
+    "limitations": [
+      "modele agrege",
+      "equilibrage non valide en jeu",
+      "batiments simplifies",
+      "raids abstraits"
+    ],
+    "provisional_actions": [
+      "proteger les reserves minimales avant expedition",
+      "afficher autonomie des stocks",
+      "faire varier les raids selon menace et exposition",
+      "simuler ensuite les recettes exactes des batiments"
+    ]
+  },
+  "simulation_progression_30_jours_v2_0": {
+    "parties": 3000,
+    "jours_par_partie": 30,
+    "profils": [
+      "prudent",
+      "équilibré",
+      "agressif"
+    ],
+    "statut": "simulation de conception; résultats indicatifs, non validés dans le moteur final",
+    "graine_deterministe": true,
+    "risques_a_traiter": [
+      "pénuries en cascade",
+      "récupération après expédition échouée",
+      "affectations exclusives des survivants et véhicules",
+      "raid pendant réparation",
+      "transactions atomiques et événements idempotents"
+    ],
+    "decisions_proposees": [
+      "maintenir alertes de stocks sous deux jours et sous un jour",
+      "fournir une voie de récupération à faible risque après pénurie",
+      "confirmer les pertes irréversibles au retour",
+      "séparer portes, segments de mur et état de brèche"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+Sujet,Décision de prototype,Précision
+Ressource nourriture,"Une seule ressource pour viande, œufs, légumes et aliments récupérés.",Pas de distinction viande/légumes/œufs dans le stock du prototype.
+Unité nourriture,"Pour le prototype, stock abstrait en unités de ration ; 1 survivant consomme 1 unité/jour.","À l'interface, afficher des unités de nourriture, pas des litres."
+Eau,Afficher le stock en litres et la consommation en L/jour.,La production et la consommation sont calculées sur un cycle de 24 heures de jeu.
+Carburant,Stock unique affiché en litres.,Le type requis est attaché au moteur ; essence et diesel ne sont pas séparés en stocks au prototype.
+Compatibilité moteur,"Chaque fiche moteur précise essence, diesel ou autre carburant.","Si le joueur installe un moteur incompatible avec le carburant disponible, afficher un avertissement et empêcher le démarrage ou appliquer une règle explicitement définie."
+HUD de base,"Jauges Eau, Nourriture et Carburant toujours visibles ; autres ressources dans un panneau détaillé.","Afficher stock/capacité, production/jour, consommation/jour et tendance."
+Alerte ressource,Avertissement sous 25 % de capacité ; urgence sous 10 % ou si autonomie estimée inférieure à 2 jours.,Les seuils peuvent être modifiés après test.
+Élevage,"Poulets et cochons exigent un coût initial, consomment nourriture/eau et ne produisent qu'après délai.",Le rendement est net des coûts d'entretien dans le calcul de la balance quotidienne.
+Production hors ligne,"La production et la consommation continuent pendant la fermeture du jeu, avec limite de simulation à définir.",Les événements négatifs doivent rester prévisibles et ne pas provoquer une catastrophe instantanée.

@@ -1,0 +1,11 @@
+Ressource,Unité affichée,Capacité exemple,Stock exemple,Production / jour,Consommation / jour,Variation / jour (calcul),Alerte sous,Règle / note
+Eau,L,20000,12400,2500,1500,,5000,Stock en litres ; afficher la consommation quotidienne et l'autonomie estimée.
+Nourriture,unités de ration,1000,350,0,20,,100,"Stock unique : viande, œufs, légumes et aliments récupérés sont fusionnés."
+Carburant,L,15000,8750,500,120,,3750,Stock unique en litres ; le type essence/diesel reste une caractéristique du moteur.
+Métal,unités,500,220,0,0,,50,Ressource de construction distincte de la ferraille récupérée.
+Matériaux de construction,unités,500,300,0,0,,50,"Utilisés pour bâtiments, renforcements et extensions."
+Ferraille / pièces mécaniques,unités,300,180,0,0,,30,"Récupération, réparation et recyclage ; pas de création infinie."
+Composants électroniques,unités,80,24,0,0,,8,"Composants rares pour pompes avancées, communications et automatismes."
+Munitions,unités,300,180,0,0,,30,Stock à part ; fabrication industrielle limitée.
+Médicaments,unités,100,45,0,0,,10,Stock à part pour soins.
+Important,"Valeurs d'exemple pour tester l'interface ; le HUD réel sera calculé à partir des bâtiments actifs, de la population, des élevages et des expéditions.",,,,,,,

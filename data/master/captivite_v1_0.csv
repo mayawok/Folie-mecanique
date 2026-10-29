@@ -1,0 +1,16 @@
+Système,Élément,Règle de conception,Coûts / contraintes,Conséquences / risques,Statut
+Capture,Équipage ennemi,Capturer des survivants après un combat si la situation tactique et la capacité de transport le permettent.,"Temps, places de transport, sécurisation du retour.","Ralentissement, risque accru sur le trajet.",À équilibrer
+Capture,Village pacifique,Choix coercitif alternatif au troc/négociation; action majeure et volontaire.,Risque opérationnel et rupture de confiance.,"Forte dégradation de réputation, représailles, routes fermées.",À équilibrer
+Détention,Enclos grillagé,Capacité intermédiaire; sécurité limitée.,"Construction, maintenance, eau, nourriture, gardes.",Évasion et vulnérabilité aux brèches.,Concept
+Détention,Cellules renforcées,"Capacité plus faible ou coût supérieur, sécurité élevée.",Coût de construction/maintenance élevé.,"Risque réduit, pas nul.",Concept
+Détention,Bloc amélioré,Installation améliorée pour gérer capacité et incidents.,"Ressources, maintenance, personnel.",Sécurité améliorée; incidents possibles.,Concept
+Personnel,Gardes,Affectation dédiée à la zone de détention.,Gardes indisponibles pour expéditions et murs.,Sous-effectif augmente évasions/incidents.,Règle canonique
+Besoins,Eau et nourriture,Les captifs consomment des ressources selon leur nombre.,Eau + nourriture.,Pénuries si capacité de stockage/production insuffisante.,À chiffrer
+Politique,Travail forcé,Gain abstrait limité sur des tâches simples.,Surveillance et ressources consommées.,"Sabotage, incidents, réputation négative.",À équilibrer
+Alternative,Libération,Met fin à la détention; effets diplomatiques contextuels.,Perte de toute contribution au travail forcé.,Peut améliorer certaines relations; témoins possibles.,Concept
+Alternative,Échange / rançon,Négociation possible selon faction et contexte.,Ressources ou concessions possibles.,Résultat non garanti.,Concept
+Alternative,Recrutement volontaire,Possible seulement si conditions narratives réunies.,Délai d’intégration.,Pas de conversion automatique des captifs en recrues loyales.,Règle canonique
+Monde,Réputation morale,"Indicateur persistant influencé par répétition, nombre et témoins.",Aucun coût direct; système global.,"Attaques de représailles, commerce dégradé, coalitions.",À équilibrer
+Incidents,Évasion / révolte / sabotage,"Événements possibles selon sécurité, effectifs et traitement.","Réparations, gardes et ressources mobilisés.","Perte de contrôle, baisse temporaire de production/sécurité.",À équilibrer
+Progression hors ligne,Résumé au retour,Respecter la limite existante de 12 h; aucun événement irréversible silencieux.,Calcul hors ligne plafonné.,Événements importants présentés au retour.,Règle canonique
+Équilibrage,Valeurs numériques,Ne pas fixer les coûts finaux dans cette passe de conception.,À définir lors d’une passe dédiée.,Tous bénéfices doivent avoir coûts et risques associés.,Non validé

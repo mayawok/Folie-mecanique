@@ -1,0 +1,10 @@
+Composant,ID stable,Effet gameplay,Réparation / contrainte
+Moteur,engine,"Panne moteur, baisse de mobilité ou arrêt",Réparation moteur/pièces; remorquage si immobilisé
+Refroidissement,cooling,Surchauffe; risque d'arrêt si poursuivi,Un seul module de refroidissement avec états fonctionnel/endommagé/absent
+Transmission,transmission,Accélération ou changement de vitesse dégradés; immobilisation sévère,Kit générique ou compatibilité directe; pas d'inventaire de micro-pièces
+Roues / chenilles,wheels_tracks,"Mobilité réduite, immobilisation si critique",Pneus/chenilles classés par famille; pièces consommées lors réparation
+Suspension,suspension,Vitesse tout-terrain et stabilité réduites,Réparation selon classe et niveau de dégâts
+Circuit carburant,fuel_system,"Fuite simulée, consommation accrue ou moteur coupé",Réparation prioritaire; pas de mélange des stocks carburant
+Caisse / blindage,hull_armor,Blessures plus probables si protection dégradée,Blindage n'annule pas les dégâts; impact dépend de l'arme
+Armement,weapon,Précision/cadence réduite ou arme indisponible,Munitions et état de l'arme séparés
+Équipage,crew,"Blessé, neutralisé ou tué",Infirmerie et repos soignent selon gravité; mort seulement dans expédition active et risque annoncé

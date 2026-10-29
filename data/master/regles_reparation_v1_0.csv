@@ -1,0 +1,9 @@
+Cas,Coût matériel,Temps atelier,Condition préalable,Issue possible,Règle
+État,Coût matériel,Temps atelier,Condition préalable,Issue possible,Règle
+Usure légère,Faible (0.5–1.5 unité par famille),Court,Pièces courantes et outillage,Remise en état partielle,Réparation peut être effectuée sur le terrain si véhicule et compétence le permettent
+Panne majeure,Moyen à élevé (2–5 unités par famille),Moyen,Pièce compatible + atelier,Retour à la mobilité ou capacité réduite,Une panne de moteur ne doit pas être réparée avec de simples matériaux génériques
+Composant critique absent,Coût de la pièce + montage,Long,Pièce exacte ou adaptation documentée,Véhicule immobilisé jusqu’à remplacement,Aucun rétablissement gratuit de composant manquant
+Épave récupérée complète,Coût de remise en état selon état,Long,Inventaire des composants présent et contrôle châssis,Retour à la configuration récupérée,Ne pas faire réapparaître les pièces démontées avant le retour
+Épave incomplète,Démontage rentable selon pièces restantes,Variable,Atelier de démontage,Pièces récupérables seulement,Réparation d’origine interdite tant que les composants critiques manquent
+Adaptation / swap,Coût pièces + supports + refroidissement + transmission + carburant,Très long,"Atelier spécialisé, plan ou compétence",Montage possible avec pénalités si adaptation incomplète,Pas de compatibilité universelle; interfaces requises
+Réparation sous pression,Surcoût/risque de réparation incorrecte,Court mais risqué,Outillage limité,"Réparation provisoire, panne récurrente possible","L’action rapide doit être un compromis, pas une remise à neuf"
