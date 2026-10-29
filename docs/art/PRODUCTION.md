@@ -62,6 +62,11 @@ pouvoir se raccorder (Claude corrige le raccord).
 4. `sol` : bande de sol de premier plan (sable tassé, cailloux, traces de chenilles),
    le dessus plat sert de ligne de roulage.
 
+**Ciel validé** (`decor/bg_desert_ciel.png`) après étalonnage par Claude : ChatGPT l'avait
+fait bleu vif et nuageux, il a été désaturé et voilé de brume de sable. Les couches 2 à 4
+doivent s'accorder à cette version : **joindre `bg_desert_ciel.png`**, lumière chaude
+et poussiéreuse, contrastes adoucis par la brume de chaleur, pas de ciel bleu.
+
 Couches 2 à 4 sur fond magenta. Aucun bâtiment, aucun véhicule entier, aucun personnage.
 
 ### Lots 4 à 6 — Bâtiments (niveau 1)
