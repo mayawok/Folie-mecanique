@@ -18,6 +18,7 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | validé | `batiments/` |
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | validé (croix rouge délavée en gris par Claude) | `batiments/` |
 | 7 | Survivants : 6 poses | 1 planche | validé (« course » à la place de « assis ») | `personnages/` |
+| 7b | Survivantes : 6 poses | 1 planche | **en cours** | `personnages/` |
 | 8 | Faune : meute, prédateur, nuée | 1 planche | validé | `faune/` |
 | 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part, cadre harmonisé | `carte/` |
 | 10 | Calques de dégâts et effets | 1 planche | validé (10 éléments) | `fx/` |
@@ -105,6 +106,14 @@ l'ordre du tableau.
 debout, marche, porte une caisse, travaille avec un outil, tient un fusil, assis.
 Vêtements militaires dépareillés des années 1940, foulard et lunettes de protection
 qui **cachent le visage** (pas de visage détaillé). Même échelle sur toute la planche.
+
+### Lot 7b — Survivantes
+
+Mêmes 6 poses et même ordre que les survivants validés : debout, marche, course,
+porte une caisse, travaille avec un outil, vise au fusil. Femme de 1,65 m, silhouette
+féminine lisible (carrure, coupe des vêtements, cheveux attachés qui dépassent du foulard),
+visage caché par foulard et lunettes. Joindre `personnages/pers_survivant_debout.png`
+comme référence d'échelle et de style. Fichiers : `pers_survivante_<pose>.png`.
 
 ### Lot 8 — Faune (désert)
 
