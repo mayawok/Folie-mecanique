@@ -12,8 +12,8 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | # | Lot | Images | Statut | Rangement (sous `docs/art/`) |
 |---|---|---|---|---|
 | 1 | Willys MB : moteur, transmission | 1 planche | validé | `vehicules/willys_mb/art/` |
-| 2 | Icônes des 6 ressources | 1 planche | **en cours** | `ui/` |
-| 3 | Décor désert, 4 couches | 4 images | à faire | `decor/` |
+| 2 | Icônes des 6 ressources | 1 planche | validé | `ui/` |
+| 3 | Décor désert, 4 couches | 4 images | **en cours** | `decor/` |
 | 4 | Bâtiments A : atelier (référence de style des bâtiments) | 1 image | à faire | `batiments/` |
 | 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | à faire | `batiments/` |
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | à faire | `batiments/` |
@@ -46,6 +46,9 @@ nourriture (boîte de conserve et pain), carburant (jerrican rouge), métal (pil
 ferraille), matériaux (planches, câbles et pièces), munitions (cartouches et caisse).
 Objet seul, vue de 3/4 autorisée **pour les icônes uniquement**, lisible à 64 px :
 silhouette forte, peu de détails. Taille finale 256 × 256 px.
+
+Validé le 2026-10-29. Jerrican recoloré en rouge par Claude (dessiné kaki, se confondait
+avec la gourde à petite taille). Matériaux représentés par bois, briques et ciment.
 
 ### Lot 3 — Décor désert (parallaxe)
 
