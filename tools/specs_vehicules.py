@@ -12,7 +12,8 @@ CELL = 0.25
 SLOTS = {"caisse": "carrosserie", "cabine": "carrosserie", "plateau": "carrosserie", "panier": "carrosserie",
          "grue": "carrosserie", "chassis": "chassis", "moteur": "moteur", "transmission": "transmission",
          "roue": "roulement", "chenille": "roulement", "galet": "roulement", "helice": "transmission",
-         "mitrailleuse": "armement", "suspension": "roulement"}
+         "mitrailleuse": "armement", "suspension": "roulement",
+         "tourelle": "armement", "canon": "armement"}
 
 # véhicule : (nom, longueur, hauteur, {pièce: (x, y, w)}, [(pièce, décalage x, z), ...])
 SPECS = {
@@ -50,6 +51,25 @@ SPECS = {
         [("transmission", 0, 1), ("moteur", 0, 2), ("chenille", 0, 3), ("galet", 0, 4), ("galet", 0.6, 4),
          ("galet", 1.2, 4), ("galet", 1.8, 4), ("suspension", 0, 4.3), ("caisse", 0, 5),
          ("roue", 0, 5.2), ("mitrailleuse", 0, 6)]),
+    # Chars : pièces provisoires (tools/placeholders_chars.py), en attendant l'art final.
+    "m3_stuart": ("M3 Stuart", 4.53, 2.64, {
+        "moteur": (0.40, 0.70, 0.90), "transmission": (3.40, 0.60, 0.70), "caisse": (0.0, 0.45, 4.40),
+        "chenille": (0.10, 0.0, 4.20), "galet": (0.85, 0.06, 0.50), "canon": (2.95, 1.80, 1.30),
+        "tourelle": (1.50, 1.55, 1.60)},
+        [("moteur", 0, 1), ("transmission", 0, 2), ("caisse", 0, 3), ("chenille", 0, 4)]
+        + [("galet", 0.75 * i, 5) for i in range(4)] + [("canon", 0, 6), ("tourelle", 0, 7)]),
+    "m4_sherman": ("M4 Sherman", 5.89, 2.74, {
+        "moteur": (0.40, 0.80, 1.20), "transmission": (4.60, 0.70, 0.90), "caisse": (0.0, 0.55, 5.84),
+        "chenille": (0.40, 0.0, 5.00), "galet": (1.20, 0.06, 0.52), "canon": (4.10, 2.25, 1.60),
+        "tourelle": (2.10, 2.00, 2.20)},
+        [("moteur", 0, 1), ("transmission", 0, 2), ("caisse", 0, 3), ("chenille", 0, 4)]
+        + [("galet", 0.62 * i, 5) for i in range(6)] + [("canon", 0, 6), ("tourelle", 0, 7)]),
+    "tiger_1": ("Tiger I", 8.45, 3.0, {
+        "moteur": (0.30, 0.80, 1.40), "transmission": (5.00, 0.80, 1.00), "caisse": (0.0, 0.60, 6.32),
+        "chenille": (0.25, 0.0, 5.80), "galet": (0.80, 0.06, 0.80), "canon": (3.75, 2.45, 4.70),
+        "tourelle": (2.30, 2.10, 2.80)},
+        [("moteur", 0, 1), ("transmission", 0, 2), ("caisse", 0, 3), ("chenille", 0, 4)]
+        + [("galet", 0.66 * i, 5) for i in range(7)] + [("canon", 0, 6), ("tourelle", 0, 7)]),
 }
 
 # Passages de roue : la caisse est redessinée devant les roues, percée d'un disque

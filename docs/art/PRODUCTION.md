@@ -22,7 +22,7 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 8 | Faune : meute, prédateur, nuée | 1 planche | validé | `faune/` |
 | 9 | Carte : fond et 7 icônes de lieux | 2 images | validé ; fond en relief vu du dessus ; « mine » en plus ; « ville » reçue à part, cadre harmonisé | `carte/` |
 | 10 | Calques de dégâts et effets | 1 planche | validé (10 éléments) | `fx/` |
-| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a à 11f reçus, découpés et assemblés (`vehicules/assemblages_v2-7.png`) ; **11g à 11i en cours** : chars refusés par ChatGPT, demandés pièce par pièce en termes neutres, une image à la fois | `vehicules/<id>/art/` |
+| 11 | Véhicules 2 à 10 | 1 à 2 par véhicule | 11a à 11f reçus, découpés et assemblés (`vehicules/assemblages_v2-7.png`) ; 11g à 11i : **pièces provisoires** générées par Claude (`tools/placeholders_chars.py`), art final reporté | `vehicules/<id>/art/` |
 | 12 | Icônes d'actions de l'interface | — | bloqué : écrans pas encore conçus | `ui/` |
 | 13 | Illustrations de récit (6 à 8) | — | bloqué : système 8 (récit) | `recit/` |
 
@@ -188,7 +188,9 @@ complet sert d'épave de décor (`decor/epave_*.png`), les petites pièces de bu
   Garde au sol relevée (4 à 25 cm selon le véhicule, table LEVE) ; plateau du T23 posé sur le châssis.
   Half-Track : `suspension.png` provisoire (bogies, ressorts), à faire dessiner.
   Le panier du BMW est presque caché par la moto en vue de profil (normal).
-- Reste à faire par Claude (chars seulement) : `gabarit.json` et `assemblage.png` de chaque véhicule.
+- Chars (11g à 11i), 2026-10-29 : pièces provisoires en aplats (`caisse`, `chenille`, `galet`, `tourelle`,
+  `canon`, `moteur`, `transmission`) générées par `tools/placeholders_chars.py`, assemblées comme les autres.
+  À remplacer par l'art final plus tard (mêmes noms de fichiers, mêmes cotes).
 
 ### Lot 10 — Dégâts et effets
 
