@@ -38,6 +38,7 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
    Thème 6 (graphismes) : `docs/design/GRAPHISMES.md` (DEC-020) — IA générative, semi-réaliste peint, pièce par pièce sur gabarit (DEC-021), Willys MB complet. Production d'images : `docs/art/PRODUCTION.md` (file de priorité, lot en cours).
    Système 7 (temps, absence, pénurie) validé (DEC-022) et codé dans le prototype.
    Prototype : menu principal, pause, garage ; véhicules et personnages dessinés par le code (DEC-023).
+   Base : armurerie, améliorations de bâtiments par chantier, rapports plein écran (DEC-025).
    Audio ElevenLabs (DEC-024) : liste et consignes dans `docs/audio/ELEVENLABS.md`, lecture prête.
    **Prochain : système 8 (récit)** dans `SYSTEMES.md`.
 2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,

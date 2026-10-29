@@ -8,7 +8,7 @@
 class_name Jeu
 extends RefCounted
 
-const POSTES := ["repos", "puits", "cuisine", "atelier"]
+const POSTES := ["repos", "puits", "cuisine", "atelier", "armurerie", "chantier"]
 const RISQUES := {"faible": "faible", "modere": "modéré", "eleve": "élevé", "critique": "critique"}
 const ORDRES := {"eviter": "Éviter le combat", "repli": "Repli à la première perte", "bout": "Jusqu'au bout"}
 const H := 3600
@@ -28,6 +28,8 @@ var etape := 0               # pénurie : 0 aucune, 1 productivité, 2 maladie, 
 var heures_penurie := 0
 var heures_ok := 0
 var heures_agitation := 0
+var niveaux := {}            # bâtiment -> niveau (1 par défaut)
+var chantier := {}           # amélioration en cours : {bat, n, reste (heures de travail), total}
 var decision := {}           # révolte en attente d'une décision du joueur
 var journal := []
 var objectif_annonce := false
@@ -58,6 +60,8 @@ func nouvelle_partie() -> void:
 	objectif_annonce = false
 	expeditions = []
 	rapports = []
+	niveaux = {}
+	chantier = {}
 	stocks = R.depart.stocks.duplicate()
 	survivants.clear()
 	for s in R.depart.survivants:
@@ -164,8 +168,17 @@ func _heure() -> void:
 		if not disponible(s):
 			continue
 		var poste: Dictionary = R.postes[s.poste]
+		var k: float = mult * mult_poste(s.poste) / 24.0
+		var ok := true
+		for res in poste.get("consomme", {}):
+			ok = ok and stocks[res] >= poste.consomme[res] / 24.0
+		if not ok:
+			continue
+		for res in poste.get("consomme", {}):
+			stocks[res] -= poste.consomme[res] / 24.0
 		for res in poste.get("produit", {}):
-			_ajouter(res, poste.produit[res] * mult / 24.0)
+			_ajouter(res, poste.produit[res] * k)
+	_avancer_chantier()
 	# Consommation (eau accrue le jour, réduite pendant une longue absence)
 	var manque := false
 	for res in R.consommation_par_survivant:
@@ -194,7 +207,7 @@ func _heure() -> void:
 	if heure_locale() == int(T.heure_atelier):
 		for s in survivants:
 			if disponible(s) and s.poste == "atelier":
-				_journal([_reparer(mult)])
+				_journal([_reparer(mult * mult_poste("atelier"))])
 	# Retours d'expédition
 	for e in expeditions.duplicate():
 		if e.retour <= t:
@@ -312,7 +325,8 @@ func bilan(res: String) -> float:
 	var b := 0.0
 	for s in survivants:
 		if disponible(s):
-			b += R.postes[s.poste].get("produit", {}).get(res, 0) * mult
+			var po: Dictionary = R.postes[s.poste]
+			b += po.get("produit", {}).get(res, 0) * mult * mult_poste(s.poste) - po.get("consomme", {}).get(res, 0)
 	return b - conso_jour(res)
 
 
@@ -499,7 +513,7 @@ func _resoudre(e: Dictionary) -> Dictionary:
 			if v.get("issue", "ok") == "ok":
 				cap += stat(v.type, "capacite")
 		_butin(e.lieu, cap, rng, rap)
-		_recrue(l, rng, L)
+		_recrue(l, rng, rap)
 	elif issue == "repli":
 		L.append("Le convoi rentre les mains vides.")
 	for v in convoi:
@@ -584,12 +598,13 @@ func _resoudre_pied(e: Dictionary) -> Dictionary:
 		L.append("Marche sans rencontre.")
 	if issue == "victoire":
 		_butin(e.lieu, e.equipage.size() * P.capacite_par_survivant, rng, rap)
-		_recrue(l, rng, L)
+		_recrue(l, rng, rap)
 	rap.issue = issue
 	return rap
 
 
-func _recrue(l: Dictionary, rng: RandomNumberGenerator, L: Array) -> void:
+func _recrue(l: Dictionary, rng: RandomNumberGenerator, rap: Dictionary) -> void:
+	var L: Array = rap.lignes
 	if rng.randf() < l.chance_recrue:
 		var pris := survivants.map(func(s): return s.nom)
 		var libres: Array = R.noms_recrues.filter(func(n): return not pris.has(n))
@@ -597,6 +612,7 @@ func _recrue(l: Dictionary, rng: RandomNumberGenerator, L: Array) -> void:
 			return
 		var nom: String = libres[rng.randi() % libres.size()]
 		survivants.append(_survivant(nom, rng.randf() < 0.5, "repos"))
+		rap.recrues = rap.get("recrues", []) + [nom]
 		L.append("RECRUE : %s, survivant(e) isolé(e), rejoint la communauté." % nom)
 
 
@@ -722,7 +738,7 @@ func _butin(lieu_id: String, cap: float, rng: RandomNumberGenerator, rap: Dictio
 
 const CHAMPS := ["t", "t_debut", "derniere_action", "decalage", "stocks", "survivants", "vehicules",
 	"expeditions", "epuisement", "etape", "heures_penurie", "heures_ok", "heures_agitation",
-	"decision", "journal", "objectif_annonce", "_uid", "rapports"]
+	"decision", "journal", "objectif_annonce", "_uid", "rapports", "niveaux", "chantier"]
 
 func sauver() -> void:
 	var d := {"version": 1}
@@ -752,6 +768,15 @@ func charger() -> bool:
 		v.uid = int(v.uid)
 		v.pv = int(v.pv)
 		v.pv_max = int(v.pv_max)
+	# Champs ajoutés après la version 1 : valeurs par défaut si absents
+	if typeof(niveaux) != TYPE_DICTIONARY:
+		niveaux = {}
+	for b in niveaux:
+		niveaux[b] = int(niveaux[b])
+	if typeof(chantier) != TYPE_DICTIONARY:
+		chantier = {}
+	if not chantier.is_empty():
+		chantier.n = int(chantier.n)
 	for e in expeditions:
 		e.depart = int(e.depart)
 		e.retour = int(e.retour)
@@ -767,7 +792,7 @@ func effacer_partie() -> void:
 # --- Outils -----------------------------------------------------------------
 
 func _ajouter(res: String, q: float) -> void:
-	stocks[res] = min(float(R.ressources[res].capacite), stocks[res] + q)
+	stocks[res] = min(capacite(res), stocks[res] + q)
 
 
 func _journal(lignes: Array) -> void:
@@ -779,3 +804,94 @@ func _journal(lignes: Array) -> void:
 
 func perdu() -> bool:
 	return survivants.is_empty()
+
+
+# --- Bâtiments et améliorations ----------------------------------------------
+# Une seule amélioration à la fois (file de chantier unique, voir ACHATS.md).
+# Coût payé au lancement ; la durée est en heures de travail : les survivants
+# affectés au poste « Chantier » avancent le travail (2 ouvriers = 2 fois plus vite).
+
+func batiment(id: String) -> Dictionary:
+	for b in R.batiments:
+		if b.id == id:
+			return b
+	return {}
+
+
+func niveau(id: String) -> int:
+	return int(niveaux.get(id, 1))
+
+
+func niveau_max(id: String) -> int:
+	return 1 + batiment(id).get("niveaux", []).size()
+
+
+func _bonus(id: String, n: int) -> Dictionary:
+	for nv in batiment(id).get("niveaux", []):
+		if int(nv.n) == n:
+			return nv
+	return {}
+
+
+func mult_poste(poste: String) -> float:
+	for b in R.batiments:
+		if b.get("poste", "") == poste:
+			return float(_bonus(b.id, niveau(b.id)).get("production", 1.0))
+	return 1.0
+
+
+func capacite(res: String) -> float:
+	var m := 1.0
+	for b in R.batiments:
+		m = maxf(m, float(_bonus(b.id, niveau(b.id)).get("capacite", {}).get(res, 1.0)))
+	return float(R.ressources[res].capacite) * m
+
+
+func prochain_niveau(id: String) -> Dictionary:
+	return _bonus(id, niveau(id) + 1)
+
+
+func ouvriers() -> Array:
+	return survivants.filter(func(s): return disponible(s) and s.poste == "chantier")
+
+
+func verifier_amelioration(id: String) -> Dictionary:
+	var nv := prochain_niveau(id)
+	var err := []
+	if nv.is_empty():
+		err.append("Niveau maximal atteint.")
+	elif not chantier.is_empty():
+		err.append("Un chantier est déjà en cours (%s)." % batiment(chantier.bat).nom)
+	else:
+		for res in nv.cout:
+			if stocks[res] < nv.cout[res]:
+				err.append("Il manque %d %s." % [ceil(nv.cout[res] - stocks[res]), R.ressources[res].nom.to_lower()])
+	return {"ok": err.is_empty(), "erreurs": err}
+
+
+func ameliorer(id: String) -> Dictionary:
+	var v := verifier_amelioration(id)
+	if not v.ok:
+		return v
+	var nv := prochain_niveau(id)
+	for res in nv.cout:
+		stocks[res] -= nv.cout[res]
+	chantier = {"bat": id, "n": int(nv.n), "reste": float(nv.heures), "total": float(nv.heures)}
+	_journal(["Chantier lancé : %s niveau %d (%d h de travail)." % [batiment(id).nom, nv.n, nv.heures]])
+	signaler_action()
+	sauver()
+	return v
+
+
+func _avancer_chantier() -> void:
+	if chantier.is_empty():
+		return
+	var mult: float = R.penurie.productivite if etape >= 1 else 1.0
+	chantier.reste -= ouvriers().size() * mult
+	if chantier.reste <= 0.0001:
+		niveaux[chantier.bat] = chantier.n
+		_journal(["CHANTIER TERMINÉ : %s passe au niveau %d (%s)." % [batiment(chantier.bat).nom, chantier.n,
+			_bonus(chantier.bat, chantier.n).effet.to_lower()]])
+		for s in ouvriers():
+			s.poste = "repos"
+		chantier = {}

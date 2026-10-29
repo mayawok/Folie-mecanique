@@ -46,6 +46,37 @@ func _init() -> void:
 	var t: int = j.t
 	var k := Jeu.new()
 	verifier(k.t == t and k.survivants.size() == j.survivants.size(), "la partie est relue à l'identique")
+	# Améliorations : coût payé, chantier mené par les ouvriers, effet appliqué
 	k.effacer_partie()
+	verifier(not k.verifier_amelioration("atelier").ok, "amélioration refusée sans ressources")
+	k.stocks.metal = 100
+	k.stocks.materials = 100
+	k.stocks.water_l = 150
+	k.stocks.food = 40
+	verifier(k.ameliorer("puits").ok and k.stocks.metal == 85, "chantier lancé, coût payé")
+	verifier(not k.verifier_amelioration("cuisine").ok, "un seul chantier à la fois")
+	k.signaler_action()
+	k.avancer_tests(3)
+	verifier(k.niveau("puits") == 1 and is_equal_approx(k.chantier.reste, 6.0), "sans ouvrier, le chantier n'avance pas")
+	k.survivants[1].poste = "chantier"
+	k.signaler_action()
+	k.avancer_tests(7)
+	verifier(k.niveau("puits") == 2 and k.chantier.is_empty(), "chantier terminé par un ouvrier (niveau 2)")
+	verifier(is_equal_approx(k.mult_poste("puits"), 1.25), "production du puits +25 %")
+	# Armurerie : munitions contre métal
+	k.survivants[1].poste = "armurerie"
+	var m0: float = k.stocks.ammo
+	k.signaler_action()
+	k.avancer_tests(12)
+	verifier(k.stocks.ammo > m0 and k.stocks.metal < 85, "l'armurerie transforme le métal en munitions")
+	# Sauvegarde d'une version antérieure (sans niveaux ni chantier) : relue sans erreur
+	k.sauver()
+	var d = JSON.parse_string(FileAccess.get_file_as_string(Jeu.SAUVEGARDE))
+	d.erase("niveaux")
+	d.erase("chantier")
+	FileAccess.open(Jeu.SAUVEGARDE, FileAccess.WRITE).store_string(JSON.stringify(d))
+	var ancienne := Jeu.new()
+	verifier(ancienne.niveau("puits") == 1 and ancienne.chantier.is_empty(), "ancienne sauvegarde relue (niveaux par défaut)")
+	ancienne.effacer_partie()
 	print("Échecs : %d" % echecs)
 	quit(echecs)

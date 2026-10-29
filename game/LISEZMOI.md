@@ -8,6 +8,9 @@ Bouton **Test +6 h** : avance l'horloge pour tester sans attendre (retiré du je
 Au lancement : **menu principal** (Continuer, Nouvelle partie, Garage, Options).
 Sur la base, le bouton **II** (ou Échap) ouvre le **menu pause**. Le monde continue
 d'avancer pendant la pause : le jeu est en temps réel.
+Sur la base : **toucher un bâtiment** ouvre sa fiche et son arbre d'amélioration ; **toucher un véhicule** ouvre ses statistiques.
+Une amélioration se construit avec les survivants affectés au poste **Chantier** ; une bulle indique le temps restant.
+Les expéditions en cours s'affichent à gauche avec une barre jusqu'au retour.
 Le **Garage** montre les 10 véhicules qui roulent (suspensions, chenilles) et tirent,
 ainsi que les silhouettes des personnages.
 
