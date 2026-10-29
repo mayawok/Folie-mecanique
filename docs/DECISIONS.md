@@ -8,3 +8,6 @@
 | 2026-10-29 | DEC-004 | Gratuit avec achats intégrés, sans publicité ; ≈ 10 véhicules en première version | Idem. |
 | 2026-10-29 | DEC-005 | Expéditions : carte stratégique + ordres permanents + prise de contrôle aux points d'intérêt en vue de profil temps réel | Voir `docs/design/VISION.md`. |
 | 2026-10-29 | DEC-006 | Cause de l'effondrement : arme climatique expérimentale ; récit fragmentaire une génération après | Idem. |
+| 2026-10-29 | DEC-007 | Joueur absent : ordre prévu + notification ; option d'attente/siège avec fortification du convoi | Voir `docs/design/VISION.md`. |
+| 2026-10-29 | DEC-008 | Faune dangereuse comme composante de jeu ; liste des 10 véhicules V1 validée | Idem. |
+| 2026-10-29 | DEC-009 | V1 : combats résolus automatiquement ; V2 : prise de contrôle en vue de profil, même simulation | Un convoi est une file sur une ligne : un seul calcul, affiché ou non. |

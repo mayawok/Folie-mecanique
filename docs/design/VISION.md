@@ -15,8 +15,12 @@ Statut : en revue (thème 1). Distingue ce qui est **décidé** de ce qui reste 
   expéditions simples, des démantèlements d'épaves, la construction de véhicules,
   réaffecter les travailleurs, vérifier les ressources, lancer des améliorations de cuves.
 - **Modèle économique** : gratuit avec achats intégrés, sans publicité.
-- **Première version** : environ 10 véhicules.
+- **Première version, 10 véhicules** : Willys MB (départ), BMW R75 side-car, Citroën Traction
+  Avant, camion type Citroën T23, Diamond T dépanneuse, DUKW, M3 Half Track, M3 Stuart,
+  M4 Sherman, Tiger I (objectif de fin).
 - **Style visuel** : référence *Earn to Die*, ambiance Mad Max. Jeu en mode paysage.
+- **Faune** : les animaux ont survécu et se sont adaptés ; ils sont forts et dangereux.
+  C'est une composante du jeu à part entière.
 - **Histoire** : une arme climatique expérimentale, employée pour sortir de l'enlisement
   de la guerre, a détraqué le climat. Une génération a passé : les survivants se souviennent
   mal de ce qui s'est produit. De courts moments narratifs évoquent cette histoire et celle
@@ -34,13 +38,16 @@ Statut : en revue (thème 1). Distingue ce qui est **décidé** de ce qui reste 
 - **Vue de combat** de profil, en temps réel : ordre des véhicules visible et modifiable
   (chars devant, camions derrière, camions envoyés ravitailler), cessez-le-feu, motos en
   éclaireur, ensemble complet d'ordres tactiques.
+- **Joueur absent à un point d'intérêt** : le convoi applique l'ordre prévu à l'avance
+  et le joueur reçoit une notification décrivant la situation.
+- **Attente / siège** : option pour que le convoi attende devant une cible (ex. grande ville).
+  Il consomme ses ressources pendant l'attente, peut se fortifier et doit se protéger
+  des animaux sauvages.
 - **Défense de la base** : même vue ; la plupart des défenses sont automatiques.
 - **Première version** : peut être uniquement tactique (sans prise de contrôle), mais
   l'architecture doit prévoir la vue contrôlée dès le départ.
 
 ## Ouvert
 
-- Comportement d'un convoi qui atteint un point d'intérêt quand le joueur est absent.
 - Nature des achats intégrés.
-- Liste des 10 véhicules de la première version.
 - Méthode de production des images.

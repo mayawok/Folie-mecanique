@@ -21,13 +21,15 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Décisions ouvertes
 
-- Mode des expéditions (action ou tactique), achats intégrés, liste des 10 véhicules.
+- Achats intégrés (thème 3).
 - Incohérence : `contenu_depart_p0.csv` sépare essence et diesel alors que la règle impose un stock unique `stocks.fuel`.
 - Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
 
 ## Prochaines étapes
 
-1. Revue de conception thème par thème.
+1. Revue de conception thème par thème. Thème 1 (vision) terminé : `docs/design/VISION.md`.
+   **Prochain : thème 2, boucle de jeu** (5 min / 1 jour / 1 mois), puis 3 achats intégrés,
+   4 périmètre V1, 5 systèmes un par un (dont faune, captivité), 6 direction artistique.
 2. Rééquilibrer l'économie de départ, relancer la simulation.
 3. DATA-001 : schémas de données versionnés.
 4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).
