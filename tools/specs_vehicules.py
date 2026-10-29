@@ -59,8 +59,8 @@ PASSAGES = {"bmw_r75": "caisse", "citroen_traction": "caisse", "citroen_t23": "c
 RAYON = 0.96
 
 # Garde au sol ajoutée : tout le véhicule monte, sauf roues, chenille et galets (débattement visible).
-LEVE = {"bmw_r75": 0.04, "citroen_traction": 0.07, "citroen_t23": 0.10, "diamond_t": 0.12,
-        "dukw": 0.08, "m3_half_track": 0.05}
+LEVE = {"bmw_r75": 0.04, "citroen_traction": 0.07, "citroen_t23": 0.10, "diamond_t": 0.25,
+        "dukw": 0.08, "m3_half_track": 0.12}
 
 def main():
     root = Path("docs/art/vehicules")
