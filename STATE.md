@@ -34,7 +34,7 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
    Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
    Thème 4 (périmètre V1) : `docs/design/PERIMETRE_V1.md` (DEC-013).
    Thème 5 (systèmes) : `docs/design/SYSTEMES.md` — systèmes 1 ressources (DEC-014) 2 travailleurs (DEC-015) 3 véhicules (DEC-016) 4 expéditions (DEC-017) 5 combat (DEC-018) et 6 faune (DEC-019) validés.
-   Thème 6 (graphismes) : `docs/design/GRAPHISMES.md` (DEC-020) — IA générative, semi-réaliste peint, pièce par pièce sur gabarit (DEC-021), pilote Willys MB : `docs/art/vehicules/willys_mb/CAHIER.md`.
+   Thème 6 (graphismes) : `docs/design/GRAPHISMES.md` (DEC-020) — IA générative, semi-réaliste peint, pièce par pièce sur gabarit (DEC-021), Willys MB complet. Production d'images : `docs/art/PRODUCTION.md` (file de priorité, lot en cours).
    **Prochain : systèmes 7 (temps, absence, pénurie) et 8 (récit)** dans `SYSTEMES.md`.
 2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
    planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).

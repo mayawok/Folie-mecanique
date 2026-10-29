@@ -1,63 +1,44 @@
 # Instructions pour ChatGPT — production des images
 
-Tu produis les images du jeu Folie Mécanique (iPhone, 2D, vue de profil, années 1940
-post-apocalyptiques). Claude prépare les cahiers des charges et recombine les pièces ;
-toi, tu dessines **une pièce à la fois**.
+Tu produis les images du jeu Folie Mécanique (iPhone, 2D, mode paysage, années 1940
+post-apocalyptiques, désert). Claude gère le plan de production, découpe tes planches et
+range les images. Le porteur de projet te donne le feu vert.
 
-## À lire, dans cet ordre
+## À chaque feu vert
 
-1. `docs/design/GRAPHISMES.md` : bible de style, règles, méthode (DEC-020, DEC-021).
-2. Le cahier du véhicule en cours : `docs/art/vehicules/<vehicule>/CAHIER.md`
-   (consigne commune, consigne par pièce, tailles, critères d'acceptation).
-3. La géométrie : `docs/art/vehicules/<vehicule>/gabarit.json` (cellule = 25 cm,
-   64 px par cellule, origine au sol à l'arrière, véhicule orienté vers la droite).
+1. Lis `docs/art/PRODUCTION.md` et prends **le lot marqué « en cours »** (un seul).
+2. Lis son cahier (dans `PRODUCTION.md`, ou le fichier qu'il indique).
+3. Annonce en une ligne par image ou pièce : nom, proportions, ce qu'elle ne doit pas
+   contenir. Puis génère.
+4. Ne passe jamais au lot suivant de toi-même : c'est Claude qui le débloque dans le dépôt.
 
+## Style (toutes les images)
 
-## Règles impératives
+- Peinture numérique semi-réaliste, dans l'esprit d'*Earn to Die*, ambiance Mad Max,
+  technologie des années 1940. Ton sérieux.
+- Lumière du haut à gauche, ombres douces, palette : ocre, sable, rouille, kaki olive
+  délavé, acier usé. Tout est usé, poussiéreux, rafistolé.
+- Référence de style : `docs/art/vehicules/willys_mb/art/caisse.png` (validée).
+  L'utilisateur la joint si tu ne peux pas l'ouvrir.
+- Aucun texte, chiffre, logo, marque, drapeau ou croix rouge nette.
 
-- Chaque pièce est complète et isolée : rien d'une autre pièce (pas de roue dans la caisse).
-- Vue de profil stricte, orientée vers la droite, sans perspective.
-- Lumière du haut à gauche, ombres douces, rendu peint semi-réaliste.
-- Fond uni magenta pur `#FF00FF`, ou transparent si possible. Pas d'ombre au sol.
-- Aucun texte, logo, marque ou personnage.
-- Respecter la silhouette et les proportions du gabarit `gabarits/<piece>.png`
-  (l'utilisateur le joint à la conversation si tu ne peux pas l'ouvrir).
-- Rapport largeur/hauteur de l'image = celui de la taille en cellules du cahier.
-- Après la caisse validée, garder exactement le même style, la même usure et la même
-  lumière pour toutes les autres pièces.
+## Cadrage
 
-## Planche unique (méthode par défaut)
+- **Vue de profil stricte, sans perspective**, sujets orientés vers la droite.
+  Seule exception : les icônes d'interface et de carte (3/4 autorisé).
+- Fond uni magenta pur `#FF00FF`, ou transparent si possible. Pas d'ombre au sol,
+  pas de sol dessiné (sauf couche `sol` du décor).
+- Respecter les proportions données en mètres ou en cellules
+  (1 cellule = 25 cm = 64 px).
 
-Toutes les pièces demandées sont dessinées **sur une seule image**, pour garantir le même
-style et la même lumière. Claude les sépare automatiquement ; pour que ça fonctionne :
+## Planche (plusieurs éléments sur une image)
 
-- **Une seule vue par pièce** : profil strict. Aucune vue de face, de 3/4 ou de détail
-  en plus.
-- **Toutes orientées vers la droite** (canon, calandre, avant du véhicule).
-- Pièces **séparées par au moins 40 px de fond magenta**, sans aucun contact.
-- Disposition en lignes, dans l'ordre du cahier, la pièce la plus longue en haut,
-  sur toute la largeur.
-- Aucun texte, aucune légende, aucun numéro.
-- Proportions entre les pièces **à la même échelle** (une roue de 3 cellules est
-  3 fois plus haute qu'une pièce d'une cellule).
-
-Exception : pour les gros véhicules (chars, camions), la caisse est dessinée seule sur
-sa propre image, pour garder assez de détails.
-
-Référence de style : `docs/art/vehicules/willys_mb/art/caisse.png` (validée). Joindre
-cette image pour tout nouveau véhicule.
-
-## Véhicule en cours
-
-Willys MB : caisse, chassis, roue, mitrailleuse validées. Restent : **moteur et
-transmission**, sur une seule planche.
-
-## Avant de dessiner chaque pièce
-
-Rappelle en une ligne par pièce : son nom, son rapport largeur/hauteur, ce qu'elle ne
-doit pas contenir. Puis génère la planche.
+- Une seule vue par élément, aucune vue en plus.
+- Éléments **séparés par au moins 40 px de magenta**, sans aucun contact.
+- **Ordre de lecture = ordre de la liste du cahier** (gauche à droite, ligne par ligne) :
+  Claude nomme les fichiers dans cet ordre.
+- Tous les éléments d'une planche à la même échelle.
 
 ## Livraison
 
-Tu n'écris pas dans le dépôt. L'utilisateur télécharge l'image et la transmet à Claude,
-qui la détoure, l'enregistre dans `art/<piece>.png` et vérifie l'assemblage.
+Tu n'écris pas dans le dépôt. L'utilisateur télécharge l'image et la transmet à Claude.

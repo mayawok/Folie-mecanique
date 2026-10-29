@@ -1,6 +1,6 @@
 # Cahier des charges — Willys MB (véhicule pilote)
 
-Statut : pilote de la méthode pièce par pièce (DEC-021). Géométrie : `gabarit.json`.
+Statut : **complet, validé le 2026-10-29** (pilote de la méthode, DEC-021). Moteur et transmission dessinés vers la gauche puis retournés. Géométrie : `gabarit.json`.
 Cotes de prototypage (L 3,36 m, H 1,78 m pare-brise relevé), à affiner sur plans.
 
 ## Méthode
