@@ -19,6 +19,10 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 3. **Tests limites non couverts** : raid pendant réparation, affectation exclusive,
    récupération après pénurie (voir `data/simulations/progression_30j/tests_limites.csv`).
 
+## Périmètre V1 (DEC-013)
+
+Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1.1.
+
 ## Décisions ouvertes
 
 - Incohérence : `contenu_depart_p0.csv` sépare essence et diesel alors que la règle impose un stock unique `stocks.fuel`.
@@ -29,9 +33,9 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 1. Revue de conception thème par thème. Thème 1 (vision) : `docs/design/VISION.md`.
    Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
    Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
-   **Prochain : thème 4, périmètre V1**, puis
-   5 systèmes un par un (dont faune, captivité), 6 direction artistique.
-2. Rééquilibrer l'économie de départ, relancer la simulation avec jour/nuit,
+   Thème 4 (périmètre V1) : `docs/design/PERIMETRE_V1.md` (DEC-013).
+   **Prochain : thème 5, systèmes** un par un (dans le périmètre V1), 6 direction artistique.
+2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
    planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.
 4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).

@@ -14,3 +14,4 @@
 | 2026-10-29 | DEC-010 | 1 jour de jeu = 1 jour réel ; 2 à 3 connexions par jour ; départ programmé des expéditions | Voir `docs/design/BOUCLE.md`. |
 | 2026-10-29 | DEC-011 | Consommation continue en absence, bornée par des planchers ; pénurie graduée (productivité, maladie, révolte/fuite), sans défaite sèche | Idem. |
 | 2026-10-29 | DEC-012 | Achats : abonnement « Commandant », cosmétiques, pack fondateur, accélérateur de chantier limité (1/jour). Pas de monnaie premium, pas de coffres. Garde-fou anti pay-to-win en règle canonique `monetization` | Voir `docs/design/ACHATS.md`. |
+| 2026-10-29 | DEC-013 | Périmètre V1 : désert seul, faune en événements, jeu solo hors ligne sans serveur (rattrapage local), sièges en V1.1, achats limités aux cosmétiques et pack fondateur | Voir `docs/design/PERIMETRE_V1.md`. |
