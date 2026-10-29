@@ -144,3 +144,27 @@ la vue V2 rejouera ce même calcul (DEC-009).
 
 - Formules de dégâts, précision, nombre de tours.
 - Profils de pillards par cercle de distance.
+
+## 6. Faune (événements) — validé (DEC-019)
+
+La faune n'est pas une IA sur la carte : ce sont des tirages d'événements, résolus
+par le moteur de combat (système 5) avec un profil animal.
+
+### Règles
+
+- **Deux situations** : attaque du convoi en route ; attaque de la base (surtout la nuit).
+- **Profil animal** : rapide, sans blindage, vise l'équipage et les véhicules légers ;
+  les blindés sont presque invulnérables.
+- **Trois menaces V1 (désert)** : meute (fréquente, dangereuse en nombre) ;
+  prédateur solitaire (rare, embuscade, peut immobiliser un véhicule léger) ;
+  nuée (attaque les stocks de nourriture, sans combat ; contrée par un entrepôt amélioré).
+- **L'eau attire les bêtes** : oasis, puits et condenseur augmentent le risque d'attaque.
+- **Plus d'activité la nuit** (BOUCLE).
+- **Chasse** : un animal abattu donne de la nourriture.
+- **Base** : défenses automatiques ; une attaque réussie blesse et vole des vivres,
+  sans jamais tuer pendant l'absence du joueur.
+
+### Ouvert
+
+- Noms et apparence des espèces (thème 6).
+- Probabilités par lieu, cercle et moment de la journée.
