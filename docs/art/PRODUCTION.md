@@ -14,8 +14,8 @@ Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/de
 | 1 | Willys MB : moteur, transmission | 1 planche | validé | `vehicules/willys_mb/art/` |
 | 2 | Icônes des 6 ressources | 1 planche | validé | `ui/` |
 | 3 | Décor désert, 4 couches | 4 images | validé | `decor/` |
-| 4 | Bâtiments A : atelier (référence de style des bâtiments) | 1 image | **en cours** | `batiments/` |
-| 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | à faire | `batiments/` |
+| 4 | Bâtiments A : atelier (référence de style des bâtiments) | 1 image | validé | `batiments/` |
+| 5 | Bâtiments B : cuve, puits/condenseur, entrepôt, cuisine | 1 planche | **en cours** | `batiments/` |
 | 6 | Bâtiments C : infirmerie, nid de mitrailleuse, tour de guet | 1 planche | à faire | `batiments/` |
 | 7 | Survivants : 6 poses | 1 planche | à faire | `personnages/` |
 | 8 | Faune : meute, prédateur, nuée | 1 planche | à faire | `faune/` |
@@ -93,7 +93,10 @@ bâtiment). Tailles (largeur × hauteur) :
 | `nid_mitrailleuse` | Sacs de sable en arc, mitrailleuse sur trépied, sans servant | 3 × 2 | 12 × 8 |
 | `tour_guet` | Tour en poutres et tôle, plateforme, projecteur | 3 × 7 | 12 × 28 |
 
-Lot 4 : l'atelier seul (il fixe le style des bâtiments). Lot 5 et 6 : planches dans
+Lot 4 : l'atelier seul (il fixe le style des bâtiments). **Validé** au 2ᵉ essai (le 1ᵉʳ
+était en perspective 3/4) : `batiments/bat_atelier_n1.png`, désaturé par Claude, retenu à
+**8 × 3,7 m** (proportions de l'image). Lots 5 et 6 : joindre `bat_atelier_n1.png` comme
+référence de style des bâtiments, en plus de la caisse du Willys. Lot 5 et 6 : planches dans
 l'ordre du tableau.
 
 ### Lot 7 — Survivants
