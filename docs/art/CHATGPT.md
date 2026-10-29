@@ -6,11 +6,12 @@ range les images. Le porteur de projet te donne le feu vert.
 
 ## À chaque feu vert
 
-1. Lis `docs/art/PRODUCTION.md` et prends **le lot marqué « en cours »** (un seul).
+1. Lis `docs/art/PRODUCTION.md` et prends **le lot nommé par l'utilisateur** ; s'il n'en
+   nomme aucun, le lot marqué « en cours ».
 2. Lis son cahier (dans `PRODUCTION.md`, ou le fichier qu'il indique).
 3. Annonce en une ligne par image ou pièce : nom, proportions, ce qu'elle ne doit pas
    contenir. Puis génère.
-4. Ne passe jamais au lot suivant de toi-même : c'est Claude qui le débloque dans le dépôt.
+4. Ne passe jamais au lot suivant de toi-même : attends le feu vert de l'utilisateur.
 
 ## Style (toutes les images)
 

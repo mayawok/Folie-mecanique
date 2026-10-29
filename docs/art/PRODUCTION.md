@@ -117,6 +117,33 @@ profil tournée vers la droite, posture d'attaque.
 | `predateur` | Grand lion du désert à crinière clairsemée, cicatrices | 3 m de long |
 | `nuee` | Nuée de criquets en essaim (forme de nuage) | 4 m de large |
 
+### Lot 11 — Véhicules 2 à 10
+
+Mêmes règles que le Willys MB (`vehicules/willys_mb/CAHIER.md`), leçons retenues :
+la caisse inclut pare-chocs et accessoires extérieurs ; le châssis inclut ressorts et
+essieux ; le moteur inclut le radiateur ; une seule roue (ou un seul galet) dessinée,
+réutilisée ; la transmission sans les longs arbres. Tout orienté vers la droite.
+
+Pièces : `caisse`, `chassis`, `roue` (ou `chenille` + `galet` pour les chenillés,
+`tourelle` + `canon` pour les chars), `armement`, `moteur`, `transmission`.
+Planche unique pour les véhicules jusqu'à 5 m ; au-delà, **2 images** : la caisse
+seule, puis les autres pièces en planche. Tailles (cotes de prototypage,
+`data/master/base_maitre_vehicules.csv`) :
+
+| # | Véhicule | Longueur × hauteur | Images | Particularités |
+|---|---|---|---|---|
+| 11a | BMW R75 side-car | 2,35 × 1,1 m | 1 | Moto + panier séparés ; mitrailleuse MG 34 sur le panier |
+| 11b | Citroën Traction Avant | ≈ 4,45 × 1,52 m (estimation) | 1 | Berline civile rafistolée, sans armement d'origine |
+| 11c | Camion Citroën T23 | ≈ 5,6 × 2,4 m (estimation) | 2 | Cabine et plateau bâché séparés |
+| 11d | Diamond T 969 dépanneuse | 7,42 × 3,0 m | 2 | Grue de dépannage séparée |
+| 11e | DUKW | 9,45 × 2,7 m | 2 | Coque amphibie, hélice |
+| 11f | M3 Half-Track | 6,17 × 2,26 m | 2 | Roues avant + chenilles arrière |
+| 11g | M3 Stuart | 4,53 × 2,64 m | 1 | Tourelle et canon séparés |
+| 11h | M4 Sherman | 5,89 × 2,74 m | 2 | Tourelle et canon séparés |
+| 11i | Tiger I | 8,45 × 3,0 m (avec canon) | 2 | Tourelle et canon séparés ; objectif final |
+
+Avant validation, Claude recale chaque véhicule comme le Willys (gabarit et assemblage).
+
 ### Lot 9 — Carte
 
 1. `fond_carte` : carte militaire d'état-major usée (papier jauni, taches, plis),
