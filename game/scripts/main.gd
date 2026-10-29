@@ -1,50 +1,108 @@
 # Affichage du prototype. Toute l'interface est construite ici, en code,
 # pour rester lisible dans un seul fichier. La logique est dans jeu.gd.
+#
+# Style : panneaux sombres translucides à coins arrondis, police Inter,
+# une seule couleur d'accent (ambre). Le décor va jusqu'aux bords de l'écran ;
+# l'interface respecte les zones sûres de l'iPhone (encoche, barre d'accueil).
 extends Control
 
-const PXM := 55.0          # pixels par mètre sur l'écran de base
+const PXM := 55.0          # pixels par mètre dans la scène de base
 const SOL_Y := 945.0       # ligne où se posent les bâtiments
 const RUE_Y := 1062.0      # ligne où se garent les véhicules
-const COUL_TEXTE := Color(0.95, 0.9, 0.8)
-const COUL_ALERTE := Color(1.0, 0.55, 0.35)
-const COUL_CRITIQUE := Color(1.0, 0.3, 0.25)
+const ZOOM_MIN := 1.0
+const ZOOM_MAX := 2.6
+
+# Palette
+const C_TEXTE := Color("#F2EEE6")
+const C_DISCRET := Color("#A8A196")
+const C_ACCENT := Color("#E8A33D")
+const C_VERT := Color("#6CC27A")
+const C_ORANGE := Color("#F0A040")
+const C_ROUGE := Color("#E5594F")
+const C_PANNEAU := Color(0.07, 0.075, 0.08, 0.80)
+const C_BORD := Color(1, 1, 1, 0.09)
+const C_RES := {"water_l": "#5AA9E6", "food": "#8CC152", "fuel_l": "#E8A33D",
+	"metal": "#9AA4AE", "materials": "#C08A5B", "ammo": "#B3A65A"}
 
 var jeu: Jeu
-var base: Control            # écran de base
-var carte: Control           # écran de carte
-var scene_base: Control      # bâtiments, survivants, véhicules (reconstruit à chaque mise à jour)
-var barre_res: HBoxContainer
+var police: Font
+var police_gras: Font
+var marges := Vector4(24, 20, 24, 20)    # gauche, haut, droite, bas (zones sûres comprises)
+
+var base: Control
+var monde: Control           # décor + scène, zoomable
+var scene_base: Control      # bâtiments, survivants, véhicules
+var carte: Control
+var hud_res: HBoxContainer
 var lbl_jour: Label
 var lbl_journal: Label
 var liste_surv: VBoxContainer
 var panneau_convoi: PanelContainer
 var rapport: Control
+
 var lieu_choisi := ""
-var choix_vehicules := {}    # uid -> CheckBox
+var mode_pied := false
+var nb_pied := 1
+var choix_vehicules := {}    # uid -> Button (bascule)
 var ordre_btn: OptionButton
 var lbl_briefing: Label
 var btn_partir: Button
 
+var zoom := 1.0
+var _touches := {}           # index du doigt -> position (zoom à deux doigts)
+
 
 func _ready() -> void:
 	jeu = Jeu.new()
+	police = load("res://assets/fonts/Inter-Medium.otf")
+	police_gras = load("res://assets/fonts/Inter-Bold.otf")
 	theme = _theme()
 	set_anchors_preset(PRESET_FULL_RECT)
+	_lire_zones_sures()
 	_construire_base()
 	_construire_carte()
 	_construire_rapport()
 	_montrer(base)
 	_maj()
-	# Vérification visuelle : godot --path game -- --carte (ou --rapport)
+	# Vérification visuelle : godot --path game -- --carte | --pied | --rapport | --zoom
 	var args := OS.get_cmdline_user_args()
-	if "--carte" in args:
+	if "--carte" in args or "--pied" in args:
 		_ouvrir_carte()
-		_choisir_lieu("oasis")
-		choix_vehicules.values()[0].button_pressed = true
+		_choisir_lieu("mine" if "--pied" in args else "oasis")
+		if "--pied" in args:
+			_changer_mode(true)
+		else:
+			choix_vehicules.values()[0].button_pressed = true
+	if "--zoom" in args:
+		_zoomer(2.0, get_viewport_rect().size * Vector2(0.3, 0.8))
 	if "--rapport" in args:
 		jeu.stocks.fuel_l = 200
 		jeu.R.lieux.depot.chance_pillards = 1.0
 		_afficher_rapport(jeu.lancer("depot", jeu.vehicules_prets().slice(2, 3), "bout"))
+	for a in args:   # --capture=fichier.png : image de l'écran puis fermeture
+		if a.begins_with("--capture="):
+			for i in 4:
+				await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png(a.split("=")[1])
+			get_tree().quit()
+
+
+# --- Zones sûres (iPhone) ---------------------------------------------------
+# Sur le Web, la page expose les marges de l'encoche (voir export_presets.cfg,
+# html/head_include). On les convertit en pixels du jeu.
+
+func _lire_zones_sures() -> void:
+	if not OS.has_feature("web"):
+		return
+	var txt = JavaScriptBridge.eval("window.fmZonesSures ? window.fmZonesSures() : ''")
+	if typeof(txt) != TYPE_STRING or txt == "":
+		return
+	var v: PackedStringArray = txt.split(",")
+	if v.size() < 5:
+		return
+	var k: float = get_viewport_rect().size.x / maxf(1.0, v[4].to_float())   # px du jeu par px CSS
+	marges = Vector4(24 + v[0].to_float() * k, 20 + v[1].to_float() * k,
+		24 + v[2].to_float() * k, 20 + v[3].to_float() * k)
 
 
 # --- Outils d'affichage -----------------------------------------------------
@@ -65,54 +123,109 @@ func _image(chemin: String, largeur: float, parent: Control) -> TextureRect:
 	return r
 
 
-func _label(texte: String, taille := 26, parent: Node = null) -> Label:
+func _label(texte: String, taille := 28, parent: Node = null, couleur := C_TEXTE, gras := false) -> Label:
 	var l := Label.new()
 	l.text = texte
 	l.add_theme_font_size_override("font_size", taille)
+	l.add_theme_color_override("font_color", couleur)
+	if gras:
+		l.add_theme_font_override("font", police_gras)
 	if parent:
 		parent.add_child(l)
 	return l
 
 
-func _bouton(texte: String, action: Callable, parent: Node) -> Button:
+func _bouton(texte: String, action: Callable, parent: Node, principal := false) -> Button:
 	var b := Button.new()
 	b.text = texte
-	b.custom_minimum_size = Vector2(0, 72)
+	b.custom_minimum_size = Vector2(0, 80)
 	b.pressed.connect(action)
+	if principal:
+		b.theme_type_variation = "BoutonPrincipal"
 	parent.add_child(b)
 	return b
 
 
-func _panneau(parent: Node) -> PanelContainer:
-	var p := PanelContainer.new()
+func _boite(fond: Color, rayon := 20, bord := C_BORD, marge := 22.0) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.12, 0.1, 0.08, 0.82)
-	sb.border_color = Color(0.55, 0.45, 0.3)
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(14)
+	sb.bg_color = fond
+	sb.border_color = bord
+	sb.set_border_width_all(1 if bord.a > 0 else 0)
+	sb.set_corner_radius_all(rayon)
+	sb.set_content_margin_all(marge)
+	sb.anti_aliasing = true
+	return sb
+
+
+func _panneau(parent: Node, marge := 22.0) -> PanelContainer:
+	var p := PanelContainer.new()
+	var sb := _boite(C_PANNEAU, 22, C_BORD, marge)
+	sb.shadow_color = Color(0, 0, 0, 0.30)
+	sb.shadow_size = 14
+	sb.shadow_offset = Vector2(0, 4)
 	p.add_theme_stylebox_override("panel", sb)
+	parent.add_child(p)
+	return p
+
+
+func _puce(texte: String, couleur: Color, parent: Node) -> PanelContainer:
+	# Petite étiquette arrondie (statut, risque).
+	var p := PanelContainer.new()
+	var sb := _boite(Color(couleur, 0.18), 12, Color(0, 0, 0, 0), 0)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 4
+	p.add_theme_stylebox_override("panel", sb)
+	_label(texte, 22, p, couleur)
 	parent.add_child(p)
 	return p
 
 
 func _theme() -> Theme:
 	var t := Theme.new()
-	t.default_font_size = 26
-	t.set_color("font_color", "Label", COUL_TEXTE)
+	t.default_font = police
+	t.default_font_size = 28
+	t.set_color("font_color", "Label", C_TEXTE)
+	# Boutons secondaires : verre clair
 	for type in ["Button", "OptionButton"]:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.36, 0.3, 0.2)
-		sb.set_corner_radius_all(6)
-		sb.set_content_margin_all(12)
-		t.set_stylebox("normal", type, sb)
-		var sh := sb.duplicate()
-		sh.bg_color = Color(0.48, 0.4, 0.26)
-		t.set_stylebox("hover", type, sh)
-		t.set_stylebox("pressed", type, sh)
-		var sd := sb.duplicate()
-		sd.bg_color = Color(0.25, 0.23, 0.2)
-		t.set_stylebox("disabled", type, sd)
+		t.set_stylebox("normal", type, _boite(Color(1, 1, 1, 0.08), 16, Color(1, 1, 1, 0.10), 18))
+		t.set_stylebox("hover", type, _boite(Color(1, 1, 1, 0.14), 16, Color(1, 1, 1, 0.16), 18))
+		t.set_stylebox("pressed", type, _boite(Color(C_ACCENT, 0.22), 16, C_ACCENT, 18))
+		t.set_stylebox("hover_pressed", type, _boite(Color(C_ACCENT, 0.28), 16, C_ACCENT, 18))
+		t.set_stylebox("disabled", type, _boite(Color(1, 1, 1, 0.04), 16, Color(0, 0, 0, 0), 18))
+		t.set_stylebox("focus", type, StyleBoxEmpty.new())
+		t.set_color("font_color", type, C_TEXTE)
+		t.set_color("font_hover_color", type, C_TEXTE)
+		t.set_color("font_pressed_color", type, C_TEXTE)
+		t.set_color("font_hover_pressed_color", type, C_TEXTE)
+		t.set_color("font_focus_color", type, C_TEXTE)
+		t.set_color("font_disabled_color", type, Color(C_TEXTE, 0.35))
+	# Bouton principal : ambre plein, texte sombre
+	t.set_type_variation("BoutonPrincipal", "Button")
+	var fonce := Color("#1B1712")
+	t.set_stylebox("normal", "BoutonPrincipal", _boite(C_ACCENT, 16, Color(0, 0, 0, 0), 18))
+	t.set_stylebox("hover", "BoutonPrincipal", _boite(C_ACCENT.lightened(0.12), 16, Color(0, 0, 0, 0), 18))
+	t.set_stylebox("pressed", "BoutonPrincipal", _boite(C_ACCENT.darkened(0.12), 16, Color(0, 0, 0, 0), 18))
+	t.set_stylebox("disabled", "BoutonPrincipal", _boite(Color(C_ACCENT, 0.25), 16, Color(0, 0, 0, 0), 18))
+	for c in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		t.set_color(c, "BoutonPrincipal", fonce)
+	t.set_color("font_disabled_color", "BoutonPrincipal", Color(fonce, 0.5))
+	t.set_font("font", "BoutonPrincipal", police_gras)
+	# Menus déroulants
+	t.set_stylebox("panel", "PopupMenu", _boite(Color("#1A1C1E"), 16, Color(1, 1, 1, 0.12), 10))
+	t.set_stylebox("hover", "PopupMenu", _boite(Color(C_ACCENT, 0.25), 10, Color(0, 0, 0, 0), 8))
+	t.set_font_size("font_size", "PopupMenu", 30)
+	t.set_color("font_color", "PopupMenu", C_TEXTE)
+	t.set_color("font_hover_color", "PopupMenu", C_TEXTE)
+	t.set_constant("v_separation", "PopupMenu", 18)
+	# Barres de progression (ressources)
+	t.set_stylebox("background", "ProgressBar", _boite(Color(1, 1, 1, 0.10), 6, Color(0, 0, 0, 0), 0))
+	t.set_stylebox("fill", "ProgressBar", _boite(C_ACCENT, 6, Color(0, 0, 0, 0), 0))
+	# Ascenseur fin
+	t.set_stylebox("scroll", "VScrollBar", _boite(Color(1, 1, 1, 0.04), 4, Color(0, 0, 0, 0), 2))
+	t.set_stylebox("grabber", "VScrollBar", _boite(Color(1, 1, 1, 0.25), 4, Color(0, 0, 0, 0), 2))
+	t.set_stylebox("tooltip_panel", "TooltipPanel", _boite(Color("#1A1C1E"), 10, C_BORD, 10))
 	return t
 
 
@@ -126,102 +239,191 @@ func _montrer(ecran: Control) -> void:
 func _construire_base() -> void:
 	base = Control.new()
 	base.set_anchors_preset(PRESET_FULL_RECT)
+	base.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(base)
-	# Décor en couches (montage de référence : GRAPHISMES / PRODUCTION lot 3)
+	# Ciel fixe, plein écran
 	var ciel := TextureRect.new()
 	ciel.texture = _tex("decor/bg_desert_ciel")
 	ciel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ciel.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	ciel.set_anchors_preset(PRESET_FULL_RECT)
+	ciel.mouse_filter = MOUSE_FILTER_IGNORE
 	base.add_child(ciel)
+	# Monde zoomable : couches de décor + scène
+	monde = Control.new()
+	monde.mouse_filter = MOUSE_FILTER_IGNORE
+	monde.size = get_viewport_rect().size
+	base.add_child(monde)
 	for c in [["lointain", 860.0], ["moyen", 960.0], ["sol", 1080.0]]:
 		var r := TextureRect.new()
 		var t := _tex("decor/bg_desert_" + c[0])
 		r.texture = t
 		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		r.stretch_mode = TextureRect.STRETCH_SCALE
+		r.mouse_filter = MOUSE_FILTER_IGNORE
 		r.anchor_right = 1.0
 		r.offset_top = c[1] - t.get_height()
 		r.offset_bottom = c[1]
-		base.add_child(r)
+		monde.add_child(r)
 	scene_base = Control.new()
-	base.add_child(scene_base)
-	# Barre du haut : jour et ressources
-	var haut := _panneau(base)
-	haut.position = Vector2(16, 12)
+	scene_base.mouse_filter = MOUSE_FILTER_IGNORE
+	monde.add_child(scene_base)
+	# Zone tactile : glisser pour déplacer, pincer ou molette pour zoomer
+	var zone := Control.new()
+	zone.set_anchors_preset(PRESET_FULL_RECT)
+	zone.gui_input.connect(_entree_zoom)
+	base.add_child(zone)
+	resized.connect(func(): monde.size = get_viewport_rect().size; _zoomer(zoom, Vector2.ZERO))
+
+	# Bandeau des ressources (haut, pleine largeur)
+	var haut := _panneau(base, 16)
+	haut.anchor_right = 1.0
+	haut.offset_left = marges.x
+	haut.offset_right = -marges.z
+	haut.offset_top = marges.y
 	var hb := HBoxContainer.new()
-	hb.add_theme_constant_override("separation", 22)
+	hb.add_theme_constant_override("separation", 14)
 	haut.add_child(hb)
-	lbl_jour = _label("", 32, hb)
-	barre_res = HBoxContainer.new()
-	barre_res.add_theme_constant_override("separation", 22)
-	hb.add_child(barre_res)
-	# Journal (à gauche)
-	var pj := _panneau(base)
-	pj.position = Vector2(16, 120)
-	pj.custom_minimum_size = Vector2(760, 0)
-	lbl_journal = _label("", 22, pj)
+	var bloc_jour := VBoxContainer.new()
+	bloc_jour.custom_minimum_size = Vector2(130, 0)
+	bloc_jour.alignment = BoxContainer.ALIGNMENT_CENTER
+	bloc_jour.add_theme_constant_override("separation", -6)
+	hb.add_child(bloc_jour)
+	_label("JOUR", 20, bloc_jour, C_DISCRET, true)
+	lbl_jour = _label("", 52, bloc_jour, C_TEXTE, true)
+	hud_res = HBoxContainer.new()
+	hud_res.add_theme_constant_override("separation", 14)
+	hud_res.size_flags_horizontal = SIZE_EXPAND_FILL
+	hb.add_child(hud_res)
+
+	# Journal (gauche)
+	var pj := _panneau(base, 20)
+	pj.position = Vector2(marges.x, marges.y + 170)
+	pj.custom_minimum_size = Vector2(720, 0)
+	var vj := VBoxContainer.new()
+	vj.add_theme_constant_override("separation", 8)
+	pj.add_child(vj)
+	_label("JOURNAL", 20, vj, C_DISCRET, true)
+	lbl_journal = _label("", 24, vj, Color(C_TEXTE, 0.9))
 	lbl_journal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl_journal.custom_minimum_size = Vector2(730, 0)
-	# Survivants (à droite)
-	var ps := _panneau(base)
+	lbl_journal.custom_minimum_size = Vector2(676, 0)
+	lbl_journal.add_theme_constant_override("line_spacing", 4)
+
+	# Survivants + actions (droite)
+	var ps := _panneau(base, 20)
 	ps.anchor_left = 1.0
 	ps.anchor_right = 1.0
-	ps.offset_left = -560
-	ps.offset_right = -16
-	ps.offset_top = 120
+	ps.offset_left = -600 - marges.z
+	ps.offset_right = -marges.z
+	ps.offset_top = marges.y + 170
 	var vs := VBoxContainer.new()
+	vs.add_theme_constant_override("separation", 12)
 	ps.add_child(vs)
-	_label("Survivants", 28, vs)
+	_label("SURVIVANTS", 20, vs, C_DISCRET, true)
 	liste_surv = VBoxContainer.new()
+	liste_surv.add_theme_constant_override("separation", 10)
 	vs.add_child(liste_surv)
-	# Actions
+	vs.add_child(HSeparator.new())
 	var actions := HBoxContainer.new()
-	actions.add_theme_constant_override("separation", 16)
-	actions.anchor_left = 1.0
-	actions.anchor_right = 1.0
-	actions.offset_left = -560
-	actions.offset_right = -16
-	actions.offset_top = 560
-	base.add_child(actions)
-	var b1 := _bouton("Passer la journée", _passer, actions)
-	var b2 := _bouton("Expédition", func(): _ouvrir_carte(), actions)
-	b1.size_flags_horizontal = SIZE_EXPAND_FILL
-	b2.size_flags_horizontal = SIZE_EXPAND_FILL
+	actions.add_theme_constant_override("separation", 12)
+	vs.add_child(actions)
+	_bouton("Passer la journée", _passer, actions).size_flags_horizontal = SIZE_EXPAND_FILL
+	_bouton("Expédition", func(): _ouvrir_carte(), actions, true).size_flags_horizontal = SIZE_EXPAND_FILL
+
+	# Zoom (bas droite, hors des véhicules), utile sur ordinateur
+	var pz := _panneau(base, 10)
+	pz.anchor_left = 1.0
+	pz.anchor_right = 1.0
+	pz.anchor_top = 1.0
+	pz.anchor_bottom = 1.0
+	pz.grow_horizontal = GROW_DIRECTION_BEGIN
+	pz.grow_vertical = GROW_DIRECTION_BEGIN
+	pz.offset_right = -marges.z
+	pz.offset_bottom = -marges.w
+	var zb := HBoxContainer.new()
+	zb.add_theme_constant_override("separation", 10)
+	pz.add_child(zb)
+	for z in [["−", 1.0 / 1.25], ["+", 1.25]]:
+		var b := _bouton(z[0], func(): _zoomer(zoom * z[1], get_viewport_rect().size / 2), zb)
+		b.custom_minimum_size = Vector2(80, 80)
+		b.add_theme_font_size_override("font_size", 40)
+	_bouton("Vue d'ensemble", func(): _zoomer(1.0, Vector2.ZERO), zb)
 
 
 func _maj() -> void:
-	lbl_jour.text = "Jour %d" % jeu.jour
-	# Ressources
-	for c in barre_res.get_children():
+	lbl_jour.text = str(jeu.jour)
+	for c in hud_res.get_children():
 		c.queue_free()
 	for res in jeu.R.ressources:
-		var info: Dictionary = jeu.R.ressources[res]
-		var box := HBoxContainer.new()
-		barre_res.add_child(box)
-		var ic := TextureRect.new()
-		ic.texture = _tex("ui/" + info.icone)
-		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		ic.custom_minimum_size = Vector2(56, 56)
-		box.add_child(ic)
-		var txt := "%d" % jeu.stocks[res]
-		var auto := jeu.autonomie(res)
-		var l := _label(txt, 26, box)
-		if auto < INF:
-			l.text += "  (%.1f j)" % auto
-			if auto < 1.0:
-				l.add_theme_color_override("font_color", COUL_CRITIQUE)
-			elif auto < 2.0:
-				l.add_theme_color_override("font_color", COUL_ALERTE)
-		l.tooltip_text = info.nom
+		hud_res.add_child(_carte_ressource(res))
 	if jeu.penurie:
-		var p := _label("PÉNURIE", 26, barre_res)
-		p.add_theme_color_override("font_color", COUL_CRITIQUE)
-	# Journal : dernières lignes
-	lbl_journal.text = "\n".join(jeu.journal.slice(max(0, jeu.journal.size() - 7)))
+		_puce("PÉNURIE", C_ROUGE, hud_res)
+	lbl_journal.text = "\n".join(jeu.journal.slice(max(0, jeu.journal.size() - 6)))
 	_maj_survivants()
 	_maj_scene()
+
+
+# Une ressource : icône, nom, quantité, barre de remplissage et flèche de tendance.
+func _carte_ressource(res: String) -> Control:
+	var info: Dictionary = jeu.R.ressources[res]
+	var stock: float = jeu.stocks[res]
+	var cap: float = info.capacite
+	var auto := jeu.autonomie(res)
+	var solde := jeu.bilan(res)
+	var h := HBoxContainer.new()
+	h.size_flags_horizontal = SIZE_EXPAND_FILL
+	h.add_theme_constant_override("separation", 10)
+	var ic := TextureRect.new()
+	ic.texture = _tex("ui/" + info.icone)
+	ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ic.custom_minimum_size = Vector2(52, 52)
+	h.add_child(ic)
+	var v := VBoxContainer.new()
+	v.size_flags_horizontal = SIZE_EXPAND_FILL
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_theme_constant_override("separation", 4)
+	h.add_child(v)
+	var l1 := HBoxContainer.new()
+	v.add_child(l1)
+	var nom := _label(info.nom, 20, l1, C_DISCRET)
+	nom.size_flags_horizontal = SIZE_EXPAND_FILL
+	nom.clip_text = true
+	var unite: String = (" " + info.unite) if info.unite == "L" else ""
+	_label("%d%s" % [stock, unite], 26, l1, C_TEXTE, true)
+	# Barre + tendance
+	var l2 := HBoxContainer.new()
+	l2.add_theme_constant_override("separation", 8)
+	v.add_child(l2)
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.max_value = cap
+	bar.value = stock
+	bar.custom_minimum_size = Vector2(0, 10)
+	bar.size_flags_horizontal = SIZE_EXPAND_FILL
+	bar.size_flags_vertical = SIZE_SHRINK_CENTER
+	var couleur := Color(C_RES[res])
+	if auto < 1.0:
+		couleur = C_ROUGE
+	elif auto < 2.0:
+		couleur = C_ORANGE
+	bar.add_theme_stylebox_override("fill", _boite(couleur, 6, Color(0, 0, 0, 0), 0))
+	l2.add_child(bar)
+	var fl := Tendance.new()
+	fl.sens = 1 if solde > 0.01 else (-1 if solde < -0.01 else 0)
+	fl.custom_minimum_size = Vector2(22, 22)
+	l2.add_child(fl)
+	# Détail : solde par jour, autonomie
+	var detail := ("%+d /j" % int(round(solde))) if fl.sens != 0 else "stable"
+	if auto < INF:
+		detail += "  ·  %.1f j" % auto
+	var l3 := _label(detail, 18, v, C_DISCRET)
+	if auto < 1.0:
+		l3.add_theme_color_override("font_color", C_ROUGE)
+	elif auto < 2.0:
+		l3.add_theme_color_override("font_color", C_ORANGE)
+	h.tooltip_text = "%s : %d / %d" % [info.nom, stock, cap]
+	return h
 
 
 func _maj_survivants() -> void:
@@ -229,20 +431,22 @@ func _maj_survivants() -> void:
 		c.queue_free()
 	for s in jeu.survivants:
 		var h := HBoxContainer.new()
+		h.add_theme_constant_override("separation", 12)
 		liste_surv.add_child(h)
-		var n := _label(s.nom, 26, h)
-		n.custom_minimum_size = Vector2(170, 0)
+		var n := _label(s.nom, 28, h, C_TEXTE, true)
+		n.custom_minimum_size = Vector2(190, 0)
 		if s.occupe > 0:
-			_label("en expédition (%d j)" % s.occupe, 24, h)
+			_puce("En expédition · %d j" % s.occupe, C_ACCENT, h)
 		elif s.blesse > 0:
-			_label("blessé(e) (%d j)" % s.blesse, 24, h).add_theme_color_override("font_color", COUL_ALERTE)
+			_puce("Blessé(e) · %d j" % s.blesse, C_ORANGE, h)
 		else:
 			var ob := OptionButton.new()
 			for p in Jeu.POSTES:
 				ob.add_item(jeu.R.postes[p].nom)
 			ob.selected = Jeu.POSTES.find(s.poste)
-			ob.custom_minimum_size = Vector2(300, 64)
-			ob.item_selected.connect(func(i): s.poste = Jeu.POSTES[i]; _maj_scene())
+			ob.custom_minimum_size = Vector2(0, 68)
+			ob.size_flags_horizontal = SIZE_EXPAND_FILL
+			ob.item_selected.connect(func(i): s.poste = Jeu.POSTES[i]; _maj())
 			h.add_child(ob)
 
 
@@ -271,17 +475,80 @@ func _maj_scene() -> void:
 		if s.blesse > 0:
 			r.modulate = Color(1, 0.75, 0.75)
 	# Véhicules garés
-	var x := 80.0
+	var x := 80.0 + marges.x
 	for v in jeu.vehicules:
 		var r := _image("vehicules/" + v.type, jeu.stat(v.type, "longueur_m") * PXM, scene_base)
 		r.position = Vector2(x, RUE_Y - r.size.y)
-		var etat := "%s  %d/%d" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
+		var etat := "%s · %d/%d" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
 		if v.etat == "epave":
 			r.modulate = Color(0.45, 0.42, 0.4)
-			etat = "%s  ÉPAVE" % jeu.stat(v.type, "nom")
-		var l := _label(etat, 20, scene_base)
+			etat = "%s · ÉPAVE" % jeu.stat(v.type, "nom")
+		var l := _label(etat, 20, scene_base, C_TEXTE, true)
+		l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+		l.add_theme_constant_override("shadow_offset_y", 2)
 		l.position = Vector2(x, RUE_Y - r.size.y - 30)
 		x += max(r.size.x, l.get_minimum_size().x) + 40
+
+
+# --- Zoom de la base --------------------------------------------------------
+
+func _zoomer(z: float, centre: Vector2) -> void:
+	var ancien := zoom
+	zoom = clampf(z, ZOOM_MIN, ZOOM_MAX)
+	# Garder le point sous les doigts au même endroit de l'écran
+	var p := monde.position
+	if ancien > 0:
+		p = centre - (centre - p) * (zoom / ancien)
+	monde.scale = Vector2(zoom, zoom)
+	monde.position = p
+	_borner()
+
+
+func _deplacer(delta: Vector2) -> void:
+	monde.position += delta
+	_borner()
+
+
+func _borner() -> void:
+	# Le monde couvre toujours l'écran ; le zoom s'ancre sur le sol (bas).
+	var ecran := get_viewport_rect().size
+	monde.position.x = clampf(monde.position.x, ecran.x - ecran.x * zoom, 0.0)
+	monde.position.y = clampf(monde.position.y, ecran.y - ecran.y * zoom, 0.0)
+
+
+func _entree_zoom(e: InputEvent) -> void:
+	# Doigts (iPhone) : un doigt déplace, deux doigts pincent.
+	if e is InputEventScreenTouch:
+		if e.pressed:
+			_touches[e.index] = e.position
+		else:
+			_touches.erase(e.index)
+	elif e is InputEventScreenDrag:
+		if _touches.size() >= 2 and _touches.has(e.index):
+			var autre: Vector2 = _touches[_touches.keys().filter(func(k): return k != e.index)[0]]
+			var avant := autre.distance_to(_touches[e.index])
+			_touches[e.index] = e.position
+			var apres := autre.distance_to(e.position)
+			if avant > 10:
+				_zoomer(zoom * apres / avant, (autre + e.position) / 2)
+		else:
+			_touches[e.index] = e.position
+			_deplacer(e.relative)
+	# Souris et pavé tactile (ordinateur). Les événements souris imités
+	# depuis le toucher sont ignorés pour ne pas déplacer deux fois.
+	elif e.device == InputEvent.DEVICE_ID_EMULATION:
+		return
+	elif e is InputEventMouseButton and e.pressed:
+		if e.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_zoomer(zoom * 1.1, e.position)
+		elif e.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_zoomer(zoom / 1.1, e.position)
+	elif e is InputEventMouseMotion and e.button_mask & MOUSE_BUTTON_MASK_LEFT:
+		_deplacer(e.relative)
+	elif e is InputEventMagnifyGesture:
+		_zoomer(zoom * e.factor, e.position)
+	elif e is InputEventPanGesture:
+		_deplacer(-e.delta * 20)
 
 
 func _passer() -> void:
@@ -300,7 +567,7 @@ func _construire_carte() -> void:
 	var fond := TextureRect.new()
 	fond.texture = _tex("carte/carte_fond")
 	fond.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	fond.stretch_mode = TextureRect.STRETCH_SCALE
+	fond.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	fond.set_anchors_preset(PRESET_FULL_RECT)
 	carte.add_child(fond)
 	var routes := Routes.new()
@@ -312,14 +579,17 @@ func _construire_carte() -> void:
 	for id in jeu.R.lieux:
 		var l: Dictionary = jeu.R.lieux[id]
 		_icone_lieu("carte/" + l.icone, l.pos, l.nom, func(): _choisir_lieu(id))
-	var retour := _bouton("Retour à la base", func(): _montrer(base); _maj(), carte)
-	retour.position = Vector2(24, 20)
-	panneau_convoi = _panneau(carte)
+	var retour := _bouton("‹  Base", func(): _montrer(base); _maj(), carte)
+	retour.position = Vector2(marges.x, marges.y)
+	retour.custom_minimum_size = Vector2(200, 80)
+	var sb: StyleBoxFlat = _boite(C_PANNEAU, 16, C_BORD, 18)
+	retour.add_theme_stylebox_override("normal", sb)
+	panneau_convoi = _panneau(carte, 26)
 	panneau_convoi.anchor_left = 1.0
 	panneau_convoi.anchor_right = 1.0
-	panneau_convoi.offset_left = -640
-	panneau_convoi.offset_right = -16
-	panneau_convoi.offset_top = 16
+	panneau_convoi.offset_left = -680 - marges.z
+	panneau_convoi.offset_right = -marges.z
+	panneau_convoi.offset_top = marges.y
 
 
 func _icone_lieu(img: String, pos: Array, nom: String, action: Callable) -> void:
@@ -327,7 +597,6 @@ func _icone_lieu(img: String, pos: Array, nom: String, action: Callable) -> void
 	b.texture_normal = _tex(img)
 	b.ignore_texture_size = true
 	b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	b.size = Vector2(130, 130)
 	b.anchor_left = pos[0]
 	b.anchor_right = pos[0]
 	b.anchor_top = pos[1]
@@ -339,9 +608,18 @@ func _icone_lieu(img: String, pos: Array, nom: String, action: Callable) -> void
 	if action.is_valid():
 		b.pressed.connect(action)
 	carte.add_child(b)
-	var l := _label(nom, 24, b)
-	l.position = Vector2(-40, 128)
-	l.add_theme_color_override("font_color", Color(0.15, 0.1, 0.05))
+	# Nom du lieu dans une pastille sombre, centrée sous l'icône
+	var p := PanelContainer.new()
+	var sb := _boite(Color(0.07, 0.075, 0.08, 0.82), 12, Color(0, 0, 0, 0), 0)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 4
+	p.add_theme_stylebox_override("panel", sb)
+	p.mouse_filter = MOUSE_FILTER_IGNORE
+	var l := _label(nom, 22, p, C_TEXTE, true)
+	b.add_child(p)
+	p.position = Vector2(65 - (l.get_minimum_size().x + 28) / 2, 132)
 
 
 func _ouvrir_carte() -> void:
@@ -352,37 +630,94 @@ func _ouvrir_carte() -> void:
 
 func _choisir_lieu(id: String) -> void:
 	lieu_choisi = id
-	var l: Dictionary = jeu.R.lieux[id]
+	_construire_panneau_convoi()
+
+
+func _changer_mode(pied: bool) -> void:
+	mode_pied = pied
+	nb_pied = 1
+	_construire_panneau_convoi()
+
+
+func _construire_panneau_convoi() -> void:
+	var l: Dictionary = jeu.R.lieux[lieu_choisi]
 	for c in panneau_convoi.get_children():
 		c.queue_free()
 	panneau_convoi.visible = true
 	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 10)
+	vb.add_theme_constant_override("separation", 14)
 	panneau_convoi.add_child(vb)
-	_label(l.nom, 30, vb)
+	_label(l.nom, 38, vb, C_TEXTE, true)
+	var infos := HBoxContainer.new()
+	infos.add_theme_constant_override("separation", 10)
+	vb.add_child(infos)
+	_puce("%d h de route" % l.heures, C_TEXTE, infos)
+	var c_risque: Color = {"faible": C_VERT, "modere": C_ORANGE, "eleve": C_ROUGE, "critique": C_ROUGE}[l.risque]
+	_puce("Risque " + Jeu.RISQUES[l.risque], c_risque, infos)
 	var butin := []
 	for res in l.butin:
 		butin.append(jeu.R.ressources[res].nom.to_lower())
-	_label("%d h de route (aller). Butin : %s." % [l.heures, ", ".join(butin)], 22, vb).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_label("Véhicules (1 survivant par véhicule)", 24, vb)
+	_label("Butin : " + ", ".join(butin), 24, vb, C_DISCRET)
+	# Mode : véhicules ou à pied (contrôle segmenté)
+	var seg := HBoxContainer.new()
+	seg.add_theme_constant_override("separation", 8)
+	vb.add_child(seg)
+	var groupe := ButtonGroup.new()
+	for m in [[false, "Véhicules"], [true, "À pied"]]:
+		var b := Button.new()
+		b.text = m[1]
+		b.toggle_mode = true
+		b.button_group = groupe
+		b.button_pressed = mode_pied == m[0]
+		b.custom_minimum_size = Vector2(0, 68)
+		b.size_flags_horizontal = SIZE_EXPAND_FILL
+		b.pressed.connect(func(): if mode_pied != m[0]: _changer_mode(m[0]))
+		seg.add_child(b)
 	choix_vehicules.clear()
-	for v in jeu.vehicules_prets():
-		var cb := CheckBox.new()
-		cb.text = "%s  (%d/%d PV)" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
-		cb.custom_minimum_size = Vector2(0, 56)
-		cb.toggled.connect(func(_on): _maj_briefing())
-		vb.add_child(cb)
-		choix_vehicules[v.uid] = cb
-	ordre_btn = OptionButton.new()
-	for o in Jeu.ORDRES:
-		ordre_btn.add_item(Jeu.ORDRES[o])
-	ordre_btn.selected = 1
-	ordre_btn.custom_minimum_size = Vector2(0, 64)
-	vb.add_child(ordre_btn)
-	lbl_briefing = _label("", 22, vb)
+	ordre_btn = null
+	if mode_pied:
+		var st := HBoxContainer.new()
+		st.add_theme_constant_override("separation", 12)
+		vb.add_child(st)
+		_label("Marcheurs", 28, st).size_flags_horizontal = SIZE_EXPAND_FILL
+		var moins := _bouton("−", func(): nb_pied = max(1, nb_pied - 1); _construire_panneau_convoi(), st)
+		var lbl := _label(str(nb_pied), 34, st, C_TEXTE, true)
+		lbl.custom_minimum_size = Vector2(50, 0)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var plus := _bouton("+", func(): nb_pied += 1; _construire_panneau_convoi(), st)
+		for b in [moins, plus]:
+			b.custom_minimum_size = Vector2(80, 72)
+			b.add_theme_font_size_override("font_size", 36)
+		var dispo := jeu.survivants.filter(jeu.disponible).size()
+		moins.disabled = nb_pied <= 1
+		plus.disabled = nb_pied >= dispo
+	else:
+		_label("Un survivant par véhicule", 22, vb, C_DISCRET)
+		var grille := GridContainer.new()
+		grille.columns = 2
+		grille.add_theme_constant_override("h_separation", 10)
+		grille.add_theme_constant_override("v_separation", 10)
+		vb.add_child(grille)
+		for v in jeu.vehicules_prets():
+			var b := Button.new()
+			b.toggle_mode = true
+			b.text = "%s\n%d/%d PV" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.add_theme_font_size_override("font_size", 24)
+			b.custom_minimum_size = Vector2(305, 92)
+			b.toggled.connect(func(_on): _maj_briefing())
+			grille.add_child(b)
+			choix_vehicules[v.uid] = b
+		ordre_btn = OptionButton.new()
+		for o in Jeu.ORDRES:
+			ordre_btn.add_item(Jeu.ORDRES[o])
+		ordre_btn.selected = 1
+		ordre_btn.custom_minimum_size = Vector2(0, 72)
+		vb.add_child(ordre_btn)
+	lbl_briefing = _label("", 23, vb, Color(C_TEXTE, 0.85))
 	lbl_briefing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl_briefing.custom_minimum_size = Vector2(600, 0)
-	btn_partir = _bouton("Partir", _partir, vb)
+	lbl_briefing.custom_minimum_size = Vector2(620, 0)
+	btn_partir = _bouton("Partir", _partir, vb, true)
 	_maj_briefing()
 
 
@@ -391,10 +726,20 @@ func _convoi() -> Array:
 
 
 func _maj_briefing() -> void:
-	var b := jeu.briefing(lieu_choisi, _convoi())
-	var t := "Carburant : %d L (conseillé %d L, stock %d L)\nVivres : %d L d'eau, %d rations\nCapacité de chargement : %d\nÉquipage : %s\nRisque %s : %s" % [
-		b.carburant, b.carburant_conseille, jeu.stocks.fuel_l, b.eau, b.vivres, b.capacite,
-		", ".join(b.equipage) if b.equipage else "—", b.risque, " ; ".join(b.raisons)]
+	var t := ""
+	var b: Dictionary
+	if mode_pied:
+		b = jeu.briefing_pied(lieu_choisi, nb_pied)
+		t = "Durée : %d h de marche (%d j)\nVivres : %d L d'eau, %d rations\nPortage : %d\nGroupe : %s\nRisque %s : %s" % [
+			int(b.heures), b.jours, b.eau, b.vivres, b.capacite,
+			", ".join(b.equipage) if b.equipage else "—", b.risque, " ; ".join(b.raisons)]
+	else:
+		b = jeu.briefing(lieu_choisi, _convoi())
+		t = "Carburant : %d L (conseillé %d, stock %d)\nVivres : %d L d'eau, %d rations\nChargement : %d\nÉquipage : %s\nRisque %s : %s" % [
+			b.carburant, b.carburant_conseille, jeu.stocks.fuel_l, b.eau, b.vivres, b.capacite,
+			", ".join(b.equipage) if b.equipage else "—", b.risque, " ; ".join(b.raisons)]
+		if not b.ok and b.erreurs.has("Carburant insuffisant."):
+			t += "\nAstuce : sans carburant, partez à pied vers un lieu proche."
 	if not b.ok:
 		t += "\n" + "\n".join(b.erreurs)
 	lbl_briefing.text = t
@@ -402,8 +747,12 @@ func _maj_briefing() -> void:
 
 
 func _partir() -> void:
-	var ordre: String = Jeu.ORDRES.keys()[ordre_btn.selected]
-	var rap := jeu.lancer(lieu_choisi, _convoi(), ordre)
+	var rap: Dictionary
+	if mode_pied:
+		rap = jeu.lancer_pied(lieu_choisi, nb_pied)
+	else:
+		var ordre: String = Jeu.ORDRES.keys()[ordre_btn.selected]
+		rap = jeu.lancer(lieu_choisi, _convoi(), ordre)
 	_montrer(base)
 	_maj()
 	_afficher_rapport(rap)
@@ -413,7 +762,7 @@ func _partir() -> void:
 
 func _construire_rapport() -> void:
 	rapport = ColorRect.new()
-	rapport.color = Color(0, 0, 0, 0.6)
+	rapport.color = Color(0, 0, 0, 0.55)
 	rapport.set_anchors_preset(PRESET_FULL_RECT)
 	rapport.visible = false
 	add_child(rapport)
@@ -423,35 +772,45 @@ func _afficher_rapport(rap: Dictionary) -> void:
 	for c in rapport.get_children():
 		c.queue_free()
 	rapport.visible = true
-	var p := _panneau(rapport)
-	p.set_anchors_preset(PRESET_CENTER)
-	p.custom_minimum_size = Vector2(1500, 860)
-	p.position = (get_viewport_rect().size - p.custom_minimum_size) / 2
+	var ecran := get_viewport_rect().size
+	var p := _panneau(rapport, 32)
+	(p.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Color("#141618")
+	p.custom_minimum_size = Vector2(min(1500.0, ecran.x - marges.x - marges.z), ecran.y - marges.y - marges.w - 40)
+	p.position = (ecran - p.custom_minimum_size) / 2
 	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 14)
+	vb.add_theme_constant_override("separation", 16)
 	p.add_child(vb)
-	_label(rap.titre, 34, vb)
+	_label(rap.titre, 40, vb, C_TEXTE, true)
 	# File du convoi (vers la droite) face aux pillards (vers la gauche)
 	var file := HBoxContainer.new()
 	file.add_theme_constant_override("separation", 24)
 	file.alignment = BoxContainer.ALIGNMENT_CENTER
-	file.custom_minimum_size = Vector2(0, 200)
+	file.custom_minimum_size = Vector2(0, 190)
 	vb.add_child(file)
+	for m in rap.get("marcheurs", []):
+		var r := TextureRect.new()
+		r.texture = _tex("personnages/pers_%s_marche" % ("survivante" if m.femme else "survivant"))
+		r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+		r.custom_minimum_size = Vector2(80, 160)
+		file.add_child(r)
 	var convoi: Array = rap.convoi.duplicate()
 	convoi.reverse()   # la tête est à droite, face à l'ennemi
 	for v in convoi:
 		_vignette(v, false, file)
 	if rap.pillards:
-		_label("  ⟷  ", 40, file)
+		_label("⟷", 40, file, C_DISCRET)
 		for v in rap.pillards:
 			_vignette(v, true, file)
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	vb.add_child(sc)
-	var lignes := _label("\n".join(rap.lignes), 24, sc)
+	var lignes := _label("\n".join(rap.lignes), 26, sc, Color(C_TEXTE, 0.9))
 	lignes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lignes.custom_minimum_size = Vector2(1440, 0)
-	_bouton("Fermer", func(): rapport.visible = false; _maj(), vb)
+	lignes.size_flags_horizontal = SIZE_EXPAND_FILL
+	lignes.add_theme_constant_override("line_spacing", 6)
+	_bouton("Continuer", func(): rapport.visible = false; _maj(), vb, true)
 
 
 func _vignette(v: Dictionary, ennemi: bool, parent: Node) -> void:
@@ -468,16 +827,28 @@ func _vignette(v: Dictionary, ennemi: bool, parent: Node) -> void:
 	var etat: String = {"ok": "intact", "epave": "épave", "perdu": "perdu", "detruit": "détruit"}[v.etat]
 	if v.etat != "ok":
 		r.modulate = Color(0.4, 0.35, 0.3)
-	var l := _label(etat, 20, vb)
+	var coul := C_ROUGE if ennemi else (C_VERT if v.etat == "ok" else C_ORANGE)
+	var l := _label(etat, 20, vb, coul, true)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if ennemi:
-		l.add_theme_color_override("font_color", COUL_ALERTE)
 
 
 func _afficher_fin() -> void:
 	_afficher_rapport({"titre": "La communauté s'est éteinte", "convoi": [], "pillards": [],
 		"lignes": ["Plus aucun survivant. Une nouvelle partie commence à la fermeture."]})
 	jeu.nouvelle_partie()
+
+
+# Flèche de tendance : ▲ verte (excédent), ▼ rouge (déficit), trait gris (stable).
+class Tendance extends Control:
+	var sens := 0
+	func _draw() -> void:
+		var s := size
+		if sens > 0:
+			draw_colored_polygon(PackedVector2Array([Vector2(s.x / 2, 2), Vector2(s.x - 1, s.y - 3), Vector2(1, s.y - 3)]), Color("#6CC27A"))
+		elif sens < 0:
+			draw_colored_polygon(PackedVector2Array([Vector2(1, 3), Vector2(s.x - 1, 3), Vector2(s.x / 2, s.y - 2)]), Color("#E5594F"))
+		else:
+			draw_rect(Rect2(2, s.y / 2 - 2, s.x - 4, 4), Color(1, 1, 1, 0.35))
 
 
 # Routes en pointillés entre la base et les lieux.
@@ -491,4 +862,4 @@ class Routes extends Control:
 		var b := Vector2(R.base_pos[0], R.base_pos[1]) * size
 		for id in R.lieux:
 			var p := Vector2(R.lieux[id].pos[0], R.lieux[id].pos[1]) * size
-			draw_dashed_line(b, p, Color(0.35, 0.15, 0.05, 0.8), 5.0, 18.0)
+			draw_dashed_line(b, p, Color(0.2, 0.1, 0.03, 0.75), 5.0, 18.0)

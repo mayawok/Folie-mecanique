@@ -53,6 +53,8 @@
     "modere": ["citroen_traction", "citroen_t23"],
     "eleve": ["citroen_t23", "citroen_traction", "citroen_t23"]
   },
+  "a_pied": {"_note": "Expédition sans véhicule : plus lente, peu de butin, discrète. Personne ne meurt à pied.",
+    "heures_max": 6, "facteur_duree": 3, "capacite_par_survivant": 5, "discretion": 0.75, "jours_blessure": 2},
   "marge_carburant": 0.25,
   "reconstitution_par_jour": 0.15,
   "lieux": {
@@ -60,6 +62,8 @@
       "risque": "faible", "chance_pillards": 0.15, "chance_recrue": 0.15, "butin": {"water_l": [50, 90]}},
     "ferme": {"nom": "Ferme abandonnée", "icone": "carte_icone_ferme", "pos": [0.30, 0.30], "heures": 3, "terrain": 1.0,
       "risque": "faible", "chance_pillards": 0.2, "chance_recrue": 0.3, "butin": {"food": [8, 16], "materials": [2, 6]}},
+    "mine": {"nom": "Mine abandonnée", "icone": "carte_icone_mine", "pos": [0.24, 0.80], "heures": 2, "terrain": 1.1,
+      "risque": "faible", "chance_pillards": 0.15, "chance_recrue": 0.05, "butin": {"fuel_l": [15, 35], "metal": [4, 10]}},
     "depot": {"nom": "Dépôt de carburant", "icone": "carte_icone_depot_carburant", "pos": [0.56, 0.30], "heures": 6, "terrain": 1.2,
       "risque": "modere", "chance_pillards": 0.45, "chance_recrue": 0.1, "butin": {"fuel_l": [60, 120], "ammo": [10, 30]}},
     "champ": {"nom": "Champ de bataille", "icone": "carte_icone_champ_bataille", "pos": [0.60, 0.80], "heures": 12, "terrain": 1.4,

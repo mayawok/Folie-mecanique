@@ -62,6 +62,18 @@ func autonomie(res: String) -> float:
 	return INF if conso <= 0 else stocks[res] / conso
 
 
+# Solde prévu sur une journée (production des postes - consommation).
+# Sert à la flèche de tendance à côté de chaque barre de ressource.
+func bilan(res: String) -> float:
+	var mult: float = R.penurie.productivite if penurie else 1.0
+	var b := 0.0
+	for s in survivants:
+		if disponible(s):
+			b += R.postes[s.poste].get("produit", {}).get(res, 0) * mult
+	b -= R.consommation_par_survivant.get(res, 0) * survivants.size()
+	return b
+
+
 func passer_journee() -> Array:
 	var lignes := []
 	var mult: float = R.penurie.productivite if penurie else 1.0
@@ -225,11 +237,13 @@ func lancer(lieu_id: String, convoi: Array, ordre: String) -> Dictionary:
 	else:
 		L.append("Trajet sans rencontre.")
 	if issue == "victoire":
-		_butin(lieu_id, convoi, rng, rap)
-		if rng.randf() < l.chance_recrue:
-			var nom: String = R.noms_recrues[rng.randi() % R.noms_recrues.size()]
-			survivants.append({"nom": nom, "femme": rng.randf() < 0.5, "poste": "repos", "blesse": 0, "occupe": 0})
-			L.append("RECRUE : %s, survivant(e) isolé(e), rejoint la communauté." % nom)
+		# Capacité de chargement des véhicules revenus
+		var cap := 0.0
+		for v in convoi:
+			if v.get("issue", "ok") == "ok":
+				cap += stat(v.type, "capacite")
+		_butin(lieu_id, cap, rng, rap)
+		_recrue(l, rng, L)
 	elif issue == "repli":
 		L.append("Le convoi rentre les mains vides.")
 	for v in convoi:
@@ -239,6 +253,84 @@ func lancer(lieu_id: String, convoi: Array, ordre: String) -> Dictionary:
 	rap.issue = issue
 	_journal([rap.titre + " : " + {"victoire": "réussite", "repli": "repli", "defaite": "convoi perdu"}[issue] + "."])
 	return rap
+
+
+# --- Expédition à pied ------------------------------------------------------
+# Sans véhicule : aucun carburant, trajet 3 fois plus long, peu de butin.
+# Les marcheurs se cachent des pillards ; s'ils sont surpris, ils sont blessés
+# et abandonnent le butin, mais personne ne meurt.
+
+func duree_pied(lieu_id: String) -> float:
+	return R.lieux[lieu_id].heures * 2.0 * R.a_pied.facteur_duree
+
+
+func briefing_pied(lieu_id: String, n: int) -> Dictionary:
+	var l: Dictionary = R.lieux[lieu_id]
+	var P: Dictionary = R.a_pied
+	var h := duree_pied(lieu_id)
+	var b := {"heures": h, "jours": max(1, ceili(h / 24.0)), "erreurs": [], "raisons": []}
+	var eq := equipage_pour(n)
+	b.equipage = eq.map(func(s): return s.nom)
+	b.eau = ceili(R.consommation_par_survivant.water_l * n * h / 24.0)
+	b.vivres = ceili(R.consommation_par_survivant.food * n * h / 24.0)
+	b.capacite = n * P.capacite_par_survivant
+	b.risque = RISQUES[l.risque]
+	b.raisons.append("à pied, les marcheurs se cachent des pillards (%d %% de réussite)" % int(P.discretion * 100))
+	if l.heures > P.heures_max:
+		b.erreurs.append("Trop loin à pied (%d h de route au maximum)." % P.heures_max)
+	if n < 1:
+		b.erreurs.append("Envoyer au moins un survivant.")
+	elif eq.size() < n:
+		b.erreurs.append("Pas assez de survivants disponibles.")
+	if stocks.water_l < b.eau or stocks.food < b.vivres:
+		b.erreurs.append("Vivres insuffisants pour le trajet.")
+	b.ok = b.erreurs.is_empty()
+	return b
+
+
+func lancer_pied(lieu_id: String, n: int) -> Dictionary:
+	var l: Dictionary = R.lieux[lieu_id]
+	var P: Dictionary = R.a_pied
+	var b := briefing_pied(lieu_id, n)
+	if not b.ok:
+		return {"titre": "Départ impossible", "lignes": b.erreurs, "butin": {}, "pillards": [], "convoi": [], "issue": "annule"}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = jour * 7919 + hash(lieu_id) + n * 31 + 17
+	var rap := {"titre": "À pied : " + l.nom, "lignes": [], "butin": {}, "pillards": [], "convoi": [], "marcheurs": []}
+	var L: Array = rap.lignes
+	stocks.water_l -= b.eau
+	stocks.food -= b.vivres
+	var groupe := equipage_pour(n)
+	for s in groupe:
+		s.occupe = b.jours
+		rap.marcheurs.append({"femme": s.femme, "nom": s.nom})
+	L.append("Départ à pied : %s. %d h de marche aller-retour, %d L d'eau, %d rations." % [
+		", ".join(b.equipage), int(b.heures), b.eau, b.vivres])
+	var issue := "victoire"
+	if rng.randf() < l.chance_pillards:
+		if rng.randf() < P.discretion:
+			L.append("Des pillards passent tout près : le groupe reste caché jusqu'à leur départ.")
+		else:
+			issue = "repli"
+			L.append("Le groupe est surpris par des pillards et s'enfuit en abandonnant tout.")
+			for s in groupe:
+				s.blesse = int(P.jours_blessure)
+				L.append("%s est blessé(e) (%d jours)." % [s.nom, P.jours_blessure])
+	else:
+		L.append("Marche sans rencontre.")
+	if issue == "victoire":
+		_butin(lieu_id, b.capacite, rng, rap)
+		_recrue(l, rng, L)
+	rap.issue = issue
+	_journal([rap.titre + " : " + ("réussite" if issue == "victoire" else "groupe surpris, butin perdu") + "."])
+	return rap
+
+
+func _recrue(l: Dictionary, rng: RandomNumberGenerator, L: Array) -> void:
+	if rng.randf() < l.chance_recrue:
+		var nom: String = R.noms_recrues[rng.randi() % R.noms_recrues.size()]
+		survivants.append({"nom": nom, "femme": rng.randf() < 0.5, "poste": "repos", "blesse": 0, "occupe": 0})
+		L.append("RECRUE : %s, survivant(e) isolé(e), rejoint la communauté." % nom)
 
 
 func _combat(convoi: Array, profil: Array, ordre: String, rng: RandomNumberGenerator, rap: Dictionary) -> String:
@@ -334,17 +426,12 @@ func _salve(tireurs: Array, cibles: Array, rng: RandomNumberGenerator, L: Array,
 	return true
 
 
-func _butin(lieu_id: String, convoi: Array, rng: RandomNumberGenerator, rap: Dictionary) -> void:
+func _butin(lieu_id: String, cap: float, rng: RandomNumberGenerator, rap: Dictionary) -> void:
 	var l: Dictionary = R.lieux[lieu_id]
 	var f: float = epuisement[lieu_id]
 	for res in l.butin:
 		var q := int(rng.randi_range(int(l.butin[res][0]), int(l.butin[res][1])) * f)
 		rap.butin[res] = rap.butin.get(res, 0) + q
-	# Capacité de chargement des véhicules revenus
-	var cap: float = 0.0
-	for v in convoi:
-		if v.get("issue", "ok") == "ok":
-			cap += stat(v.type, "capacite")
 	var poids: float = 0.0
 	for res in rap.butin:
 		poids += rap.butin[res] * R.ressources[res].poids

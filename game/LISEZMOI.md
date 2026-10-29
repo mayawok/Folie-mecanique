@@ -9,10 +9,16 @@ Lien du navigateur (PC ou iPhone, en paysage) : https://mayawok.github.io/Folie-
 Il se met à jour tout seul quelques minutes après chaque envoi qui touche `game/`
 (suivi dans l'onglet **Actions** du dépôt).
 
+**Plein écran sur iPhone** : dans Safari, bouton Partager → « Sur l'écran d'accueil »,
+puis lancer le jeu depuis l'icône. La barre d'adresse disparaît et le jeu va jusqu'aux bords.
+
+Commandes de la base : glisser pour se déplacer, pincer (ou molette, boutons − / +) pour zoomer.
+Sans carburant : choisir un lieu proche (6 h de route au plus), onglet **À pied**.
+
 ## Modifier l'équilibrage sans Claude
 
 Toutes les valeurs sont dans `data/regles_proto.json` : stocks de départ, production des
-postes, consommation, statistiques des véhicules, lieux, butin, pillards, combat.
+postes, expéditions à pied (`a_pied`), consommation, statistiques des véhicules, lieux, butin, pillards, combat.
 Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstruit.
 
 ## Fichiers
@@ -23,6 +29,7 @@ Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstr
 | `scripts/main.gd` | Interface : base, carte, convoi, rapport |
 | `data/regles_proto.json` | Valeurs d'équilibrage |
 | `assets/` | Images réduites, produites par `tools/export_proto.py` (ne pas modifier à la main) |
+| `assets/fonts/` | Police Inter (licence SIL OFL 1.1, usage commercial autorisé) |
 | `tests/test_sim.gd` | Test sans écran : `godot --headless --path game -s res://tests/test_sim.gd` |
 
 ## Hors prototype
