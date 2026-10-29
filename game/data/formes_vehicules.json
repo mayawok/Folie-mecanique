@@ -1,0 +1,184 @@
+{
+  "_lisez_moi": "Formes simples des véhicules, dessinées par le code (scripts/vehicule_dessin.gd). Cotes en mètres : x depuis l'arrière, y depuis le sol, véhicule tourné vers la droite. Calques : z 0 = derrière le train roulant, z 1 = devant, z 2 = détails. Couleurs : caisse, sombre, clair, vitre, metal, pneu, bois, toile, ou un code #RRGGBB. Valeurs de prototypage, proportions d'après les dimensions historiques.",
+  "teintes": {"joueur": "#5E6238", "pillards": "#7A4A2C", "allemand": "#9C8A5A"},
+  "vehicules": {
+    "willys_mb": {
+      "nom": "Willys MB", "longueur": 3.36, "hauteur": 1.8, "teinte": "joueur", "moteur": "jeep", "course": 0.10,
+      "fiche": "Jeep de reconnaissance 4×4. Équipage 2. Mitrailleuse lourde sur pivot.",
+      "roues": [{"x": 0.65, "r": 0.36}, {"x": 2.68, "r": 0.36}],
+      "formes": [
+        {"cercle": [0.05, 0.78, 0.30], "c": "pneu", "z": 0},
+        {"pts": [[0.08, 0.50], [0.08, 0.98], [1.50, 0.98], [1.62, 1.06], [3.18, 1.06], [3.32, 0.98], [3.32, 0.50]], "c": "caisse", "z": 1},
+        {"pts": [[1.05, 0.98], [1.05, 0.74], [1.30, 0.64], [1.52, 0.64], [1.52, 0.98]], "c": "sombre", "z": 2},
+        {"pts": [[3.22, 0.56], [3.32, 0.56], [3.32, 0.98], [3.22, 1.02]], "c": "sombre", "z": 2},
+        {"arc": [0.65, 0.36, 0.44, 15, 165, 0.07], "c": "caisse", "z": 1},
+        {"arc": [2.68, 0.36, 0.44, 15, 165, 0.07], "c": "caisse", "z": 1},
+        {"ligne": [[1.56, 1.02], [1.46, 1.72]], "ep": 0.05, "c": "metal", "z": 1}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 1.00, "y": 0.98, "pied": 0.55, "long": 1.30, "ep": 0.05}],
+      "equipage": [{"x": 1.32, "y": 0.80, "role": "conducteur"}, {"x": 0.68, "y": 0.75, "role": "tireur", "debout": true}]
+    },
+    "bmw_r75": {
+      "nom": "BMW R75 side-car", "longueur": 2.35, "hauteur": 1.3, "teinte": "joueur", "moteur": "moto", "course": 0.08,
+      "fiche": "Moto à side-car, roue du panier motrice. Équipage 2. Mitrailleuse légère sur le panier.",
+      "roues": [{"x": 0.45, "r": 0.33}, {"x": 1.90, "r": 0.33}],
+      "roues_fond": [{"x": 1.20, "r": 0.30}],
+      "formes": [
+        {"pts": [[0.25, 0.40], [0.20, 0.75], [0.55, 0.92], [1.75, 0.90], [2.05, 0.70], [1.95, 0.46], [1.50, 0.38]], "c": "sombre", "z": 0},
+        {"pts": [[0.85, 0.28], [1.35, 0.28], [1.42, 0.55], [0.88, 0.58]], "c": "metal", "z": 1},
+        {"pts": [[0.95, 0.80], [1.20, 0.96], [1.65, 0.93], [1.76, 0.80], [1.02, 0.72]], "c": "caisse", "z": 1},
+        {"pts": [[0.70, 0.82], [1.00, 0.82], [0.98, 0.89], [0.72, 0.91]], "c": "sombre", "z": 1},
+        {"arc": [0.45, 0.33, 0.40, 30, 175, 0.06], "c": "caisse", "z": 1},
+        {"arc": [1.90, 0.33, 0.40, 20, 150, 0.06], "c": "caisse", "z": 1},
+        {"ligne": [[1.90, 0.33], [1.72, 1.00]], "ep": 0.05, "c": "metal", "z": 1},
+        {"ligne": [[1.62, 1.02], [1.82, 1.06]], "ep": 0.04, "c": "metal", "z": 1},
+        {"ligne": [[0.45, 0.33], [1.00, 0.55]], "ep": 0.05, "c": "metal", "z": 1}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 1.55, "y": 0.92, "pied": 0.18, "long": 1.00, "ep": 0.04}],
+      "equipage": [{"x": 0.92, "y": 0.86, "role": "conducteur"}, {"x": 1.32, "y": 0.62, "role": "tireur"}]
+    },
+    "citroen_traction": {
+      "nom": "Citroën Traction Avant", "longueur": 4.75, "hauteur": 1.6, "teinte": "pillards", "moteur": "voiture", "course": 0.09,
+      "fiche": "Berline à traction avant. Toit percé pour un tireur.",
+      "roues": [{"x": 1.01, "r": 0.34}, {"x": 4.08, "r": 0.34}],
+      "formes": [
+        {"pts": [[0.08, 0.38], [0.05, 0.80], [0.45, 0.92], [1.15, 1.45], [2.95, 1.50], [3.40, 0.98], [4.55, 0.90], [4.72, 0.75], [4.70, 0.40], [4.30, 0.36], [0.40, 0.36]], "c": "caisse", "z": 1},
+        {"pts": [[1.30, 1.00], [1.95, 1.00], [1.95, 1.38], [1.42, 1.36]], "c": "vitre", "z": 2},
+        {"pts": [[2.05, 1.00], [3.15, 1.00], [2.88, 1.40], [2.05, 1.40]], "c": "vitre", "z": 2},
+        {"pts": [[4.60, 0.45], [4.72, 0.45], [4.72, 0.82], [4.58, 0.86]], "c": "metal", "z": 2},
+        {"arc": [1.01, 0.34, 0.42, 10, 170, 0.07], "c": "sombre", "z": 2},
+        {"arc": [4.08, 0.34, 0.42, 10, 170, 0.07], "c": "sombre", "z": 2},
+        {"ligne": [[1.98, 0.42], [1.98, 1.40]], "ep": 0.025, "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 2.15, "y": 1.50, "pied": 0.12, "long": 1.00, "ep": 0.04}],
+      "equipage": [{"x": 1.95, "y": 1.22, "role": "tireur", "h": 0.40}]
+    },
+    "citroen_t23": {
+      "nom": "Citroën T23", "longueur": 5.6, "hauteur": 2.4, "teinte": "pillards", "moteur": "camion", "course": 0.10,
+      "fiche": "Camion de transport. Plateau à ridelles, mitrailleuse sur la cabine.",
+      "roues": [{"x": 1.25, "r": 0.47}, {"x": 4.85, "r": 0.45}],
+      "formes": [
+        {"pts": [[0.30, 0.62], [5.45, 0.62], [5.45, 0.80], [0.30, 0.80]], "c": "sombre", "z": 0},
+        {"pts": [[0.00, 0.80], [3.30, 0.80], [3.30, 1.75], [0.00, 1.75]], "c": "bois", "z": 1},
+        {"ligne": [[0.02, 1.12], [3.28, 1.12]], "ep": 0.025, "c": "sombre", "z": 2},
+        {"ligne": [[0.02, 1.44], [3.28, 1.44]], "ep": 0.025, "c": "sombre", "z": 2},
+        {"pts": [[3.35, 0.80], [4.40, 0.80], [4.40, 1.55], [4.30, 2.30], [3.45, 2.32], [3.35, 2.25]], "c": "caisse", "z": 1},
+        {"pts": [[3.85, 1.65], [4.30, 1.65], [4.24, 2.15], [3.85, 2.15]], "c": "vitre", "z": 2},
+        {"pts": [[4.40, 0.80], [5.50, 0.80], [5.55, 1.55], [4.40, 1.62]], "c": "caisse", "z": 1},
+        {"pts": [[5.45, 0.85], [5.58, 0.85], [5.58, 1.55], [5.48, 1.55]], "c": "metal", "z": 2},
+        {"arc": [4.85, 0.45, 0.56, 10, 170, 0.08], "c": "caisse", "z": 1},
+        {"ligne": [[3.80, 0.85], [3.80, 2.25]], "ep": 0.025, "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 3.80, "y": 2.32, "pied": 0.22, "long": 1.10, "ep": 0.045}],
+      "equipage": [{"x": 3.55, "y": 2.00, "role": "tireur", "h": 0.40}, {"x": 1.50, "y": 1.15, "role": "passager", "debout": true}]
+    },
+    "diamond_t": {
+      "nom": "Diamond T 969 dépanneuse", "longueur": 7.42, "hauteur": 3.0, "teinte": "joueur", "moteur": "camion", "course": 0.10,
+      "fiche": "Dépanneuse 6×6 à grue. Seule capable de remorquer les épaves lourdes.",
+      "roues": [{"x": 1.06, "r": 0.55}, {"x": 2.36, "r": 0.55}, {"x": 6.20, "r": 0.55}],
+      "formes": [
+        {"pts": [[0.30, 0.75], [7.20, 0.75], [7.20, 0.95], [0.30, 0.95]], "c": "sombre", "z": 0},
+        {"ligne": [[2.00, 1.55], [0.15, 2.85]], "ep": 0.20, "c": "caisse", "z": 0},
+        {"ligne": [[2.30, 1.55], [1.00, 2.55]], "ep": 0.08, "c": "metal", "z": 0},
+        {"ligne": [[0.15, 2.85], [0.15, 1.62]], "ep": 0.025, "c": "metal", "z": 0},
+        {"cercle": [0.15, 1.56, 0.07], "c": "metal", "z": 0},
+        {"pts": [[0.15, 0.95], [4.45, 0.95], [4.45, 1.55], [0.15, 1.55]], "c": "caisse", "z": 1},
+        {"ligne": [[1.70, 1.00], [1.70, 1.50]], "ep": 0.025, "c": "sombre", "z": 2},
+        {"ligne": [[3.10, 1.00], [3.10, 1.50]], "ep": 0.025, "c": "sombre", "z": 2},
+        {"pts": [[4.45, 0.95], [5.55, 0.95], [5.55, 2.00], [5.40, 2.85], [4.55, 2.85], [4.45, 2.75]], "c": "caisse", "z": 1},
+        {"pts": [[4.95, 2.00], [5.42, 2.00], [5.32, 2.65], [4.95, 2.65]], "c": "vitre", "z": 2},
+        {"pts": [[5.55, 0.95], [7.25, 0.95], [7.30, 2.00], [5.55, 2.10]], "c": "caisse", "z": 1},
+        {"pts": [[7.18, 1.00], [7.35, 1.00], [7.35, 1.98], [7.22, 2.00]], "c": "metal", "z": 2},
+        {"pts": [[7.25, 0.70], [7.42, 0.70], [7.42, 0.95], [7.25, 0.95]], "c": "metal", "z": 2},
+        {"arc": [6.20, 0.55, 0.66, 10, 170, 0.09], "c": "caisse", "z": 1}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 4.90, "y": 2.85, "pied": 0.28, "long": 1.30, "ep": 0.055}],
+      "equipage": [{"x": 4.70, "y": 2.45, "role": "tireur", "h": 0.45}]
+    },
+    "dukw": {
+      "nom": "DUKW", "longueur": 9.45, "hauteur": 2.7, "teinte": "joueur", "moteur": "camion", "course": 0.10,
+      "fiche": "Camion amphibie 6×6 à coque de bateau. Grande capacité de chargement.",
+      "roues": [{"x": 2.82, "r": 0.55}, {"x": 4.74, "r": 0.55}, {"x": 6.60, "r": 0.55}],
+      "formes": [
+        {"pts": [[0.05, 0.55], [0.30, 0.55], [0.30, 1.00], [0.05, 1.00]], "c": "sombre", "z": 0},
+        {"cercle": [0.38, 0.78, 0.18], "c": "metal", "z": 0},
+        {"pts": [[0.00, 1.10], [0.55, 0.70], [7.70, 0.70], [9.40, 1.45], [9.45, 1.80], [0.00, 1.80]], "c": "caisse", "z": 1},
+        {"pts": [[0.00, 1.80], [9.00, 1.80], [9.00, 1.88], [0.00, 1.88]], "c": "sombre", "z": 2},
+        {"ligne": [[0.20, 1.45], [9.30, 1.45]], "ep": 0.04, "c": "sombre", "z": 2},
+        {"ligne": [[6.45, 1.88], [6.85, 2.45]], "ep": 0.05, "c": "metal", "z": 2},
+        {"arc": [2.82, 0.55, 0.62, 25, 155, 0.06], "c": "sombre", "z": 2},
+        {"arc": [4.74, 0.55, 0.62, 25, 155, 0.06], "c": "sombre", "z": 2},
+        {"arc": [6.60, 0.55, 0.62, 25, 155, 0.06], "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 5.95, "y": 1.88, "pied": 0.60, "long": 1.30, "ep": 0.055}],
+      "equipage": [{"x": 6.15, "y": 1.55, "role": "conducteur"}, {"x": 5.55, "y": 1.30, "role": "tireur", "debout": true}]
+    },
+    "m3_half_track": {
+      "nom": "M3 Half-Track", "longueur": 6.17, "hauteur": 2.3, "teinte": "joueur", "moteur": "semi_chenille", "course": 0.09,
+      "fiche": "Semi-chenillé blindé de transport. Roues avant directrices, chenilles arrière.",
+      "roues": [{"x": 5.24, "r": 0.47}],
+      "chenille": {"barbotin": [3.15, 0.42, 0.30], "tendeur": [0.55, 0.38, 0.28], "galets": [1.05, 1.55, 2.05, 2.55], "r_galet": 0.19, "ep": 0.07},
+      "formes": [
+        {"pts": [[0.00, 0.80], [4.30, 0.80], [4.30, 1.98], [0.00, 1.98]], "c": "caisse", "z": 0},
+        {"pts": [[4.30, 0.80], [5.95, 0.80], [6.05, 1.45], [4.65, 1.58], [4.45, 1.98], [4.30, 1.98]], "c": "caisse", "z": 1},
+        {"pts": [[5.90, 0.85], [6.10, 0.85], [6.10, 1.45], [5.95, 1.48]], "c": "sombre", "z": 2},
+        {"cercle": [6.08, 0.62, 0.13], "c": "metal", "z": 2},
+        {"ligne": [[4.36, 1.76], [4.55, 1.76]], "ep": 0.03, "c": "sombre", "z": 2},
+        {"arc": [5.24, 0.47, 0.56, 15, 165, 0.07], "c": "caisse", "z": 1},
+        {"ligne": [[0.15, 0.84], [3.50, 0.84]], "ep": 0.07, "c": "sombre", "z": 1}
+      ],
+      "armes": [{"type": "mitrailleuse", "x": 3.00, "y": 1.98, "pied": 0.25, "long": 1.30, "ep": 0.055}],
+      "equipage": [{"x": 4.05, "y": 1.42, "role": "conducteur"}, {"x": 2.70, "y": 1.35, "role": "tireur", "debout": true}, {"x": 1.40, "y": 1.45, "role": "passager"}]
+    },
+    "m3_stuart": {
+      "nom": "M3 Stuart", "longueur": 4.53, "hauteur": 2.6, "teinte": "joueur", "moteur": "char_leger", "course": 0.08,
+      "fiche": "Char léger rapide. Canon de 37 mm, mitrailleuse de toit.",
+      "chenille": {"barbotin": [4.00, 0.52, 0.30], "tendeur": [0.42, 0.34, 0.30], "galets": [1.10, 1.70, 2.55, 3.15], "r_galet": 0.27, "rouleaux": [1.40, 2.85], "ep": 0.07},
+      "formes": [
+        {"pts": [[0.05, 0.62], [0.05, 1.45], [0.70, 1.62], [3.40, 1.62], [4.45, 1.20], [4.50, 0.80], [4.20, 0.62]], "c": "caisse", "z": 0},
+        {"pts": [[0.05, 0.90], [4.30, 0.90], [4.30, 0.99], [0.05, 0.99]], "c": "caisse", "z": 1},
+        {"pts": [[1.55, 1.62], [3.10, 1.62], [3.15, 2.25], [2.95, 2.42], [1.70, 2.42], [1.55, 2.30]], "c": "caisse", "z": 1},
+        {"pts": [[3.10, 1.85], [3.28, 1.85], [3.28, 2.15], [3.10, 2.15]], "c": "sombre", "z": 2},
+        {"pts": [[2.00, 2.42], [2.60, 2.42], [2.55, 2.52], [2.05, 2.52]], "c": "caisse", "z": 1},
+        {"cercle": [4.30, 1.30, 0.07], "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "canon", "x": 3.25, "y": 2.00, "long": 1.35, "ep": 0.07},
+                {"type": "mitrailleuse", "x": 2.30, "y": 2.52, "pied": 0.12, "long": 0.90, "ep": 0.04}],
+      "equipage": [{"x": 2.70, "y": 2.32, "role": "chef", "h": 0.26}]
+    },
+    "m4_sherman": {
+      "nom": "M4 Sherman", "longueur": 5.89, "hauteur": 2.8, "teinte": "joueur", "moteur": "char", "course": 0.09,
+      "fiche": "Char moyen polyvalent. Canon de 75 mm, suspension à bogies.",
+      "chenille": {"barbotin": [5.30, 0.72, 0.33], "tendeur": [0.50, 0.55, 0.30], "galets": [1.25, 1.75, 2.65, 3.15, 4.05, 4.55], "r_galet": 0.26, "rouleaux": [1.50, 2.90, 4.30], "ep": 0.08},
+      "formes": [
+        {"pts": [[0.00, 0.72], [0.00, 1.85], [4.45, 1.88], [5.85, 1.05], [5.85, 0.80], [5.40, 0.62], [0.40, 0.62]], "c": "caisse", "z": 0},
+        {"pts": [[0.05, 1.12], [5.45, 1.12], [5.45, 1.21], [0.05, 1.21]], "c": "caisse", "z": 1},
+        {"pts": [[2.00, 1.88], [4.25, 1.88], [4.40, 2.15], [4.30, 2.50], [3.80, 2.70], [2.40, 2.72], [2.05, 2.55], [1.85, 2.20]], "c": "caisse", "z": 1},
+        {"pts": [[4.25, 2.05], [4.55, 2.05], [4.55, 2.45], [4.25, 2.45]], "c": "sombre", "z": 2},
+        {"pts": [[2.60, 2.72], [3.20, 2.72], [3.15, 2.85], [2.65, 2.85]], "c": "caisse", "z": 1},
+        {"cercle": [5.30, 1.42, 0.08], "c": "sombre", "z": 2},
+        {"ligne": [[2.10, 2.05], [2.10, 2.55]], "ep": 0.025, "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "canon", "x": 4.55, "y": 2.25, "long": 2.10, "ep": 0.10},
+                {"type": "mitrailleuse", "x": 3.60, "y": 2.72, "pied": 0.22, "long": 1.20, "ep": 0.05}],
+      "equipage": [{"x": 2.90, "y": 2.72, "role": "chef", "h": 0.26}]
+    },
+    "tiger_1": {
+      "nom": "Tiger I", "longueur": 8.45, "hauteur": 3.0, "teinte": "allemand", "moteur": "char", "course": 0.08,
+      "fiche": "Char lourd, objectif final. Canon de 88 mm, galets entrelacés.",
+      "chenille": {"barbotin": [5.85, 0.80, 0.38], "tendeur": [0.55, 0.74, 0.33], "galets": [1.05, 1.70, 2.35, 3.00, 3.65, 4.30, 4.95], "galets_fond": [1.38, 2.03, 2.68, 3.33, 3.98, 4.63], "r_galet": 0.40, "ep": 0.09},
+      "formes": [
+        {"pts": [[0.00, 0.75], [0.00, 1.90], [6.32, 1.90], [6.32, 1.20], [6.05, 0.70], [0.30, 0.62]], "c": "caisse", "z": 0},
+        {"pts": [[0.00, 1.26], [6.32, 1.26], [6.32, 1.35], [0.00, 1.35]], "c": "caisse", "z": 1},
+        {"pts": [[1.85, 2.05], [2.25, 2.05], [2.25, 2.60], [1.90, 2.60]], "c": "sombre", "z": 1},
+        {"pts": [[2.20, 1.90], [5.00, 1.90], [5.10, 2.20], [5.05, 2.70], [4.80, 2.88], [2.40, 2.88], [2.20, 2.70]], "c": "caisse", "z": 1},
+        {"pts": [[5.00, 2.05], [5.35, 2.05], [5.35, 2.62], [5.00, 2.62]], "c": "sombre", "z": 2},
+        {"pts": [[2.50, 2.88], [3.15, 2.88], [3.10, 3.00], [2.55, 3.00]], "c": "caisse", "z": 1},
+        {"pts": [[6.10, 1.68], [6.30, 1.68], [6.30, 1.77], [6.10, 1.77]], "c": "sombre", "z": 2},
+        {"cercle": [6.20, 1.48, 0.08], "c": "sombre", "z": 2}
+      ],
+      "armes": [{"type": "canon", "x": 5.35, "y": 2.33, "long": 3.10, "ep": 0.12, "frein": true}],
+      "equipage": [{"x": 2.85, "y": 2.90, "role": "chef", "h": 0.26}]
+    }
+  }
+}

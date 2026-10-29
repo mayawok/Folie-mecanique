@@ -56,6 +56,8 @@ var _chrono := 0.0
 
 var zoom := 1.0
 var _touches := {}           # index du doigt -> position (zoom à deux doigts)
+var menus: Menus
+var garage: Garage
 
 
 func _ready() -> void:
@@ -68,6 +70,9 @@ func _ready() -> void:
 	_construire_base()
 	_construire_carte()
 	_construire_rapport()
+	menus = Menus.new()
+	menus.main = self
+	add_child(menus)
 	_montrer(base)
 	var args := OS.get_cmdline_user_args()
 	if "--neuve" in args:
@@ -76,6 +81,24 @@ func _ready() -> void:
 	_avancer(jeu.rattraper())
 	jeu.signaler_action()
 	# Vérification visuelle : godot --path game -- --neuve --carte | --pied | --rapport | --zoom | --revolte
+	#                         | --base | --pause | --garage=<véhicule> | --personnages  (sans option : menu principal)
+	var test := false
+	for a in args:
+		test = test or (a.begins_with("--") and not a.begins_with("--capture") and a != "--neuve")
+	if test:
+		menus.titre.visible = false
+		_entrer_base()
+	else:
+		menus.afficher_titre()
+	if "--pause" in args:
+		menus.basculer_pause()
+	for a in args:
+		if a.begins_with("--garage") or a == "--personnages":
+			_ouvrir_garage()
+			if a.begins_with("--garage="):
+				garage._choisir(garage.types.find(a.split("=")[1]))
+			if a == "--personnages":
+				garage._basculer_mode()
 	if "--carte" in args or "--pied" in args:
 		_ouvrir_carte()
 		_choisir_lieu("mine" if "--pied" in args else "oasis")
@@ -155,6 +178,7 @@ func _bouton(texte: String, action: Callable, parent: Node, principal := false) 
 	b.text = texte
 	b.custom_minimum_size = Vector2(0, 80)
 	b.pressed.connect(action)
+	b.pressed.connect(func(): Son.effet("sfx_ui_clic"))
 	if principal:
 		b.theme_type_variation = "BoutonPrincipal"
 	parent.add_child(b)
@@ -241,6 +265,16 @@ func _theme() -> Theme:
 	t.set_stylebox("scroll", "VScrollBar", _boite(Color(1, 1, 1, 0.04), 4, Color(0, 0, 0, 0), 2))
 	t.set_stylebox("grabber", "VScrollBar", _boite(Color(1, 1, 1, 0.25), 4, Color(0, 0, 0, 0), 2))
 	t.set_stylebox("tooltip_panel", "TooltipPanel", _boite(Color("#1A1C1E"), 10, C_BORD, 10))
+	# Curseurs (volumes)
+	var rail := _boite(Color(1, 1, 1, 0.12), 6, Color(0, 0, 0, 0), 0)
+	rail.content_margin_top = 6
+	rail.content_margin_bottom = 6
+	t.set_stylebox("slider", "HSlider", rail)
+	var plein := _boite(C_ACCENT, 6, Color(0, 0, 0, 0), 0)
+	plein.content_margin_top = 6
+	plein.content_margin_bottom = 6
+	t.set_stylebox("grabber_area", "HSlider", plein)
+	t.set_stylebox("grabber_area_highlight", "HSlider", plein)
 	return t
 
 
@@ -311,6 +345,11 @@ func _construire_base() -> void:
 	hud_res.add_theme_constant_override("separation", 14)
 	hud_res.size_flags_horizontal = SIZE_EXPAND_FILL
 	hb.add_child(hud_res)
+	var bp := _bouton("II", func(): menus.basculer_pause(), hb)
+	bp.custom_minimum_size = Vector2(90, 90)
+	bp.size_flags_vertical = SIZE_SHRINK_CENTER
+	bp.add_theme_font_override("font", police_gras)
+	bp.tooltip_text = "Pause"
 
 	# Journal (gauche)
 	var pj := _panneau(base, 20)
@@ -378,6 +417,8 @@ func _maj() -> void:
 	var teinte := Color.WHITE if jour_ else Color(0.42, 0.48, 0.68)
 	monde.modulate = teinte
 	ciel.modulate = teinte
+	if base.visible and menus and not menus.titre_visible():
+		Son.ambiance("amb_desert_jour" if jour_ else "amb_desert_nuit")
 	for c in en_route.get_children():
 		c.queue_free()
 	if jeu.expeditions:
@@ -513,7 +554,7 @@ func _maj_scene() -> void:
 	for v in jeu.vehicules:
 		if v.en_route:
 			continue
-		var r := _image("vehicules/" + v.type, jeu.stat(v.type, "longueur_m") * PXM, scene_base)
+		var r := _dessin_vehicule(v.type, PXM, false, scene_base)
 		r.position = Vector2(x, RUE_Y - r.size.y)
 		var etat := "%s · %d/%d" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
 		if v.etat == "epave":
@@ -841,6 +882,7 @@ func _partir() -> void:
 	if not r.ok:
 		lbl_briefing.text = "\n".join(r.erreurs)
 		return
+	Son.effet("sfx_depart_marche" if mode_pied else "sfx_depart_convoi")
 	_montrer(base)
 	_maj()
 
@@ -859,6 +901,9 @@ func _afficher_rapport(rap: Dictionary) -> void:
 	for c in rapport.get_children():
 		c.queue_free()
 	rapport.visible = true
+	Son.effet("sfx_radio")
+	if rap.get("convoi", []) or rap.get("marcheurs", []):
+		Son.voix("voix_retour_convoi")
 	var ecran := get_viewport_rect().size
 	var p := _panneau(rapport, 32)
 	(p.get_theme_stylebox("panel") as StyleBoxFlat).bg_color = Color("#141618")
@@ -914,13 +959,7 @@ func _vignette(v: Dictionary, ennemi: bool, parent: Node) -> void:
 	var vb := VBoxContainer.new()
 	vb.alignment = BoxContainer.ALIGNMENT_END
 	parent.add_child(vb)
-	var r := TextureRect.new()
-	r.texture = _tex("vehicules/" + v.type)
-	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	r.custom_minimum_size = Vector2(jeu.stat(v.type, "longueur_m") * 34, 110)
-	r.flip_h = ennemi
-	vb.add_child(r)
+	var r := _dessin_vehicule(v.type, 34.0, ennemi, vb)
 	var etat: String = {"ok": "intact", "epave": "épave", "perdu": "perdu", "detruit": "détruit"}[v.etat]
 	if v.etat != "ok":
 		r.modulate = Color(0.4, 0.35, 0.3)
@@ -954,3 +993,54 @@ class Routes extends Control:
 		for id in R.lieux:
 			var p := Vector2(R.lieux[id].pos[0], R.lieux[id].pos[1]) * size
 			draw_dashed_line(b, p, Color(0.2, 0.1, 0.03, 0.75), 5.0, 18.0)
+
+
+# --- Dessin des véhicules, menus, garage ------------------------------------
+
+func _dessin_vehicule(type: String, echelle: float, ennemi: bool, parent: Node) -> VehiculeDessin:
+	var d := VehiculeDessin.new()
+	d.type = type
+	d.ppm = echelle
+	d.ennemi = ennemi
+	d.miroir = ennemi
+	parent.add_child(d)
+	return d
+
+
+# Arrivée sur la base (depuis le menu principal ou au lancement des tests).
+func _entrer_base() -> void:
+	Son.musique("mus_base")
+	_maj()
+
+
+func _nouvelle_partie() -> void:
+	jeu.effacer_partie()
+	file_rapports.clear()
+	rapport.visible = false
+	jeu.signaler_action()
+	jeu.sauver()
+	_montrer(base)
+	_maj()
+
+
+func _ouvrir_garage() -> void:
+	if garage == null:
+		garage = Garage.new()
+		garage.main = self
+		add_child(garage)
+	garage.visible = true
+	garage._maj_son()
+	Son.ambiance("")
+
+
+func _fermer_garage() -> void:
+	garage.visible = false
+	if menus.titre_visible():
+		Son.moteur("sfx_moteur_semi_chenille")
+	else:
+		_entrer_base()
+
+
+func _unhandled_input(e: InputEvent) -> void:
+	if e.is_action_pressed("ui_cancel") and not menus.titre_visible() and not (garage and garage.visible):
+		menus.basculer_pause()
