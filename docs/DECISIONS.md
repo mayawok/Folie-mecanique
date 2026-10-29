@@ -11,3 +11,5 @@
 | 2026-10-29 | DEC-007 | Joueur absent : ordre prévu + notification ; option d'attente/siège avec fortification du convoi | Voir `docs/design/VISION.md`. |
 | 2026-10-29 | DEC-008 | Faune dangereuse comme composante de jeu ; liste des 10 véhicules V1 validée | Idem. |
 | 2026-10-29 | DEC-009 | V1 : combats résolus automatiquement ; V2 : prise de contrôle en vue de profil, même simulation | Un convoi est une file sur une ligne : un seul calcul, affiché ou non. |
+| 2026-10-29 | DEC-010 | 1 jour de jeu = 1 jour réel ; 2 à 3 connexions par jour ; départ programmé des expéditions | Voir `docs/design/BOUCLE.md`. |
+| 2026-10-29 | DEC-011 | Consommation continue en absence, bornée par des planchers ; pénurie graduée (productivité, maladie, révolte/fuite), sans défaite sèche | Idem. |

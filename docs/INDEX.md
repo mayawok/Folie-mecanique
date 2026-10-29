@@ -22,6 +22,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
     (un fichier par onglet, voir `data/master/INDEX.md`). Édition dans
     `sources/base_maitre.xlsx` (v1.9), puis
     `python3 tools/export_xlsx.py sources/base_maitre.xlsx data/master`.
+-   Boucle de jeu : `docs/design/BOUCLE.md`
 -   Spécification intégrée : `docs/design/specification_integree.md`
 -   Équilibrage et feuille de route : `docs/design/equilibrage_feuille_de_route.md`
 -   Backlog de développement : `docs/TASKS.md`

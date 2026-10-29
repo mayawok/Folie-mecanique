@@ -27,10 +27,12 @@ Mis à jour : 2026-10-29. Fichier à lire en premier (court, à garder < 60 lign
 
 ## Prochaines étapes
 
-1. Revue de conception thème par thème. Thème 1 (vision) terminé : `docs/design/VISION.md`.
-   **Prochain : thème 2, boucle de jeu** (5 min / 1 jour / 1 mois), puis 3 achats intégrés,
-   4 périmètre V1, 5 systèmes un par un (dont faune, captivité), 6 direction artistique.
-2. Rééquilibrer l'économie de départ, relancer la simulation.
+1. Revue de conception thème par thème. Thème 1 (vision) : `docs/design/VISION.md`.
+   Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
+   **Prochain : thème 3, achats intégrés**, puis 4 périmètre V1,
+   5 systèmes un par un (dont faune, captivité), 6 direction artistique.
+2. Rééquilibrer l'économie de départ, relancer la simulation avec jour/nuit,
+   planchers d'absence et profil « joueur absent » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.
 4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).
 
