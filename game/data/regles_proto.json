@@ -1,0 +1,75 @@
+{
+  "_lisez_moi": "Valeurs du prototype. Modifiables librement : enregistrer, pousser, le jeu se reconstruit. Durées en heures, quantités dans les unités du jeu.",
+  "objectif_jours": 10,
+  "depart": {
+    "survivants": [
+      {"nom": "Marcel", "femme": false, "poste": "puits"},
+      {"nom": "Louise", "femme": true, "poste": "cuisine"}
+    ],
+    "stocks": {"water_l": 35, "food": 7, "fuel_l": 80, "metal": 15, "materials": 10, "ammo": 60},
+    "vehicules": ["willys_mb", "bmw_r75", "m3_half_track"]
+  },
+  "ressources": {
+    "water_l": {"nom": "Eau", "unite": "L", "icone": "ui_res_eau", "capacite": 200, "poids": 0.1},
+    "food": {"nom": "Nourriture", "unite": "rations", "icone": "ui_res_nourriture", "capacite": 60, "poids": 0.5},
+    "fuel_l": {"nom": "Carburant", "unite": "L", "icone": "ui_res_carburant", "capacite": 200, "poids": 0.1},
+    "metal": {"nom": "Métal", "unite": "", "icone": "ui_res_metal", "capacite": 300, "poids": 1.0},
+    "materials": {"nom": "Matériaux", "unite": "", "icone": "ui_res_materiaux", "capacite": 300, "poids": 1.0},
+    "ammo": {"nom": "Munitions", "unite": "", "icone": "ui_res_munitions", "capacite": 400, "poids": 0.2}
+  },
+  "consommation_par_survivant": {"water_l": 5, "food": 1},
+  "penurie": {"productivite": 0.5},
+  "postes": {
+    "repos": {"nom": "Repos", "produit": {}},
+    "puits": {"nom": "Puits", "produit": {"water_l": 5}},
+    "cuisine": {"nom": "Cuisine", "produit": {"food": 1}},
+    "atelier": {"nom": "Atelier", "reparation_pv": 30, "metal_par_10pv": 1, "epave_cout": {"metal": 10, "materials": 5}}
+  },
+  "batiments": [
+    {"id": "entrepot", "image": "bat_entrepot_n1", "largeur_m": 6, "x_m": 1.0},
+    {"id": "cuve", "image": "bat_cuve_n1", "largeur_m": 3, "x_m": 7.5},
+    {"id": "puits", "image": "bat_puits_n1", "largeur_m": 3, "x_m": 11.0},
+    {"id": "cuisine", "image": "bat_cuisine_n1", "largeur_m": 5, "x_m": 14.5},
+    {"id": "atelier", "image": "bat_atelier_n1", "largeur_m": 8, "x_m": 20.0}
+  ],
+  "vehicules": {
+    "willys_mb": {"nom": "Willys MB", "longueur_m": 3.36, "pv": 40, "blindage": 2, "feu": 8, "precision": 0.6, "conso_l_h": 4, "capacite": 40, "equipage_max": 2, "vitesse": 1.0},
+    "bmw_r75": {"nom": "BMW R75 side-car", "longueur_m": 2.35, "pv": 25, "blindage": 1, "feu": 6, "precision": 0.55, "conso_l_h": 2, "capacite": 15, "equipage_max": 2, "vitesse": 1.2},
+    "m3_half_track": {"nom": "M3 Half-Track", "longueur_m": 6.17, "pv": 90, "blindage": 8, "feu": 10, "precision": 0.6, "conso_l_h": 9, "capacite": 120, "equipage_max": 3, "vitesse": 0.8},
+    "citroen_traction": {"nom": "Traction de pillards", "longueur_m": 4.75, "pv": 25, "blindage": 2, "feu": 5, "precision": 0.5, "conso_l_h": 3, "capacite": 30, "equipage_max": 2, "vitesse": 1.0},
+    "citroen_t23": {"nom": "Camion de pillards", "longueur_m": 5.6, "pv": 45, "blindage": 3, "feu": 7, "precision": 0.5, "conso_l_h": 6, "capacite": 80, "equipage_max": 3, "vitesse": 0.8}
+  },
+  "combat": {
+    "tours_max": 10,
+    "munitions_par_tir": 2,
+    "chance_roulement_touche": 0.12,
+    "chance_armement_touche": 0.12,
+    "evitement_reussite": 0.6,
+    "jours_blessure": 2,
+    "butin_pillards": {"ammo": [10, 30], "fuel_l": [10, 40], "metal": [5, 15]}
+  },
+  "pillards": {
+    "faible": ["citroen_traction"],
+    "modere": ["citroen_traction", "citroen_t23"],
+    "eleve": ["citroen_t23", "citroen_traction", "citroen_t23"]
+  },
+  "marge_carburant": 0.25,
+  "reconstitution_par_jour": 0.15,
+  "lieux": {
+    "oasis": {"nom": "Oasis du Puits-Sec", "icone": "carte_icone_oasis", "pos": [0.36, 0.62], "heures": 2, "terrain": 1.0,
+      "risque": "faible", "chance_pillards": 0.15, "chance_recrue": 0.15, "butin": {"water_l": [50, 90]}},
+    "ferme": {"nom": "Ferme abandonnée", "icone": "carte_icone_ferme", "pos": [0.30, 0.30], "heures": 3, "terrain": 1.0,
+      "risque": "faible", "chance_pillards": 0.2, "chance_recrue": 0.3, "butin": {"food": [8, 16], "materials": [2, 6]}},
+    "depot": {"nom": "Dépôt de carburant", "icone": "carte_icone_depot_carburant", "pos": [0.56, 0.30], "heures": 6, "terrain": 1.2,
+      "risque": "modere", "chance_pillards": 0.45, "chance_recrue": 0.1, "butin": {"fuel_l": [60, 120], "ammo": [10, 30]}},
+    "champ": {"nom": "Champ de bataille", "icone": "carte_icone_champ_bataille", "pos": [0.60, 0.80], "heures": 12, "terrain": 1.4,
+      "risque": "eleve", "chance_pillards": 0.7, "chance_recrue": 0.1, "butin": {"metal": [20, 40], "materials": [8, 16], "ammo": [30, 60]}}
+  },
+  "base_pos": [0.14, 0.50],
+  "evenements_trajet": [
+    {"texte": "Panne en route : réparation de fortune.", "chance": 0.15, "perte": {"fuel_l": 8}},
+    {"texte": "Tempête de sable : le convoi s'abrite et boit plus.", "chance": 0.1, "perte": {"water_l": 10}},
+    {"texte": "Raccourci trouvé par l'éclaireur.", "chance": 0.1, "gain": {"fuel_l": 6}}
+  ],
+  "noms_recrues": ["Henri", "Jeanne", "Lucien", "Odette", "Paul", "Simone", "René", "Yvonne", "Gaston", "Madeleine"]
+}
