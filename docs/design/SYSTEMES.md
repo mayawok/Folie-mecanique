@@ -94,3 +94,27 @@ L'éditeur d'atelier est la partie la plus difficile à programmer : premier pro
 - Sous-ensemble de composants V1 parmi les 29 du catalogue.
 - Règles de compatibilité simplifiées (poids, puissance, emplacement).
 - Coûts et durées d'atelier.
+
+## 4. Carte et expéditions — validé (DEC-017)
+
+Déjà décidés (VISION, BOUCLE) : ordres permanents, départ programmé, événements de trajet,
+rapport, réservation des vivres et du carburant.
+
+### Règles
+
+- **Carte en graphe** : la base, 10 à 12 points d'intérêt, des routes avec distance
+  et terrain. Un itinéraire = une suite de routes.
+- **Trois cercles** : proche (1–3 h, peu de risque et de butin), moyen (4–8 h),
+  lointain (12 h et plus, riche et dangereux).
+- **Types de lieux** : oasis/puits (eau), ferme abandonnée (nourriture), dépôt (carburant),
+  champ de bataille (épaves, composants), village (survivants), ville (mixte, défendue).
+- **Épuisement** : un lieu fouillé s'appauvrit puis se reconstitue lentement.
+- **Briefing** : carburant aller-retour + marge de 25 %, risque (faible / modéré / élevé /
+  critique) avec raisons, alerte si carburant insuffisant.
+- **Capacité de chargement** par véhicule : limite le butin rapporté.
+
+### Ouvert
+
+- Liste et placement des 10 à 12 points d'intérêt.
+- Vitesse de reconstitution des lieux.
+- Consommation de carburant par véhicule et par terrain.
