@@ -48,6 +48,12 @@ var ordre_btn: OptionButton
 var lbl_briefing: Label
 var btn_partir: Button
 
+var lbl_heure: Label
+var en_route: VBoxContainer
+var ciel: TextureRect
+var file_rapports := []      # rapports à montrer l'un après l'autre
+var _chrono := 0.0
+
 var zoom := 1.0
 var _touches := {}           # index du doigt -> position (zoom à deux doigts)
 
@@ -63,9 +69,13 @@ func _ready() -> void:
 	_construire_carte()
 	_construire_rapport()
 	_montrer(base)
-	_maj()
-	# Vérification visuelle : godot --path game -- --carte | --pied | --rapport | --zoom
 	var args := OS.get_cmdline_user_args()
+	if "--neuve" in args:
+		jeu.effacer_partie()
+	# Rattrapage des heures passées hors du jeu, puis rapport de retour
+	_avancer(jeu.rattraper())
+	jeu.signaler_action()
+	# Vérification visuelle : godot --path game -- --neuve --carte | --pied | --rapport | --zoom | --revolte
 	if "--carte" in args or "--pied" in args:
 		_ouvrir_carte()
 		_choisir_lieu("mine" if "--pied" in args else "oasis")
@@ -78,7 +88,12 @@ func _ready() -> void:
 	if "--rapport" in args:
 		jeu.stocks.fuel_l = 200
 		jeu.R.lieux.depot.chance_pillards = 1.0
-		_afficher_rapport(jeu.lancer("depot", jeu.vehicules_prets().slice(2, 3), "bout"))
+		jeu.lancer("depot", jeu.vehicules_prets().slice(2, 3), "bout")
+		_avancer(jeu.avancer_tests(13))
+	if "--revolte" in args:
+		jeu.stocks.water_l = 0
+		jeu.stocks.food = 0
+		_avancer(jeu.avancer_tests(50))
 	for a in args:   # --capture=fichier.png : image de l'écran puis fermeture
 		if a.begins_with("--capture="):
 			for i in 4:
@@ -242,7 +257,7 @@ func _construire_base() -> void:
 	base.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(base)
 	# Ciel fixe, plein écran
-	var ciel := TextureRect.new()
+	ciel = TextureRect.new()
 	ciel.texture = _tex("decor/bg_desert_ciel")
 	ciel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ciel.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -291,6 +306,7 @@ func _construire_base() -> void:
 	hb.add_child(bloc_jour)
 	_label("JOUR", 20, bloc_jour, C_DISCRET, true)
 	lbl_jour = _label("", 52, bloc_jour, C_TEXTE, true)
+	lbl_heure = _label("", 20, bloc_jour, C_DISCRET)
 	hud_res = HBoxContainer.new()
 	hud_res.add_theme_constant_override("separation", 14)
 	hud_res.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -323,11 +339,15 @@ func _construire_base() -> void:
 	liste_surv = VBoxContainer.new()
 	liste_surv.add_theme_constant_override("separation", 10)
 	vs.add_child(liste_surv)
+	en_route = VBoxContainer.new()
+	en_route.add_theme_constant_override("separation", 6)
+	vs.add_child(en_route)
 	vs.add_child(HSeparator.new())
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 12)
 	vs.add_child(actions)
-	_bouton("Passer la journée", _passer, actions).size_flags_horizontal = SIZE_EXPAND_FILL
+	# Bouton de test : fait avancer l'horloge de 6 h (retiré du jeu final)
+	_bouton("Test +6 h", func(): _avancer(jeu.avancer_tests(6)), actions).size_flags_horizontal = SIZE_EXPAND_FILL
 	_bouton("Expédition", func(): _ouvrir_carte(), actions, true).size_flags_horizontal = SIZE_EXPAND_FILL
 
 	# Zoom (bas droite, hors des véhicules), utile sur ordinateur
@@ -351,13 +371,27 @@ func _construire_base() -> void:
 
 
 func _maj() -> void:
-	lbl_jour.text = str(jeu.jour)
+	lbl_jour.text = str(jeu.jour())
+	var jour_ := jeu.est_jour()
+	lbl_heure.text = "%02d h · %s" % [jeu.heure_locale(), "jour" if jour_ else "nuit"]
+	# Nuit : simple voile de lumière sur le décor (GRAPHISMES : pas d'images de nuit)
+	var teinte := Color.WHITE if jour_ else Color(0.42, 0.48, 0.68)
+	monde.modulate = teinte
+	ciel.modulate = teinte
+	for c in en_route.get_children():
+		c.queue_free()
+	if jeu.expeditions:
+		_label("EN ROUTE", 20, en_route, C_DISCRET, true)
+	for e in jeu.expeditions:
+		var reste := int(ceil((e.retour - jeu.t) / 3600.0))
+		_label("%s %s · retour dans %d h" % ["À pied :" if e.pied else "Convoi :", jeu.R.lieux[e.lieu].nom, reste], 22, en_route)
 	for c in hud_res.get_children():
 		c.queue_free()
 	for res in jeu.R.ressources:
 		hud_res.add_child(_carte_ressource(res))
-	if jeu.penurie:
-		_puce("PÉNURIE", C_ROUGE, hud_res)
+	if jeu.etape > 0:
+		var noms := ["", "PÉNURIE", "MALADIE", "AGITATION"]
+		_puce("%s · étape %d" % [noms[jeu.etape], jeu.etape], C_ROUGE, hud_res)
 	lbl_journal.text = "\n".join(jeu.journal.slice(max(0, jeu.journal.size() - 6)))
 	_maj_survivants()
 	_maj_scene()
@@ -435,10 +469,10 @@ func _maj_survivants() -> void:
 		liste_surv.add_child(h)
 		var n := _label(s.nom, 28, h, C_TEXTE, true)
 		n.custom_minimum_size = Vector2(190, 0)
-		if s.occupe > 0:
-			_puce("En expédition · %d j" % s.occupe, C_ACCENT, h)
-		elif s.blesse > 0:
-			_puce("Blessé(e) · %d j" % s.blesse, C_ORANGE, h)
+		if s.occupe_h > 0:
+			_puce("En expédition · %d h" % s.occupe_h, C_ACCENT, h)
+		elif s.blesse_h > 0:
+			_puce("%s · %d h" % ["Malade" if s.malade else "Blessé(e)", s.blesse_h], C_ORANGE, h)
 		else:
 			var ob := OptionButton.new()
 			for p in Jeu.POSTES:
@@ -446,7 +480,7 @@ func _maj_survivants() -> void:
 			ob.selected = Jeu.POSTES.find(s.poste)
 			ob.custom_minimum_size = Vector2(0, 68)
 			ob.size_flags_horizontal = SIZE_EXPAND_FILL
-			ob.item_selected.connect(func(i): s.poste = Jeu.POSTES[i]; _maj())
+			ob.item_selected.connect(func(i): jeu.affecter(s, Jeu.POSTES[i]); _maj())
 			h.add_child(ob)
 
 
@@ -461,10 +495,10 @@ func _maj_scene() -> void:
 	# Survivants devant leur poste (au repos : devant l'entrepôt)
 	var decal := {}
 	for s in jeu.survivants:
-		if s.occupe > 0:
+		if s.occupe_h > 0:
 			continue
 		var cle: String = s.poste if s.poste != "repos" else "entrepot"
-		var pose := "debout" if s.poste == "repos" or s.blesse > 0 else "travaille"
+		var pose := "debout" if s.poste == "repos" or s.blesse_h > 0 else "travaille"
 		var img := "personnages/pers_%s_%s" % ["survivante" if s.femme else "survivant", pose]
 		var t := _tex(img)
 		var h := 1.75 * PXM * (0.75 if pose == "travaille" else 1.0)
@@ -472,11 +506,13 @@ func _maj_scene() -> void:
 		var d: float = decal.get(cle, 0.0)
 		decal[cle] = d + r.size.x + 6
 		r.position = Vector2(centres[cle] - 40 + d, SOL_Y + 20 - r.size.y)
-		if s.blesse > 0:
+		if s.blesse_h > 0:
 			r.modulate = Color(1, 0.75, 0.75)
 	# Véhicules garés
 	var x := 80.0 + marges.x
 	for v in jeu.vehicules:
+		if v.en_route:
+			continue
 		var r := _image("vehicules/" + v.type, jeu.stat(v.type, "longueur_m") * PXM, scene_base)
 		r.position = Vector2(x, RUE_Y - r.size.y)
 		var etat := "%s · %d/%d" % [jeu.stat(v.type, "nom"), v.pv, v.pv_max]
@@ -551,11 +587,60 @@ func _entree_zoom(e: InputEvent) -> void:
 		_deplacer(-e.delta * 20)
 
 
-func _passer() -> void:
-	jeu.passer_journee()
-	_maj()
+# Horloge : toutes les 5 s, le jeu rattrape les heures pleines écoulées.
+func _process(delta: float) -> void:
+	_chrono += delta
+	if _chrono >= 5.0:
+		_chrono = 0.0
+		_avancer(jeu.rattraper())
+
+
+func _input(e: InputEvent) -> void:
+	if e is InputEventScreenTouch or e is InputEventMouseButton:
+		jeu.signaler_action()
+
+
+# Après un passage du temps : rapport de retour, expéditions revenues, révolte.
+func _avancer(bilan: Dictionary) -> void:
+	if not bilan.is_empty() and bilan.heures >= 2:
+		file_rapports.append(_rapport_absence(bilan))
+	file_rapports.append_array(jeu.rapports)
+	jeu.rapports.clear()
+	jeu.sauver()
 	if jeu.perdu():
-		_afficher_fin()
+		file_rapports.append({"titre": "La communauté s'est éteinte", "convoi": [], "pillards": [],
+			"lignes": ["Plus aucun survivant. Une nouvelle partie commence."]})
+		jeu.effacer_partie()
+	_maj()
+	if not rapport.visible:
+		_rapport_suivant()
+
+
+func _rapport_absence(b: Dictionary) -> Dictionary:
+	var lignes := []
+	for res in jeu.R.ressources:
+		var d: float = b.apres[res] - b.avant[res]
+		if abs(d) >= 1:
+			lignes.append("%s : %+d (%d)" % [jeu.R.ressources[res].nom, int(d), int(b.apres[res])])
+	lignes.append("")
+	lignes.append_array(b.lignes)
+	return {"titre": "Pendant ton absence (%d h)" % b.heures, "convoi": [], "pillards": [], "lignes": lignes}
+
+
+func _rapport_suivant() -> void:
+	if file_rapports:
+		_afficher_rapport(file_rapports.pop_front())
+	elif not jeu.decision.is_empty():
+		_afficher_revolte()
+	else:
+		rapport.visible = false
+
+
+func _afficher_revolte() -> void:
+	var nom: String = jeu.decision.nom
+	_afficher_rapport({"titre": "Révolte : " + nom, "convoi": [], "pillards": [], "decision": true,
+		"lignes": ["%s refuse de travailler et menace de partir avec une partie des vivres." % nom,
+			"Les autres survivants attendent ta décision."]})
 
 
 # --- Carte et convoi --------------------------------------------------------
@@ -747,15 +832,17 @@ func _maj_briefing() -> void:
 
 
 func _partir() -> void:
-	var rap: Dictionary
+	var r: Dictionary
 	if mode_pied:
-		rap = jeu.lancer_pied(lieu_choisi, nb_pied)
+		r = jeu.lancer_pied(lieu_choisi, nb_pied)
 	else:
 		var ordre: String = Jeu.ORDRES.keys()[ordre_btn.selected]
-		rap = jeu.lancer(lieu_choisi, _convoi(), ordre)
+		r = jeu.lancer(lieu_choisi, _convoi(), ordre)
+	if not r.ok:
+		lbl_briefing.text = "\n".join(r.erreurs)
+		return
 	_montrer(base)
 	_maj()
-	_afficher_rapport(rap)
 
 
 # --- Rapport ----------------------------------------------------------------
@@ -781,6 +868,8 @@ func _afficher_rapport(rap: Dictionary) -> void:
 	vb.add_theme_constant_override("separation", 16)
 	p.add_child(vb)
 	_label(rap.titre, 40, vb, C_TEXTE, true)
+	if rap.has("heure"):
+		_label("Retour " + rap.heure, 22, vb, C_DISCRET)
 	# File du convoi (vers la droite) face aux pillards (vers la gauche)
 	var file := HBoxContainer.new()
 	file.add_theme_constant_override("separation", 24)
@@ -794,14 +883,15 @@ func _afficher_rapport(rap: Dictionary) -> void:
 		r.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
 		r.custom_minimum_size = Vector2(80, 160)
 		file.add_child(r)
-	var convoi: Array = rap.convoi.duplicate()
+	var convoi: Array = rap.get("convoi", []).duplicate()
 	convoi.reverse()   # la tête est à droite, face à l'ennemi
 	for v in convoi:
 		_vignette(v, false, file)
-	if rap.pillards:
+	if rap.get("pillards", []):
 		_label("⟷", 40, file, C_DISCRET)
 		for v in rap.pillards:
 			_vignette(v, true, file)
+	file.visible = file.get_child_count() > 0
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -810,7 +900,14 @@ func _afficher_rapport(rap: Dictionary) -> void:
 	lignes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lignes.size_flags_horizontal = SIZE_EXPAND_FILL
 	lignes.add_theme_constant_override("line_spacing", 6)
-	_bouton("Continuer", func(): rapport.visible = false; _maj(), vb, true)
+	if rap.get("decision", false):
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 12)
+		vb.add_child(hb)
+		for c in [["pardonner", "Pardonner"], ["partir", "Le laisser partir"], ["executer", "Exécuter"]]:
+			_bouton(c[1], func(): jeu.decider(c[0]); _maj(); _rapport_suivant(), hb).size_flags_horizontal = SIZE_EXPAND_FILL
+	else:
+		_bouton("Continuer", func(): _maj(); _rapport_suivant(), vb, true)
 
 
 func _vignette(v: Dictionary, ennemi: bool, parent: Node) -> void:
@@ -830,12 +927,6 @@ func _vignette(v: Dictionary, ennemi: bool, parent: Node) -> void:
 	var coul := C_ROUGE if ennemi else (C_VERT if v.etat == "ok" else C_ORANGE)
 	var l := _label(etat, 20, vb, coul, true)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-
-func _afficher_fin() -> void:
-	_afficher_rapport({"titre": "La communauté s'est éteinte", "convoi": [], "pillards": [],
-		"lignes": ["Plus aucun survivant. Une nouvelle partie commence à la fermeture."]})
-	jeu.nouvelle_partie()
 
 
 # Flèche de tendance : ▲ verte (excédent), ▼ rouge (déficit), trait gris (stable).

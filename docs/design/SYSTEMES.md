@@ -1,6 +1,6 @@
 # Systèmes V1 — Folie Mécanique
 
-Statut : en revue (thème 5). Un système à la fois, dans le périmètre V1 (DEC-013).
+Statut : en revue (thème 5). Systèmes 1 à 7 validés. Un système à la fois, dans le périmètre V1 (DEC-013).
 Chaque système précise : entrées, sorties, règles, valeurs de départ, liens.
 
 Ordre de revue : 1 ressources et stockage · 2 travailleurs et bâtiments ·
@@ -168,3 +168,35 @@ par le moteur de combat (système 5) avec un profil animal.
 
 - Noms et apparence des espèces (thème 6).
 - Probabilités par lieu, cercle et moment de la journée.
+
+## 7. Temps, absence et pénurie — validé (DEC-022)
+
+Complète `BOUCLE.md` (points restés ouverts). Valeurs dans `game/data/regles_proto.json`
+(blocs `temps` et `penurie`), à ajuster par simulation.
+
+### Règles
+
+- **Calcul heure par heure**, en temps réel. Le rattrapage hors ligne rejoue les heures
+  manquées dans l'ordre (résultat déterministe).
+- **Jour / nuit (désert)** : jour de 7 h à 21 h, heure locale du téléphone.
+  Jour : eau consommée à +30 %, pillards ×1,5. Nuit : pillards ×0,5. Nuit affichée par
+  un voile de lumière global.
+- **Expéditions à durée réelle** : vivres et carburant réservés au départ ; trajet,
+  combat et butin résolus au retour (aller-retour). Le joueur reçoit un rapport.
+- **Absence** : au-delà de 12 h sans action du joueur, consommation réduite de moitié.
+- **Rattrapage plafonné à 72 h** : au-delà, le monde attend le joueur. Limite aussi
+  la triche par changement d'horloge.
+- **Pénurie graduée** :
+  1. stock d'eau ou de nourriture à zéro : productivité −50 % ;
+  2. après 24 h : un survivant tombe malade (indisponible 24 h) ;
+  3. après 48 h : agitation, **seulement si le joueur est présent** ; toutes les 12 h,
+     un survivant se révolte et le joueur décide : pardonner, laisser partir, exécuter.
+  - Retour : la pénurie recule d'une étape par 12 h de stock suffisant.
+- **Sauvegarde** locale automatique à chaque action et à chaque heure de jeu.
+- **Rapport de retour** à la connexion (au moins 2 h écoulées) : variation des stocks
+  et événements, puis rapports d'expédition.
+
+### Ouvert
+
+- Notifications locales (retour de convoi, pénurie) : nécessitent l'application iOS.
+- Valeurs à recaler par la simulation 30 jours (profils « joueur absent », « abonné »).

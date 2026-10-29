@@ -1,19 +1,34 @@
 # Logique du prototype : état de la partie et règles. Aucun affichage ici.
 # Toutes les valeurs viennent de data/regles_proto.json.
+#
+# Temps réel (système 7, DEC-022) : le monde avance heure par heure.
+# « t » est un horodatage Unix (secondes) toujours calé sur une heure pleine.
+# À chaque connexion, les heures manquées sont rejouées dans l'ordre
+# (rattrapage déterministe), dans la limite de 72 h.
 class_name Jeu
 extends RefCounted
 
 const POSTES := ["repos", "puits", "cuisine", "atelier"]
 const RISQUES := {"faible": "faible", "modere": "modéré", "eleve": "élevé", "critique": "critique"}
 const ORDRES := {"eviter": "Éviter le combat", "repli": "Repli à la première perte", "bout": "Jusqu'au bout"}
+const H := 3600
+const SAUVEGARDE := "user://partie.json"
 
 var R: Dictionary            # règles
-var jour := 1
+var t := 0                   # heure simulée (Unix, heure pleine)
+var t_debut := 0             # début de la partie
+var derniere_action := 0     # dernière action du joueur (Unix, temps réel)
+var decalage := 0            # avance de l'horloge pour les tests (bouton « +6 h »)
 var stocks := {}             # ressource -> quantité
-var survivants := []         # {nom, femme, poste, blesse, occupe}
-var vehicules := []          # {uid, type, pv, pv_max, etat ("ok" ou "epave")}
-var penurie := false
+var survivants := []         # {nom, femme, poste, blesse_h, occupe_h, malade}
+var vehicules := []          # {uid, type, pv, pv_max, etat ("ok"|"epave"), en_route}
+var expeditions := []        # convois en cours, résolus à leur retour
 var epuisement := {}         # lieu -> facteur de butin (1 = plein)
+var etape := 0               # pénurie : 0 aucune, 1 productivité, 2 maladie, 3 agitation
+var heures_penurie := 0
+var heures_ok := 0
+var heures_agitation := 0
+var decision := {}           # révolte en attente d'une décision du joueur
 var journal := []
 var objectif_annonce := false
 var _uid := 0
@@ -22,106 +37,296 @@ var _uid := 0
 func _init() -> void:
 	var f := FileAccess.open("res://data/regles_proto.json", FileAccess.READ)
 	R = JSON.parse_string(f.get_as_text())
-	nouvelle_partie()
+	if not charger():
+		nouvelle_partie()
+
+
+func maintenant() -> int:
+	return int(Time.get_unix_time_from_system()) + decalage
 
 
 func nouvelle_partie() -> void:
-	jour = 1
-	penurie = false
+	decalage = 0
+	t = maintenant() / H * H
+	t_debut = t
+	derniere_action = maintenant()
+	etape = 0
+	heures_penurie = 0
+	heures_ok = 0
+	heures_agitation = 0
+	decision = {}
 	objectif_annonce = false
+	expeditions = []
+	rapports = []
 	stocks = R.depart.stocks.duplicate()
 	survivants.clear()
 	for s in R.depart.survivants:
-		survivants.append({"nom": s.nom, "femme": s.femme, "poste": s.poste, "blesse": 0, "occupe": 0})
+		survivants.append(_survivant(s.nom, s.femme, s.poste))
 	vehicules.clear()
-	for t in R.depart.vehicules:
-		ajouter_vehicule(t)
+	for ty in R.depart.vehicules:
+		ajouter_vehicule(ty)
 	for l in R.lieux:
 		epuisement[l] = 1.0
-	journal = ["Jour 1. Deux survivants, quelques jours de vivres. Il faudra sortir."]
+	journal = []
+	_journal(["Deux survivants, quelques jours de vivres. Il faudra sortir."])
+	sauver()
+
+
+func _survivant(nom: String, femme: bool, poste: String) -> Dictionary:
+	return {"nom": nom, "femme": femme, "poste": poste, "blesse_h": 0, "occupe_h": 0, "malade": false}
 
 
 func ajouter_vehicule(type: String) -> void:
 	_uid += 1
 	var pv: int = int(R.vehicules[type].pv)
-	vehicules.append({"uid": _uid, "type": type, "pv": pv, "pv_max": pv, "etat": "ok"})
+	vehicules.append({"uid": _uid, "type": type, "pv": pv, "pv_max": pv, "etat": "ok", "en_route": false})
 
 
 func stat(type: String, cle: String):
 	return R.vehicules[type][cle]
 
 
-# --- Base -------------------------------------------------------------------
+# --- Horloge ----------------------------------------------------------------
 
-func disponible(s: Dictionary) -> bool:
-	return s.blesse == 0 and s.occupe == 0
-
-
-func autonomie(res: String) -> float:
-	var conso: float = R.consommation_par_survivant.get(res, 0) * survivants.size()
-	return INF if conso <= 0 else stocks[res] / conso
+# Numéro du jour : change à minuit, heure locale.
+func jour(ts: int = -1) -> int:
+	if ts < 0:
+		ts = t
+	return _jour_local(ts) - _jour_local(t_debut) + 1
 
 
-# Solde prévu sur une journée (production des postes - consommation).
-# Sert à la flèche de tendance à côté de chaque barre de ressource.
-func bilan(res: String) -> float:
-	var mult: float = R.penurie.productivite if penurie else 1.0
-	var b := 0.0
-	for s in survivants:
-		if disponible(s):
-			b += R.postes[s.poste].get("produit", {}).get(res, 0) * mult
-	b -= R.consommation_par_survivant.get(res, 0) * survivants.size()
-	return b
+func _jour_local(ts: int) -> int:
+	return (ts + Time.get_time_zone_from_system().bias * 60) / 86400
 
 
-func passer_journee() -> Array:
+func heure_locale(ts: int = -1) -> int:
+	if ts < 0:
+		ts = t
+	var biais: int = Time.get_time_zone_from_system().bias * 60
+	return int(Time.get_datetime_dict_from_unix_time(ts + biais).hour)
+
+
+func est_jour(ts: int = -1) -> bool:
+	var h := heure_locale(ts)
+	return h >= R.temps.jour_debut_h and h < R.temps.jour_fin_h
+
+
+func horodatage(ts: int = -1) -> String:
+	if ts < 0:
+		ts = t
+	return "J%d %02d h" % [jour(ts), heure_locale(ts)]
+
+
+func signaler_action() -> void:
+	derniere_action = maintenant()
+
+
+func avancer_tests(heures: int) -> Dictionary:
+	decalage += heures * H
+	return rattraper()
+
+
+# Rejoue les heures écoulées jusqu'à maintenant. Renvoie un bilan si au moins
+# une heure (réglable) s'est écoulée : sert au rapport de retour.
+func rattraper() -> Dictionary:
+	var fin := maintenant() / H * H
+	var heures := (fin - t) / H
+	if heures <= 0:
+		return {}
 	var lignes := []
-	var mult: float = R.penurie.productivite if penurie else 1.0
-	var gains := {}
+	var max_h: int = int(R.temps.rattrapage_max_h)
+	if heures > max_h:
+		t = fin - max_h * H
+		lignes.append("Absence de plus de %d h : le monde a attendu ton retour." % max_h)
+		heures = max_h
+	var avant := stocks.duplicate()
+	var n_journal := journal.size()
+	for i in heures:
+		_heure()
+	sauver()
+	if heures < R.temps.rapport_min_h:
+		return {}
+	lignes.append_array(journal.slice(n_journal))
+	return {"heures": heures, "avant": avant, "apres": stocks.duplicate(), "lignes": lignes}
+
+
+# --- Une heure de jeu ---------------------------------------------------------
+
+func _heure() -> void:
+	var T: Dictionary = R.temps
+	var P: Dictionary = R.penurie
+	t += H
+	var absent: bool = (t - derniere_action) > T.absence_seuil_h * H
+	var present: bool = (t - derniere_action) <= T.presence_h * H
+	# Production des postes
+	var mult: float = P.productivite if etape >= 1 else 1.0
 	for s in survivants:
 		if not disponible(s):
 			continue
 		var poste: Dictionary = R.postes[s.poste]
 		for res in poste.get("produit", {}):
-			gains[res] = gains.get(res, 0.0) + poste.produit[res] * mult
-		if s.poste == "atelier":
-			lignes.append(_reparer(mult))
-	for res in gains:
-		_ajouter(res, gains[res])
-	# Consommation
+			_ajouter(res, poste.produit[res] * mult / 24.0)
+	# Consommation (eau accrue le jour, réduite pendant une longue absence)
 	var manque := false
 	for res in R.consommation_par_survivant:
-		var besoin: float = R.consommation_par_survivant[res] * survivants.size()
-		if stocks[res] < besoin:
+		var besoin: float = R.consommation_par_survivant[res] * survivants.size() / 24.0
+		if res == "water_l" and est_jour():
+			besoin *= T.eau_jour
+		if absent:
+			besoin *= T.absence_conso
+		if stocks[res] + 0.0001 < besoin:
 			manque = true
-			stocks[res] = 0
+			stocks[res] = 0.0
 		else:
-			stocks[res] -= besoin
-	if manque and not penurie:
-		lignes.append("PÉNURIE : la communauté manque d'eau ou de nourriture. Productivité réduite de moitié.")
-	elif not manque and penurie:
-		lignes.append("Fin de la pénurie : retour à la normale.")
-	penurie = manque
+			stocks[res] = max(0.0, stocks[res] - besoin)
+	_penurie(manque, present)
+	# Survivants : blessures, maladies, absences
 	for s in survivants:
-		s.blesse = max(0, s.blesse - 1)
-		s.occupe = max(0, s.occupe - 1)
+		s.blesse_h = max(0, s.blesse_h - 1)
+		s.occupe_h = max(0, s.occupe_h - 1)
+		if s.blesse_h == 0 and s.malade:
+			s.malade = false
+			_journal(["%s est guéri(e)." % s.nom])
+	# Lieux qui se reconstituent
 	for l in epuisement:
-		epuisement[l] = min(1.0, epuisement[l] + R.reconstitution_par_jour)
-	jour += 1
-	var resume := "Jour %d." % jour
-	for res in gains:
-		resume += " +%s %s." % [_fmt(gains[res]), R.ressources[res].nom.to_lower()]
-	lignes.push_front(resume)
-	if jour > R.objectif_jours and not objectif_annonce:
+		epuisement[l] = min(1.0, epuisement[l] + R.reconstitution_par_jour / 24.0)
+	# Atelier : une séance par jour
+	if heure_locale() == int(T.heure_atelier):
+		for s in survivants:
+			if disponible(s) and s.poste == "atelier":
+				_journal([_reparer(mult)])
+	# Retours d'expédition
+	for e in expeditions.duplicate():
+		if e.retour <= t:
+			expeditions.erase(e)
+			_retour(e)
+	if jour() > R.objectif_jours and not objectif_annonce:
 		objectif_annonce = true
-		lignes.append("OBJECTIF ATTEINT : la communauté a tenu %d jours." % R.objectif_jours)
-	_journal(lignes)
-	return lignes
+		_journal(["OBJECTIF ATTEINT : la communauté a tenu %d jours." % R.objectif_jours])
+
+
+func _penurie(manque: bool, present: bool) -> void:
+	var P: Dictionary = R.penurie
+	if manque:
+		heures_ok = 0
+		heures_penurie += 1
+		if etape == 0:
+			etape = 1
+			_journal(["PÉNURIE : plus d'eau ou de nourriture. Productivité réduite de moitié."])
+		if etape == 1 and heures_penurie >= P.etape2_h:
+			etape = 2
+			_tomber_malade()
+		# L'agitation attend le joueur : jamais pendant son absence.
+		if etape == 2 and heures_penurie >= P.etape3_h and present:
+			etape = 3
+			heures_agitation = int(P.agitation_h)
+			_journal(["AGITATION : la faim et la soif poussent certains à la révolte."])
+		if etape == 3 and present:
+			heures_agitation += 1
+			if heures_agitation >= P.agitation_h and decision.is_empty():
+				heures_agitation = 0
+				_revolte()
+	elif etape > 0:
+		heures_ok += 1
+		if heures_ok >= P.recul_h:
+			heures_ok = 0
+			etape -= 1
+			heures_penurie = 0 if etape == 0 else int([0, 0, P.etape2_h, P.etape3_h][etape])
+			if etape == 0:
+				_journal(["Fin de la pénurie : retour à la normale."])
+			else:
+				_journal(["La situation s'améliore (pénurie : étape %d)." % etape])
+
+
+func _tomber_malade() -> void:
+	var dispo := survivants.filter(func(s): return s.occupe_h == 0 and s.blesse_h == 0)
+	if dispo.is_empty():
+		return
+	var s: Dictionary = dispo[(t / H) % dispo.size()]
+	s.malade = true
+	s.blesse_h = int(R.penurie.maladie_h)
+	_journal(["MALADIE : %s, affaibli(e) par les privations, ne peut plus travailler." % s.nom])
+
+
+func _revolte() -> void:
+	var dispo := survivants.filter(func(s): return s.occupe_h == 0)
+	if dispo.size() < 2:
+		return
+	var s: Dictionary = dispo[(t / H) % dispo.size()]
+	decision = {"nom": s.nom}
+	_journal(["RÉVOLTE : %s refuse de travailler et menace de partir avec des vivres." % s.nom])
+
+
+# Choix du joueur face à un révolté : "pardonner", "partir" ou "executer".
+func decider(choix: String) -> String:
+	if decision.is_empty():
+		return ""
+	var s = null
+	for x in survivants:
+		if x.nom == decision.nom:
+			s = x
+	decision = {}
+	var txt := ""
+	if s == null:
+		return txt
+	match choix:
+		"pardonner":
+			txt = "%s reste. Rien n'est réglé : la colère couve toujours." % s.nom
+		"partir":
+			survivants.erase(s)
+			stocks.food = max(0.0, stocks.food - 1)
+			txt = "%s quitte la communauté en emportant une ration." % s.nom
+		"executer":
+			survivants.erase(s)
+			heures_agitation = -24   # le calme revient pour un temps
+			txt = "%s est exécuté(e). Un silence pesant tombe sur la base." % s.nom
+	signaler_action()
+	_journal([txt])
+	sauver()
+	return txt
+
+
+# --- Base -------------------------------------------------------------------
+
+func disponible(s: Dictionary) -> bool:
+	return s.blesse_h == 0 and s.occupe_h == 0
+
+
+func conso_jour(res: String) -> float:
+	var c: float = R.consommation_par_survivant.get(res, 0) * survivants.size()
+	if res == "water_l":
+		var hj: float = R.temps.jour_fin_h - R.temps.jour_debut_h
+		c *= (hj * R.temps.eau_jour + 24.0 - hj) / 24.0
+	return c
+
+
+func autonomie(res: String) -> float:
+	var c := conso_jour(res)
+	return INF if c <= 0 else stocks[res] / c
+
+
+# Solde prévu sur une journée (production des postes - consommation).
+# Sert à la flèche de tendance à côté de chaque barre de ressource.
+func bilan(res: String) -> float:
+	var mult: float = R.penurie.productivite if etape >= 1 else 1.0
+	var b := 0.0
+	for s in survivants:
+		if disponible(s):
+			b += R.postes[s.poste].get("produit", {}).get(res, 0) * mult
+	return b - conso_jour(res)
+
+
+func affecter(s: Dictionary, poste: String) -> void:
+	s.poste = poste
+	signaler_action()
+	sauver()
 
 
 func _reparer(mult: float) -> String:
 	var at: Dictionary = R.postes.atelier
 	for v in vehicules:
+		if v.en_route:
+			continue
 		var nom: String = stat(v.type, "nom")
 		if v.etat == "epave":
 			var cout: Dictionary = at.epave_cout
@@ -148,9 +353,11 @@ func _reparer(mult: float) -> String:
 
 
 # --- Expéditions ------------------------------------------------------------
+# Départ : carburant et vivres réservés, équipage et véhicules partis.
+# Le trajet est résolu au retour, X heures plus tard (même en absence).
 
 func vehicules_prets() -> Array:
-	return vehicules.filter(func(v): return v.etat == "ok")
+	return vehicules.filter(func(v): return v.etat == "ok" and not v.en_route)
 
 
 func equipage_pour(n: int) -> Array:
@@ -170,7 +377,7 @@ func ordonner(convoi: Array) -> Array:
 func briefing(lieu_id: String, convoi: Array) -> Dictionary:
 	var l: Dictionary = R.lieux[lieu_id]
 	var h: float = l.heures * 2.0
-	var b := {"carburant": 0.0, "eau": 0, "vivres": 0, "erreurs": [], "raisons": [], "equipage": []}
+	var b := {"heures": h, "carburant": 0.0, "eau": 0, "vivres": 0, "erreurs": [], "raisons": [], "equipage": []}
 	for v in convoi:
 		b.carburant += stat(v.type, "conso_l_h") * h * l.terrain
 	b.carburant = ceili(b.carburant)
@@ -182,6 +389,8 @@ func briefing(lieu_id: String, convoi: Array) -> Dictionary:
 	b.capacite = convoi.reduce(func(acc, v): return acc + stat(v.type, "capacite"), 0)
 	b.risque = RISQUES[l.risque]
 	b.raisons.append("lieu : risque %s (pillards %d %%)" % [RISQUES[l.risque], int(l.chance_pillards * 100)])
+	b.raisons.append("arrivée de %s : pillards %s" % ["jour" if est_jour(t + int(l.heures * H)) else "nuit",
+		"plus fréquents" if est_jour(t + int(l.heures * H)) else "plus rares"])
 	if convoi.all(func(v): return stat(v.type, "blindage") < 5):
 		b.raisons.append("aucun véhicule blindé")
 	if stocks.ammo < 20:
@@ -201,25 +410,71 @@ func briefing(lieu_id: String, convoi: Array) -> Dictionary:
 
 
 func lancer(lieu_id: String, convoi: Array, ordre: String) -> Dictionary:
-	var l: Dictionary = R.lieux[lieu_id]
 	var b := briefing(lieu_id, convoi)
 	if not b.ok:
-		return {"titre": "Départ impossible", "lignes": b.erreurs, "butin": {}, "pillards": [], "convoi": [], "issue": "annule"}
-	var rng := RandomNumberGenerator.new()
-	rng.seed = jour * 7919 + hash(lieu_id) + convoi.size()   # même situation = même résultat
+		return {"ok": false, "erreurs": b.erreurs}
 	convoi = ordonner(convoi)
-	var rap := {"titre": "Expédition : " + l.nom, "lignes": [], "butin": {}, "pillards": [], "convoi": []}
-	var L: Array = rap.lignes
+	var eq := equipage_pour(convoi.size())
 	stocks.fuel_l -= b.carburant
 	stocks.water_l -= b.eau
 	stocks.food -= b.vivres
-	var equipage := equipage_pour(convoi.size())
-	var jours := 1 if l.heures * 2 < 24 else 2
+	var e := {"lieu": lieu_id, "pied": false, "ordre": ordre, "depart": t, "retour": t + int(ceil(b.heures)) * H,
+		"vehicules": [], "equipage": [], "conso": [b.carburant, b.eau, b.vivres]}
 	for i in convoi.size():
-		equipage[i].occupe = jours
-		convoi[i].equipage = equipage[i]
-	L.append("Départ : %s. Consommé %d L de carburant, %d L d'eau, %d rations." % [
-		", ".join(convoi.map(func(v): return stat(v.type, "nom"))), b.carburant, b.eau, b.vivres])
+		convoi[i].en_route = true
+		e.vehicules.append(convoi[i].uid)
+		e.equipage.append(eq[i].nom)
+		eq[i].occupe_h = int(ceil(b.heures))
+	return _partir(e)
+
+
+func _partir(e: Dictionary) -> Dictionary:
+	expeditions.append(e)
+	var l: Dictionary = R.lieux[e.lieu]
+	_journal(["Départ %s vers %s (%s). Retour prévu %s." % ["à pied" if e.pied else "du convoi", l.nom,
+		", ".join(e.equipage), horodatage(e.retour)]])
+	signaler_action()
+	sauver()
+	return {"ok": true}
+
+
+# Fin d'une expédition : trajet, combat éventuel, butin. Le rapport est rangé
+# dans « rapports » pour être montré au joueur.
+var rapports := []
+
+func _retour(e: Dictionary) -> void:
+	var rap: Dictionary = _resoudre_pied(e) if e.pied else _resoudre(e)
+	rap.heure = horodatage(e.retour)
+	rapports.append(rap)
+	_journal([rap.titre + " : " + {"victoire": "réussite", "repli": "repli", "defaite": "convoi perdu"}[rap.issue] + "."])
+
+
+func _equipe(e: Dictionary) -> Array:
+	var r := []
+	for n in e.equipage:
+		for s in survivants:
+			if s.nom == n:
+				r.append(s)
+	return r
+
+
+func _resoudre(e: Dictionary) -> Dictionary:
+	var l: Dictionary = R.lieux[e.lieu]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = e.depart / H * 7919 + hash(e.lieu) + e.vehicules.size()   # même départ = même résultat
+	var convoi := []
+	for uid in e.vehicules:
+		for v in vehicules:
+			if v.uid == uid:
+				convoi.append(v)
+	var eq := _equipe(e)
+	for i in convoi.size():
+		convoi[i].en_route = false
+		convoi[i].equipage = eq[i] if i < eq.size() else {}
+	var rap := {"titre": "Expédition : " + l.nom, "lignes": [], "butin": {}, "pillards": [], "convoi": []}
+	var L: Array = rap.lignes
+	L.append("Convoi : %s. Consommé %d L de carburant, %d L d'eau, %d rations." % [
+		", ".join(convoi.map(func(v): return stat(v.type, "nom"))), e.conso[0], e.conso[1], e.conso[2]])
 	for ev in R.evenements_trajet:
 		if rng.randf() < ev.chance:
 			L.append(ev.texte)
@@ -228,21 +483,22 @@ func lancer(lieu_id: String, convoi: Array, ordre: String) -> Dictionary:
 			for res in ev.get("gain", {}):
 				_ajouter(res, ev.gain[res])
 	var issue := "victoire"
-	if rng.randf() < l.chance_pillards:
+	var arrivee: int = e.depart + int(l.heures * H)
+	var chance: float = l.chance_pillards * (R.temps.pillards_jour if est_jour(arrivee) else R.temps.pillards_nuit)
+	if rng.randf() < chance:
 		var vit: float = convoi.map(func(v): return stat(v.type, "vitesse")).min()
-		if ordre == "eviter" and rng.randf() < R.combat.evitement_reussite * vit:
+		if e.ordre == "eviter" and rng.randf() < R.combat.evitement_reussite * vit:
 			L.append("Des pillards repérés au loin : le convoi les contourne.")
 		else:
-			issue = _combat(convoi, R.pillards[l.risque], ordre, rng, rap)
+			issue = _combat(convoi, R.pillards[l.risque], e.ordre, rng, rap)
 	else:
 		L.append("Trajet sans rencontre.")
 	if issue == "victoire":
-		# Capacité de chargement des véhicules revenus
 		var cap := 0.0
 		for v in convoi:
 			if v.get("issue", "ok") == "ok":
 				cap += stat(v.type, "capacite")
-		_butin(lieu_id, cap, rng, rap)
+		_butin(e.lieu, cap, rng, rap)
 		_recrue(l, rng, L)
 	elif issue == "repli":
 		L.append("Le convoi rentre les mains vides.")
@@ -251,7 +507,6 @@ func lancer(lieu_id: String, convoi: Array, ordre: String) -> Dictionary:
 		v.erase("equipage")
 		v.erase("issue")
 	rap.issue = issue
-	_journal([rap.titre + " : " + {"victoire": "réussite", "repli": "repli", "defaite": "convoi perdu"}[issue] + "."])
 	return rap
 
 
@@ -268,7 +523,7 @@ func briefing_pied(lieu_id: String, n: int) -> Dictionary:
 	var l: Dictionary = R.lieux[lieu_id]
 	var P: Dictionary = R.a_pied
 	var h := duree_pied(lieu_id)
-	var b := {"heures": h, "jours": max(1, ceili(h / 24.0)), "erreurs": [], "raisons": []}
+	var b := {"heures": h, "erreurs": [], "raisons": []}
 	var eq := equipage_pour(n)
 	b.equipage = eq.map(func(s): return s.nom)
 	b.eau = ceili(R.consommation_par_survivant.water_l * n * h / 24.0)
@@ -289,47 +544,59 @@ func briefing_pied(lieu_id: String, n: int) -> Dictionary:
 
 
 func lancer_pied(lieu_id: String, n: int) -> Dictionary:
-	var l: Dictionary = R.lieux[lieu_id]
-	var P: Dictionary = R.a_pied
 	var b := briefing_pied(lieu_id, n)
 	if not b.ok:
-		return {"titre": "Départ impossible", "lignes": b.erreurs, "butin": {}, "pillards": [], "convoi": [], "issue": "annule"}
-	var rng := RandomNumberGenerator.new()
-	rng.seed = jour * 7919 + hash(lieu_id) + n * 31 + 17
-	var rap := {"titre": "À pied : " + l.nom, "lignes": [], "butin": {}, "pillards": [], "convoi": [], "marcheurs": []}
-	var L: Array = rap.lignes
+		return {"ok": false, "erreurs": b.erreurs}
 	stocks.water_l -= b.eau
 	stocks.food -= b.vivres
-	var groupe := equipage_pour(n)
+	var e := {"lieu": lieu_id, "pied": true, "depart": t, "retour": t + int(ceil(b.heures)) * H,
+		"vehicules": [], "equipage": [], "conso": [0, b.eau, b.vivres]}
+	for s in equipage_pour(n):
+		s.occupe_h = int(ceil(b.heures))
+		e.equipage.append(s.nom)
+	return _partir(e)
+
+
+func _resoudre_pied(e: Dictionary) -> Dictionary:
+	var l: Dictionary = R.lieux[e.lieu]
+	var P: Dictionary = R.a_pied
+	var rng := RandomNumberGenerator.new()
+	rng.seed = e.depart / H * 7919 + hash(e.lieu) + e.equipage.size() * 31 + 17
+	var groupe := _equipe(e)
+	var rap := {"titre": "À pied : " + l.nom, "lignes": [], "butin": {}, "pillards": [], "convoi": [], "marcheurs": []}
+	var L: Array = rap.lignes
 	for s in groupe:
-		s.occupe = b.jours
 		rap.marcheurs.append({"femme": s.femme, "nom": s.nom})
-	L.append("Départ à pied : %s. %d h de marche aller-retour, %d L d'eau, %d rations." % [
-		", ".join(b.equipage), int(b.heures), b.eau, b.vivres])
+	L.append("Groupe : %s. %d L d'eau et %d rations emportés." % [", ".join(e.equipage), e.conso[1], e.conso[2]])
 	var issue := "victoire"
-	if rng.randf() < l.chance_pillards:
+	var arrivee: int = e.depart + int(l.heures * P.facteur_duree * H)
+	var chance: float = l.chance_pillards * (R.temps.pillards_jour if est_jour(arrivee) else R.temps.pillards_nuit)
+	if rng.randf() < chance:
 		if rng.randf() < P.discretion:
 			L.append("Des pillards passent tout près : le groupe reste caché jusqu'à leur départ.")
 		else:
 			issue = "repli"
 			L.append("Le groupe est surpris par des pillards et s'enfuit en abandonnant tout.")
 			for s in groupe:
-				s.blesse = int(P.jours_blessure)
+				s.blesse_h = int(P.jours_blessure) * 24
 				L.append("%s est blessé(e) (%d jours)." % [s.nom, P.jours_blessure])
 	else:
 		L.append("Marche sans rencontre.")
 	if issue == "victoire":
-		_butin(lieu_id, b.capacite, rng, rap)
+		_butin(e.lieu, e.equipage.size() * P.capacite_par_survivant, rng, rap)
 		_recrue(l, rng, L)
 	rap.issue = issue
-	_journal([rap.titre + " : " + ("réussite" if issue == "victoire" else "groupe surpris, butin perdu") + "."])
 	return rap
 
 
 func _recrue(l: Dictionary, rng: RandomNumberGenerator, L: Array) -> void:
 	if rng.randf() < l.chance_recrue:
-		var nom: String = R.noms_recrues[rng.randi() % R.noms_recrues.size()]
-		survivants.append({"nom": nom, "femme": rng.randf() < 0.5, "poste": "repos", "blesse": 0, "occupe": 0})
+		var pris := survivants.map(func(s): return s.nom)
+		var libres: Array = R.noms_recrues.filter(func(n): return not pris.has(n))
+		if libres.is_empty():
+			return
+		var nom: String = libres[rng.randi() % libres.size()]
+		survivants.append(_survivant(nom, rng.randf() < 0.5, "repos"))
 		L.append("RECRUE : %s, survivant(e) isolé(e), rejoint la communauté." % nom)
 
 
@@ -340,8 +607,8 @@ func _combat(convoi: Array, profil: Array, ordre: String, rng: RandomNumberGener
 	for v in convoi:
 		nous.append({"nom": stat(v.type, "nom"), "type": v.type, "pv": float(v.pv), "roul": true, "arm": true, "ref": v})
 	var eux := []
-	for t in profil:
-		eux.append({"nom": stat(t, "nom"), "type": t, "pv": float(stat(t, "pv")), "roul": true, "arm": true, "ref": null})
+	for ty in profil:
+		eux.append({"nom": stat(ty, "nom"), "type": ty, "pv": float(stat(ty, "pv")), "roul": true, "arm": true, "ref": null})
 	L.append("PILLARDS : %d véhicule(s) en travers de la route. Ordre : %s." % [eux.size(), ORDRES[ordre]])
 	var issue := ""
 	for tour in range(1, int(C.tours_max) + 1):
@@ -381,13 +648,13 @@ func _combat(convoi: Array, profil: Array, ordre: String, rng: RandomNumberGener
 			v.issue = "perdu"
 			vehicules.erase(v)
 			L.append("%s : abandonné sur place." % u.nom)
-		if u.pv <= 0 or perdu:
+		if (u.pv <= 0 or perdu) and not v.equipage.is_empty():
 			var s: Dictionary = v.equipage
 			if issue == "defaite":
 				survivants.erase(s)
 				L.append("%s n'est pas revenu(e)." % s.nom)
 			else:
-				s.blesse = int(C.jours_blessure)
+				s.blesse_h = int(C.jours_blessure) * 24
 				L.append("%s est blessé(e) (%d jours)." % [s.nom, C.jours_blessure])
 	if issue == "victoire" and eux.any(func(u): return u.pv <= 0):
 		for res in C.butin_pillards:
@@ -400,8 +667,8 @@ func _combat(convoi: Array, profil: Array, ordre: String, rng: RandomNumberGener
 # Renvoie false si le joueur n'a plus de munitions.
 func _salve(tireurs: Array, cibles: Array, rng: RandomNumberGenerator, L: Array, joueur: bool) -> bool:
 	var C: Dictionary = R.combat
-	for t in tireurs:
-		if t.pv <= 0 or not t.arm:
+	for ti in tireurs:
+		if ti.pv <= 0 or not ti.arm:
 			continue
 		var vivantes := cibles.filter(func(u): return u.pv > 0)
 		if vivantes.is_empty():
@@ -411,9 +678,9 @@ func _salve(tireurs: Array, cibles: Array, rng: RandomNumberGenerator, L: Array,
 				return false
 			stocks.ammo -= C.munitions_par_tir
 		var cible: Dictionary = vivantes[0]
-		if rng.randf() >= stat(t.type, "precision"):
+		if rng.randf() >= stat(ti.type, "precision"):
 			continue
-		var deg: float = max(1.0, stat(t.type, "feu") * rng.randf_range(0.8, 1.2) - stat(cible.type, "blindage") * 0.5)
+		var deg: float = max(1.0, stat(ti.type, "feu") * rng.randf_range(0.8, 1.2) - stat(cible.type, "blindage") * 0.5)
 		cible.pv -= deg
 		if cible.pv <= 0:
 			L.append("%s détruit%s." % [cible.nom, "" if joueur else " par les pillards"])
@@ -450,6 +717,53 @@ func _butin(lieu_id: String, cap: float, rng: RandomNumberGenerator, rap: Dictio
 	epuisement[lieu_id] = f * 0.5
 
 
+# --- Sauvegarde -------------------------------------------------------------
+# Un fichier JSON sur l'appareil (sur le Web : stockage du navigateur).
+
+const CHAMPS := ["t", "t_debut", "derniere_action", "decalage", "stocks", "survivants", "vehicules",
+	"expeditions", "epuisement", "etape", "heures_penurie", "heures_ok", "heures_agitation",
+	"decision", "journal", "objectif_annonce", "_uid", "rapports"]
+
+func sauver() -> void:
+	var d := {"version": 1}
+	for c in CHAMPS:
+		d[c] = get(c)
+	var f := FileAccess.open(SAUVEGARDE, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(d))
+
+
+func charger() -> bool:
+	if not FileAccess.file_exists(SAUVEGARDE):
+		return false
+	var d = JSON.parse_string(FileAccess.get_file_as_string(SAUVEGARDE))
+	if typeof(d) != TYPE_DICTIONARY or d.get("version", 0) != 1:
+		return false
+	for c in CHAMPS:
+		if d.has(c):
+			set(c, d[c])
+	# Le JSON relit les nombres en décimaux : on remet les entiers.
+	for c in ["t", "t_debut", "derniere_action", "decalage", "etape", "heures_penurie", "heures_ok", "heures_agitation", "_uid"]:
+		set(c, int(get(c)))
+	for s in survivants:
+		s.blesse_h = int(s.blesse_h)
+		s.occupe_h = int(s.occupe_h)
+	for v in vehicules:
+		v.uid = int(v.uid)
+		v.pv = int(v.pv)
+		v.pv_max = int(v.pv_max)
+	for e in expeditions:
+		e.depart = int(e.depart)
+		e.retour = int(e.retour)
+		e.vehicules = e.vehicules.map(func(u): return int(u))
+	return true
+
+
+func effacer_partie() -> void:
+	DirAccess.remove_absolute(SAUVEGARDE)
+	nouvelle_partie()
+
+
 # --- Outils -----------------------------------------------------------------
 
 func _ajouter(res: String, q: float) -> void:
@@ -457,14 +771,11 @@ func _ajouter(res: String, q: float) -> void:
 
 
 func _journal(lignes: Array) -> void:
-	journal.append_array(lignes)
+	for l in lignes:
+		journal.append("%s · %s" % [horodatage(), l])
 	while journal.size() > 40:
 		journal.pop_front()
 
 
 func perdu() -> bool:
 	return survivants.is_empty()
-
-
-static func _fmt(x: float) -> String:
-	return str(int(x)) if is_equal_approx(x, round(x)) else "%.1f" % x

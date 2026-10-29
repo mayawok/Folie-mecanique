@@ -18,7 +18,11 @@
     "ammo": {"nom": "Munitions", "unite": "", "icone": "ui_res_munitions", "capacite": 400, "poids": 0.2}
   },
   "consommation_par_survivant": {"water_l": 5, "food": 1},
-  "penurie": {"productivite": 0.5},
+  "temps": {"_note": "Système 7 (DEC-022). Heures locales du téléphone.",
+    "jour_debut_h": 7, "jour_fin_h": 21, "eau_jour": 1.3, "pillards_jour": 1.5, "pillards_nuit": 0.5,
+    "absence_seuil_h": 12, "absence_conso": 0.5, "rattrapage_max_h": 72, "presence_h": 1,
+    "heure_atelier": 6, "rapport_min_h": 1},
+  "penurie": {"productivite": 0.5, "etape2_h": 24, "etape3_h": 48, "recul_h": 12, "maladie_h": 24, "agitation_h": 12},
   "postes": {
     "repos": {"nom": "Repos", "produit": {}},
     "puits": {"nom": "Puits", "produit": {"water_l": 5}},

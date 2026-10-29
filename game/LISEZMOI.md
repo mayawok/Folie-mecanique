@@ -1,7 +1,9 @@
 # Prototype jouable — Folie Mécanique
 
 Boucle minimale : base → expédition → combat automatique → retour avec butin.
-But du test : tenir 10 jours. Pas d'horloge réelle : « Passer la journée » avance d'un jour.
+But du test : tenir 10 jours, **en temps réel** (1 jour de jeu = 1 jour réel, système 7).
+La partie est sauvegardée dans le navigateur ; à chaque retour, un rapport résume l'absence.
+Bouton **Test +6 h** : avance l'horloge pour tester sans attendre (retiré du jeu final).
 
 ## Jouer
 
@@ -17,7 +19,7 @@ Sans carburant : choisir un lieu proche (6 h de route au plus), onglet **À pied
 
 ## Modifier l'équilibrage sans Claude
 
-Toutes les valeurs sont dans `data/regles_proto.json` : stocks de départ, production des
+Toutes les valeurs sont dans `data/regles_proto.json` : temps et pénurie (`temps`, `penurie`), stocks de départ, production des
 postes, expéditions à pied (`a_pied`), consommation, statistiques des véhicules, lieux, butin, pillards, combat.
 Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstruit.
 
@@ -34,5 +36,5 @@ Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstr
 
 ## Hors prototype
 
-Atelier, sauvegarde, faune, récit, achats, horloge réelle.
+Atelier, faune, récit, achats, notifications.
 Chars (Stuart, Sherman, Tiger I) : pièces provisoires, pas encore dans le jeu.
