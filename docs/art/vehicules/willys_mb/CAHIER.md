@@ -19,16 +19,18 @@ Cotes de prototypage (L 3,36 m, H 1,78 m pare-brise relevé), à affiner sur pla
 
 ## Pièces
 
+Caisse validée le 2026-10-29 (crochet et pare-chocs inclus, boîte ajustée à l'image).
+
 Échelle source : 64 px par cellule de 25 cm (1 m = 256 px). L'affichage en jeu reste
 zoomable (`echelle_et_grille.csv`).
 
 | Pièce | Emplacement | Taille (cellules) | Taille (px) | Profondeur | Visible en jeu |
 |---|---|---|---|---|---|
-| `chassis` | châssis (racine) | 13,8 × 1,0 | 883 × 64 | 1 | Partiellement, sous la caisse |
+| `chassis` | châssis (racine) | 13,2 × 0,65 | 845 × 42 | 1 | Partiellement, sous la caisse |
 | `transmission` | transmission | 9,3 × 2,2 | 595 × 141 | 2 | Non (atelier seulement) |
 | `moteur` | moteur | 3,5 × 1,5 | 224 × 96 | 3 | Non (atelier seulement) |
 | `roue` | roulement | 3,0 × 3,0 | 192 × 192 | 4 | Oui, ×2, tourne |
-| `caisse` | carrosserie | 13,6 × 4,9 | 870 × 314 | 5 | Oui |
+| `caisse` | carrosserie | 13,4 × 4,35 | 858 × 278 | 5 | Oui — **validée** |
 | `mitrailleuse` | armement | 4,0 × 2,7 | 256 × 173 | 6 | Oui |
 
 « Profondeur » : ordre d'empilement, 1 = au fond. Dans l'atelier, la caisse devient
@@ -36,8 +38,8 @@ semi-transparente pour montrer moteur et transmission.
 
 ### Contraintes par pièce
 
-- **chassis** : deux longerons d'acier riveté, pare-chocs avant et arrière, crochet de
-  remorquage arrière. Racine du véhicule : toutes les pièces s'y accrochent.
+- **chassis** : deux longerons d'acier riveté, traverses, ressorts à lames. **Sans
+  pare-chocs ni crochet** : la caisse validée les contient déjà. Racine du véhicule : toutes les pièces s'y accrochent.
 - **transmission** : boîte de vitesses et boîte de transfert, arbres de transmission
   avant et arrière, différentiels sur les essieux.
 - **moteur** : 4 cylindres en ligne Go-Devil, ventilateur à l'avant, filtre à air,
@@ -73,7 +75,8 @@ se confondrait avec lui au détourage. Si l'outil propose un fond transparent, l
   avant plates, pare-brise relevé (cadre seul). Passages de roues vides : ne dessine
   aucune roue, aucun châssis, aucun moteur. »
 - **chassis** : « La pièce est le châssis nu d'une jeep Willys MB : deux longerons d'acier
-  rivetés, pare-chocs avant et arrière, crochet de remorquage. Sans roues ni carrosserie. »
+  rivetés vus de côté, traverses, ressorts à lames. Sans pare-chocs, sans crochet de
+  remorquage, sans roues ni carrosserie. Pièce très allongée et fine. »
 - **moteur** : « La pièce est un moteur essence 4 cylindres en ligne des années 1940,
   vu de côté, ventilateur à droite, encrassé et rafistolé. »
 - **transmission** : « La pièce est la transmission d'une jeep 4x4 : boîte de vitesses
