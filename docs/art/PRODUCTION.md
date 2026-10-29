@@ -182,6 +182,10 @@ complet sert d'épave de décor (`decor/epave_*.png`), les petites pièces de bu
 - Assemblages faits le 2026-10-29 par `tools/specs_vehicules.py` (cotes de prototypage).
   Roues recalées le 2026-10-29 : centres sur les passages de roue mesurés sur chaque caisse,
   moyeux du châssis alignés sur les roues.
+  Passages de roue : ordre d'affichage caisse → roues → `caisse_avant` (caisse percée d'un
+  disque à 96 % du rayon de roue). Les roues passent devant le fond du passage de roue,
+  le bord de l'aile recouvre le pneu. Même ordre dans Godot (3 sprites).
+  Half-Track : `suspension.png` provisoire (bogies, ressorts), à faire dessiner.
   Le panier du BMW est presque caché par la moto en vue de profil (normal).
 - Reste à faire par Claude (chars seulement) : `gabarit.json` et `assemblage.png` de chaque véhicule.
 

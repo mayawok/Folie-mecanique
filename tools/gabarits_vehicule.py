@@ -2,6 +2,8 @@
 
 Usage : python3 tools/gabarits_vehicule.py docs/art/vehicules/willys_mb
 - Écrit gabarits/<image>.png : silhouette noire sur blanc, à joindre à la consigne ChatGPT.
+- Si une instance a des "trous", écrit art/<image>_avant.png : la caisse percée aux roues,
+  à poser devant les roues (ordre : caisse, roues, caisse_avant).
 - Écrit assemblage.png : véhicule recombiné sur la grille de 25 cm.
   Si art/<image>.png existe (pièce dessinée, fond transparent), elle remplace la silhouette.
 """
@@ -39,7 +41,14 @@ def main(folder):
         img = images[inst["image"]]; bx, by, bw, bh = img["box"]; bx += inst["dx"]
         art = folder / "art" / f"{img['id']}.png"
         if art.exists():
-            piece = Image.open(art).convert("RGBA").resize((round(bw * ppc), round(bh * ppc)))
+            piece = Image.open(art).convert("RGBA")
+            if inst.get("trous"):  # calque avant : la caisse percée là où passent les roues
+                k = piece.width / (bw * ppc); dr = ImageDraw.Draw(piece)
+                for cx, cy, r in inst["trous"]:
+                    px, py, pr = (cx - bx) * ppc * k, (by + bh - cy) * ppc * k, r * ppc * k
+                    dr.ellipse([px - pr, py - pr, px + pr, py + pr], fill=(0, 0, 0, 0))
+                piece.save(folder / "art" / f"{img['id']}_avant.png")
+            piece = piece.resize((round(bw * ppc), round(bh * ppc)))
             sheet.alpha_composite(piece, (round(bx * ppc), round((H - by - bh) * ppc)))
         else:
             layer = Image.new("RGBA", sheet.size, (0, 0, 0, 0))

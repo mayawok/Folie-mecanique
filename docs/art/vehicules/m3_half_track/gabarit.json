@@ -138,6 +138,38 @@
    ]
   },
   {
+   "id": "suspension",
+   "slot": "roulement",
+   "box": [
+    3.2,
+    0.8,
+    8.0,
+    2.390625
+   ],
+   "shapes": [
+    {
+     "poly": [
+      [
+       3.2,
+       0.8
+      ],
+      [
+       11.2,
+       0.8
+      ],
+      [
+       11.2,
+       3.190625
+      ],
+      [
+       3.2,
+       3.190625
+      ]
+     ]
+    }
+   ]
+  },
+  {
    "id": "roue",
    "slot": "roulement",
    "box": [
@@ -278,10 +310,10 @@
    "z": 4
   },
   {
-   "id": "roue_7",
-   "image": "roue",
+   "id": "suspension_7",
+   "image": "suspension",
    "dx": 0.0,
-   "z": 4
+   "z": 4.3
   },
   {
    "id": "caisse_8",
@@ -290,10 +322,29 @@
    "z": 5
   },
   {
-   "id": "mitrailleuse_9",
+   "id": "roue_9",
+   "image": "roue",
+   "dx": 0.0,
+   "z": 5.2
+  },
+  {
+   "id": "mitrailleuse_10",
    "image": "mitrailleuse",
    "dx": 0.0,
    "z": 6
+  },
+  {
+   "id": "caisse_avant",
+   "image": "caisse",
+   "dx": 0,
+   "z": 5.3,
+   "trous": [
+    [
+     20.959999999999997,
+     1.8898936170212766,
+     1.8239999999999998
+    ]
+   ]
   }
  ]
 }

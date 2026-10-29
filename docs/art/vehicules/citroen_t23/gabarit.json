@@ -228,22 +228,35 @@
    "z": 4
   },
   {
-   "id": "roue_4",
-   "image": "roue",
-   "dx": 14.4,
-   "z": 4
-  },
-  {
-   "id": "plateau_5",
+   "id": "plateau_4",
    "image": "plateau",
    "dx": 0.0,
    "z": 5
   },
   {
-   "id": "cabine_6",
+   "id": "cabine_5",
    "image": "cabine",
    "dx": 0.0,
    "z": 6
+  },
+  {
+   "id": "roue_6",
+   "image": "roue",
+   "dx": 14.4,
+   "z": 6.2
+  },
+  {
+   "id": "cabine_avant",
+   "image": "cabine",
+   "dx": 0,
+   "z": 6.3,
+   "trous": [
+    [
+     19.4,
+     1.9152815013404825,
+     1.8239999999999998
+    ]
+   ]
   }
  ]
 }
