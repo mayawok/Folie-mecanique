@@ -7,6 +7,7 @@ extends Control
 var camera_x := 0.0     # position du monde (m) au point d'ancrage
 var ppm := 55.0
 var sol_y := 900.0      # ligne du sol (px) pour une hauteur nulle
+var nuit := 0.0         # 0 = plein jour, 1 = pleine nuit
 var ancre_x := 0.0      # abscisse écran (px) qui correspond à camera_x
 
 
@@ -56,11 +57,14 @@ func _draw() -> void:
 	var w := size.x
 	var hgt := size.y
 	# Ciel en dégradé
-	var haut := Color("#7FA6BF")
-	var horizon := Color("#E9CFA0")
+	var haut := Color("#7FA6BF").lerp(Color("#070D1C"), nuit)
+	var horizon := Color("#E9CFA0").lerp(Color("#2B2B48"), nuit)
 	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, sol_y), Vector2(0, sol_y)]),
 		PackedColorArray([haut, haut, horizon, horizon]))
-	draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70, Color(1.0, 0.95, 0.82, 0.85))
+	if nuit > 0.2:
+		for i in 70:
+			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
+	draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70 if nuit < 0.5 else 46, Color(1.0, 0.95, 0.82, 0.85).lerp(Color(0.85, 0.9, 1.0, 0.95), nuit))
 	# Dunes en parallaxe (lointain -> proche)
 	var couches := [[0.08, 0.62, 70.0, Color("#C9A57A")], [0.2, 0.74, 55.0, Color("#BC925F")], [0.45, 0.86, 40.0, Color("#B08452")]]
 	for c in couches:
@@ -149,3 +153,5 @@ func _draw() -> void:
 			draw_circle(pied + Vector2(-1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
 			draw_circle(pied + Vector2(1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
 		kk += 1.0
+	if nuit > 0.01:
+		draw_rect(Rect2(Vector2(0, 0), size), Color(0.02, 0.04, 0.12, 0.5 * nuit))

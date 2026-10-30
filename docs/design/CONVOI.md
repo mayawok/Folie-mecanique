@@ -103,6 +103,18 @@ Collines jusqu'à ~15° (`Terrain.relief`) : les véhicules s'inclinent, la cam�
 (×0,55 mini) et accélère en descente (×1,3 maxi). Décor semé : poteaux, cactus, arbres morts, rochers, carcasses,
 ville en ruine au loin, nuages, poussière des roues.
 
+## Monde : carte, camps, nuit, rencontres à pied (`monde.gd`)
+
+- **Carte** : 12 secteurs aléatoires (nom, faction 1 à 3, niveau 0 à 7) sur l'image de carte. Le joueur touche un secteur puis
+  « Partir » : une **zone calme** sans rencontre (250 m + 900 m par unité de distance) assure la continuité en 2D, puis le niveau
+  des rencontres suit le secteur. Relations (provisoires) : faction 1 alliée, 2 neutre, 3 hostile.
+- **Camps** (pillards, fortifiés, alliés) : posés 300 m devant, **annoncés à droite** avec leur faction (drapeau coloré et numéro).
+  Camp allié : échanger (munitions, carburant), atelier (pièces à 70 %), se reposer (soigne, la nuit passe plus vite).
+- **Fantassins et animaux** : pillards à pied (fusil), loups et chiens (morsure). La mitrailleuse les abat ; la garnison aussi.
+- **Cycle jour/nuit** (400 s) : à la tombée, alerte « s'abriter » ; l'équipage se poste dans un bâtiment, des **planches sont clouées**,
+  un **feu** s'allume. Nuit à l'abri : temps ×3. Dehors la nuit : tirs moins précis, meutes et pillards plus fréquents.
+- **Voyageurs** au bord de la route : troc, réfugié, quêtes (« abattre N ennemis »). Le convoi s'arrête pour répondre.
+
 ## Architecture
 
 | Fichier | Rôle |

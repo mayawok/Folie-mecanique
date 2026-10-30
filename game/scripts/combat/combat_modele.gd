@@ -16,6 +16,9 @@ const FENETRES := {
 	"grange": [[0.2, 0.5], [0.8, 0.5], [0.5, 0.76]],
 	"eglise": [[0.80, 0.78], [0.80, 0.50], [0.30, 0.38]],
 	"bunker": [[0.25, 0.40], [0.5, 0.40], [0.75, 0.40]],
+	"camp_pillard": [[0.1, 0.66], [0.35, 0.66], [0.65, 0.66], [0.9, 0.66]],
+	"camp_fortifie": [[0.08, 0.78], [0.28, 0.78], [0.5, 0.78], [0.72, 0.78], [0.92, 0.78], [0.5, 0.48]],
+	"camp_ami": [],
 }
 
 static var _data := {}
@@ -169,9 +172,15 @@ class Bat extends RefCounted:
 	var revele_t := 0.0           # > 0 : l'ennemi a repéré la garnison
 	var butin := {}
 	var butin_pris := false
+	var ami := false              # camp allié : ne tire pas, ne se cible pas
+	var faction := 0
+	var barricade := 0.0          # 0..1 : planches clouées aux ouvertures
+	var barricade_cible := false
+	var blindage_base := 0.0
+	var feu := false              # feu allumé à l'intérieur (nuit, garnison barricadée)
 
 	func actif() -> bool:
-		return statut == "actif"
+		return statut == "actif" and not ami
 
 	func fenetre(i: int) -> Vector2:
 		var f: Array = CombatModele.FENETRES.get(type, [[0.5, 0.5]])
@@ -222,6 +231,7 @@ var _alerte_muni := false
 var projectiles: Array = []       # balles et obus en vol : {a, b, t, T, touche, zone, ...}
 var mines: Array = []             # {x, arme_t, armee}
 var transits: Array = []          # équipages en marche vers un bâtiment ou un véhicule
+var monde: MondeJeu
 var reserve_survivants := 0      # recrues sans place : elles monteront dans le prochain véhicule
 
 
@@ -240,6 +250,7 @@ func _init(g := 1) -> void:
 	x_tete_prev = x_tete
 	for v in convoi:
 		v.x_prev = v.x
+	monde = MondeJeu.new(self)
 	log_("Une Jeep et deux survivants. Avancez pour trouver de quoi vous équiper.", "info")
 
 
@@ -308,6 +319,7 @@ func creer_batiment(type: String, x: float) -> Bat:
 	b.pv_max = float(d.pv)
 	b.blindage = float(d.blindage)
 	b.arme_fixe = d.get("arme", "")
+	b.blindage_base = b.blindage
 	for i in int(d.tireurs):
 		b.tireurs.append({"pv": 12.0, "cd": rng.randf_range(0.5, 1.5), "slot": i})
 	var res := {}
@@ -339,6 +351,9 @@ func trouver(uid: int):
 	for v in epaves:
 		if v.uid == uid:
 			return v
+	for p in monde.pietons:
+		if p.uid == uid:
+			return p
 	return null
 
 
@@ -508,6 +523,7 @@ func avancer(dt := DT) -> void:
 	_projectiles(dt)
 	_mines(dt)
 	_transits(dt)
+	monde.avancer(dt)
 	_camouflage(dt)
 	_reparer(dt)
 	_fouiller(dt)
@@ -551,6 +567,8 @@ func _marche(dt: float) -> void:
 			blocage = "Équipages en déplacement."
 		elif sans_equipage:
 			blocage = "Un véhicule n'a plus d'équipage : rembarquez-le avant de repartir."
+		elif not monde.dialogue.is_empty():
+			blocage = "Un voyageur vous parle."
 		elif cache:
 			blocage = "Un véhicule est camouflé : découvrez-le avant de repartir."
 		elif immobilise:
@@ -670,6 +688,10 @@ func _choisir_cible(att, w: Dictionary):
 			if r <= 0.0:
 				return cands[i]
 		return cands[cands.size() - 1]
+	if w.classe != "canon":
+		var pp = monde.pieton_proche(att.x, att.longueur, w.portee)
+		if pp != null:
+			return pp
 	var meilleur = null
 	var score_min := INF
 	for e in ennemis:
@@ -723,6 +745,10 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 		a.premier = false
 	if cible is Bat:
 		chance = minf(0.95, chance * 1.2)
+	if cible is MondeJeu.Pieton:
+		chance *= 0.8
+	if monde.nuit() and joueur and not garde:
+		chance *= 0.8   # on y voit mal la nuit
 	var touche := rng.randf() < chance
 	var origine := _bouche(att, a)
 	var zone := ""
@@ -735,6 +761,9 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 			point = ancre(cible, zone)
 			var arm: float = cible.profil.blindage * Z.blindage_zone[genre_piece(zone)]
 			ricoche = w.penetration / (w.penetration + arm) < 0.3
+		elif cible is MondeJeu.Pieton:
+			zone = ""
+			point = Vector2(cible.x + 0.35, 0.9)
 		else:
 			zone = "structure"
 			point = Vector2(cible.x + cible.longueur * rng.randf_range(0.25, 0.75), cible.hauteur * rng.randf_range(0.15, 0.6))
@@ -749,6 +778,8 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 
 # Bouche de l'arme (m, repère du monde)
 func _bouche(att, a: Dictionary) -> Vector2:
+	if att is MondeJeu.Pieton:
+		return Vector2(att.x + 0.3, 1.3)
 	if att is Bat:
 		return att.fenetre(int(a.get("slot", 0)))
 	var D: Dictionary = VehiculeDessin.donnees().vehicules[att.type]
@@ -790,6 +821,9 @@ func _impact(p: Dictionary) -> void:
 			if cible.statut != "epave":
 				_toucher_vehicule(null, w, cible, p.visee, p.zone)
 				reel = true
+		elif cible is MondeJeu.Pieton:
+			monde.toucher_pieton(cible, w)
+			reel = true
 		else:
 			_toucher_batiment(w, cible, p.visee)
 			reel = true
@@ -1286,6 +1320,8 @@ func _armes_garnison(dt: float) -> void:
 						g_min = gp
 						cible = e
 			if cible == null:
+				cible = monde.pieton_proche(b.x, b.longueur, W.portee)
+			if cible == null:
 				g.cd = 0.0
 				continue
 			b.revele_t = 8.0
@@ -1313,6 +1349,9 @@ func alerte() -> Dictionary:
 
 func menace() -> bool:
 	var F: Dictionary = donnees().fouille
+	for p in monde.pietons:
+		if p.actif() and absf(p.x - x_tete) < F.menace_distance:
+			return true
 	for e in ennemis:
 		if e.actif() and absf(e.x - x_tete) < F.menace_distance:
 			return true
@@ -1394,13 +1433,13 @@ func _recolter(c) -> void:
 # --- Rencontres ------------------------------------------------------------
 
 func _rencontres() -> void:
-	if x_tete + 120.0 < _prochain_x or ennemis.size() >= 5:
+	if x_tete + 120.0 < _prochain_x or ennemis.size() >= 5 or monde.en_transit():
 		return
 	var R: Dictionary = donnees().rencontres
 	_n_rencontres += 1
 	var r := RandomNumberGenerator.new()
 	r.seed = graine * 7919 + _n_rencontres
-	var niveau := int(_prochain_x / R.palier_m)
+	var niveau: int = monde.niveau_a(_prochain_x)
 	var liste := []
 	var total := 0.0
 	for e in R.liste:
@@ -1451,7 +1490,8 @@ func _rencontres() -> void:
 		b.butin.ressources["survivants"] = 1 if (choix.get("survivant", false) or r.randf() < 0.4) else 0
 		batiments.append(b)
 		x = b.x + b.longueur
-	var hostile := not ennemis.is_empty() or batiments.any(func(b): return b.actif())
+	x = monde.generer(choix, x, r)
+	var hostile := not ennemis.is_empty() or batiments.any(func(b): return b.actif()) or monde.vivants() > 0
 	evt({"t": "contact", "ennemi": hostile})
 	log_("%s à %d m." % ["Contact" if hostile else "Du nouveau", int(debut - x_tete)], "info")
 	_prochain_x = x + r.randf_range(R.intervalle[0], R.intervalle[1])
@@ -1462,6 +1502,7 @@ func _nettoyer() -> void:
 	epaves = epaves.filter(func(v): return v.x + v.longueur > limite)
 	batiments = batiments.filter(func(b): return b.x + b.longueur > limite)
 	mines = mines.filter(func(mn): return mn.x > limite)
+	monde.nettoyer(limite)
 
 
 # --- Lecture pour tests et interface --------------------------------------

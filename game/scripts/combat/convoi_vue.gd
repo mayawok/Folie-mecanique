@@ -5,6 +5,26 @@ extends Control
 
 const SOL_Y := 700.0
 var cam_h := 0.0                # hauteur du sol suivie par la caméra (m)
+var _panneau_dial: PanelContainer
+var _lbl_dial_titre: Label
+var _lbl_dial_texte: Label
+var _boite_dial: VBoxContainer
+var _dial_sig := ""
+var _camp_ferme := 0
+var _lbl_camp: Label
+var _lbl_nuit: Label
+var _btn_nuit: Button
+var _btn_mines: Button
+var _btn_carte: Button
+var _lbl_quete: Label
+var _voile_carte: Control
+var _carte_ctl: Control
+var _carte_sel := -1
+var _lbl_carte_info: Label
+var _btn_partir: Button
+var _pause_avant := false
+var _amb_nom := ""
+var _t_nuit := 10.0
 var _poussiere_veh := []        # {p, age} poussière soulevée par les roues
 var _dernier_nuage := 0.0
 const BARRE_H := 270.0
@@ -141,6 +161,68 @@ func _ready() -> void:
 	_nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1)
 
 
+class MondeJeuCouleurs:
+	static func get_c(f: int) -> String:
+		return {1: "#3F78C8", 2: "#D6B13C", 3: "#C0392B"}.get(f, "#888888")
+
+
+class CarteMap extends Control:
+	var vue
+	var tex: Texture2D = load("res://assets/carte/carte_fond.png")
+
+	func _zone() -> Rect2:
+		var t := tex.get_size()
+		var k: float = minf(size.x / t.x, size.y / t.y)
+		var sz := t * k
+		return Rect2((size - sz) * 0.5, sz)
+
+	func _pt(s: Dictionary) -> Vector2:
+		var z := _zone()
+		return z.position + Vector2(s.pos.x * z.size.x, s.pos.y * z.size.y)
+
+	func _gui_input(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			var meilleur := -1
+			var d_min := 46.0
+			for s in vue.m.monde.secteurs:
+				var d: float = _pt(s).distance_to(e.position)
+				if d < d_min:
+					d_min = d
+					meilleur = s.id
+			vue._carte_sel = meilleur
+			queue_redraw()
+
+	func _draw() -> void:
+		var z := _zone()
+		draw_texture_rect(tex, z, false)
+		draw_rect(z, Color(0, 0, 0, 0.18))
+		var w = vue.m.monde
+		var f := ThemeDB.fallback_font
+		var cour: Dictionary = w.secteurs[w.secteur]
+		var cible := -1
+		if w.en_transit():
+			cible = w.trajet.dest
+		elif vue._carte_sel >= 0:
+			cible = vue._carte_sel
+		if cible >= 0 and cible != w.secteur:
+			draw_dashed_line(_pt(cour), _pt(w.secteurs[cible]), Color(1, 0.9, 0.5, 0.9), 4.0, 14.0)
+		for s in w.secteurs:
+			var p := _pt(s)
+			var dif: float = clampf(float(s.niveau) / 7.0, 0.0, 1.0)
+			var anneau := Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.2, 0.15), dif)
+			var fac := Color(MondeJeuCouleurs.get_c(s.faction))
+			draw_circle(p, 22.0, Color(0, 0, 0, 0.6))
+			draw_circle(p, 18.0, anneau)
+			draw_circle(p, 12.0, fac)
+			if s.id == vue._carte_sel:
+				draw_arc(p, 28.0, 0.0, TAU, 32, Color.WHITE, 3.0)
+			if s.id == w.secteur:
+				draw_colored_polygon(PackedVector2Array([p + Vector2(0, -44), p + Vector2(10, -28), p + Vector2(-10, -28)]), Color.WHITE)
+			draw_string(f, p + Vector2(-80, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color(0, 0, 0, 0.9))
+			draw_string(f, p + Vector2(-81, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color("#F6F0DC"))
+			draw_string(f, p + Vector2(-20, 4), str(s.faction), HORIZONTAL_ALIGNMENT_CENTER, 40, 18, Color(0.05, 0.05, 0.05))
+
+
 class FxVue extends Control:
 	var vue: ConvoiVue
 
@@ -239,14 +321,19 @@ func _construire_interface() -> void:
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
+	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 130)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 150)
 	for v in [1, 2, 3]:
 		var b := _bouton("x%d" % v, func(): vitesse_sim = v, hb, 80)
 		b.toggle_mode = true
 		_btns_vitesse.append(b)
+	_lbl_quete = _label("", self, 22, C_ACCENT)
+	_lbl_quete.position = Vector2(30, 96)
+	_lbl_quete.add_theme_constant_override("outline_size", 6)
+	_lbl_quete.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	# --- Journal
 	var jb := VBoxContainer.new()
-	jb.position = Vector2(30, 104)
+	jb.position = Vector2(30, 134)
 	jb.custom_minimum_size = Vector2(900, 0)
 	jb.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(jb)
@@ -319,10 +406,74 @@ func _construire_interface() -> void:
 	_lbl_alerte = _label("", av, 26, C_TEXTE)
 	_lbl_alerte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_alerte.custom_minimum_size = Vector2(500, 0)
+	_lbl_camp = _label("", av, 24, Color.WHITE)
+	_lbl_camp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_camp.custom_minimum_size = Vector2(500, 0)
+	_lbl_nuit = _label("", av, 24, Color("#9FB8FF"))
+	_lbl_nuit.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_nuit.custom_minimum_size = Vector2(500, 0)
+	_btn_nuit = _bouton("Passer la nuit à l'abri", func(): m.monde.ordre_nuit(), av, 0)
 	_btn_embuscade = _bouton("Embuscade : s'abriter et se cacher", func(): _embuscade(), av, 0)
-	_bouton("Poser des mines (12 métal)", func(): m.ordre_mines(3), av, 0)
+	_btn_mines = _bouton("Poser des mines (12 métal)", func(): m.ordre_mines(3), av, 0)
 	_btn_sortir = _bouton("Reprendre la route", func(): _reprendre_route(), av, 0)
 	_panneau_alerte.visible = false
+	# --- Dialogue : voyageur au bord de la route, camp allié
+	_panneau_dial = _panneau(self, Color(0.08, 0.09, 0.1, 0.95))
+	_panneau_dial.anchor_left = 1.0
+	_panneau_dial.anchor_right = 1.0
+	_panneau_dial.anchor_top = 0.5
+	_panneau_dial.anchor_bottom = 0.5
+	_panneau_dial.offset_left = -800
+	_panneau_dial.offset_right = -24
+	_panneau_dial.offset_top = -300
+	_panneau_dial.offset_bottom = -299
+	var dv := VBoxContainer.new()
+	dv.add_theme_constant_override("separation", 10)
+	_panneau_dial.add_child(dv)
+	_lbl_dial_titre = _label("", dv, 32, C_ACCENT)
+	_lbl_dial_texte = _label("", dv, 24)
+	_lbl_dial_texte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_dial_texte.custom_minimum_size = Vector2(720, 0)
+	_boite_dial = VBoxContainer.new()
+	_boite_dial.add_theme_constant_override("separation", 8)
+	dv.add_child(_boite_dial)
+	_panneau_dial.visible = false
+	# --- Carte du monde
+	_voile_carte = Control.new()
+	_voile_carte.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_voile_carte.visible = false
+	add_child(_voile_carte)
+	var fond_c := ColorRect.new()
+	fond_c.color = Color(0.03, 0.03, 0.04, 0.96)
+	fond_c.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_voile_carte.add_child(fond_c)
+	_carte_ctl = CarteMap.new()
+	_carte_ctl.vue = self
+	_carte_ctl.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_carte_ctl.offset_left = 20
+	_carte_ctl.offset_top = 20
+	_carte_ctl.offset_bottom = -20
+	_carte_ctl.offset_right = -560
+	_voile_carte.add_child(_carte_ctl)
+	var pc := _panneau(_voile_carte, Color(0.1, 0.11, 0.12, 1.0))
+	pc.anchor_left = 1.0
+	pc.anchor_right = 1.0
+	pc.anchor_top = 0.0
+	pc.anchor_bottom = 1.0
+	pc.offset_left = -540
+	pc.offset_right = -20
+	pc.offset_top = 20
+	pc.offset_bottom = -20
+	var cv := VBoxContainer.new()
+	cv.add_theme_constant_override("separation", 14)
+	pc.add_child(cv)
+	_label("CARTE DES SECTEURS", cv, 34, C_ACCENT)
+	_lbl_carte_info = _label("", cv, 26)
+	_lbl_carte_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_carte_info.custom_minimum_size = Vector2(480, 0)
+	_lbl_carte_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_btn_partir = _bouton("Partir vers ce secteur", func(): _partir(), cv, 0)
+	_bouton("Fermer la carte", func(): _fermer_carte(), cv, 0)
 	# --- Fin de partie
 	_voile_fin = ColorRect.new()
 	_voile_fin.color = Color(0, 0, 0, 0.72)
@@ -372,6 +523,31 @@ func _son(nom: String, volume := 0.0) -> void:
 	var s := get_node_or_null("/root/Son")
 	if s:
 		s.effet(nom, volume)
+
+
+func _ouvrir_carte() -> void:
+	_pause_avant = pause
+	pause = true
+	_carte_sel = -1
+	_voile_carte.visible = true
+	_carte_ctl.queue_redraw()
+
+
+func _fermer_carte() -> void:
+	_voile_carte.visible = false
+	pause = _pause_avant
+
+
+func _partir() -> void:
+	if _carte_sel >= 0 and m.monde.choisir_destination(_carte_sel):
+		m.ordre_marche("avancer")
+		_fermer_carte()
+
+
+func _dialogue_bouton(texte: String, action: Callable, actif := true) -> void:
+	var b := _bouton(texte, action, _boite_dial, 0)
+	b.disabled = not actif
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 
 func _embuscade() -> void:
@@ -459,6 +635,7 @@ func _process(delta: float) -> void:
 	for e in m.vider_evenements():
 		_evenement(e)
 	_vieillir(delta)
+	terrain.nuit = m.monde.obscurite()
 	_camera(delta)
 	_synchroniser()
 	_maj_persos(0.0 if pause else delta * vitesse_sim)
@@ -475,7 +652,7 @@ func _camera(delta: float) -> void:
 			droite = maxf(droite, _rx(e) + e.longueur + 3.0)
 	for b in m.batiments:
 		var proche: bool = b.x - m.x_tete < 85.0 and b.x + b.longueur > gauche - 40.0
-		if (b.actif() and b.x - m.x_tete < 85.0) or (b.garnison.size() > 0 and proche):
+		if ((b.actif() or b.ami) and b.x - m.x_tete < 85.0) or (b.garnison.size() > 0 and proche):
 			droite = maxf(droite, b.x + b.longueur + 3.0)
 			if b.garnison.size() > 0:
 				gauche = minf(gauche, b.x - 2.0)
@@ -520,6 +697,7 @@ func _synchroniser() -> void:
 		n.modulate = Color.WHITE if v.actif() else (Color(0.82, 0.8, 0.78) if v.recuperable() else Color(0.4, 0.38, 0.36))
 		if v.camo_voulu:
 			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)
+		n.modulate = n.modulate * Color.WHITE.lerp(Color(0.5, 0.55, 0.75), terrain.nuit)
 		n.z_index = 0 if v.actif() else -1   # les épaves passent derrière les véhicules
 		var cxv: float = x + v.longueur * 0.5
 		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
@@ -537,6 +715,7 @@ func _synchroniser() -> void:
 		n.ppm = ppm
 		n.size = Vector2(b.longueur, b.hauteur) * ppm
 		n.position = Vector2(terrain.ecran_x(b.x), _sy(b.x + b.longueur * 0.5) - n.size.y + 2.0)
+		n.modulate = Color.WHITE.lerp(Color(0.42, 0.48, 0.72), terrain.nuit)
 		n.z_index = -2
 	for uid in noeuds.keys():
 		if not vus.has(uid):
@@ -583,6 +762,21 @@ func _evenement(e: Dictionary) -> void:
 				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe == "canon"})
 				if e.classe == "canon":
 					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
+		"meute":
+			_son("sfx_meute", -3.0)
+		"pillards":
+			var so2 := get_node_or_null("/root/Son")
+			if so2 and _audio_ok and _temps - _t_son.voix > 25.0:
+				_t_son.voix = _temps
+				so2.voix("voix_pillards")
+		"nuit_tombe":
+			_son("sfx_nuee", -4.0)
+		"marteau":
+			_son("sfx_atelier", -9.0)
+		"voyageur", "secteur", "quete":
+			_son("sfx_radio" if e.t == "voyageur" else "sfx_depart_convoi", -4.0)
+		"mort":
+			_etincelles.append({"p": Vector2(e.x, 0.9), "age": 0.0, "gros": false})
 		"mine":
 			_explosions.append({"p": Vector2(e.x, 0.3), "age": 0.0, "taille": 2.2})
 			_son("sfx_explosion")
@@ -667,8 +861,75 @@ func _sy(x: float, relief_seul := false) -> float:
 	return SOL_Y + (cam_h - (Terrain.relief(x) if relief_seul else Terrain.sol(x))) * ppm
 
 
+func _loup(c: CanvasItem, pied: Vector2, dir: float, phase: float, mort: bool, teinte: Color) -> void:
+	var k := ppm
+	var d := dir
+	if mort:
+		c.draw_colored_polygon(PackedVector2Array([pied + Vector2(-0.6 * k, 0), pied + Vector2(-0.5 * k, -0.28 * k), pied + Vector2(0.5 * k, -0.25 * k), pied + Vector2(0.7 * k, 0)]), teinte.darkened(0.4))
+		return
+	var courir: float = sin(phase)
+	for j in 4:
+		var lx: float = (-0.45 + 0.3 * j) * d
+		var pat: float = sin(phase + j * 1.6) * 0.28
+		c.draw_line(pied + Vector2(lx * k, -0.5 * k), pied + Vector2((lx + pat * d) * k, -0.02 * k), teinte.darkened(0.25), maxf(2.0, k * 0.07))
+	c.draw_colored_polygon(PackedVector2Array([pied + Vector2(-0.6 * d * k, -0.55 * k + courir * 0.03 * k), pied + Vector2(-0.3 * d * k, -0.95 * k), pied + Vector2(0.45 * d * k, -0.92 * k), pied + Vector2(0.65 * d * k, -0.6 * k), pied + Vector2(0.2 * d * k, -0.42 * k), pied + Vector2(-0.45 * d * k, -0.4 * k)]), teinte)
+	c.draw_colored_polygon(PackedVector2Array([pied + Vector2(0.5 * d * k, -0.95 * k), pied + Vector2(0.95 * d * k, -0.75 * k), pied + Vector2(0.55 * d * k, -0.55 * k), pied + Vector2(0.4 * d * k, -0.72 * k)]), teinte.lightened(0.05))
+	c.draw_line(pied + Vector2(0.55 * d * k, -0.98 * k), pied + Vector2(0.5 * d * k, -1.15 * k), teinte, maxf(2.0, k * 0.06))
+	c.draw_line(pied + Vector2(-0.6 * d * k, -0.6 * k), pied + Vector2(-1.05 * d * k, -0.75 * k + courir * 0.08 * k), teinte, maxf(2.0, k * 0.07))
+	c.draw_circle(pied + Vector2(0.72 * d * k, -0.74 * k), maxf(1.5, k * 0.04), Color(1.0, 0.3, 0.2))
+
+
+func _dessiner_monde(c: CanvasItem) -> void:
+	var f := get_theme_default_font()
+	# Fantassins et animaux
+	for p in m.monde.pietons:
+		var xx: float = lerpf(p.x_prev, p.x, 0.0 if pause else _alpha)
+		var pied := Vector2(terrain.ecran_x(xx), _sy(xx))
+		var mort: bool = not p.actif()
+		if mort and p.mort_t > 7.0:
+			continue
+		var marche: bool = absf(p.x - p.x_prev) > 0.001
+		var phase: float = _temps * (14.0 if p.animal else 7.0) + p.uid
+		if p.animal:
+			_loup(c, pied, p.dir if p.dir != 0.0 else -1.0, phase, mort, Color("#5A5650") if p.type == "loup" else Color("#6B5A44"))
+		elif mort:
+			c.draw_rect(Rect2(pied + Vector2(-0.7 * ppm, -0.22 * ppm), Vector2(1.4 * ppm, 0.22 * ppm)), Color(0.18, 0.15, 0.12, 0.8))
+		else:
+			Silhouette.dessiner(c, pied, ppm, "pillard", {"phase": phase if marche else 0.0, "miroir": p.dir < 0.0, "peau": p.uid, "bras": "vise" if not marche else ""})
+	# Lueur des feux allumés dans les bâtiments
+	for b in m.batiments:
+		if b.feu:
+			var fl: float = 0.75 + 0.25 * sin(_temps * 13.0 + b.uid)
+			for g in b.garnison:
+				if g.pv > 0.0:
+					var pf := _px(b.fenetre(g.slot))
+					c.draw_circle(pf, ppm * 1.8, Color(1.0, 0.55, 0.2, 0.12 * fl))
+					c.draw_circle(pf, ppm * 0.7, Color(1.0, 0.7, 0.3, 0.35 * fl))
+	# Voyageurs au bord de la route
+	for v in m.monde.pnj:
+		var pv := Vector2(terrain.ecran_x(v.x), _sy(v.x))
+		var parti: bool = v.statut == "parti"
+		Silhouette.dessiner(c, pv, ppm, "survivant", {"phase": _temps * 7.0 if parti else 0.0, "miroir": parti, "peau": v.peau + 1})
+		if v.statut == "attend":
+			var hb: float = pv.y - 2.6 * ppm - 5.0 * sin(_temps * 3.0)
+			c.draw_circle(Vector2(pv.x, hb), 17.0, C_ACCENT)
+			c.draw_string(f, Vector2(pv.x - 8, hb + 9), "!", HORIZONTAL_ALIGNMENT_CENTER, 16, 26, Color("#1A1A18"))
+			if v.type == "marchand":
+				c.draw_rect(Rect2(pv + Vector2(0.8 * ppm, -0.9 * ppm), Vector2(1.6 * ppm, 0.7 * ppm)), Color("#6A5238"))
+				c.draw_circle(pv + Vector2(1.2 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
+				c.draw_circle(pv + Vector2(2.0 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
+
+
 func dessiner_fx(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
+	var obs: float = m.monde.obscurite()
+	if obs > 0.01:
+		c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.04, 0.12, 0.2 * obs))
+		for v in m.convoi:   # phares
+			if v.actif() and not v.camoufle:
+				var av := _px(Vector2(_rx(v) + v.longueur, 0.9))
+				c.draw_colored_polygon(PackedVector2Array([av, av + Vector2(14.0 * ppm, -1.2 * ppm), av + Vector2(14.0 * ppm, 1.8 * ppm)]), Color(1.0, 0.95, 0.7, 0.16 * obs))
+	_dessiner_monde(c)
 	# Fumée des véhicules endommagés et épaves
 	for v in m.convoi + m.ennemis + m.epaves:
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
@@ -685,7 +946,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var pf := _px(base)
 				c.draw_circle(pf, ppm * (0.3 + 0.08 * sin(_temps * 14.0 + v.uid)), Color(1.0, 0.55, 0.15, 0.8))
 	for b in m.batiments:
-		if not b.actif():
+		if b.statut == "neutralise":
 			for k in 4:
 				var ph := fposmod(_temps * 0.5 + k * 0.25 + b.uid * 0.1, 1.0)
 				var p := _px(Vector2(b.x + b.longueur * (0.25 + 0.15 * k), 1.5 + ph * 4.0))
@@ -1028,7 +1289,6 @@ func _demarrer_audio() -> void:
 	_audio_ok = true
 	var so := get_node_or_null("/root/Son")
 	if so:
-		so.ambiance("amb_desert_jour")
 		so.musique("mus_combat")
 
 
@@ -1038,6 +1298,15 @@ func _maj_sons() -> void:
 	var so := get_node_or_null("/root/Son")
 	if so == null:
 		return
+	var amb: String = "amb_desert_nuit" if m.monde.obscurite() > 0.5 else "amb_desert_jour"
+	if amb != _amb_nom:
+		_amb_nom = amb
+		so.ambiance(amb)
+	if m.monde.obscurite() > 0.6 and not pause:
+		_t_nuit -= get_process_delta_time()
+		if _t_nuit <= 0.0:
+			_t_nuit = _rng.randf_range(14.0, 30.0)
+			_son("sfx_meute" if _rng.randf() < 0.6 else "sfx_nuee", -10.0)
 	var lourd = null
 	for v in m.convoi:
 		if v.actif() and (lourd == null or v.profil.metal > lourd.profil.metal):
@@ -1064,7 +1333,6 @@ func _maj_interface() -> void:
 		l.text = txt
 		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
 	_chips.pieces[0].text = "Pièces %d" % m.composants.size()
-	_lbl_dist.text = "Distance %d m   Niveau %d" % [int(m.x_tete), int(m.x_tete / 400.0)]
 	_btn_pause.text = "Reprendre" if pause else "Pause"
 	for i in _btns_vitesse.size():
 		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)
@@ -1120,15 +1388,21 @@ func _maj_interface() -> void:
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
 	_voile_fin.visible = m.fini
-	# Alerte de vague ennemie et contrôle d'embuscade
+	# Alertes : vague ennemie, camps annoncés, nuit, embuscade
 	var al: Dictionary = m.alerte()
+	var w = m.monde
 	var poste := false
-	for b in m.batiments:
-		poste = poste or b.garnison.size() > 0
+	for bt in m.batiments:
+		poste = poste or bt.garnison.size() > 0
 	var cache := false
 	for v in m.convoi:
 		cache = cache or v.camo_voulu
-	_panneau_alerte.visible = not al.is_empty() or poste or cache or not m.mines.is_empty() or not m.transits.is_empty()
+	var ann: Array = w.annonces()
+	var nuit_alerte: bool = w.alerte_nuit()
+	var vf = w.voyageur_actuel()
+	var camp = w.camp_proche()
+	var dial: bool = vf != null or (camp != null and m.ordres.marche == "halte" and camp.uid != _camp_ferme)
+	_panneau_alerte.visible = (not al.is_empty() or poste or cache or not m.mines.is_empty() or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte) and not dial and not _voile_carte.visible
 	if _panneau_alerte.visible:
 		var txt := ""
 		if not al.is_empty():
@@ -1137,10 +1411,72 @@ func _maj_interface() -> void:
 				txt += ", contact dans %d s" % int(al.eta)
 		elif poste or cache:
 			txt = "Embuscade en place : l'ennemi ne vous voit pas. La première salve surprend."
-		else:
-			txt = "Préparatifs en cours..."
 		_lbl_alerte.text = txt
+		_lbl_alerte.visible = txt != ""
+		var lignes := ""
+		for an in ann:
+			lignes += "%s %s (%s) à %d m%s\n" % [an.nom, "ALLIÉ" if an.ami else "HOSTILE", MondeJeu.FACTIONS[an.faction], int(an.dist), " : fortifié" if an.fortifie else ""]
+		_lbl_camp.text = lignes.strip_edges()
+		_lbl_camp.visible = lignes != ""
+		var hostile_annonce := false
+		for an2 in ann:
+			hostile_annonce = hostile_annonce or not an2.ami
+		_lbl_camp.modulate = Color("#FFB35A") if hostile_annonce else Color("#9BE89B")
+		var abri: Dictionary = w.abri_proche()
+		_lbl_nuit.text = "LA NUIT TOMBE : les rôdeurs sortent.\n%s" % ("Abri : %s à %d m (%s)." % [abri.nom, int(abri.dist), "devant" if abri.devant else "derrière"] if not abri.is_empty() else "Aucun abri en vue : cherchez une ruine ou une église.")
+		_lbl_nuit.visible = nuit_alerte
+		_btn_nuit.visible = nuit_alerte and not abri.is_empty()
+		_btn_embuscade.visible = not al.is_empty() or poste or cache
+		_btn_mines.visible = not al.is_empty() or poste or cache
 		_btn_sortir.visible = poste or cache or not m.transits.is_empty()
+	# Dialogue : voyageur ou camp allié
+	_panneau_dial.visible = dial and not _voile_carte.visible
+	if _panneau_dial.visible:
+		var sig_d := "%s|%d|%d|%d" % ["v" if vf != null else "c", vf.uid if vf != null else camp.uid, int(m.stocks.metal), int(m.stocks.ammo)]
+		if sig_d != _dial_sig:
+			_dial_sig = sig_d
+			for ch in _boite_dial.get_children():
+				ch.queue_free()
+			if vf != null:
+				var o: Dictionary = w.offre_de(vf)
+				_lbl_dial_titre.text = vf.nom
+				_lbl_dial_texte.text = o.texte
+				_dialogue_bouton("Accepter : %s" % o.titre, func(): w.repondre(true), w.peut_accepter(o))
+				_dialogue_bouton("Refuser", func(): w.repondre(false))
+			else:
+				_lbl_dial_titre.text = "%s allié (%s)" % [camp.nom, MondeJeu.FACTIONS[camp.faction]]
+				_lbl_dial_texte.text = "Les sentinelles vous laissent entrer. Vous pouvez échanger, réparer ou vous reposer."
+				for a in w.actions_camp():
+					var ok := true
+					for k in a.prend:
+						ok = ok and m.stocks[k] >= a.prend[k]
+					var aid: String = a.id
+					_dialogue_bouton(a.txt, func(): w.camp_action(aid), ok)
+				var cuid: int = camp.uid
+				_dialogue_bouton("Fermer", func(): _camp_ferme = cuid)
+	else:
+		_dial_sig = ""
+	if camp == null:
+		_camp_ferme = 0
+	# HUD : secteur, horloge, quête
+	var sct: Dictionary = w.secteurs[w.secteur]
+	_lbl_dist.text = "%s (F%d)  %d m  Jour %d, %s" % [sct.nom, sct.faction, int(m.x_tete), w.jour, w.periode()]
+	if w.en_transit():
+		_lbl_quete.text = "Cap sur %s : %d m de route calme" % [w.secteurs[w.trajet.dest].nom, int(w.trajet.reste)]
+	elif not w.quete.is_empty():
+		_lbl_quete.text = "Quête : %s (%d/%d)" % [w.quete.titre, mini(m.ennemis_detruits - w.quete.depart, w.quete.abattre), w.quete.abattre]
+	else:
+		_lbl_quete.text = ""
+	# Carte
+	if _voile_carte.visible:
+		var inf := ""
+		if _carte_sel >= 0:
+			var ss: Dictionary = w.secteurs[_carte_sel]
+			inf = "%s\n%s : %s\nDifficulté : niveau %d sur 7\nDistance : environ %d m de route calme" % [ss.nom, MondeJeu.FACTIONS[ss.faction], {"ami": "alliée", "neutre": "neutre", "hostile": "hostile"}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
+		else:
+			inf = "Touchez un secteur pour le choisir.\nLes anneaux vont du vert (calme) au rouge (dangereux). La couleur du centre est la faction."
+		_lbl_carte_info.text = "Vous êtes à %s.\n\n%s" % [sct.nom, inf]
+		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur
 	if _btn_camo != null:
 		_btn_camo.text = "Découvrir" if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:

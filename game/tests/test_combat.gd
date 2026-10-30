@@ -230,6 +230,67 @@ func _init() -> void:
 	_avancer(mm, 1.0)
 	verifier(em.pieces.roulement.pv < avant_m or mm.mines.size() < 3, "une mine armée explose sous un véhicule qui passe dessus")
 
+	# --- Carte, secteurs et zone calme
+	var mc2 := CombatModele.new(51)
+	var w1 := mc2.monde
+	verifier(w1.secteurs.size() == 12 and w1.secteurs[w1.secteur].niveau == 0, "12 secteurs, départ au niveau 0 (%s)" % w1.secteurs[w1.secteur].nom)
+	var autre := 0
+	for sct in w1.secteurs:
+		if sct.niveau >= 3:
+			autre = sct.id
+	verifier(w1.choisir_destination(autre) and w1.en_transit(), "choisir un secteur lance un trajet calme")
+	mc2.ordre_marche("avancer")
+	mc2.stocks.fuel_l = 1.0e5
+	var vus := 0
+	for i in 12000:
+		mc2.avancer()
+		vus += mc2.ennemis.size() + mc2.batiments.size() if w1.en_transit() else 0
+		if not w1.en_transit():
+			break
+	verifier(w1.secteur == autre and vus == 0, "zone calme : rien sur la route, arrivée au secteur (rencontres vues : %d)" % vus)
+	verifier(w1.niveau_a(mc2.x_tete) >= 3, "le niveau des rencontres suit le secteur (%d)" % w1.niveau_a(mc2.x_tete))
+
+	# --- Camps annoncés, fantassins, voyageurs
+	var mw := CombatModele.new(61)
+	mw._prochain_x = 1.0e9
+	var rr := RandomNumberGenerator.new()
+	rr.seed = 5
+	mw.monde.generer({"camp": "ami"}, mw.x_tete + 120.0, rr)
+	var camp: CombatModele.Bat = mw.batiments[0]
+	verifier(camp.ami and not camp.actif() and mw.monde.annonces().size() == 1 and mw.monde.annonces()[0].dist > 250.0, "un camp allié est annoncé de loin (%d m)" % int(mw.monde.annonces()[0].dist))
+	var lp := mw.monde.creer_pieton("loup", mw.x_tete + 40.0)
+	mw.monde.creer_pieton("pillard", mw.x_tete + 60.0)
+	_avancer(mw, 25.0)
+	verifier(mw.monde.vivants() == 0 and not lp.actif(), "la mitrailleuse abat loups et pillards à pied")
+	var vo := {"uid": 7, "x": mw.x_tete + 5.0, "type": "marchand", "nom": "Marchand", "offre": 0, "statut": "attend", "peau": 0}
+	mw.monde.pnj.append(vo)
+	mw.stocks.metal = 20.0
+	var am0: float = mw.stocks.ammo
+	_avancer(mw, 1.0)
+	verifier(not mw.monde.dialogue.is_empty(), "un voyageur arrête le convoi")
+	mw.monde.repondre(true)
+	verifier(mw.stocks.ammo == am0 + 40.0 and mw.stocks.metal == 10.0 and mw.monde.dialogue.is_empty(), "échange accepté : +40 munitions, -10 métal")
+	mw.monde.quete = {"titre": "t", "abattre": 1, "depart": mw.ennemis_detruits, "recompense": {"metal": 5}}
+	mw.monde.creer_pieton("loup", mw.x_tete + 20.0)
+	_avancer(mw, 10.0)
+	verifier(mw.monde.quete.is_empty() and mw.stocks.metal >= 15.0, "la quête est accomplie et récompensée")
+
+	# --- Nuit : alerte, abri, barricade, feu
+	var mn := CombatModele.new(71)
+	mn._prochain_x = 1.0e9
+	var rb2 := mn.creer_batiment("maison", mn.x_tete + 12.0)
+	rb2.statut = "neutralise"
+	mn.batiments.append(rb2)
+	mn.monde.heure = 0.60
+	_avancer(mn, 20.0)
+	verifier(mn.monde.nuit() and mn.monde.alerte_nuit(), "la nuit tombe : alerte d'abri")
+	verifier(mn.monde.ordre_nuit(), "ordre : passer la nuit à l'abri")
+	_avancer(mn, 25.0)
+	verifier(rb2.barricade >= 1.0 and rb2.feu and rb2.blindage > rb2.blindage_base, "planches clouées (%.0f%%) et feu allumé" % (rb2.barricade * 100.0))
+	var h0: float = mn.monde.heure
+	_avancer(mn, 10.0)
+	verifier(mn.monde.heure - h0 > 10.0 / MondeJeu.JOUR_S * 2.5, "la nuit passe plus vite à l'abri")
+
 	# --- Déterminisme
 	var a1 := CombatModele.new(99)
 	var a2 := CombatModele.new(99)

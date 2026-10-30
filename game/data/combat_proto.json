@@ -441,6 +441,60 @@
      24
     ]
    }
+  },
+  "camp_pillard": {
+   "nom": "Camp de pillards",
+   "largeur": 20.0,
+   "hauteur": 5.5,
+   "pv": 240,
+   "blindage": 8,
+   "tireurs": 4,
+   "butin": {
+    "ammo": [
+     20,
+     50
+    ],
+    "fuel_l": [
+     10,
+     30
+    ],
+    "metal": [
+     14,
+     34
+    ]
+   }
+  },
+  "camp_fortifie": {
+   "nom": "Camp fortifié",
+   "largeur": 26.0,
+   "hauteur": 7.5,
+   "pv": 520,
+   "blindage": 18,
+   "tireurs": 6,
+   "arme": "mitrailleuse",
+   "butin": {
+    "ammo": [
+     40,
+     90
+    ],
+    "fuel_l": [
+     20,
+     50
+    ],
+    "metal": [
+     24,
+     60
+    ]
+   }
+  },
+  "camp_ami": {
+   "nom": "Camp",
+   "largeur": 22.0,
+   "hauteur": 5.5,
+   "pv": 400,
+   "blindage": 10,
+   "tireurs": 0,
+   "butin": {}
   }
  },
  "rencontres": {
@@ -651,6 +705,51 @@
      "citroen_traction"
     ],
     "ruine": "eglise"
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 99,
+    "poids": 3,
+    "camp": "auto"
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 99,
+    "poids": 2,
+    "pnj": true
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 3,
+    "poids": 3,
+    "pietons": [
+     "pillard",
+     3
+    ]
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 99,
+    "poids": 3,
+    "pietons": [
+     "loup",
+     3
+    ]
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 99,
+    "poids": 2,
+    "pietons": [
+     "pillard",
+     5
+    ]
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 99,
+    "poids": 2,
+    "camp": "fortifie"
    }
   ],
   "premiere": {
@@ -667,5 +766,97 @@
   "mine_dist": 48.0,
   "portee_refuge": 40.0,
   "vitesse_marche": 2.6
+ },
+ "pietons": {
+  "pillard": {
+   "nom": "Pillard à pied",
+   "pv": 10,
+   "vit": 2.3,
+   "portee": 26.0,
+   "animal": false
+  },
+  "loup": {
+   "nom": "Loup",
+   "pv": 8,
+   "vit": 7.0,
+   "portee": 1.0,
+   "animal": true,
+   "morsure": 2.5
+  },
+  "chien": {
+   "nom": "Chien errant",
+   "pv": 6,
+   "vit": 6.0,
+   "portee": 1.0,
+   "animal": true,
+   "morsure": 2.0
+  }
+ },
+ "pnj": [
+  {
+   "nom": "Marchand ambulant",
+   "titre": "40 munitions contre 10 métal",
+   "texte": "Un marchand arrête sa charrette : « J'ai des munitions, si tu as du métal. »",
+   "prend": {
+    "metal": 10
+   },
+   "donne": {
+    "ammo": 40
+   }
+  },
+  {
+   "nom": "Réfugié",
+   "titre": "un réfugié rejoint le convoi",
+   "texte": "Un homme épuisé vous fait signe : « Emmenez-moi, je sais me servir d'un fusil. »",
+   "survivant": 1
+  },
+  {
+   "nom": "Mécanicien itinérant",
+   "titre": "25 L de carburant contre 8 munitions",
+   "texte": "Une femme au bord de la route : « J'ai du carburant coupé. Je le troque contre des balles. »",
+   "prend": {
+    "ammo": 8
+   },
+   "donne": {
+    "fuel_l": 25
+   }
+  },
+  {
+   "nom": "Éclaireur",
+   "titre": "détruire 3 ennemis (récompense 20 métal, 40 munitions)",
+   "texte": "Un éclaireur vous prévient : « Des pillards infestent la région. Abattez-en trois et je vous récompense. »",
+   "quete": {
+    "abattre": 3,
+    "recompense": {
+     "metal": 20,
+     "ammo": 40
+    }
+   }
+  },
+  {
+   "nom": "Fermier",
+   "titre": "30 L de carburant contre 12 métal",
+   "texte": "Un fermier vous interpelle : « Du métal pour ma clôture, et je vous donne du carburant. »",
+   "prend": {
+    "metal": 12
+   },
+   "donne": {
+    "fuel_l": 30
+   }
+  },
+  {
+   "nom": "Chasseur",
+   "titre": "détruire 5 ennemis (récompense 35 métal)",
+   "texte": "Un chasseur désigne l'horizon : « Il y a trop de rôdeurs. Cinq de moins, et le métal est à vous. »",
+   "quete": {
+    "abattre": 5,
+    "recompense": {
+     "metal": 35
+    }
+   }
+  }
+ ],
+ "cycle": {
+  "jour_s": 400
  }
 }
