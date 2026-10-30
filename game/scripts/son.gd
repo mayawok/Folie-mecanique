@@ -54,11 +54,13 @@ func _flux(nom: String) -> AudioStream:
 	if _cache.has(nom):
 		return _cache[nom]
 	var f: AudioStream = null
-	for ext in ["ogg", "mp3", "wav"]:
-		var chemin := "%s%s.%s" % [DOSSIER, nom, ext]
-		if ResourceLoader.exists(chemin):
-			f = load(chemin)
-			break
+	# Tolère un dossier « Audio » ou une majuscule au début du nom (envoi depuis GitHub)
+	for dossier in [DOSSIER, "res://assets/Audio/"]:
+		for n in [nom, nom.capitalize().replace(" ", "_"), nom[0].to_upper() + nom.substr(1)]:
+			for ext in ["ogg", "mp3", "wav"]:
+				var chemin := "%s%s.%s" % [dossier, n, ext]
+				if f == null and ResourceLoader.exists(chemin):
+					f = load(chemin)
 	_cache[nom] = f
 	return f
 

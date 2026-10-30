@@ -35,8 +35,20 @@ jobs:
         run: |
           mkdir -p build/web
           cd game
+          # Version affichée dans le menu principal (heure de Paris)
+          echo "{\"version\": \"$(TZ=Europe/Paris date +'%d/%m %Hh%M') · ${GITHUB_SHA::7}\"}" > data/version.json
           godot --headless --import || true
           godot --headless --export-release "Web" ../build/web/index.html
+          # Nom unique pour le paquet du jeu : un navigateur ne peut pas garder l'ancien en cache
+          cd ../build/web
+          P="index-${GITHUB_SHA::8}.pck"
+          if grep -q '"executable":"index"' index.html; then
+            cp index.pck "$P"
+            sed -i "s/\"executable\":\"index\"/\"executable\":\"index\",\"mainPack\":\"$P\"/; s/\"index.pck\":/\"$P\":/" index.html
+          fi
+          # La page elle-même n'est jamais gardée en cache
+          sed -i 's|<head>|<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache">|' index.html
+          grep -o '"mainPack":"[^"]*"' index.html || true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

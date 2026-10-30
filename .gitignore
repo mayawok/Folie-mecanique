@@ -5,3 +5,4 @@ __pycache__/
 # Godot
 game/.godot/
 build/
+game/data/version.json

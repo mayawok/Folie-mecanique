@@ -430,25 +430,6 @@ func _construire_base() -> void:
 	_bouton("Test +6 h", func(): _avancer(jeu.avancer_tests(6)), actions).size_flags_horizontal = SIZE_EXPAND_FILL
 	_bouton("Expédition", func(): _ouvrir_carte(), actions, true).size_flags_horizontal = SIZE_EXPAND_FILL
 
-	# Zoom (bas droite, hors des véhicules), utile sur ordinateur
-	var pz := _panneau(base, 10)
-	pz.anchor_left = 1.0
-	pz.anchor_right = 1.0
-	pz.anchor_top = 1.0
-	pz.anchor_bottom = 1.0
-	pz.grow_horizontal = GROW_DIRECTION_BEGIN
-	pz.grow_vertical = GROW_DIRECTION_BEGIN
-	pz.offset_right = -marges.z
-	pz.offset_bottom = -marges.w
-	var zb := HBoxContainer.new()
-	zb.add_theme_constant_override("separation", 10)
-	pz.add_child(zb)
-	for z in [["−", 1.0 / 1.25], ["+", 1.25]]:
-		var b := _bouton(z[0], func(): _zoomer(zoom * z[1], get_viewport_rect().size / 2), zb)
-		b.custom_minimum_size = Vector2(80, 80)
-		b.add_theme_font_size_override("font_size", 40)
-	_bouton("Vue d'ensemble", func(): _zoomer(1.0, Vector2.ZERO), zb)
-
 
 func _maj() -> void:
 	lbl_jour.text = str(jeu.jour())
@@ -487,7 +468,7 @@ func _carte_ressource(res: String) -> Control:
 	ic.texture = _tex("ui/" + info.icone)
 	ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ic.custom_minimum_size = Vector2(52, 52)
+	ic.custom_minimum_size = Vector2(44, 52)
 	h.add_child(ic)
 	var v := VBoxContainer.new()
 	v.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -495,12 +476,13 @@ func _carte_ressource(res: String) -> Control:
 	v.add_theme_constant_override("separation", 4)
 	h.add_child(v)
 	var l1 := HBoxContainer.new()
+	l1.add_theme_constant_override("separation", 8)
 	v.add_child(l1)
-	var nom := _label(info.nom, 20, l1, C_DISCRET)
+	var nom := _label(info.nom, 25, l1, C_DISCRET)
 	nom.size_flags_horizontal = SIZE_EXPAND_FILL
 	nom.clip_text = true
 	var unite: String = (" " + info.unite) if info.unite == "L" else ""
-	_label("%d%s" % [stock, unite], 26, l1, C_TEXTE, true)
+	_label("%d%s" % [stock, unite], 28, l1, C_TEXTE, true)
 	# Barre + tendance
 	var l2 := HBoxContainer.new()
 	l2.add_theme_constant_override("separation", 8)
@@ -527,7 +509,7 @@ func _carte_ressource(res: String) -> Control:
 	var detail := ("%+d /j" % int(round(solde))) if fl.sens != 0 else "stable"
 	if auto < INF:
 		detail += "  ·  %.1f j" % auto
-	var l3 := _label(detail, 18, v, C_DISCRET)
+	var l3 := _label(detail, 20, v, C_DISCRET)
 	if auto < 1.0:
 		l3.add_theme_color_override("font_color", C_ROUGE)
 	elif auto < 2.0:

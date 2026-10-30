@@ -91,7 +91,12 @@ func _construire_titre() -> void:
 	main._bouton("Nouvelle partie", func(): confirmation.visible = true, vb)
 	main._bouton("Garage", func(): main._ouvrir_garage(), vb)
 	main._bouton("Options", func(): options.visible = true, vb)
-	var ver: Label = main._label("Version de test : les sons s'ajoutent dans game/assets/audio/", 20, titre, main.C_DISCRET)
+	var version := "locale"
+	if FileAccess.file_exists("res://data/version.json"):
+		var d = JSON.parse_string(FileAccess.get_file_as_string("res://data/version.json"))
+		if typeof(d) == TYPE_DICTIONARY:
+			version = d.get("version", version)
+	var ver: Label = main._label("Version du %s" % version, 20, titre, main.C_DISCRET)
 	ver.anchor_top = 1.0
 	ver.anchor_bottom = 1.0
 	ver.offset_left = m.x + 70
