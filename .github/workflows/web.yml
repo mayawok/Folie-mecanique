@@ -35,13 +35,14 @@ jobs:
         run: |
           mkdir -p build/web
           cd game
+          COURT=$(echo "$GITHUB_SHA" | cut -c1-8)
           # Version affichée dans le menu principal (heure de Paris)
-          echo "{\"version\": \"$(TZ=Europe/Paris date +'%d/%m %Hh%M') · ${GITHUB_SHA::7}\"}" > data/version.json
+          echo "{\"version\": \"$(TZ=Europe/Paris date +'%d/%m %Hh%M') · $COURT\"}" > data/version.json
           godot --headless --import || true
           godot --headless --export-release "Web" ../build/web/index.html
           # Nom unique pour le paquet du jeu : un navigateur ne peut pas garder l'ancien en cache
           cd ../build/web
-          P="index-${GITHUB_SHA::8}.pck"
+          P="index-$COURT.pck"
           if grep -q '"executable":"index"' index.html; then
             cp index.pck "$P"
             sed -i "s/\"executable\":\"index\"/\"executable\":\"index\",\"mainPack\":\"$P\"/; s/\"index.pck\":/\"$P\":/" index.html
