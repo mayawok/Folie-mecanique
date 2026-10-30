@@ -83,5 +83,17 @@ func _process(_d: float) -> bool:
 		m.monde.creer_pieton("pillard", m.x_tete + 50.0)
 	if frame == 700:
 		_photo("m7_fantassins")
+		vue._ouvrir_surv()
+		vue._surv_sel = {"veh": m.convoi[0].uid, "idx": 0, "nom": "Test"}
+	if frame == 720:
+		_photo("m8_survivants")
+		vue._fermer_surv()
+		m.batiments.clear()
+		m.batiments.append(_camp(m, "maison", 14.0, false, 0))
+		m.batiments[0].statut = "neutralise"
+		m.monde.pietons.clear()
+		m.monde.pnj.clear()
+	if frame == 760:
+		_photo("m9_fouiller")
 		quit(0)
 	return false

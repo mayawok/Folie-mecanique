@@ -115,6 +115,13 @@ ville en ruine au loin, nuages, poussière des roues.
   un **feu** s'allume. Nuit à l'abri : temps ×3. Dehors la nuit : tirs moins précis, meutes et pillards plus fréquents.
 - **Voyageurs** au bord de la route : troc, réfugié, quêtes (« abattre N ennemis »). Le convoi s'arrête pour répondre.
 
+## Interface (v3)
+
+Fouille **au bouton** : « Fouiller : <bâtiment> » flotte au-dessus de la ruine ou de l'épave (à moins de 40 m) ; le convoi
+s'approche, s'arrête à 5 m et fouille. Plus de ligne « Cible » ni « Fouille ». **Roue du temps** : moitié soleil, moitié lune,
+la flèche fixe indique l'instant. **Regard libre** : glisser le doigt déplace la vue (70 m), elle revient au convoi après 3 s.
+**Survivants** : nom, état de santé, lieu ; « Affecter » les change de véhicule (convoi à l'arrêt, place libre). Lore : `LORE.md`.
+
 ## Architecture
 
 | Fichier | Rôle |

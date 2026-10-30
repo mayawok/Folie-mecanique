@@ -84,6 +84,7 @@ class Veh extends RefCounted:
 	var pieces := {}              # id -> {id, nom, pv, max}
 	var armes: Array = []         # {piece, id, cd}
 	var equipage: Array = []      # pv de chaque membre
+	var noms: Array = []          # nom de chaque membre (même ordre)
 	var statut := "actif"         # actif | abandonne | epave
 	var mode := "approche"        # ennemis : approche | barrage
 	var tir := true               # joueur : feu libre ou cessez-le-feu
@@ -232,6 +233,9 @@ var projectiles: Array = []       # balles et obus en vol : {a, b, t, T, touche,
 var mines: Array = []             # {x, arme_t, armee}
 var transits: Array = []          # équipages en marche vers un bâtiment ou un véhicule
 var monde: MondeJeu
+var fouille_demandee := 0         # uid du bâtiment ou de l'épave que le joueur veut fouiller
+var _lore_dit := false
+var _n_noms := 0
 var reserve_survivants := 0      # recrues sans place : elles monteront dans le prochain véhicule
 
 
@@ -302,7 +306,24 @@ func creer_vehicule(type: String, camp: String, x: float) -> Veh:
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.4, float(w.cadence)), "idx": i})
 	for i in int(p.equipage):
 		v.equipage.append(float(D.equipage_pv))
+		v.noms.append(_nom_survivant())
 	return v
+
+
+const PRENOMS := ["Pierre", "Marie", "Jules", "Léa", "Hugo", "Inès", "Louis", "Camille", "Noé", "Alice", "Paul", "Jeanne", "Marc", "Élise", "Théo", "Sarah", "Émile", "Clara", "Victor", "Nina"]
+const INITIALES := "BCDFGLMPRSTV"
+
+
+func _nom_survivant() -> String:
+	_n_noms += 1
+	return "%s %s." % [PRENOMS[(_n_noms * 7 + graine) % PRENOMS.size()], INITIALES[(_n_noms * 5 + graine) % INITIALES.length()]]
+
+
+func _aligner_noms(v: Veh) -> void:
+	while v.noms.size() < v.equipage.size():
+		v.noms.append(_nom_survivant())
+	while v.noms.size() > v.equipage.size():
+		v.noms.pop_back()
 
 
 func creer_batiment(type: String, x: float) -> Bat:
@@ -451,15 +472,78 @@ func rejoindre(uid: int) -> bool:
 func _recruter_survivant() -> bool:
 	for v in convoi:
 		if v.actif() and v.equipage.size() < int(v.profil.equipage):
+			_aligner_noms(v)
 			v.equipage.append(float(donnees().equipage_pv))
+			v.noms.append(_nom_survivant())
 			return true
 	for v in convoi:
 		if v.actif():
 			for i in v.equipage.size():
 				if v.equipage[i] <= 0.0:
 					v.equipage[i] = float(donnees().equipage_pv)
+					_aligner_noms(v)
+					v.noms[i] = _nom_survivant()
 					return true
 	reserve_survivants += 1   # pas de place : il suivra à pied jusqu'au prochain véhicule
+	return true
+
+
+# Tous les survivants du joueur : {nom, pv, lieu, veh_uid, idx}
+func _dire_lore() -> void:
+	if not _lore_dit:
+		_lore_dit = true
+		log_("On ne revoit jamais ceux qui s'éloignent.", "info")
+
+
+func liste_survivants() -> Array:
+	var res := []
+	for v in convoi:
+		_aligner_noms(v)
+		for i in v.equipage.size():
+			res.append({"nom": v.noms[i], "pv": v.equipage[i], "lieu": v.nom, "veh_uid": v.uid, "idx": i})
+	for b in batiments:
+		for g in b.garnison:
+			res.append({"nom": g.get("nom", "Survivant"), "pv": g.pv, "lieu": b.nom, "veh_uid": -1, "idx": -1})
+	for t in transits:
+		for k in t.pvs.size():
+			res.append({"nom": t.noms[k], "pv": t.pvs[k], "lieu": "en chemin", "veh_uid": -1, "idx": -1})
+	return res
+
+
+func etat_sante(pv: float) -> String:
+	var q: float = pv / float(donnees().equipage_pv)
+	if pv <= 0.0:
+		return "Hors de combat"
+	if q > 0.8:
+		return "En forme"
+	if q > 0.4:
+		return "Blessé"
+	return "Gravement blessé"
+
+
+# Change un survivant de véhicule (convoi à l'arrêt, place libre)
+func affecter(de_uid: int, idx: int, vers_uid: int) -> bool:
+	var a = trouver(de_uid)
+	var b = trouver(vers_uid)
+	if not (a is Veh and b is Veh) or not convoi.has(a) or not convoi.has(b) or a == b:
+		return false
+	if ordres.marche != "halte":
+		log_("Arrêtez le convoi pour changer d'affectation.", "alerte")
+		return false
+	_aligner_noms(a)
+	_aligner_noms(b)
+	if idx < 0 or idx >= a.equipage.size() or a.equipage[idx] <= 0.0:
+		return false
+	if b.equipage.size() >= int(b.profil.equipage) or not b.actif():
+		log_("%s n'a pas de place libre." % b.nom, "alerte")
+		return false
+	var pv: float = a.equipage[idx]
+	var nom: String = a.noms[idx]
+	a.equipage.remove_at(idx)
+	a.noms.remove_at(idx)
+	b.equipage.append(pv)
+	b.noms.append(nom)
+	log_("%s passe dans %s." % [nom, b.nom], "info")
 	return true
 
 
@@ -483,6 +567,7 @@ func _deplacer_rang(uid: int, sens: int) -> void:
 
 
 func abandonner(uid: int) -> void:
+	_dire_lore()
 	for i in convoi.size():
 		var v: Veh = convoi[i]
 		if v.uid == uid:
@@ -1132,14 +1217,20 @@ func ordre_debarquer(uid: int) -> bool:
 	var libres: int = FENETRES[b.type].size() - b.garnison.size() - _en_route(b)
 	var pvs := []
 	var reste := []
-	for pv in v.equipage:
-		if pv > 0.0 and pvs.size() < libres:
-			pvs.append(pv)
+	var noms_p := []
+	var noms_r := []
+	_aligner_noms(v)
+	for i in v.equipage.size():
+		if v.equipage[i] > 0.0 and pvs.size() < libres:
+			pvs.append(v.equipage[i])
+			noms_p.append(v.noms[i])
 		else:
-			reste.append(pv)
+			reste.append(v.equipage[i])
+			noms_r.append(v.noms[i])
 	v.equipage = reste
+	v.noms = noms_r
 	var T: float = ecart(v.x, v.longueur, b.x, b.longueur) / donnees().embuscade.vitesse_marche + 1.0
-	transits.append({"mode": "debarque", "veh": uid, "bat": b.uid, "pvs": pvs, "restant": T, "T": T})
+	transits.append({"mode": "debarque", "veh": uid, "bat": b.uid, "pvs": pvs, "noms": noms_p, "restant": T, "T": T})
 	log_("L'équipage de %s rejoint %s." % [v.nom, b.nom], "info")
 	return true
 
@@ -1151,16 +1242,18 @@ func ordre_rembarquer(uid: int) -> bool:
 	var fait := false
 	for b in batiments:
 		var sortants := []
+		var noms_s := []
 		var restants := []
 		for g in b.garnison:
 			if g.veh == uid and g.pv > 0.0:
 				sortants.append(g.pv)
+				noms_s.append(g.get("nom", "Survivant"))
 			else:
 				restants.append(g)
 		if not sortants.is_empty():
 			b.garnison = restants
 			var T: float = ecart(v.x, v.longueur, b.x, b.longueur) / donnees().embuscade.vitesse_marche + 1.0
-			transits.append({"mode": "rembarque", "veh": uid, "bat": b.uid, "pvs": sortants, "restant": T, "T": T})
+			transits.append({"mode": "rembarque", "veh": uid, "bat": b.uid, "pvs": sortants, "noms": noms_s, "restant": T, "T": T})
 			fait = true
 	if fait:
 		log_("L'équipage de %s regagne son véhicule." % v.nom, "info")
@@ -1198,18 +1291,23 @@ func _transits(dt: float) -> void:
 		if t.mode == "debarque":
 			var b = trouver(t.bat)
 			if b is Bat and b.pv > 0.0:
-				for pv in t.pvs:
-					b.garnison.append({"pv": pv, "cd": rng.randf_range(0.5, 1.5), "veh": t.veh, "premier": true, "garde": true, "slot": _slot_libre(b)})
+				for i in t.pvs.size():
+					var pv: float = t.pvs[i]
+					b.garnison.append({"nom": t.noms[i], "pv": pv, "cd": rng.randf_range(0.5, 1.5), "veh": t.veh, "premier": true, "garde": true, "slot": _slot_libre(b)})
 				log_("%d survivant(s) se postent dans %s et attendent l'ennemi." % [t.pvs.size(), b.nom], "ok")
 				evt({"t": "poste", "uid": b.uid})
 			else:
 				var v = trouver(t.veh)
 				if v is Veh:
+					_aligner_noms(v)
 					v.equipage.append_array(t.pvs)
+					v.noms.append_array(t.noms)
 		else:
 			var v = trouver(t.veh)
 			if v is Veh:
+				_aligner_noms(v)
 				v.equipage.append_array(t.pvs)
+				v.noms.append_array(t.noms)
 				log_("L'équipage de %s a rembarqué." % v.nom, "ok")
 	transits = en_cours
 
@@ -1382,26 +1480,66 @@ func a_fouiller():
 	return meilleur
 
 
+# Cible de fouille proposée au joueur : le bâtiment ou l'épave fouillable le plus proche (40 m)
+func cible_fouille():
+	var F: Dictionary = donnees().fouille
+	var meilleur = null
+	var g_min := 40.0
+	var cands: Array = []
+	for v in epaves:
+		if not v.butin_pris:
+			cands.append(v)
+	for b in batiments:
+		if b.statut == "neutralise" and not b.butin_pris:
+			cands.append(b)
+	for c in cands:
+		var centre_conv: float = x_tete - 4.0
+		var g: float = absf(c.x + c.longueur * 0.5 - centre_conv)
+		if g < g_min:
+			g_min = g
+			meilleur = c
+	return meilleur
+
+
+# Le joueur demande à fouiller : le convoi s'approche (avant ou arrière), s'arrête et fouille
+func ordre_fouiller(uid: int) -> bool:
+	var c = trouver(uid)
+	if c == null or c.butin_pris or menace():
+		return false
+	fouille_demandee = uid
+	ordres.marche = "avancer" if c.x + c.longueur * 0.5 > x_tete - 3.0 else "recul"
+	return true
+
+
 func _fouiller(dt: float) -> void:
 	var F: Dictionary = donnees().fouille
 	if fouille_en_cours.is_empty():
-		var peut: bool = ordres.marche == "halte" or (ordres.marche == "avancer" and ordres.fouille == "auto")
-		if peut and not menace():
-			var c = a_fouiller()
-			if c != null:
-				fouille_en_cours = {"uid": c.uid, "restant": F.duree_base, "total": F.duree_base}
-				evt({"t": "fouille", "uid": c.uid})
+		if fouille_demandee == 0:
+			return
+		var c = trouver(fouille_demandee)
+		if c == null or c.butin_pris or menace():
+			fouille_demandee = 0
+			return
+		var proche := false
+		for v in convoi:
+			if v.actif() and ecart(v.x, v.longueur, c.x, c.longueur) <= F.portee:
+				proche = true
+		if proche:
+			ordres.marche = "halte"
+			fouille_demandee = 0
+			fouille_en_cours = {"uid": c.uid, "restant": F.duree_base, "total": F.duree_base}
+			evt({"t": "fouille", "uid": c.uid})
 	else:
-		if menace() or ordres.marche == "recul":
+		if menace():
 			fouille_en_cours = {}
 			log_("Fouille interrompue.", "alerte")
 			return
 		fouille_en_cours.restant -= dt
 		if fouille_en_cours.restant <= 0.0:
-			var c = trouver(fouille_en_cours.uid)
+			var c2 = trouver(fouille_en_cours.uid)
 			fouille_en_cours = {}
-			if c != null:
-				_recolter(c)
+			if c2 != null:
+				_recolter(c2)
 
 
 func _recolter(c) -> void:
@@ -1470,6 +1608,7 @@ func _rencontres() -> void:
 		var f := creer_vehicule(t, "joueur", x)
 		f.statut = "trouvee"
 		f.equipage = []
+		f.noms = []
 		var casses := 0
 		for id in f.pieces:
 			if id != "chassis" and r.randf() < 0.5:

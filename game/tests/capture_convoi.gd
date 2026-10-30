@@ -30,6 +30,11 @@ func _clic(p: Vector2) -> void:
 	e.button_index = MOUSE_BUTTON_LEFT
 	e.pressed = true
 	vue._gui_input(e)
+	var r := InputEventMouseButton.new()
+	r.position = p
+	r.button_index = MOUSE_BUTTON_LEFT
+	r.pressed = false
+	vue._gui_input(r)
 
 
 func _trouvaille():

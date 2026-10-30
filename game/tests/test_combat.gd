@@ -97,8 +97,8 @@ func _init() -> void:
 	var butin_avant: float = m2.stocks.metal
 	_avancer(m2, 10.0)
 	verifier(not e.butin_pris, "l'épave est trop loin pour être fouillée à l'arrêt")
-	m2.ordre_marche("avancer")
-	_avancer(m2, 40.0)
+	m2.ordre_fouiller(e.uid)
+	_avancer(m2, 60.0)
 	verifier(e.butin_pris and m2.stocks.metal > butin_avant, "en avançant, le convoi s'arrête et fouille l'épave (+%.0f métal)" % (m2.stocks.metal - butin_avant))
 
 	# --- Visée : viser les roues immobilise plus souvent
@@ -165,6 +165,7 @@ func _init() -> void:
 	ru.butin.ressources["survivants"] = 1
 	m5.batiments.append(ru)
 	m5.convoi[0].equipage.pop_back()
+	m5.ordre_fouiller(ru.uid)
 	_avancer(m5, 8.0)
 	verifier(ru.butin_pris and m5.convoi[0].equipage.size() == 2, "fouiller une ruine peut recruter un survivant")
 
@@ -290,6 +291,21 @@ func _init() -> void:
 	var h0: float = mn.monde.heure
 	_avancer(mn, 10.0)
 	verifier(mn.monde.heure - h0 > 10.0 / MondeJeu.JOUR_S * 2.5, "la nuit passe plus vite à l'abri")
+
+	# --- Survivants : noms, santé, affectation
+	var ms := CombatModele.new(81)
+	ms._prochain_x = 1.0e9
+	var j2: CombatModele.Veh = ms.convoi[0]
+	var b2: CombatModele.Veh = ms.ajouter_vehicule("bmw_r75")
+	b2.equipage.clear()
+	b2.noms.clear()
+	var ls := ms.liste_survivants()
+	verifier(ls.size() == 2 and ls[0].nom != "" and ms.etat_sante(ls[0].pv) == "En forme", "les survivants ont un nom et un état de santé (%s)" % ls[0].nom)
+	ms.ordre_marche("avancer")
+	verifier(not ms.affecter(j2.uid, 0, b2.uid), "pas d'affectation en marche")
+	ms.ordre_marche("halte")
+	var n0: String = j2.noms[0]
+	verifier(ms.affecter(j2.uid, 0, b2.uid) and b2.noms[0] == n0 and j2.equipage.size() == 1, "un survivant change de véhicule avec son nom")
 
 	# --- Déterminisme
 	var a1 := CombatModele.new(99)

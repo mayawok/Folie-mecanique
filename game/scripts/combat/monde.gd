@@ -514,6 +514,7 @@ func repondre(accepte: bool) -> void:
 		m.log_("Vous déclinez l'offre de %s." % v.nom, "info")
 	v.statut = "parti"
 	dialogue = {}
+	m._dire_lore()
 
 
 func _quete() -> void:
