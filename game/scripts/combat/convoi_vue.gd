@@ -4,6 +4,9 @@ class_name ConvoiVue
 extends Control
 
 const SOL_Y := 700.0
+var cam_h := 0.0                # hauteur du sol suivie par la caméra (m)
+var _poussiere_veh := []        # {p, age} poussière soulevée par les roues
+var _dernier_nuage := 0.0
 const BARRE_H := 270.0
 const DT := CombatModele.DT
 const C_TEXTE := Color("#F2EEE6")
@@ -414,6 +417,12 @@ func selectionner(uid: int) -> void:
 	selection = uid
 
 
+func _input(e: InputEvent) -> void:
+	# Le premier toucher peut tomber sur un bouton : on débloque l'audio sur n'importe quelle entrée
+	if not _audio_ok and ((e is InputEventMouseButton and e.pressed) or (e is InputEventScreenTouch and e.pressed) or (e is InputEventKey and e.pressed)):
+		_demarrer_audio()
+
+
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo:
 		match e.keycode:
@@ -477,6 +486,9 @@ func _camera(delta: float) -> void:
 	ppm = lerpf(ppm, cible, 1.0 - exp(-2.2 * delta))
 	terrain.ppm = ppm
 	terrain.camera_x = lerpf(terrain.camera_x, gauche - 2.0, 1.0 - exp(-4.0 * delta))
+	var centre: float = (gauche + droite) * 0.5
+	cam_h = lerpf(cam_h, Terrain.sol(centre) * 0.6 + Terrain.sol(_rtete()) * 0.4 - 0.5, 1.0 - exp(-3.0 * delta))
+	terrain.sol_y = SOL_Y + cam_h * ppm
 
 
 func _synchroniser() -> void:
@@ -494,7 +506,7 @@ func _synchroniser() -> void:
 			n.ppm = ppm
 			n.ennemi = v.camp == "ennemi"
 			n.miroir = v.camp == "ennemi"
-			n.sol = Terrain.sol
+			n.sol = Terrain.bosses
 			couche.add_child(n)
 			noeuds[v.uid] = n
 		if absf(n.ppm - ppm) > 0.01 and not n.D.is_empty():
@@ -509,7 +521,10 @@ func _synchroniser() -> void:
 		if v.camo_voulu:
 			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)
 		n.z_index = 0 if v.actif() else -1   # les épaves passent derrière les véhicules
-		n.position = Vector2(terrain.ecran_x(x), SOL_Y - n.size.y)
+		var cxv: float = x + v.longueur * 0.5
+		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
+		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y)
+		n.rotation = -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
 	for b in m.batiments:
 		vus[b.uid] = true
 		var n: BatimentDessin = noeuds.get(b.uid)
@@ -521,7 +536,7 @@ func _synchroniser() -> void:
 			noeuds[b.uid] = n
 		n.ppm = ppm
 		n.size = Vector2(b.longueur, b.hauteur) * ppm
-		n.position = Vector2(terrain.ecran_x(b.x), SOL_Y - n.size.y + 2.0)
+		n.position = Vector2(terrain.ecran_x(b.x), _sy(b.x + b.longueur * 0.5) - n.size.y + 2.0)
 		n.z_index = -2
 	for uid in noeuds.keys():
 		if not vus.has(uid):
@@ -603,6 +618,9 @@ func _vieillir(delta: float) -> void:
 	for l in [_etincelles, _explosions, _bouffees, _poussieres, _ricochets]:
 		for x in l:
 			x.age += delta
+	for q in _poussiere_veh:
+		q.age += delta
+	_poussiere_veh = _poussiere_veh.filter(func(q): return q.age < 0.9)
 	_poussieres = _poussieres.filter(func(x): return x.age < 0.7)
 	_ricochets = _ricochets.filter(func(x): return x.age < 0.35)
 	_etincelles = _etincelles.filter(func(x): return x.age < 0.3)
@@ -641,7 +659,12 @@ func _ancre(v, id: String) -> Vector2:
 
 
 func _px(p: Vector2) -> Vector2:
-	return Vector2(terrain.ecran_x(p.x), SOL_Y - (p.y + Terrain.sol(p.x)) * ppm)
+	return Vector2(terrain.ecran_x(p.x), SOL_Y + cam_h * ppm - (p.y + Terrain.sol(p.x)) * ppm)
+
+
+# Ordonnée écran du sol en x (m) ; avec relief seul pour les véhicules
+func _sy(x: float, relief_seul := false) -> float:
+	return SOL_Y + (cam_h - (Terrain.relief(x) if relief_seul else Terrain.sol(x))) * ppm
 
 
 func dessiner_fx(c: CanvasItem) -> void:
@@ -673,7 +696,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 			continue
 		var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
 		var x0 := terrain.ecran_x(_rx(v))
-		var top: float = SOL_Y - (float(D.hauteur) + 0.7) * ppm
+		var top: float = _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.7) * ppm
 		var w: float = v.longueur * ppm
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
 		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w, 6)), Color(0, 0, 0, 0.6))
@@ -682,13 +705,21 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_circle(Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_VERT if v.equipage[k] > 0.0 else Color(0.35, 0.35, 0.35))
 		if v.camo_voulu:
 			var fr: float = 1.0 if v.camoufle else clampf(v.camo_t / CombatModele.donnees().embuscade.camo_s, 0.0, 1.0)
-			var cam := Rect2(Vector2(x0 - 4, SOL_Y - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
+			var cam := Rect2(Vector2(x0 - 4, _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
 			c.draw_rect(cam, Color(0.25, 0.32, 0.18, 0.78 * fr))
 			for k in 9:
 				c.draw_circle(cam.position + Vector2(cam.size.x * (k + 0.5) / 9.0, cam.size.y * (0.2 + 0.5 * fposmod(k * 0.37, 1.0))), ppm * 0.45, Color(0.18, 0.26, 0.12, 0.8 * fr))
 		if v.uid == selection:
 			var cx := x0 + w * 0.5
 			c.draw_colored_polygon(PackedVector2Array([Vector2(cx - 10, top - 34), Vector2(cx + 10, top - 34), Vector2(cx, top - 20)]), C_ACCENT)
+	# Poussière soulevée par les véhicules en marche
+	if m.vitesse_convoi != 0.0 and not pause:
+		for v in m.convoi:
+			if v.actif() and _rng.randf() < 0.35:
+				_poussiere_veh.append({"p": Vector2(_rx(v) + 0.3, 0.2), "age": 0.0})
+	for q in _poussiere_veh:
+		var kq: float = q.age / 0.9
+		c.draw_circle(_px(q.p) + Vector2(-kq * ppm * 1.6, -kq * ppm * 0.7), ppm * (0.2 + 0.5 * kq), Color(0.7, 0.6, 0.45, 0.35 * (1.0 - kq)))
 	# Mines posées (la LED rouge clignote quand elles sont armées)
 	for mn in m.mines:
 		var pm := _px(Vector2(mn.x, 0.0))
@@ -711,14 +742,14 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var gx: float = lerpf(d0, d1, fr2)
 		for k in t.pvs.size():
 			var xx: float = gx - signf(d1 - d0) * k * 0.9
-			Silhouette.dessiner(c, Vector2(terrain.ecran_x(xx), SOL_Y - Terrain.sol(xx) * ppm), ppm, "survivant",
+			Silhouette.dessiner(c, Vector2(terrain.ecran_x(xx), _sy(xx)), ppm, "survivant",
 				{"phase": _temps * 7.0 + k, "miroir": d1 < d0, "peau": k + 3})
 	# Butin à récupérer
 	for cc in m.epaves + m.batiments:
 		var libre: bool = (cc is CombatModele.Veh and not cc.butin_pris) or (cc is CombatModele.Bat and cc.statut == "neutralise" and not cc.butin_pris)
 		if libre:
 			var h: float = 2.0 if cc is CombatModele.Veh else cc.hauteur
-			var p := Vector2(terrain.ecran_x(_rx(cc) + cc.longueur * 0.5), SOL_Y - (h + 1.3) * ppm - 4.0 * sin(_temps * 3.0))
+			var p := Vector2(terrain.ecran_x(_rx(cc) + cc.longueur * 0.5), _sy(_rx(cc) + cc.longueur * 0.5) - (h + 1.3) * ppm - 4.0 * sin(_temps * 3.0))
 			c.draw_rect(Rect2(p - Vector2(10, 10), Vector2(20, 20)), C_ACCENT)
 			c.draw_string(f, p + Vector2(-10, 7), "$", HORIZONTAL_ALIGNMENT_CENTER, 20, 18, Color("#1A1A18"))
 	if not m.fouille_en_cours.is_empty():
@@ -726,7 +757,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		if cible != null:
 			var fr: float = 1.0 - m.fouille_en_cours.restant / m.fouille_en_cours.total
 			var h2: float = 2.0 if cible is CombatModele.Veh else cible.hauteur
-			var p2 := Vector2(terrain.ecran_x(_rx(cible) + cible.longueur * 0.5), SOL_Y - (h2 + 2.4) * ppm)
+			var p2 := Vector2(terrain.ecran_x(_rx(cible) + cible.longueur * 0.5), _sy(_rx(cible) + cible.longueur * 0.5) - (h2 + 2.4) * ppm)
 			c.draw_rect(Rect2(p2 - Vector2(50, 7), Vector2(100, 14)), Color(0, 0, 0, 0.7))
 			c.draw_rect(Rect2(p2 - Vector2(48, 5), Vector2(96 * fr, 10)), C_ACCENT)
 			c.draw_string(f, p2 + Vector2(-60, -14), "Fouille", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, C_TEXTE)
@@ -794,7 +825,7 @@ func _gui_input(e: InputEvent) -> void:
 		if v.statut == "epave":
 			continue
 		var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
-		var r := Rect2(Vector2(terrain.ecran_x(_rx(v)) - 12.0, SOL_Y - float(D.hauteur) * ppm - 50.0), Vector2(v.longueur * ppm + 24.0, float(D.hauteur) * ppm + 60.0))
+		var r := Rect2(Vector2(terrain.ecran_x(_rx(v)) - 12.0, _sy(_rx(v) + v.longueur * 0.5) - float(D.hauteur) * ppm - 50.0), Vector2(v.longueur * ppm + 24.0, float(D.hauteur) * ppm + 60.0))
 		if r.has_point(p):
 			trouve = v.uid
 	ouvert = 0 if trouve == ouvert else trouve
@@ -842,7 +873,7 @@ func _dessiner_panneau(c: CanvasItem) -> void:
 	var largeur: float = casses.size() * (t + 8.0) + (198.0 if rejoindre else 0.0) - 8.0
 	var x0: float = terrain.ecran_x(_rx(v)) + v.longueur * ppm * 0.5 - largeur * 0.5
 	x0 = clampf(x0, 12.0, size.x - largeur - 12.0)
-	var y0: float = maxf(150.0, SOL_Y - (float(D.hauteur) + 0.7) * ppm - 120.0)
+	var y0: float = maxf(150.0, _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.7) * ppm - 120.0)
 	var f := get_theme_default_font()
 	for i in casses.size():
 		var id: String = casses[i]
@@ -977,7 +1008,7 @@ func _maj_persos(delta: float) -> void:
 func _dessiner_persos(c: CanvasItem) -> void:
 	for q in _persos:
 		var x: float = q.x
-		var pied := Vector2(terrain.ecran_x(x), SOL_Y - Terrain.sol(x) * ppm)
+		var pied := Vector2(terrain.ecran_x(x), _sy(x))
 		var marche: bool = q.mode != "travaille"
 		Silhouette.dessiner(c, pied, ppm, q.variante, {"phase": q.phase if marche else 0.0, "miroir": q.dir < 0.0,
 			"travaille": q.phase if not marche else 0.0, "peau": q.idx})

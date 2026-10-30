@@ -560,6 +560,8 @@ func _marche(dt: float) -> void:
 		elif not fouille_en_cours.is_empty():
 			blocage = "Fouille en cours."
 		else:
+			var pente: float = Terrain.pente(x_tete)
+			vmax *= clampf(1.0 - 2.4 * pente, 0.55, 1.3)   # montée : plus lent ; descente : plus vite
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax
 			if vit > 0.0:
 				for e in ennemis:

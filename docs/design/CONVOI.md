@@ -97,6 +97,12 @@ l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprend
 
 Maison de village, ferme, grange, église (clocher de 14 m, plafond de zoom), bunker. Style européen.
 
+## Relief et décor
+
+Collines jusqu'à ~15° (`Terrain.relief`) : les véhicules s'inclinent, la caméra suit la hauteur, le convoi ralentit en montée
+(×0,55 mini) et accélère en descente (×1,3 maxi). Décor semé : poteaux, cactus, arbres morts, rochers, carcasses,
+ville en ruine au loin, nuages, poussière des roues.
+
 ## Architecture
 
 | Fichier | Rôle |

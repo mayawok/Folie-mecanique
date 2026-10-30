@@ -50,6 +50,13 @@ func _draw() -> void:
 	var T := Color(t, t, t)
 	var sombre := Color("#241E18")
 	var dmg := 1.0 - bat.pv / bat.pv_max
+	# Fondations : le bâtiment repose sur la pente
+	var h0: float = Terrain.sol(bat.x + bat.longueur * 0.5)
+	for i in 12:
+		var fx: float = (i + 0.5) / 12.0
+		var prof: float = (h0 - Terrain.sol(bat.x + fx * bat.longueur)) * ppm
+		if prof > 0.0:
+			draw_rect(Rect2(Vector2(fx * W - W / 24.0 - 1.0, H - 2.0), Vector2(W / 12.0 + 2.0, prof + 4.0)), Color("#7C7366") * T)
 	match bat.type:
 		"ferme":   # murs de pierre, toit de tuiles à quatre pans, porte cintrée
 			_poly([[0.03, 0.55], [0.03, 1.0], [0.97, 1.0], [0.97, 0.55]], Color("#B5A27C") * T, W, H)
