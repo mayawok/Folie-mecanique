@@ -65,7 +65,7 @@ Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'a
 
 ## Butin et réparation
 
-- Une épave ou un bâtiment neutralisé se **fouille** (convoi à portée de 14 m, sans menace) :
+- Une épave ou un bâtiment neutralisé se **fouille** (convoi garé à 5 m, sans menace ; 14 m pour les réparations) :
   munitions, carburant, métal et **pièces récupérées** (avec leur état en %).
 - **Réparer** (à l'arrêt) : une pièce abîmée se répare avec du métal ; une pièce détruite se
   remplace par une pièce récupérée compatible (état conservé) ou se rafistole à 25 % pour 10 métal.
@@ -75,6 +75,27 @@ Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'a
 
 Tirées à graine fixe par palier de 400 m : patrouilles, véhicules en barrage, fermes, hangars,
 bunkers, puis half-tracks, chars Stuart et Sherman, Tiger I en barrage au palier 6.
+
+## Balles et armes
+
+Chaque tir crée un **projectile** (modèle) : bouche de l'arme, point d'impact précis (zone touchée, ou sol si raté),
+vitesse propre à l'arme (mitrailleuse 150 m/s, obus 85 à 110 m/s). Les dégâts s'appliquent **à l'arrivée**.
+La vue dessine un trait traçant (mitrailleuse), un obus avec sillage (canon), des étincelles à l'impact,
+un ricochet quand la pénétration est trop faible, une gerbe de terre quand le tir est raté.
+Aucune barre de vie ennemie n'est affichée : seul l'état de nos véhicules est connu.
+
+## Embuscade
+
+Une **alerte à droite** annonce la vague (nombre, distance, délai). Le joueur peut : **s'abriter** (l'équipage marche
+jusqu'à un bâtiment en ruine proche : 2 à 3 postes de tir, fenêtres propres à chaque bâtiment), **camoufler** un
+véhicule vide (5 s, les ennemis ne le visent plus), **poser des mines** (4 métal pièce, armées après 6 s, dégâts
+roues et suspension). La garnison tire au fusil antichar ; sa **première salve est renforcée** (surprise). Elle
+n'est visible qu'après avoir tiré ; si l'ennemi la repère, il peut la viser. Le convoi ne repart pas tant que
+l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprendre la route »).
+
+## Bâtiments
+
+Maison de village, ferme, grange, église (clocher de 14 m, plafond de zoom), bunker. Style européen.
 
 ## Architecture
 

@@ -160,13 +160,75 @@ func _init() -> void:
 	# --- Fouille d'une ruine : survivant recruté
 	var m5 := CombatModele.new(8)
 	m5._prochain_x = 1.0e9
-	var ru := m5.creer_batiment("ferme", m5.x_tete + 6.0)
+	var ru := m5.creer_batiment("ferme", m5.x_tete + 3.0)
 	ru.statut = "neutralise"
 	ru.butin.ressources["survivants"] = 1
 	m5.batiments.append(ru)
 	m5.convoi[0].equipage.pop_back()
 	_avancer(m5, 8.0)
 	verifier(ru.butin_pris and m5.convoi[0].equipage.size() == 2, "fouiller une ruine peut recruter un survivant")
+
+	# --- Balles en vol : temps de trajet, puis impact
+	var mp := CombatModele.new(11)
+	mp._prochain_x = 1.0e9
+	var cp := mp.creer_vehicule("citroen_traction", "ennemi", mp.x_tete + 30.0)
+	mp.ennemis.append(cp)
+	mp.ordre_marche("halte")
+	var vu_vol := false
+	var impacts := 0
+	for i in 200:
+		mp.avancer()
+		vu_vol = vu_vol or not mp.projectiles.is_empty()
+		for ev in mp.evenements:
+			if ev.t == "impact":
+				impacts += 1
+	verifier(vu_vol and impacts > 0, "les tirs créent des projectiles en vol puis des impacts (%d)" % impacts)
+
+	# --- Embuscade : débarquer, se poster, tirer en premier, rembarquer
+	var me := CombatModele.new(21)
+	me._prochain_x = 1.0e9
+	var rb := me.creer_batiment("eglise", me.x_tete + 20.0)
+	rb.statut = "neutralise"
+	me.batiments.append(rb)
+	me.ordre_marche("halte")
+	var jeep: CombatModele.Veh = me.convoi[0]
+	verifier(me.ordre_debarquer(jeep.uid), "l'équipage peut aller se poster dans une église proche")
+	verifier(jeep.equipage_vivant() == 0 and me.a_garnison(jeep.uid), "il est en route (véhicule vide)")
+	_avancer(me, 12.0)
+	verifier(rb.garnison_vivants() == 2, "les survivants sont postés dans l'église (%d)" % rb.garnison_vivants())
+	var mc := me.ordre_camoufler(jeep.uid, true)
+	_avancer(me, 6.0)
+	verifier(mc and jeep.camoufle, "la Jeep vide est camouflée")
+	var ee := me.creer_vehicule("citroen_traction", "ennemi", me.x_tete + 45.0)
+	me.ennemis.append(ee)
+	verifier(not me.alerte().is_empty(), "une vague en approche déclenche l'alerte")
+	var v_avant: float = jeep.pieces.chassis.pv
+	_avancer(me, 60.0)
+	verifier(not ee.actif(), "la garnison détruit l'ennemi (statut %s)" % ee.statut)
+	verifier(jeep.pieces.chassis.pv == v_avant, "le véhicule camouflé n'a pas été visé")
+	verifier(me.ordre_rembarquer(jeep.uid), "ordre de rembarquer")
+	me.ordre_camoufler(jeep.uid, false)
+	_avancer(me, 12.0)
+	verifier(jeep.equipage_vivant() == 2 and rb.garnison_vivants() == 0, "l'équipage est de retour dans la Jeep")
+
+	# --- Mines : coût en métal et explosion sous un ennemi
+	var mm := CombatModele.new(31)
+	mm._prochain_x = 1.0e9
+	mm.stocks.metal = 5.0
+	verifier(not mm.ordre_mines(3), "pas assez de métal pour des mines")
+	mm.stocks.metal = 40.0
+	verifier(mm.ordre_mines(3) and mm.stocks.metal == 28.0 and mm.mines.size() == 3, "3 mines posées pour 12 métal")
+	mm.mines[0].x = mm.x_tete + 20.0
+	var em := mm.creer_vehicule("citroen_traction", "ennemi", mm.x_tete + 16.0)
+	em.vitesse_act = -5.0
+	mm.ennemis.append(em)
+	_avancer(mm, 8.0)
+	mm.ordre_marche("halte")
+	var avant_m: float = em.pieces.roulement.pv
+	em.x = mm.mines[0].x - 1.0
+	em.vitesse_act = -5.0
+	_avancer(mm, 1.0)
+	verifier(em.pieces.roulement.pv < avant_m or mm.mines.size() < 3, "une mine armée explose sous un véhicule qui passe dessus")
 
 	# --- Déterminisme
 	var a1 := CombatModele.new(99)

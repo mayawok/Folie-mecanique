@@ -11,9 +11,10 @@
  "ecart_convoi": 1.4,
  "equipage_pv": 20,
  "fouille": {
-  "portee": 14,
+  "portee": 5.0,
   "duree_base": 2.5,
-  "menace_distance": 60
+  "menace_distance": 60,
+  "portee_reparation": 14.0
  },
  "reparation": {
   "pv_par_s": 3.0,
@@ -33,7 +34,8 @@
    "portee": 55,
    "precision": 0.55,
    "munitions": 1,
-   "pv": 25
+   "pv": 25,
+   "vitesse": 150
   },
   "canon_leger": {
    "nom": "Canon 37 mm",
@@ -44,7 +46,8 @@
    "portee": 70,
    "precision": 0.6,
    "munitions": 2,
-   "pv": 40
+   "pv": 40,
+   "vitesse": 90
   },
   "canon_75": {
    "nom": "Canon 75 mm",
@@ -55,7 +58,8 @@
    "portee": 75,
    "precision": 0.62,
    "munitions": 2,
-   "pv": 50
+   "pv": 50,
+   "vitesse": 85
   },
   "canon_88": {
    "nom": "Canon 88 mm",
@@ -66,7 +70,8 @@
    "portee": 85,
    "precision": 0.7,
    "munitions": 3,
-   "pv": 70
+   "pv": 70,
+   "vitesse": 110
   },
   "fusil": {
    "nom": "Fusil",
@@ -77,7 +82,20 @@
    "portee": 40,
    "precision": 0.45,
    "munitions": 0,
-   "pv": 0
+   "pv": 0,
+   "vitesse": 130
+  },
+  "fusil_antichar": {
+   "nom": "Fusil antichar",
+   "classe": "fusil",
+   "degats": 22,
+   "penetration": 30,
+   "cadence": 2.5,
+   "portee": 45,
+   "precision": 0.5,
+   "munitions": 1,
+   "pv": 0,
+   "vitesse": 120
   }
  },
  "zones": {
@@ -161,7 +179,7 @@
    "armes": [
     "mitrailleuse"
    ],
-   "standoff": 30,
+   "standoff": 24,
    "pv": {
     "chassis": 70,
     "roulement": 40,
@@ -181,7 +199,7 @@
    "armes": [
     "mitrailleuse"
    ],
-   "standoff": 34,
+   "standoff": 27,
    "pv": {
     "chassis": 90,
     "roulement": 50,
@@ -220,7 +238,7 @@
    "armes": [
     "mitrailleuse"
    ],
-   "standoff": 36,
+   "standoff": 29,
    "pv": {
     "chassis": 140,
     "roulement": 65,
@@ -240,7 +258,7 @@
    "armes": [
     "mitrailleuse"
    ],
-   "standoff": 38,
+   "standoff": 30,
    "pv": {
     "chassis": 150,
     "roulement": 70,
@@ -261,7 +279,7 @@
     "canon_leger",
     "mitrailleuse"
    ],
-   "standoff": 45,
+   "standoff": 36,
    "pv": {
     "chassis": 170,
     "roulement": 80,
@@ -282,7 +300,7 @@
     "canon_75",
     "mitrailleuse"
    ],
-   "standoff": 50,
+   "standoff": 40,
    "pv": {
     "chassis": 240,
     "roulement": 110,
@@ -302,7 +320,7 @@
    "armes": [
     "canon_88"
    ],
-   "standoff": 60,
+   "standoff": 48,
    "pv": {
     "chassis": 380,
     "roulement": 160,
@@ -314,9 +332,9 @@
  },
  "batiments": {
   "ferme": {
-   "nom": "Ferme fortifiée",
-   "largeur": 9.0,
-   "hauteur": 4.6,
+   "nom": "Ferme",
+   "largeur": 10.0,
+   "hauteur": 6.5,
    "pv": 130,
    "blindage": 6,
    "tireurs": 3,
@@ -335,10 +353,32 @@
     ]
    }
   },
-  "hangar": {
-   "nom": "Hangar",
-   "largeur": 12.0,
-   "hauteur": 4.0,
+  "maison": {
+   "nom": "Maison de village",
+   "largeur": 7.0,
+   "hauteur": 8.5,
+   "pv": 120,
+   "blindage": 6,
+   "tireurs": 3,
+   "butin": {
+    "ammo": [
+     8,
+     20
+    ],
+    "fuel_l": [
+     3,
+     10
+    ],
+    "metal": [
+     4,
+     10
+    ]
+   }
+  },
+  "grange": {
+   "nom": "Grange",
+   "largeur": 13.0,
+   "hauteur": 7.5,
    "pv": 170,
    "blindage": 8,
    "tireurs": 3,
@@ -350,6 +390,28 @@
     "fuel_l": [
      10,
      28
+    ],
+    "metal": [
+     8,
+     20
+    ]
+   }
+  },
+  "eglise": {
+   "nom": "Vieille église",
+   "largeur": 15.0,
+   "hauteur": 14.0,
+   "pv": 260,
+   "blindage": 14,
+   "tireurs": 3,
+   "butin": {
+    "ammo": [
+     12,
+     30
+    ],
+    "fuel_l": [
+     4,
+     12
     ],
     "metal": [
      8,
@@ -410,7 +472,7 @@
     "niveau_min": 0,
     "niveau_max": 3,
     "poids": 2,
-    "ruine": "hangar"
+    "ruine": "grange"
    },
    {
     "niveau_min": 1,
@@ -478,7 +540,7 @@
     "niveau_max": 6,
     "poids": 2,
     "batiments": [
-     "hangar"
+     "grange"
     ],
     "vehicules": [
      "bmw_r75"
@@ -552,6 +614,43 @@
      "bunker"
     ],
     "mode": "barrage"
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 3,
+    "poids": 2,
+    "ruine": "maison"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 99,
+    "poids": 2,
+    "ruine": "eglise"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 5,
+    "poids": 2,
+    "batiments": [
+     "maison"
+    ]
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 99,
+    "poids": 2,
+    "batiments": [
+     "eglise"
+    ]
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 99,
+    "poids": 2,
+    "trouvailles": [
+     "citroen_traction"
+    ],
+    "ruine": "eglise"
    }
   ],
   "premiere": {
@@ -561,5 +660,12 @@
    "ruine": "ferme",
    "survivant": true
   }
+ },
+ "embuscade": {
+  "camo_s": 5.0,
+  "mine_cout": 4,
+  "mine_dist": 48.0,
+  "portee_refuge": 40.0,
+  "vitesse_marche": 2.6
  }
 }

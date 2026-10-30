@@ -27,7 +27,14 @@ var selection := 0
 var graine := 1
 
 var _acc := 0.0
-var _tirs := []                 # {a: Vector2 (m), b: Vector2 (m), age, classe}
+var _tirs := []                 # (inutilisé : les balles viennent du modèle, m.projectiles)
+var _poussieres := []           # {p, age} gerbes de terre des tirs manqués
+var _ricochets := []            # {p, age} balles qui ricochent sur le blindage
+var _panneau_alerte: PanelContainer
+var _lbl_alerte: Label
+var _btn_embuscade: Button
+var _btn_sortir: Button
+var _btn_camo: Button
 var _etincelles := []           # {p: Vector2 (m), age}
 var _explosions := []           # {p: Vector2 (m), age, taille}
 var _bouffees := []             # {p: Vector2 (m), age} lueur de tir des tireurs
@@ -295,6 +302,24 @@ func _construire_interface() -> void:
 	_bouton("Rang vers l'arrière", func(): m.descendre(selection), ab, 270)
 	_bouton("Rang vers l'avant", func(): m.monter(selection), ab, 250)
 	_bouton("Abandonner", func(): m.abandonner(selection), ab, 190)
+	_bouton("S'abriter", func(): m.ordre_debarquer(selection), ab, 190)
+	_btn_camo = _bouton("Camoufler", func(): _basculer_camo(), ab, 200)
+	# --- Alerte à droite : vague ennemie, embuscade, mines
+	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
+	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
+	_panneau_alerte.offset_left = -560
+	_panneau_alerte.offset_right = -16
+	_panneau_alerte.offset_top = 104
+	var av := VBoxContainer.new()
+	av.add_theme_constant_override("separation", 8)
+	_panneau_alerte.add_child(av)
+	_lbl_alerte = _label("", av, 26, C_TEXTE)
+	_lbl_alerte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_alerte.custom_minimum_size = Vector2(500, 0)
+	_btn_embuscade = _bouton("Embuscade : s'abriter et se cacher", func(): _embuscade(), av, 0)
+	_bouton("Poser des mines (12 métal)", func(): m.ordre_mines(3), av, 0)
+	_btn_sortir = _bouton("Reprendre la route", func(): _reprendre_route(), av, 0)
+	_panneau_alerte.visible = false
 	# --- Fin de partie
 	_voile_fin = ColorRect.new()
 	_voile_fin.color = Color(0, 0, 0, 0.72)
@@ -344,6 +369,29 @@ func _son(nom: String, volume := 0.0) -> void:
 	var s := get_node_or_null("/root/Son")
 	if s:
 		s.effet(nom, volume)
+
+
+func _embuscade() -> void:
+	m.ordre_marche("halte")
+	var n := 0
+	for v in m.convoi.duplicate():
+		if m.ordre_debarquer(v.uid):
+			n += 1
+		m.ordre_camoufler(v.uid, true)
+	if n == 0:
+		m.log_("Pas de bâtiment à portée : les véhicules se camouflent sur place.", "info")
+
+
+func _reprendre_route() -> void:
+	for v in m.convoi.duplicate():
+		m.ordre_rembarquer(v.uid)
+		m.ordre_camoufler(v.uid, false)
+
+
+func _basculer_camo() -> void:
+	var v = m.trouver(selection)
+	if v is CombatModele.Veh:
+		m.ordre_camoufler(v.uid, not v.camo_voulu)
 
 
 func _basculer_pause() -> void:
@@ -411,15 +459,21 @@ func _process(delta: float) -> void:
 
 func _camera(delta: float) -> void:
 	var gauche: float = _rx(m.convoi.back()) if not m.convoi.is_empty() else _rtete() - 20.0
-	var droite := _rtete() + 22.0
+	var droite := _rtete() + 20.0
+	var plafond := 62.0
 	for e in m.ennemis:
 		if e.actif() and e.x - m.x_tete < 85.0:
-			droite = maxf(droite, _rx(e) + e.longueur + 4.0)
+			droite = maxf(droite, _rx(e) + e.longueur + 3.0)
 	for b in m.batiments:
-		if b.actif() and b.x - m.x_tete < 85.0:
-			droite = maxf(droite, b.x + b.longueur + 4.0)
-	var span := maxf(droite - gauche + 6.0, 30.0)
-	var cible := clampf(1620.0 / span, 19.0, 46.0)
+		var proche: bool = b.x - m.x_tete < 85.0 and b.x + b.longueur > gauche - 40.0
+		if (b.actif() and b.x - m.x_tete < 85.0) or (b.garnison.size() > 0 and proche):
+			droite = maxf(droite, b.x + b.longueur + 3.0)
+			if b.garnison.size() > 0:
+				gauche = minf(gauche, b.x - 2.0)
+		if proche:
+			plafond = minf(plafond, 600.0 / b.hauteur)   # un grand bâtiment (église) doit tenir à l'écran
+	var span := maxf(droite - gauche + 4.0, 26.0)
+	var cible := clampf(1560.0 / span, 24.0, plafond)
 	ppm = lerpf(ppm, cible, 1.0 - exp(-2.2 * delta))
 	terrain.ppm = ppm
 	terrain.camera_x = lerpf(terrain.camera_x, gauche - 2.0, 1.0 - exp(-4.0 * delta))
@@ -452,6 +506,8 @@ func _synchroniser() -> void:
 		n.vitesse = v.vitesse_act if (v.actif() and not pause) else 0.0
 		n.equipage = v.actif()
 		n.modulate = Color.WHITE if v.actif() else (Color(0.82, 0.8, 0.78) if v.recuperable() else Color(0.4, 0.38, 0.36))
+		if v.camo_voulu:
+			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)
 		n.z_index = 0 if v.actif() else -1   # les épaves passent derrière les véhicules
 		n.position = Vector2(terrain.ecran_x(x), SOL_Y - n.size.y)
 	for b in m.batiments:
@@ -484,33 +540,41 @@ func _evenement(e: Dictionary) -> void:
 	match e.t:
 		"tir":
 			var tireur = m.trouver(e.de)
-			var cible = m.trouver(e.vers)
-			if tireur == null or cible == null:
+			if tireur == null or m.projectiles.is_empty():
 				return
 			var n = noeuds.get(e.de)
 			if n is VehiculeDessin:
 				n.tirer("canon" if e.classe == "canon" else "mitrailleuse")
-			var ha: float = 2.0 if tireur is CombatModele.Bat else float(VehiculeDessin.donnees().vehicules[tireur.type].hauteur) * 0.72
-			var a := Vector2(e.x0, ha)
-			var b := _centre_veh(cible)
-			if e.touche:
-				b += Vector2(_rng.randf_range(-1.2, 1.2), _rng.randf_range(-0.4, 0.5))
-				_etincelles.append({"p": b, "age": 0.0})
+			var a: Vector2 = m.projectiles.back().a
+			_bouffees.append({"p": a, "age": 0.0, "grand": e.classe == "canon"})
+			var joueur: bool = (tireur is CombatModele.Veh and tireur.camp == "joueur") or (tireur is CombatModele.Bat and tireur.statut == "neutralise")
+			if e.classe == "canon":
+				_son("sfx_tir_canon", 0.0 if joueur else -6.0)
+			elif _temps - _t_son.mitrailleuse > 0.35:
+				_t_son.mitrailleuse = _temps
+				_son("sfx_tir_mitrailleuse", -6.0 if joueur else -11.0)
+		"impact":
+			var p := Vector2(e.x, e.y)
+			if e.touche and e.reel:
+				_etincelles.append({"p": p, "age": 0.0, "gros": e.classe == "canon"})
+				if e.ricoche:
+					_ricochets.append({"p": p, "age": 0.0, "sens": 1.0 if _rng.randf() < 0.5 else -1.0})
+				if e.sur_joueur and _temps - _t_son.impact > 0.25:
+					_t_son.impact = _temps
+					_son("sfx_impact_blindage", -4.0)
+			elif e.touche:
+				_etincelles.append({"p": p, "age": 0.0, "gros": false})
 			else:
-				b += Vector2(_rng.randf_range(-6.0, 6.0), _rng.randf_range(0.5, 2.5))
-			_tirs.append({"a": a, "b": b, "age": 0.0, "classe": e.classe})
-			if tireur is CombatModele.Bat:
-				_bouffees.append({"p": a, "age": 0.0})
-			var joueur: bool = tireur is CombatModele.Veh and tireur.camp == "joueur"
-			if joueur:
+				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe == "canon"})
 				if e.classe == "canon":
-					_son("sfx_tir_canon")
-				elif _temps - _t_son.mitrailleuse > 0.35:
-					_t_son.mitrailleuse = _temps
-					_son("sfx_tir_mitrailleuse", -6.0)
-			if e.touche and not joueur and _temps - _t_son.impact > 0.25:
-				_t_son.impact = _temps
-				_son("sfx_impact_blindage", -4.0)
+					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
+		"mine":
+			_explosions.append({"p": Vector2(e.x, 0.3), "age": 0.0, "taille": 2.2})
+			_son("sfx_explosion")
+		"mines":
+			_son("sfx_atelier", -4.0)
+		"poste":
+			_son("sfx_radio", -6.0)
 		"contact":
 			if e.ennemi:
 				if _temps - _t_son.voix > 25.0:
@@ -536,13 +600,14 @@ func _evenement(e: Dictionary) -> void:
 
 
 func _vieillir(delta: float) -> void:
-	for l in [_tirs, _etincelles, _explosions, _bouffees]:
+	for l in [_etincelles, _explosions, _bouffees, _poussieres, _ricochets]:
 		for x in l:
 			x.age += delta
-	_tirs = _tirs.filter(func(x): return x.age < 0.16)
+	_poussieres = _poussieres.filter(func(x): return x.age < 0.7)
+	_ricochets = _ricochets.filter(func(x): return x.age < 0.35)
 	_etincelles = _etincelles.filter(func(x): return x.age < 0.3)
 	_explosions = _explosions.filter(func(x): return x.age < 1.4)
-	_bouffees = _bouffees.filter(func(x): return x.age < 0.08)
+	_bouffees = _bouffees.filter(func(x): return x.age < 0.1)
 
 
 # Position (m) d'une pièce, dans le repère du monde
@@ -602,8 +667,8 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var ph := fposmod(_temps * 0.5 + k * 0.25 + b.uid * 0.1, 1.0)
 				var p := _px(Vector2(b.x + b.longueur * (0.25 + 0.15 * k), 1.5 + ph * 4.0))
 				c.draw_circle(p, (0.4 + ph * 1.2) * ppm, Color(0.12, 0.11, 0.1, 0.5 * (1.0 - ph)))
-	# Barres de vie, équipage et pièces abîmées
-	for v in m.convoi + m.ennemis:
+	# Barre de vie et équipage : seulement pour NOS véhicules (l'état de l'ennemi reste inconnu)
+	for v in m.convoi:
 		if not v.actif():
 			continue
 		var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
@@ -612,21 +677,42 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var w: float = v.longueur * ppm
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
 		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w, 6)), Color(0, 0, 0, 0.6))
-		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w * q, 6)), couleur_etat(q) if v.camp == "joueur" else C_ROUGE)
+		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w * q, 6)), couleur_etat(q))
 		for k in v.equipage.size():
 			c.draw_circle(Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_VERT if v.equipage[k] > 0.0 else Color(0.35, 0.35, 0.35))
-		if v.camp == "joueur" and v.uid == selection:
+		if v.camo_voulu:
+			var fr: float = 1.0 if v.camoufle else clampf(v.camo_t / CombatModele.donnees().embuscade.camo_s, 0.0, 1.0)
+			var cam := Rect2(Vector2(x0 - 4, SOL_Y - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
+			c.draw_rect(cam, Color(0.25, 0.32, 0.18, 0.78 * fr))
+			for k in 9:
+				c.draw_circle(cam.position + Vector2(cam.size.x * (k + 0.5) / 9.0, cam.size.y * (0.2 + 0.5 * fposmod(k * 0.37, 1.0))), ppm * 0.45, Color(0.18, 0.26, 0.12, 0.8 * fr))
+		if v.uid == selection:
 			var cx := x0 + w * 0.5
 			c.draw_colored_polygon(PackedVector2Array([Vector2(cx - 10, top - 34), Vector2(cx + 10, top - 34), Vector2(cx, top - 20)]), C_ACCENT)
-	for b in m.batiments:
-		if b.actif():
-			var x0 := terrain.ecran_x(b.x)
-			var top: float = SOL_Y - (b.hauteur + 0.7) * ppm
-			var w: float = b.longueur * ppm
-			c.draw_rect(Rect2(Vector2(x0, top), Vector2(w, 6)), Color(0, 0, 0, 0.6))
-			c.draw_rect(Rect2(Vector2(x0, top), Vector2(w * b.pv / b.pv_max, 6)), C_ROUGE)
-			for k in b.tireurs.size():
-				c.draw_circle(Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_ROUGE if b.tireurs[k].pv > 0.0 else Color(0.35, 0.35, 0.35))
+	# Mines posées (la LED rouge clignote quand elles sont armées)
+	for mn in m.mines:
+		var pm := _px(Vector2(mn.x, 0.0))
+		c.draw_rect(Rect2(pm + Vector2(-0.35, -0.12) * ppm, Vector2(0.7, 0.2) * ppm), Color("#3A3A32"))
+		if mn.armee and fmod(_temps, 1.0) < 0.2:
+			c.draw_circle(pm + Vector2(0, -0.15 * ppm), maxf(2.0, ppm * 0.07), C_ROUGE)
+	# Équipages en marche vers un bâtiment ou un véhicule
+	for t in m.transits:
+		var vv = m.trouver(t.veh)
+		var bb = m.trouver(t.bat)
+		if vv == null or bb == null:
+			continue
+		var d0: float = vv.x + vv.longueur * 0.5
+		var d1: float = bb.x + bb.longueur * 0.5
+		if t.mode == "rembarque":
+			var tmp := d0
+			d0 = d1
+			d1 = tmp
+		var fr2: float = clampf(1.0 - t.restant / maxf(t.T, 0.1), 0.0, 1.0)
+		var gx: float = lerpf(d0, d1, fr2)
+		for k in t.pvs.size():
+			var xx: float = gx - signf(d1 - d0) * k * 0.9
+			Silhouette.dessiner(c, Vector2(terrain.ecran_x(xx), SOL_Y - Terrain.sol(xx) * ppm), ppm, "survivant",
+				{"phase": _temps * 7.0 + k, "miroir": d1 < d0, "peau": k + 3})
 	# Butin à récupérer
 	for cc in m.epaves + m.batiments:
 		var libre: bool = (cc is CombatModele.Veh and not cc.butin_pris) or (cc is CombatModele.Bat and cc.statut == "neutralise" and not cc.butin_pris)
@@ -646,22 +732,44 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_string(f, p2 + Vector2(-60, -14), "Fouille", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, C_TEXTE)
 	_dessiner_persos(c)
 	_dessiner_panneau(c)
-	# Traits de tir, étincelles, explosions
-	for t in _tirs:
-		var a := _px(t.a)
-		var b := _px(t.b)
-		var fade: float = 1.0 - t.age / 0.16
-		if t.classe == "canon":
-			c.draw_line(a, b, Color(1.0, 0.7, 0.25, fade), 4.0)
+	# Balles et obus en vol : trajectoire du modèle (bouche de l'arme -> point d'impact)
+	for pr in m.projectiles:
+		var tt: float = clampf((pr.t + (0.0 if pause else _alpha * CombatModele.DT)) / pr.T, 0.0, 1.0)
+		var dist: float = pr.a.distance_to(pr.b)
+		var arc: float = (0.03 if pr.classe == "canon" else (0.012 if pr.classe == "fusil" else 0.004)) * dist
+		var t0: float = maxf(0.0, tt - (3.2 if pr.classe != "canon" else 2.0) / maxf(dist, 1.0))
+		var pa: Vector2 = pr.a.lerp(pr.b, tt) + Vector2(0, sin(PI * tt) * arc)
+		var pb: Vector2 = pr.a.lerp(pr.b, t0) + Vector2(0, sin(PI * t0) * arc)
+		var sa := _px(pa)
+		var sb := _px(pb)
+		if pr.classe == "canon":
+			c.draw_line(sb, sa, Color(0.8, 0.8, 0.75, 0.35), maxf(3.0, ppm * 0.14))
+			c.draw_line(sb.lerp(sa, 0.4), sa, Color(1.0, 0.75, 0.3, 0.95), maxf(4.0, ppm * 0.12))
+			c.draw_circle(sa, maxf(3.5, ppm * 0.1), Color(1.0, 0.95, 0.7))
+		elif pr.classe == "fusil":
+			c.draw_line(sb, sa, Color(1.0, 1.0, 0.9, 0.85), 2.0)
 		else:
-			c.draw_line(a, b, Color(1.0, 0.9, 0.5, fade * 0.9), 2.0)
+			c.draw_line(sb, sa, Color(1.0, 0.85, 0.35, 0.35), maxf(5.0, ppm * 0.1))
+			c.draw_line(sb, sa, Color(1.0, 0.95, 0.6, 1.0), 2.0)
+	for s2 in _poussieres:
+		var k2: float = s2.age / 0.7
+		var pd := _px(s2.p)
+		var rr: float = ppm * (0.25 if not s2.gros else 0.5) * (0.5 + k2)
+		c.draw_circle(pd + Vector2(0, -k2 * ppm * 0.6), rr, Color(0.55, 0.46, 0.34, 0.6 * (1.0 - k2)))
+		c.draw_circle(pd + Vector2(rr * 0.8, -k2 * ppm * 0.3), rr * 0.7, Color(0.5, 0.42, 0.3, 0.5 * (1.0 - k2)))
+	for s3 in _ricochets:
+		var k3: float = s3.age / 0.35
+		var pr3 := _px(s3.p)
+		c.draw_line(pr3, pr3 + Vector2(s3.sens * 70.0 * k3, -110.0 * k3 + 90.0 * k3 * k3), Color(1.0, 0.9, 0.5, 1.0 - k3), 2.5)
 	for s in _etincelles:
 		var p := _px(s.p)
 		var fade2: float = 1.0 - s.age / 0.3
-		for k in 6:
-			c.draw_line(p, p + Vector2.from_angle(k * TAU / 6 + s.age * 3) * (6 + 22 * s.age) , Color(1, 0.8, 0.3, fade2), 2.0)
+		var gros: bool = s.get("gros", false)
+		var nb := 9 if gros else 6
+		for k in nb:
+			c.draw_line(p, p + Vector2.from_angle(k * TAU / nb + s.age * 3) * ((9 if gros else 6) + (34 if gros else 22) * s.age), Color(1, 0.8, 0.3, fade2), 2.0)
 	for s in _bouffees:
-		c.draw_circle(_px(s.p), 8.0, Color(1.0, 0.9, 0.5, 0.9))
+		c.draw_circle(_px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
 	for x in _explosions:
 		var p := _px(x.p)
 		var k: float = x.age / 1.4
@@ -981,5 +1089,28 @@ func _maj_interface() -> void:
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
 	_voile_fin.visible = m.fini
+	# Alerte de vague ennemie et contrôle d'embuscade
+	var al: Dictionary = m.alerte()
+	var poste := false
+	for b in m.batiments:
+		poste = poste or b.garnison.size() > 0
+	var cache := false
+	for v in m.convoi:
+		cache = cache or v.camo_voulu
+	_panneau_alerte.visible = not al.is_empty() or poste or cache or not m.mines.is_empty() or not m.transits.is_empty()
+	if _panneau_alerte.visible:
+		var txt := ""
+		if not al.is_empty():
+			txt = "ENNEMIS EN APPROCHE\n%d véhicule(s), à %d m" % [al.n, int(al.dist)]
+			if al.eta >= 0.0:
+				txt += ", contact dans %d s" % int(al.eta)
+		elif poste or cache:
+			txt = "Embuscade en place : l'ennemi ne vous voit pas. La première salve surprend."
+		else:
+			txt = "Préparatifs en cours..."
+		_lbl_alerte.text = txt
+		_btn_sortir.visible = poste or cache or not m.transits.is_empty()
+	if _btn_camo != null:
+		_btn_camo.text = "Découvrir" if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:
 		_lbl_fin.text = "Convoi anéanti\nDistance : %d m   Ennemis détruits : %d" % [int(m.distance_max), m.ennemis_detruits]
