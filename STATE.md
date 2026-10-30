@@ -20,7 +20,6 @@ Mis à jour : 2026-10-30 (pivot : mode convoi). Fichier à lire en premier (cour
 3. **Tests limites non couverts** : raid pendant réparation, affectation exclusive, récupération après pénurie.
 
 ## Périmètre V1 (DEC-013)
-
 Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1.1.
 
 ## Décisions ouvertes
