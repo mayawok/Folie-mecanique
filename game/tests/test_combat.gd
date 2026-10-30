@@ -18,9 +18,20 @@ func _avancer(m: CombatModele, secondes: float) -> void:
 		m.avancer()
 
 
+# Convoi complet pour les tests de combat : Stuart en tête, half-track, Willys
+func _equipe(m: CombatModele) -> void:
+	m.ajouter_vehicule("m3_half_track")
+	var st: CombatModele.Veh = m.ajouter_vehicule("m3_stuart")
+	m.monter(st.uid)
+	m.monter(st.uid)
+	m._replacer(true)
+
+
 func _init() -> void:
 	# --- Départ
 	var m := CombatModele.new(42)
+	verifier(m.convoi.size() == 1 and m.convoi[0].type == "willys_mb", "le départ est une Jeep seule")
+	_equipe(m)
 	verifier(m.convoi.size() == 3, "le convoi de départ compte 3 véhicules")
 	var ok_pos := true
 	for i in range(1, m.convoi.size()):
@@ -55,7 +66,7 @@ func _init() -> void:
 	# --- Réparation avec une pièce récupérée
 	m.composants.append({"kind": "roulement", "classe": "", "nom": "Roues test", "etat": 0.8})
 	verifier(m.ordre_reparer(w.uid, true), "réparation acceptée à l'arrêt")
-	_avancer(m, 6.0)
+	_avancer(m, 8.0)
 	verifier(w.pieces.roulement.pv > 0.0 and m.composants.is_empty(), "la pièce de rechange est montée et consommée")
 	w.reparation = false
 
@@ -73,6 +84,7 @@ func _init() -> void:
 
 	# --- Combat : un ennemi attaque, le convoi gagne et récupère le butin
 	var m2 := CombatModele.new(7)
+	_equipe(m2)
 	var e := m2.creer_vehicule("citroen_traction", "ennemi", m2.x_tete + 45.0)
 	m2.ennemis.append(e)
 	m2._prochain_x = 1.0e9   # pas d'autre rencontre dans ce test
@@ -97,8 +109,7 @@ func _init() -> void:
 		mt.ordre_visee("roulement")
 		var cible := mt.creer_vehicule("citroen_t23", "ennemi", mt.x_tete + 30.0)
 		var tireur: CombatModele.Veh = mt.convoi[0]
-		var arme: Dictionary = tireur.armes[0]
-		var arm: Dictionary = CombatModele.donnees().armes[arme.id]
+		var arm: Dictionary = CombatModele.donnees().armes["canon_leger"]
 		for n in 12:
 			mt._toucher_vehicule(tireur, arm, cible, "roulement")
 			if not cible.piece_ok("roulement"):
@@ -109,11 +120,53 @@ func _init() -> void:
 
 	# --- Bâtiment : neutralisé en un temps raisonnable, butin disponible
 	var m3 := CombatModele.new(5)
+	_equipe(m3)
 	var b := m3.creer_batiment("ferme", m3.x_tete + 40.0)
 	m3.batiments.append(b)
 	m3._prochain_x = 1.0e9
 	_avancer(m3, 150.0)
 	verifier(b.statut == "neutralise", "la ferme est neutralisée (pv %.0f, tireurs %d)" % [b.pv, b.tireurs_vivants()])
+
+	# --- Trouvaille : réparer au toucher, le mécanicien arrive, le véhicule rejoint le convoi
+	var m4 := CombatModele.new(3)
+	m4._prochain_x = 0.0
+	m4.avancer()
+	var trouve: CombatModele.Veh = null
+	for v in m4.epaves:
+		if v.statut == "trouvee":
+			trouve = v
+	verifier(trouve != null, "la première rencontre est un véhicule à retrouver (%s)" % (trouve.nom if trouve else "?"))
+	verifier(m4.batiments.size() == 1 and m4.batiments[0].statut == "neutralise", "avec une ruine à fouiller")
+	trouve.x = m4.x_tete + 5.0
+	for id in trouve.pieces:
+		trouve.pieces[id].pv = trouve.pieces[id].max
+	trouve.pieces.moteur.pv = 0.0
+	verifier(not m4.peut_rejoindre(trouve), "un véhicule au moteur détruit ne peut pas rejoindre")
+	m4.composants.append({"kind": "moteur", "classe": "", "nom": "Moteur test", "etat": 0.9})
+	m4.ordre_marche("halte")
+	verifier(m4.ordre_reparer(trouve.uid, true, "moteur"), "ordre de réparer une pièce précise")
+	_avancer(m4, 3.0)
+	verifier(trouve.pieces.moteur.pv <= 0.0, "le mécanicien met du temps à arriver")
+	_avancer(m4, 6.0)
+	verifier(trouve.pieces.moteur.pv > 0.0 and m4.composants.is_empty(), "moteur remplacé par la pièce récupérée")
+	verifier(m4.peut_rejoindre(trouve) and m4.rejoindre(trouve.uid), "le véhicule réparé rejoint le convoi")
+	verifier(m4.convoi.size() == 2 and trouve.actif() and trouve.equipage_vivant() == 1, "il est dans le convoi avec un survivant")
+	var loin := CombatModele.new(4)
+	var fl := loin.creer_vehicule("bmw_r75", "joueur", loin.x_tete + 200.0)
+	fl.statut = "trouvee"
+	loin.epaves.append(fl)
+	verifier(not loin.ordre_reparer(fl.uid, true), "pas de mécanicien à portée d'un véhicule lointain")
+
+	# --- Fouille d'une ruine : survivant recruté
+	var m5 := CombatModele.new(8)
+	m5._prochain_x = 1.0e9
+	var ru := m5.creer_batiment("ferme", m5.x_tete + 6.0)
+	ru.statut = "neutralise"
+	ru.butin.ressources["survivants"] = 1
+	m5.batiments.append(ru)
+	m5.convoi[0].equipage.pop_back()
+	_avancer(m5, 8.0)
+	verifier(ru.butin_pris and m5.convoi[0].equipage.size() == 2, "fouiller une ruine peut recruter un survivant")
 
 	# --- Déterminisme
 	var a1 := CombatModele.new(99)

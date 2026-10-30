@@ -7,8 +7,9 @@ Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json` ; test :
 
 Le cœur du jeu est le convoi visible et contrôlable qui avance de profil et combat.
 La base est mise en pause (code conservé, plus affichée au lancement). Le jeu démarre
-directement sur une **expédition permanente** : le convoi avance, rencontre des ennemis
-(véhicules, bâtiments), les détruit et récupère leur butin. Le danger augmente avec la distance.
+directement sur une **expédition permanente**. On part **très léger : une Jeep et deux survivants**.
+Le convoi avance, rencontre des ruines à fouiller, des véhicules abandonnés à réparer et à récupérer,
+et des ennemis (véhicules, bâtiments) dont on prend le butin. Le danger augmente avec la distance.
 
 ## Contrôle : ordres tactiques
 
@@ -18,7 +19,13 @@ les ordres restent possibles en pause ; vitesse ×1, ×2, ×3.
 | Niveau | Ordres |
 |---|---|
 | Convoi | Marche (reculer, halte, avancer) · Cible (plus proche, véhicules, bâtiments) · Visée (libre, roues, armes, châssis) · Fouille (automatique, à l'arrêt seulement) |
-| Véhicule | Feu libre / cessez-le-feu · Réparer · Rang vers l'avant / l'arrière · Abandonner |
+| Véhicule | Feu libre / cessez-le-feu · Réparer (automatique) · Rang vers l'avant / l'arrière · Abandonner |
+
+**Toucher un véhicule** (le sien ou un véhicule trouvé) ouvre son état : rien ne s'affiche s'il n'y a rien
+de cassé ; sinon une icône par pièce abîmée (canon, chenilles ou roues, moteur, suspension, cabine,
+châssis ; orange = abîmée, rouge = détruite). Toucher une icône envoie un **mécanicien** : le convoi
+s'arrête, le personnage marche jusqu'à la pièce et la répare. Un véhicule trouvé, une fois en état de
+rouler, propose **Rejoindre le convoi**.
 
 ## Pièces cassables et effets
 
@@ -45,6 +52,16 @@ Un canon blesse aussi le châssis (25 %). Une mitrailleuse ne tire pas sur un bl
 les véhicules ouverts (Willys, BMW, half-track) mais pas les blindés.
 Bâtiments : structure + tireurs ; la mitrailleuse vise les tireurs, le canon la structure.
 Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'arrête.
+
+## Départ, trouvailles et survivants
+
+- Départ : Willys MB, 2 survivants. La première rencontre est toujours une ruine à fouiller et un
+  véhicule abandonné (BMW) : elle montre la boucle fouiller, réparer, récupérer.
+- Un véhicule ennemi **neutralisé** (équipage hors de combat) est réparable et récupérable ; un véhicule
+  dont le châssis est détruit n'est que démontable.
+- Un véhicule récupéré rejoint le convoi avec 1 survivant ; les ruines peuvent livrer des survivants
+  (réserve si aucun siège libre).
+- Pendant la fouille, des survivants marchent de leur véhicule jusqu'à la ruine ou l'épave puis reviennent.
 
 ## Butin et réparation
 
@@ -75,10 +92,15 @@ Le convoi tient entre 570 et 1 020 m et détruit 4 à 8 ennemis, puis tombe à c
 munitions ou de véhicules. L'objectif est qu'un joueur qui réfléchit (visée, réparation,
 rang, fouille) aille nettement plus loin. À confirmer par essais humains.
 
+## Son
+
+Ambiance et musique démarrent au premier toucher (exigence des navigateurs). Moteur du véhicule le plus
+lourd tant que le convoi roule, tirs, impacts, explosions, atelier, radio.
+
 ## Ouvert
 
 - Lien avec la base : que fait-on du butin et des pièces ? (atelier, DEC-016)
 - Temps réel et absence : combat suspendu ou résolu automatiquement hors connexion (DEC-009, DEC-022).
 - Capacité de chargement par véhicule, fantassins à pied, faune, nuit.
 - Remorquage d'un véhicule immobilisé, équipage blessé et soins.
-- Animations de casse, art définitif, sons de moteur par véhicule.
+- Animations de casse, art définitif.

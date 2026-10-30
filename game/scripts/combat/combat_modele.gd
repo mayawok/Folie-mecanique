@@ -47,6 +47,9 @@ class Veh extends RefCounted:
 	var tir := true               # joueur : feu libre ou cessez-le-feu
 	var reparation := false
 	var rep_acc := 0.0
+	var rep_pret := 0.0           # délai avant l'arrivée du mécanicien
+	var rep_piece := ""           # pièce à réparer (vide = automatique)
+	var x_prev := 0.0             # position au pas précédent (affichage fluide)
 	var x_cible := 0.0
 	var vitesse_act := 0.0
 	var butin := {}
@@ -54,6 +57,10 @@ class Veh extends RefCounted:
 
 	func actif() -> bool:
 		return statut == "actif"
+
+	# Véhicule laissé sur place mais entier : réparable et récupérable
+	func recuperable() -> bool:
+		return statut == "abandonne" or statut == "trouvee"
 
 	func piece_ok(id: String) -> bool:
 		return pieces.has(id) and pieces[id].pv > 0.0
@@ -144,6 +151,7 @@ var stocks := {"ammo": 0.0, "fuel_l": 0.0, "metal": 0.0}
 var composants: Array = []        # {kind, classe, nom, etat}
 var ordres := {"marche": "halte", "cible": "proche", "visee": "libre", "fouille": "auto"}
 var x_tete := 0.0                 # bord avant du premier véhicule
+var x_tete_prev := 0.0
 var vitesse_convoi := 0.0
 var blocage := ""                 # raison pour laquelle le convoi n'avance pas
 var fouille_en_cours := {}
@@ -155,6 +163,7 @@ var _uid := 1
 var _prochain_x := 130.0
 var _n_rencontres := 0
 var _alerte_muni := false
+var reserve_survivants := 0      # recrues sans place : elles monteront dans le prochain véhicule
 
 
 func _init(g := 1) -> void:
@@ -169,7 +178,10 @@ func _init(g := 1) -> void:
 		bord += v.longueur + D.ecart_convoi
 	x_tete = bord - D.ecart_convoi
 	_replacer(true)
-	log_("Convoi prêt. Donnez vos ordres : Avancer pour partir.", "info")
+	x_tete_prev = x_tete
+	for v in convoi:
+		v.x_prev = v.x
+	log_("Une Jeep et deux survivants. Avancez pour trouver de quoi vous équiper.", "info")
 
 
 func log_(txt: String, ton := "info") -> void:
@@ -206,6 +218,7 @@ func creer_vehicule(type: String, camp: String, x: float) -> Veh:
 	v.longueur = float(forme.longueur)
 	v.chenille = forme.has("chenille")
 	v.x = x
+	v.x_prev = x
 	for id in PIECES_BASE:
 		var pv := float(p.pv[id])
 		v.pieces[id] = {"id": id, "nom": NOMS[id], "pv": pv, "max": pv}
@@ -243,6 +256,15 @@ func creer_batiment(type: String, x: float) -> Bat:
 		res[k] = round(rng.randf_range(d.butin[k][0], d.butin[k][1]))
 	b.butin = {"ressources": res, "composants": []}
 	return b
+
+
+# Ajoute un véhicule neuf à l'arrière du convoi (tests, récompenses)
+func ajouter_vehicule(type: String) -> Veh:
+	var v := creer_vehicule(type, "joueur", x_tete - 30.0)
+	convoi.append(v)
+	_replacer(true)
+	v.x_prev = v.x
+	return v
 
 
 func trouver(uid: int):
@@ -293,14 +315,77 @@ func ordre_tir(uid: int, actif: bool) -> void:
 		v.tir = actif
 
 
-func ordre_reparer(uid: int, actif: bool) -> bool:
+func ordre_reparer(uid: int, actif: bool, piece := "") -> bool:
 	var v = trouver(uid)
-	if not (v is Veh) or v.camp != "joueur":
+	if not (v is Veh) or not (convoi.has(v) or v.recuperable()):
 		return false
-	if actif and ordres.marche != "halte":
+	if not actif:
+		v.reparation = false
+		return true
+	if ordres.marche != "halte":
 		log_("Réparation impossible en mouvement : ordonnez Halte.", "alerte")
 		return false
-	v.reparation = actif
+	if not _mecanicien_possible(v):
+		log_("Aucun mécanicien à portée : approchez le convoi.", "alerte")
+		return false
+	v.reparation = true
+	v.rep_piece = piece
+	v.rep_pret = 0.0
+	v.rep_acc = 0.0
+	return true
+
+
+func _mecanicien_possible(v: Veh) -> bool:
+	var F: Dictionary = donnees().fouille
+	for c in convoi:
+		if c.actif() and c.equipage_vivant() > 0:
+			if c == v or convoi.has(v) or ecart(c.x, c.longueur, v.x, v.longueur) <= F.portee:
+				return true
+	return false
+
+
+func peut_rejoindre(v: Veh) -> bool:
+	return v.recuperable() and v.piece_ok("chassis") and v.piece_ok("roulement") and v.piece_ok("moteur") \
+		and ordres.marche == "halte" and _mecanicien_possible(v)
+
+
+# Un véhicule réparé se joint au convoi avec un survivant à bord
+func rejoindre(uid: int) -> bool:
+	var v = trouver(uid)
+	if not (v is Veh) or not peut_rejoindre(v):
+		return false
+	epaves.erase(v)
+	v.statut = "actif"
+	v.camp = "joueur"
+	v.reparation = false
+	v.tir = true
+	v.butin_pris = true
+	v.equipage = [float(donnees().equipage_pv)]
+	while reserve_survivants > 0 and v.equipage.size() < int(v.profil.equipage):
+		v.equipage.append(float(donnees().equipage_pv))
+		reserve_survivants -= 1
+	v.x_prev = v.x
+	for a in v.armes:
+		a.cd = 1.0
+	convoi.append(v)
+	_replacer()
+	log_("%s rejoint le convoi." % v.nom, "ok")
+	evt({"t": "rejoint", "uid": v.uid})
+	return true
+
+
+func _recruter_survivant() -> bool:
+	for v in convoi:
+		if v.actif() and v.equipage.size() < int(v.profil.equipage):
+			v.equipage.append(float(donnees().equipage_pv))
+			return true
+	for v in convoi:
+		if v.actif():
+			for i in v.equipage.size():
+				if v.equipage[i] <= 0.0:
+					v.equipage[i] = float(donnees().equipage_pv)
+					return true
+	reserve_survivants += 1   # pas de place : il suivra à pied jusqu'au prochain véhicule
 	return true
 
 
@@ -331,6 +416,7 @@ func abandonner(uid: int) -> void:
 				log_("Impossible d'abandonner le dernier véhicule.", "alerte")
 				return
 			convoi.remove_at(i)
+			v.x_prev = v.x
 			v.statut = "abandonne"
 			v.reparation = false
 			v.butin = _butin_vehicule(v, 0.9)
@@ -345,6 +431,9 @@ func avancer(dt := DT) -> void:
 	if fini:
 		return
 	temps += dt
+	x_tete_prev = x_tete
+	for v in convoi + ennemis:
+		v.x_prev = v.x
 	_marche(dt)
 	_ia_ennemis(dt)
 	for v in convoi.duplicate():
@@ -688,10 +777,11 @@ func _neutraliser(v: Veh) -> void:
 		log_("L'équipage de %s est hors de combat : le véhicule est perdu." % v.nom, "alerte")
 	else:
 		ennemis_detruits += 1
-		log_("%s ennemi neutralisé (équipage hors de combat)." % v.nom, "ok")
+		log_("%s ennemi neutralisé : réparable et récupérable." % v.nom, "ok")
 
 
 func _sortir_du_combat(v: Veh) -> void:
+	v.x_prev = v.x
 	convoi.erase(v)
 	ennemis.erase(v)
 	epaves.append(v)
@@ -720,6 +810,9 @@ func _butin_vehicule(v: Veh, facteur: float) -> Dictionary:
 # --- Réparation ------------------------------------------------------------
 
 func _piece_a_reparer(v: Veh) -> String:
+	if v.rep_piece != "":
+		var p0 = v.pieces.get(v.rep_piece)
+		return v.rep_piece if p0 != null and p0.pv < p0.max - 0.5 else ""
 	var ordre := ["roulement", "moteur"]
 	for p in v.pieces:
 		if p.begins_with("a"):
@@ -735,17 +828,22 @@ func _reparer(dt: float) -> void:
 	if ordres.marche != "halte":
 		return
 	var R: Dictionary = donnees().reparation
-	for v in convoi:
-		if not v.actif() or not v.reparation:
+	for v in convoi + epaves:
+		if not v.reparation:
 			continue
-		if v.equipage_vivant() == 0:
+		if not _mecanicien_possible(v):
 			v.reparation = false
+			continue
+		v.rep_pret += dt
+		if v.rep_pret < R.delai_depart:
 			continue
 		var id := _piece_a_reparer(v)
 		if id == "":
 			v.reparation = false
 			v.rep_acc = 0.0
+			v.rep_piece = ""
 			log_("%s : réparations terminées." % v.nom, "ok")
+			evt({"t": "repare", "uid": v.uid})
 			continue
 		var p: Dictionary = v.pieces[id]
 		if p.pv <= 0.0:
@@ -854,11 +952,20 @@ func _recolter(c) -> void:
 	c.butin_pris = true
 	var res: Dictionary = c.butin.ressources
 	var morceaux := []
+	var noms := {"ammo": "munitions", "fuel_l": "L carburant", "metal": "métal"}
 	for k in res:
-		if res[k] > 0:
+		if res[k] <= 0:
+			continue
+		if k == "survivants":
+			for i in int(res[k]):
+				if _recruter_survivant():
+					morceaux.append("un survivant se joint à vous")
+		else:
 			stocks[k] = stocks.get(k, 0.0) + res[k]
-			morceaux.append("+%d %s" % [int(res[k]), {"ammo": "munitions", "fuel_l": "L carburant", "metal": "métal"}.get(k, k)])
-	for comp in c.butin.composants:
+			morceaux.append("+%d %s" % [int(res[k]), noms.get(k, k)])
+	# Les pièces ne se prennent que sur les épaves détruites ; un véhicule entier se répare
+	var comps: Array = c.butin.composants if (c is Bat or c.statut == "epave") else []
+	for comp in comps:
 		composants.append(comp)
 		morceaux.append("%s %d %%" % [comp.nom, int(comp.etat * 100)])
 	if composants.size() > 20:
@@ -890,6 +997,8 @@ func _rencontres() -> void:
 		if tirage <= 0.0:
 			choix = e
 			break
+	if _n_rencontres == 1 and R.has("premiere"):
+		choix = R.premiere
 	var x := x_tete + 80.0
 	var debut := x
 	for t in choix.get("vehicules", []):
@@ -901,7 +1010,33 @@ func _rencontres() -> void:
 		var b := creer_batiment(bt, x + r.randf_range(4.0, 14.0))
 		batiments.append(b)
 		x = b.x + b.longueur
-	log_("Contact à %d m." % int(debut - x_tete), "info")
+	for t in choix.get("trouvailles", []):
+		var f := creer_vehicule(t, "joueur", x)
+		f.statut = "trouvee"
+		f.equipage = []
+		var casses := 0
+		for id in f.pieces:
+			if id != "chassis" and r.randf() < 0.5:
+				var q := 0.0 if r.randf() < 0.5 else r.randf_range(0.1, 0.7)
+				f.pieces[id].pv = f.pieces[id].max * q
+				casses += 1
+		if casses == 0:
+			f.pieces.roulement.pv = 0.0
+		f.butin = _butin_vehicule(f, 0.6)
+		epaves.append(f)
+		x += f.longueur + 6.0
+	if choix.has("ruine"):
+		var b := creer_batiment(choix.ruine, x + r.randf_range(2.0, 10.0))
+		b.statut = "neutralise"
+		b.pv = b.pv_max * 0.35
+		for t in b.tireurs:
+			t.pv = 0.0
+		b.butin.ressources["survivants"] = 1 if (choix.get("survivant", false) or r.randf() < 0.4) else 0
+		batiments.append(b)
+		x = b.x + b.longueur
+	var hostile := not ennemis.is_empty() or batiments.any(func(b): return b.actif())
+	evt({"t": "contact", "ennemi": hostile})
+	log_("%s à %d m." % ["Contact" if hostile else "Du nouveau", int(debut - x_tete)], "info")
 	_prochain_x = x + r.randf_range(R.intervalle[0], R.intervalle[1])
 
 

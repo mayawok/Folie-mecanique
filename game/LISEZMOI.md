@@ -2,11 +2,12 @@
 
 ## Mode convoi (lancement par défaut, DEC-026)
 
-Un convoi de 3 véhicules avance de profil dans le désert, affronte des ennemis (véhicules,
+Une Jeep et deux survivants avancent de profil dans le désert, affronte des ennemis (véhicules,
 bâtiments) et récupère leur butin. Appuyer sur **Avancer** pour partir. Le convoi tire seul :
 on donne des **ordres** (marche, cible, visée sur roues/armes/châssis, fouille) et, par véhicule,
 cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres restent possibles.
-Toucher une carte de véhicule en bas pour le sélectionner. Détails : `docs/design/CONVOI.md`.
+Toucher un véhicule dans la scène affiche ses pièces cassées : toucher une icône envoie un mécanicien ;
+un véhicule trouvé et réparé peut rejoindre le convoi. Les cartes en bas sélectionnent un véhicule. Détails : `docs/design/CONVOI.md`.
 La base décrite plus bas est conservée mais n'est plus affichée : pour la rejouer, remettre
 `run/main_scene="res://scenes/main.tscn"` dans `project.godot`.
 Test sans écran : `godot --headless --path game -s res://tests/test_combat.gd`.
