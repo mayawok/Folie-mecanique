@@ -1,0 +1,72 @@
+{
+  "_lisez_moi": "Valeurs de prototypage du mode convoi (scripts/combat/combat_modele.gd). Distances en m, vitesses en m/s, durées en s, pv = points de vie. Tout se règle ici.",
+  "depart": ["m3_stuart", "m3_half_track", "willys_mb"],
+  "stocks_depart": {"ammo": 140, "fuel_l": 70, "metal": 20},
+  "ecart_convoi": 1.4,
+  "equipage_pv": 20,
+  "fouille": {"portee": 14, "duree_base": 2.5, "menace_distance": 60},
+  "reparation": {"pv_par_s": 3.0, "metal_par_pv": 0.2, "delai_piece_s": 4.0, "metal_bricolage": 10, "etat_bricolage": 0.25},
+  "armes": {
+    "mitrailleuse": {"nom": "Mitrailleuse", "classe": "mitrailleuse", "degats": 8, "penetration": 7, "cadence": 0.8, "portee": 55, "precision": 0.55, "munitions": 1, "pv": 25},
+    "canon_leger": {"nom": "Canon 37 mm", "classe": "canon", "degats": 30, "penetration": 45, "cadence": 2.4, "portee": 70, "precision": 0.6, "munitions": 2, "pv": 40},
+    "canon_75": {"nom": "Canon 75 mm", "classe": "canon", "degats": 45, "penetration": 60, "cadence": 2.8, "portee": 75, "precision": 0.62, "munitions": 2, "pv": 50},
+    "canon_88": {"nom": "Canon 88 mm", "classe": "canon", "degats": 75, "penetration": 95, "cadence": 3.6, "portee": 85, "precision": 0.7, "munitions": 3, "pv": 70},
+    "fusil": {"nom": "Fusil", "classe": "fusil", "degats": 6, "penetration": 2, "cadence": 1.5, "portee": 40, "precision": 0.45, "munitions": 0, "pv": 0}
+  },
+  "zones": {
+    "poids": {"chassis": 0.30, "roulement": 0.20, "suspension": 0.10, "moteur": 0.10, "cabine": 0.14, "arme": 0.08},
+    "blindage_zone": {"chassis": 1.2, "roulement": 0.4, "suspension": 0.4, "moteur": 1.0, "cabine": 1.0, "arme": 0.6},
+    "visee_chance": 0.65,
+    "visee_precision": 0.8
+  },
+  "effets": {
+    "roulement_bas": 0.7, "moteur_bas": 0.7, "suspension_bas": 0.8,
+    "suspension_hs_vitesse": 0.5, "suspension_hs_precision": 0.6, "suspension_bas_precision": 0.85,
+    "cabine_hs_precision": 0.5, "cabine_hs_equipage": 0.3, "seuil_bas": 0.5
+  },
+  "vehicules": {
+    "willys_mb":        {"vitesse": 6.5, "blindage": 2,  "conso": 1.0, "reservoir": 12, "metal": 8,  "equipage": 2, "ouvert": true,  "armes": ["mitrailleuse"],
+                         "pv": {"chassis": 55, "roulement": 35, "suspension": 25, "moteur": 30, "cabine": 25}},
+    "bmw_r75":          {"vitesse": 7.5, "blindage": 1,  "conso": 0.8, "reservoir": 8,  "metal": 6,  "equipage": 2, "ouvert": true,  "armes": ["mitrailleuse"],
+                         "pv": {"chassis": 40, "roulement": 28, "suspension": 20, "moteur": 28, "cabine": 18}},
+    "citroen_traction": {"vitesse": 6.0, "blindage": 4,  "conso": 1.4, "reservoir": 14, "metal": 10, "equipage": 2, "ouvert": false, "armes": ["mitrailleuse"], "standoff": 30,
+                         "pv": {"chassis": 70, "roulement": 40, "suspension": 28, "moteur": 35, "cabine": 30}},
+    "citroen_t23":      {"vitesse": 5.0, "blindage": 5,  "conso": 2.5, "reservoir": 25, "metal": 16, "equipage": 2, "ouvert": false, "armes": ["mitrailleuse"], "standoff": 34,
+                         "pv": {"chassis": 90, "roulement": 50, "suspension": 35, "moteur": 45, "cabine": 35}},
+    "diamond_t":        {"vitesse": 4.5, "blindage": 8,  "conso": 4.0, "reservoir": 40, "metal": 25, "equipage": 2, "ouvert": false, "armes": ["mitrailleuse"],
+                         "pv": {"chassis": 130, "roulement": 70, "suspension": 50, "moteur": 70, "cabine": 45}},
+    "dukw":             {"vitesse": 3.8, "blindage": 6,  "conso": 4.5, "reservoir": 40, "metal": 22, "equipage": 2, "ouvert": true,  "armes": ["mitrailleuse"], "standoff": 36,
+                         "pv": {"chassis": 140, "roulement": 65, "suspension": 45, "moteur": 60, "cabine": 40}},
+    "m3_half_track":    {"vitesse": 5.0, "blindage": 12, "conso": 3.5, "reservoir": 30, "metal": 24, "equipage": 3, "ouvert": true,  "armes": ["mitrailleuse"], "standoff": 38,
+                         "pv": {"chassis": 150, "roulement": 70, "suspension": 45, "moteur": 65, "cabine": 50}},
+    "m3_stuart":        {"vitesse": 5.5, "blindage": 28, "conso": 3.5, "reservoir": 30, "metal": 30, "equipage": 3, "ouvert": false, "armes": ["canon_leger", "mitrailleuse"], "standoff": 45,
+                         "pv": {"chassis": 170, "roulement": 80, "suspension": 50, "moteur": 70, "cabine": 55}},
+    "m4_sherman":       {"vitesse": 4.5, "blindage": 45, "conso": 5.0, "reservoir": 60, "metal": 45, "equipage": 3, "ouvert": false, "armes": ["canon_75", "mitrailleuse"], "standoff": 50,
+                         "pv": {"chassis": 240, "roulement": 110, "suspension": 70, "moteur": 100, "cabine": 80}},
+    "tiger_1":          {"vitesse": 3.2, "blindage": 80, "conso": 9.0, "reservoir": 90, "metal": 70, "equipage": 3, "ouvert": false, "armes": ["canon_88"], "standoff": 60,
+                         "pv": {"chassis": 380, "roulement": 160, "suspension": 100, "moteur": 140, "cabine": 120}}
+  },
+  "batiments": {
+    "ferme":  {"nom": "Ferme fortifiée", "largeur": 9.0,  "hauteur": 4.6, "pv": 130, "blindage": 6,  "tireurs": 3, "butin": {"ammo": [10, 25], "fuel_l": [4, 14], "metal": [4, 10]}},
+    "hangar": {"nom": "Hangar",          "largeur": 12.0, "hauteur": 4.0, "pv": 170, "blindage": 8,  "tireurs": 3, "butin": {"ammo": [8, 20], "fuel_l": [10, 28], "metal": [8, 20]}},
+    "bunker": {"nom": "Bunker",          "largeur": 8.0,  "hauteur": 3.0, "pv": 320, "blindage": 24, "tireurs": 3, "arme": "mitrailleuse", "butin": {"ammo": [20, 45], "fuel_l": [6, 18], "metal": [10, 24]}}
+  },
+  "rencontres": {
+    "intervalle": [110, 190],
+    "palier_m": 400,
+    "liste": [
+      {"niveau_min": 0, "niveau_max": 2, "poids": 3, "vehicules": ["citroen_traction"], "mode": "approche"},
+      {"niveau_min": 0, "niveau_max": 3, "poids": 2, "batiments": ["ferme"]},
+      {"niveau_min": 1, "niveau_max": 4, "poids": 2, "vehicules": ["citroen_traction", "bmw_r75"], "mode": "approche"},
+      {"niveau_min": 1, "niveau_max": 5, "poids": 2, "vehicules": ["citroen_t23"], "mode": "barrage"},
+      {"niveau_min": 1, "niveau_max": 6, "poids": 2, "batiments": ["hangar"], "vehicules": ["bmw_r75"], "mode": "approche"},
+      {"niveau_min": 2, "niveau_max": 99, "poids": 2, "batiments": ["bunker"]},
+      {"niveau_min": 2, "niveau_max": 6, "poids": 3, "vehicules": ["citroen_t23", "citroen_traction"], "mode": "approche"},
+      {"niveau_min": 3, "niveau_max": 99, "poids": 2, "vehicules": ["dukw", "citroen_traction"], "mode": "approche"},
+      {"niveau_min": 3, "niveau_max": 99, "poids": 3, "vehicules": ["m3_half_track", "bmw_r75"], "mode": "approche"},
+      {"niveau_min": 4, "niveau_max": 99, "poids": 3, "vehicules": ["m3_stuart", "citroen_traction"], "mode": "approche"},
+      {"niveau_min": 5, "niveau_max": 99, "poids": 3, "vehicules": ["m4_sherman", "m3_half_track"], "mode": "approche"},
+      {"niveau_min": 6, "niveau_max": 99, "poids": 2, "vehicules": ["tiger_1"], "batiments": ["bunker"], "mode": "barrage"}
+    ]
+  }
+}

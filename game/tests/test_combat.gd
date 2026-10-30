@@ -1,0 +1,145 @@
+# Test sans écran du mode convoi :
+#   godot --headless --path game -s res://tests/test_combat.gd
+# Vérifie : déterminisme, marche et carburant, blocage par véhicule immobilisé, effets des pièces
+# cassées, combat et butin, fouille, réparation, rencontres. Affiche aussi un bilan d'équilibrage.
+extends SceneTree
+
+var echecs := 0
+
+
+func verifier(cond: bool, msg: String) -> void:
+	print(("OK   " if cond else "ÉCHEC ") + msg)
+	if not cond:
+		echecs += 1
+
+
+func _avancer(m: CombatModele, secondes: float) -> void:
+	for i in int(secondes / CombatModele.DT):
+		m.avancer()
+
+
+func _init() -> void:
+	# --- Départ
+	var m := CombatModele.new(42)
+	verifier(m.convoi.size() == 3, "le convoi de départ compte 3 véhicules")
+	var ok_pos := true
+	for i in range(1, m.convoi.size()):
+		ok_pos = ok_pos and m.convoi[i].x + m.convoi[i].longueur < m.convoi[i - 1].x
+	verifier(ok_pos, "les véhicules sont alignés sans se recouvrir")
+
+	# --- Marche et carburant
+	var x0 := m.x_tete
+	var c0: float = m.stocks.fuel_l
+	m.ordre_marche("avancer")
+	_avancer(m, 10.0)
+	verifier(m.x_tete > x0 + 20.0, "le convoi avance (%.0f m en 10 s)" % (m.x_tete - x0))
+	verifier(m.stocks.fuel_l < c0, "le carburant baisse (%.1f L)" % (c0 - m.stocks.fuel_l))
+	m.ordre_marche("halte")
+	var x1 := m.x_tete
+	_avancer(m, 2.0)
+	verifier(is_equal_approx(m.x_tete, x1), "Halte : le convoi s'arrête")
+
+	# --- Effets des pièces cassées
+	var w: CombatModele.Veh = m.convoi[2]
+	var v_ok := w.vitesse()
+	w.pieces.suspension.pv = 0.0
+	verifier(is_equal_approx(w.vitesse(), v_ok * 0.5), "suspension détruite : vitesse ÷ 2")
+	w.pieces.suspension.pv = w.pieces.suspension.max
+	w.pieces.roulement.pv = 0.0
+	m.ordre_marche("avancer")
+	var x2 := m.x_tete
+	_avancer(m, 3.0)
+	verifier(is_equal_approx(m.x_tete, x2) and m.blocage != "", "roues détruites : le convoi est bloqué (%s)" % m.blocage)
+	m.ordre_marche("halte")
+
+	# --- Réparation avec une pièce récupérée
+	m.composants.append({"kind": "roulement", "classe": "", "nom": "Roues test", "etat": 0.8})
+	verifier(m.ordre_reparer(w.uid, true), "réparation acceptée à l'arrêt")
+	_avancer(m, 6.0)
+	verifier(w.pieces.roulement.pv > 0.0 and m.composants.is_empty(), "la pièce de rechange est montée et consommée")
+	w.reparation = false
+
+	# --- Ordres de rang, cessez-le-feu, abandon
+	var u_tete: int = m.convoi[0].uid
+	m.descendre(u_tete)
+	verifier(m.convoi[1].uid == u_tete, "l'ordre « rang vers l'arrière » échange deux véhicules")
+	m.monter(u_tete)
+	verifier(m.convoi[0].uid == u_tete, "l'ordre « rang vers l'avant » le remet en tête")
+	m.ordre_tir(u_tete, false)
+	verifier(not m.convoi[0].tir, "cessez-le-feu appliqué à un véhicule")
+	var ab: CombatModele.Veh = m.convoi[2]
+	m.abandonner(ab.uid)
+	verifier(not m.convoi.has(ab) and m.epaves.has(ab) and ab.statut == "abandonne", "abandon : le véhicule quitte le convoi et devient récupérable")
+
+	# --- Combat : un ennemi attaque, le convoi gagne et récupère le butin
+	var m2 := CombatModele.new(7)
+	var e := m2.creer_vehicule("citroen_traction", "ennemi", m2.x_tete + 45.0)
+	m2.ennemis.append(e)
+	m2._prochain_x = 1.0e9   # pas d'autre rencontre dans ce test
+	m2.ordre_marche("halte")
+	var muni0: float = m2.stocks.ammo
+	_avancer(m2, 120.0)
+	verifier(not e.actif() and m2.epaves.has(e), "l'ennemi est hors de combat et devient une épave (statut %s)" % e.statut)
+	verifier(m2.stocks.ammo < muni0, "les munitions sont consommées (%.0f -> %.0f)" % [muni0, m2.stocks.ammo])
+	verifier(m2.ennemis_detruits == 1, "un ennemi comptabilisé")
+	var butin_avant: float = m2.stocks.metal
+	_avancer(m2, 10.0)
+	verifier(not e.butin_pris, "l'épave est trop loin pour être fouillée à l'arrêt")
+	m2.ordre_marche("avancer")
+	_avancer(m2, 40.0)
+	verifier(e.butin_pris and m2.stocks.metal > butin_avant, "en avançant, le convoi s'arrête et fouille l'épave (+%.0f métal)" % (m2.stocks.metal - butin_avant))
+
+	# --- Visée : viser les roues immobilise plus souvent
+	var immob := 0
+	var essais := 40
+	for k in essais:
+		var mt := CombatModele.new(100 + k)
+		mt.ordre_visee("roulement")
+		var cible := mt.creer_vehicule("citroen_t23", "ennemi", mt.x_tete + 30.0)
+		var tireur: CombatModele.Veh = mt.convoi[0]
+		var arme: Dictionary = tireur.armes[0]
+		var arm: Dictionary = CombatModele.donnees().armes[arme.id]
+		for n in 12:
+			mt._toucher_vehicule(tireur, arm, cible, "roulement")
+			if not cible.piece_ok("roulement"):
+				break
+		if not cible.piece_ok("roulement"):
+			immob += 1
+	verifier(immob >= essais * 0.8, "viser les roues les détruit (%d/%d en 12 obus)" % [immob, essais])
+
+	# --- Bâtiment : neutralisé en un temps raisonnable, butin disponible
+	var m3 := CombatModele.new(5)
+	var b := m3.creer_batiment("ferme", m3.x_tete + 40.0)
+	m3.batiments.append(b)
+	m3._prochain_x = 1.0e9
+	_avancer(m3, 150.0)
+	verifier(b.statut == "neutralise", "la ferme est neutralisée (pv %.0f, tireurs %d)" % [b.pv, b.tireurs_vivants()])
+
+	# --- Déterminisme
+	var a1 := CombatModele.new(99)
+	var a2 := CombatModele.new(99)
+	a1.ordre_marche("avancer")
+	a2.ordre_marche("avancer")
+	_avancer(a1, 300.0)
+	_avancer(a2, 300.0)
+	verifier(a1.resume() == a2.resume(), "même graine, mêmes ordres : même partie")
+	print("   ", a1.resume())
+
+	# --- Rencontres et équilibrage : 6 graines, ordres simples (avancer, fouille auto)
+	var distances := []
+	var kills := []
+	for g in range(1, 7):
+		var s := CombatModele.new(g)
+		s.stocks.fuel_l = 1.0e6
+		s.ordre_marche("avancer")
+		var t := 0.0
+		while not s.fini and t < 1500.0:
+			s.avancer()
+			t += CombatModele.DT
+		distances.append(int(s.distance_max))
+		kills.append(s.ennemis_detruits)
+	print("   équilibrage (avancer sans réfléchir, 25 min max) : distances ", distances, " ennemis détruits ", kills)
+	verifier(distances.max() > 150, "des rencontres ont bien lieu en avançant")
+
+	print("Échecs : ", echecs)
+	quit(1 if echecs > 0 else 0)

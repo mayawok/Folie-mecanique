@@ -81,10 +81,13 @@ func configurer(t: String) -> void:
 
 
 # Tir : rafale pour une mitrailleuse, recul et fumée pour un canon. Renvoie le type tiré.
-func tirer() -> String:
+# `arme` ("canon" ou "mitrailleuse") force l'arme animée ; vide = canon s'il y en a un.
+func tirer(arme := "") -> String:
 	var canon := false
 	for a in D.get("armes", []):
 		canon = canon or a.type == "canon"
+	if arme != "":
+		canon = canon and arme == "canon"
 	if canon:
 		_flash = 0.12
 		_recul = 1.0

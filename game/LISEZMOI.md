@@ -1,5 +1,20 @@
 # Prototype jouable — Folie Mécanique
 
+## Mode convoi (lancement par défaut, DEC-026)
+
+Un convoi de 3 véhicules avance de profil dans le désert, affronte des ennemis (véhicules,
+bâtiments) et récupère leur butin. Appuyer sur **Avancer** pour partir. Le convoi tire seul :
+on donne des **ordres** (marche, cible, visée sur roues/armes/châssis, fouille) et, par véhicule,
+cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres restent possibles.
+Toucher une carte de véhicule en bas pour le sélectionner. Détails : `docs/design/CONVOI.md`.
+La base décrite plus bas est conservée mais n'est plus affichée : pour la rejouer, remettre
+`run/main_scene="res://scenes/main.tscn"` dans `project.godot`.
+Test sans écran : `godot --headless --path game -s res://tests/test_combat.gd`.
+
+---
+
+## Prototype de la base (en pause)
+
 Boucle minimale : base → expédition → combat automatique → retour avec butin.
 But du test : tenir 10 jours, **en temps réel** (1 jour de jeu = 1 jour réel, système 7).
 La partie est sauvegardée dans le navigateur ; à chaque retour, un rapport résume l'absence.

@@ -1,24 +1,21 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-29 (menus, garage, véhicules dessinés, audio). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-30 (pivot : mode convoi). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
-- Phase : conception ; **prototype jouable** dans `game/` en temps réel (horloge, sauvegarde,
-  rapport de retour, pénurie graduée, expéditions à pied), publié sur GitHub Pages (`game/LISEZMOI.md`).
+- Phase : conception ; **prototype jouable** dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
+  **Pivot (DEC-026) : le jeu démarre sur le mode convoi** (`docs/design/CONVOI.md`) ; la base est en pause
+  (`scenes/main.tscn` conservée, test `tests/test_sim.gd` toujours vert).
 - Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
-- Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0.
-- Simulations 30 jours v2.0 : 3 000 parties, 3 profils (prudent, équilibré, agressif).
+- Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0 ; simulations 30 jours v2.0 (3 000 parties).
 
 ## Constats clés
 
-1. **Pas de tension en début de partie** : 0 % de pénurie d'eau et de nourriture,
-   0 % de brèche, quel que soit le profil. Seul le carburant crée une contrainte
-   (2,9 % de pénurie en profil agressif). À corriger avant tout développement.
-2. **Données véhicules incomplètes** : jusqu'à 10 champs vides par fiche
-   (voir `data/master/audit_completude_vehicule.csv`).
-3. **Tests limites non couverts** : raid pendant réparation, affectation exclusive,
-   récupération après pénurie (voir `data/simulations/progression_30j/tests_limites.csv`).
+1. **Pas de tension en début de partie** (simulation de la base) : 0 % de pénurie d'eau et de
+   nourriture, 0 % de brèche ; seul le carburant contraint (2,9 % en profil agressif).
+2. **Données véhicules incomplètes** : jusqu'à 10 champs vides par fiche (`data/master/audit_completude_vehicule.csv`).
+3. **Tests limites non couverts** : raid pendant réparation, affectation exclusive, récupération après pénurie.
 
 ## Périmètre V1 (DEC-013)
 
@@ -26,10 +23,12 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
 
 ## Décisions ouvertes
 
-- Cible d'équilibrage : taux de pénurie et de brèche souhaités sur 30 jours.
+Cible d'équilibrage (pénurie, brèche sur 30 jours) ; lien convoi / base ; temps réel et absence.
 
 ## Prochaines étapes
 
+0. **Prochain : jouer le mode convoi**, régler `game/data/combat_proto.json`, puis décider du lien avec la base
+   (butin, atelier) et du temps réel (`CONVOI.md`, section Ouvert). Tests : `tests/test_combat.gd`.
 1. Revue de conception thème par thème. Thème 1 (vision) : `docs/design/VISION.md`.
    Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
    Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
@@ -40,7 +39,7 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
    Prototype : menu principal, pause, garage ; véhicules et personnages dessinés par le code (DEC-023).
    Base : armurerie, améliorations de bâtiments par chantier, rapports plein écran (DEC-025).
    Audio ElevenLabs (DEC-024) : liste et consignes dans `docs/audio/ELEVENLABS.md`, lecture prête.
-   **Prochain : système 8 (récit)** dans `SYSTEMES.md`.
+   Système 8 (récit) : en attente du mode convoi (DEC-026).
 2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
    planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
 3. DATA-001 : schémas de données versionnés.

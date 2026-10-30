@@ -1,0 +1,84 @@
+# Mode convoi — Folie Mécanique
+
+Statut : prototype jouable (DEC-026). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
+Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json` ; test : `game/tests/test_combat.gd`.
+
+## Principe
+
+Le cœur du jeu est le convoi visible et contrôlable qui avance de profil et combat.
+La base est mise en pause (code conservé, plus affichée au lancement). Le jeu démarre
+directement sur une **expédition permanente** : le convoi avance, rencontre des ennemis
+(véhicules, bâtiments), les détruit et récupère leur butin. Le danger augmente avec la distance.
+
+## Contrôle : ordres tactiques
+
+Pas de visée au doigt. Le joueur donne des ordres, le convoi tire seul. **Pause active** :
+les ordres restent possibles en pause ; vitesse ×1, ×2, ×3.
+
+| Niveau | Ordres |
+|---|---|
+| Convoi | Marche (reculer, halte, avancer) · Cible (plus proche, véhicules, bâtiments) · Visée (libre, roues, armes, châssis) · Fouille (automatique, à l'arrêt seulement) |
+| Véhicule | Feu libre / cessez-le-feu · Réparer · Rang vers l'avant / l'arrière · Abandonner |
+
+## Pièces cassables et effets
+
+Chaque véhicule a des pièces avec des points de vie. Rien n'est animé à la casse en V0 :
+la pièce est signalée (pastille orange puis rouge avec croix, fumée, carte du véhicule).
+
+| Pièce | Effet quand abîmée (< 50 %) | Effet quand détruite |
+|---|---|---|
+| Roues / chenilles | vitesse ×0,7 | véhicule immobilisé, **le convoi est bloqué** |
+| Moteur | vitesse ×0,7 | véhicule immobilisé, convoi bloqué |
+| Suspension | vitesse ×0,8, précision ×0,85 | vitesse ×0,5, précision ×0,6 |
+| Canon / mitrailleuse | — | cette arme ne tire plus |
+| Cabine | — | précision ×0,5, l'équipage encaisse 30 % de chaque coup |
+| Châssis | — | véhicule détruit (épave) |
+
+Équipage : tous hors de combat = véhicule neutralisé (épave récupérable, non détruite).
+
+## Combat
+
+Déterministe (graine). Dégâts = `dégâts × pénétration / (pénétration + blindage × coefficient de zone)`.
+Les roues, chenilles et suspensions sont peu blindées ; le châssis l'est davantage.
+Un canon blesse aussi le châssis (25 %). Une mitrailleuse ne tire pas sur un blindé
+(blindage > 25) : elle économise ses munitions. Les fantassins en bâtiment (fusils) menacent
+les véhicules ouverts (Willys, BMW, half-track) mais pas les blindés.
+Bâtiments : structure + tireurs ; la mitrailleuse vise les tireurs, le canon la structure.
+Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'arrête.
+
+## Butin et réparation
+
+- Une épave ou un bâtiment neutralisé se **fouille** (convoi à portée de 14 m, sans menace) :
+  munitions, carburant, métal et **pièces récupérées** (avec leur état en %).
+- **Réparer** (à l'arrêt) : une pièce abîmée se répare avec du métal ; une pièce détruite se
+  remplace par une pièce récupérée compatible (état conservé) ou se rafistole à 25 % pour 10 métal.
+- **Abandonner** un véhicule le laisse sur place, démontable comme une épave.
+
+## Rencontres
+
+Tirées à graine fixe par palier de 400 m : patrouilles, véhicules en barrage, fermes, hangars,
+bunkers, puis half-tracks, chars Stuart et Sherman, Tiger I en barrage au palier 6.
+
+## Architecture
+
+| Fichier | Rôle |
+|---|---|
+| `combat_modele.gd` | Toute la logique, sans dessin (testable sans écran) |
+| `convoi_vue.gd` | Caméra, dessin, effets, cartes de véhicules, panneau d'ordres |
+| `batiment_dessin.gd` | Bâtiments ennemis dessinés par le code |
+
+Réutilise `VehiculeDessin`, `Silhouette` et `Terrain` du prototype de base.
+
+## Constat d'équilibrage (6 graines, ordres naïfs : avancer en continu)
+
+Le convoi tient entre 570 et 1 020 m et détruit 4 à 8 ennemis, puis tombe à court de
+munitions ou de véhicules. L'objectif est qu'un joueur qui réfléchit (visée, réparation,
+rang, fouille) aille nettement plus loin. À confirmer par essais humains.
+
+## Ouvert
+
+- Lien avec la base : que fait-on du butin et des pièces ? (atelier, DEC-016)
+- Temps réel et absence : combat suspendu ou résolu automatiquement hors connexion (DEC-009, DEC-022).
+- Capacité de chargement par véhicule, fantassins à pied, faune, nuit.
+- Remorquage d'un véhicule immobilisé, équipage blessé et soins.
+- Animations de casse, art définitif, sons de moteur par véhicule.

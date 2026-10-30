@@ -4,7 +4,7 @@ config_version=5
 [application]
 
 config/name="Folie Mécanique (prototype)"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/convoi.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 
 [autoload]
