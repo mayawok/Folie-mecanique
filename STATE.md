@@ -7,7 +7,7 @@ Mis à jour : 2026-10-30 (pivot : mode convoi). Fichier à lire en premier (cour
 - Phase : conception ; **prototype jouable** dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
   **Pivot (DEC-026) : le jeu démarre sur le mode convoi** (`docs/design/CONVOI.md`) ; la base est en pause
   (`scenes/main.tscn` conservée, test `tests/test_sim.gd` toujours vert).
-  Ajouts : balles en vol (trajectoires), embuscade (garnison, camouflage, mines, alerte), bâtiments européens, pas de barres ennemies.
+  Ajouts : balles en vol, embuscade (garnison, camouflage, mines), bâtiments européens.
 - Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
 - Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0 ; simulations 30 jours v2.0 (3 000 parties).
 
@@ -25,7 +25,6 @@ Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1
 ## Décisions ouvertes
 
 Cible d'équilibrage (pénurie, brèche sur 30 jours) ; lien convoi / base ; temps réel et absence.
-
 ## Prochaines étapes
 
 0. **Prochain : jouer le mode convoi**, régler `game/data/combat_proto.json`, puis décider du lien avec la base
