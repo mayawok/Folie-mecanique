@@ -88,6 +88,14 @@ var _toggles := []              # {btn, getter, valeur}
 var _cartes_sig := ""
 var _boite_cartes: HBoxContainer
 var _bande_actions: PanelContainer
+var _bande_on := false          # menu du véhicule : visible seulement après un toucher sur un véhicule
+var _ord: VBoxContainer
+var _ord_t := 0.0               # temps restant d'affichage du bandeau d'ordres
+var _btn_ordres: Button
+var _btn_marche: Button
+var _btn_garage: Button
+var _save_t := 0.0
+const SAVE_PATH := "user://convoi_save.json"
 var _btn_feu: Button
 var _btn_rep: Button
 var _chips := {}
@@ -171,7 +179,11 @@ func _ready() -> void:
 	fx.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	add_child(fx)
 	_construire_interface()
-	_nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1)
+	var sv := _charger_sauvegarde()
+	if sv.is_empty():
+		_nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1)
+	else:
+		_nouvelle_partie(int(sv.graine), sv)
 
 
 class MondeJeuCouleurs:
@@ -383,11 +395,29 @@ func _construire_interface() -> void:
 	var ord := VBoxContainer.new()
 	ord.add_theme_constant_override("separation", 6)
 	ord.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ord.visible = false
+	_ord = ord
 	bb.add_child(ord)
 	_rangee(ord, "Marche", [["Reculer", "recul"], ["Halte", "halte"], ["Avancer", "avancer"]],
 		func(): return m.ordres.marche, func(v): m.ordre_marche(v), 200.0)
 	_rangee(ord, "Visée", [["Libre", "libre"], ["Roues", "roulement"], ["Armes", "armement"], ["Châssis", "chassis"]],
 		func(): return m.ordres.visee, func(v): m.ordre_visee(v), 150.0)
+	var hd := HBoxContainer.new()
+	ord.add_child(hd)
+	_bouton("Demi-tour du convoi", func(): _demi_tour(), hd, 330)
+	_bouton("Fermer", func(): _ord_t = 0.0, hd, 150)
+	_btn_ordres = _bouton("Ordres du convoi", func(): _ord_t = 8.0, self, 300)
+	_btn_ordres.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_btn_ordres.offset_left = -320
+	_btn_ordres.offset_right = -16
+	_btn_ordres.offset_top = -BARRE_H - 140
+	_btn_ordres.offset_bottom = -BARRE_H - 80
+	_btn_marche = _bouton("Avancer", func(): m.ordre_marche("halte" if m.ordres.marche == "avancer" else "avancer"), self, 300)
+	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_btn_marche.offset_left = -320
+	_btn_marche.offset_right = -16
+	_btn_marche.offset_top = -BARRE_H - 76
+	_btn_marche.offset_bottom = -BARRE_H - 12
 	# --- Actions du véhicule sélectionné
 	_bande_actions = _panneau(self)
 	_bande_actions.set_anchors_and_offsets_preset(PRESET_BOTTOM_LEFT)
@@ -404,6 +434,7 @@ func _construire_interface() -> void:
 	_bouton("Abandonner", func(): m.abandonner(selection), ab, 190)
 	_bouton("S'abriter", func(): m.ordre_debarquer(selection), ab, 190)
 	_btn_camo = _bouton("Camoufler", func(): _basculer_camo(), ab, 200)
+	_btn_garage = _bouton("Garer", func(): _basculer_garage(), ab, 170)
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
 	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
@@ -545,9 +576,13 @@ func _construire_interface() -> void:
 
 # --- Partie ----------------------------------------------------------------
 
-func _nouvelle_partie(g: int) -> void:
+func _nouvelle_partie(g: int, sauve := {}) -> void:
 	graine = g
-	m = CombatModele.new(g)
+	if sauve.is_empty():
+		_effacer_sauvegarde()
+		m = CombatModele.new(g)
+	else:
+		m = CombatModele.depuis_sauvegarde(sauve)
 	_rng.seed = g
 	for n in noeuds.values():
 		n.queue_free()
@@ -704,6 +739,55 @@ func _basculer_rep() -> void:
 
 func selectionner(uid: int) -> void:
 	selection = uid
+	_bande_on = true
+
+
+func _demi_tour() -> void:
+	if m.ordre_demi_tour():
+		_ord_t = 0.0
+		terrain.camera_x = m.convoi.back().x
+		_look_x = 0.0
+		for n in noeuds.values():
+			n.queue_free()
+		noeuds.clear()
+
+
+func _basculer_garage() -> void:
+	var v = m.trouver(selection)
+	if v is CombatModele.Veh:
+		if v.garage != 0:
+			m.ordre_sortir(v.uid)
+		else:
+			m.ordre_garer(v.uid)
+
+
+# --- Sauvegarde : reprise après rechargement de la page (iPhone) ---------------------
+
+func _sauver_vue() -> void:
+	if m == null or m.fini:
+		return
+	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(m.sauver()))
+
+
+func _charger_sauvegarde() -> Dictionary:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return {}
+	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	if d is Dictionary and d.has("convoi") and not d.convoi.is_empty() and d.has("graine"):
+		return d
+	return {}
+
+
+func _effacer_sauvegarde() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_sauver_vue()
 
 
 func _input(e: InputEvent) -> void:
@@ -736,6 +820,14 @@ func _rtete() -> float:
 
 func _process(delta: float) -> void:
 	_temps += delta
+	_ord_t = maxf(0.0, _ord_t - delta)
+	_save_t += delta
+	if _save_t >= 10.0:
+		_save_t = 0.0
+		if m.fini:
+			_effacer_sauvegarde()
+		else:
+			_sauver_vue()
 	if not pause and not m.fini:
 		_acc += delta * vitesse_sim
 		var pas := 0
@@ -820,6 +912,7 @@ func _synchroniser() -> void:
 		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
 		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y)
 		n.rotation = -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
+		n.visible = v.garage == 0
 	for b in m.batiments:
 		vus[b.uid] = true
 		var n: BatimentDessin = noeuds.get(b.uid)
@@ -1258,7 +1351,8 @@ func _tap(p: Vector2) -> void:
 		if r.has_point(p):
 			trouve = v.uid
 	ouvert = 0 if trouve == ouvert else trouve
-	if m.trouver(trouve) in m.convoi:
+	_bande_on = m.trouver(trouve) in m.convoi
+	if _bande_on:
 		selection = trouve
 	accept_event()
 
@@ -1458,6 +1552,7 @@ func _demarrer_audio() -> void:
 	var so := get_node_or_null("/root/Son")
 	if so:
 		so.musique("mus_combat")
+		_son("sfx_ui_clic")
 
 
 func _maj_sons() -> void:
@@ -1551,8 +1646,14 @@ func _maj_interface() -> void:
 	for ch in _boite_cartes.get_children():
 		ch.queue_redraw()
 	var sel = m.trouver(selection)
-	_bande_actions.visible = sel is CombatModele.Veh and sel in m.convoi
+	_bande_actions.visible = _bande_on and sel is CombatModele.Veh and sel in m.convoi
+	_ord.visible = _ord_t > 0.0
+	_btn_ordres.visible = _ord_t <= 0.0
+	_btn_marche.text = "Halte" if m.ordres.marche == "avancer" else "Avancer"
 	if _bande_actions.visible:
+		var ab_g = m.abri_garage()
+		_btn_garage.text = "Sortir du garage" if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
+		_btn_garage.disabled = sel.garage == 0 and ab_g == null
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
 	_voile_fin.visible = m.fini

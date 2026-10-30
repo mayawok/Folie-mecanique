@@ -395,7 +395,8 @@
      8,
      20
     ]
-   }
+   },
+   "garage": 2
   },
   "eglise": {
    "nom": "Vieille église",
@@ -495,6 +496,29 @@
    "blindage": 10,
    "tireurs": 0,
    "butin": {}
+  },
+  "hangar": {
+   "nom": "Hangar",
+   "largeur": 16.0,
+   "hauteur": 6.5,
+   "pv": 200,
+   "blindage": 8,
+   "tireurs": 3,
+   "garage": 3,
+   "butin": {
+    "ammo": [
+     12,
+     30
+    ],
+    "fuel_l": [
+     14,
+     34
+    ],
+    "metal": [
+     10,
+     26
+    ]
+   }
   }
  },
  "rencontres": {
@@ -750,6 +774,26 @@
     "niveau_max": 99,
     "poids": 2,
     "camp": "fortifie"
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 4,
+    "poids": 3,
+    "ruine": "hangar"
+   },
+   {
+    "niveau_min": 0,
+    "niveau_max": 99,
+    "poids": 2,
+    "ruine": "grange"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 99,
+    "poids": 2,
+    "batiments": [
+     "hangar"
+    ]
    }
   ],
   "premiere": {
@@ -858,5 +902,10 @@
  ],
  "cycle": {
   "jour_s": 400
+ },
+ "garage": {
+  "pv_s": 2.5,
+  "pv_detruite_s": 1.0,
+  "plafond_detruite": 0.5
  }
 }

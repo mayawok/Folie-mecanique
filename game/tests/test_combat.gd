@@ -307,6 +307,36 @@ func _init() -> void:
 	var n0: String = j2.noms[0]
 	verifier(ms.affecter(j2.uid, 0, b2.uid) and b2.noms[0] == n0 and j2.equipage.size() == 1, "un survivant change de véhicule avec son nom")
 
+	# --- Garage, demi-tour, sauvegarde
+	var mg := CombatModele.new(91)
+	mg._prochain_x = 1.0e9
+	var han := mg.creer_batiment("hangar", mg.x_tete + 10.0)
+	han.statut = "neutralise"
+	mg.batiments.append(han)
+	var jp: CombatModele.Veh = mg.convoi[0]
+	jp.pieces.roulement.pv = 0.0
+	jp.pieces.suspension.pv = 5.0
+	verifier(mg.ordre_garer(jp.uid) and jp.garage == han.uid, "un véhicule rentre dans le hangar")
+	mg.ordre_marche("avancer")
+	_avancer(mg, 2.0)
+	verifier(mg.blocage.find("garage") >= 0, "le convoi ne part pas tant qu'un véhicule est au garage")
+	mg.ordre_marche("halte")
+	_avancer(mg, 40.0)
+	verifier(jp.pieces.roulement.pv > 0.0 and jp.pieces.suspension.pv > 5.0, "le garage répare les pièces (roues %.0f, suspension %.0f)" % [jp.pieces.roulement.pv, jp.pieces.suspension.pv])
+	verifier(mg.ordre_sortir(jp.uid) and jp.garage == 0, "sortie du garage")
+	var xh: float = han.x
+	var xt: float = mg.x_tete
+	verifier(mg.ordre_demi_tour(), "demi-tour accepté")
+	verifier(han.x < mg.x_tete and mg.x_tete > xh - 5.0 and xt != mg.x_tete or han.x != xh, "le monde est retourné autour du convoi (hangar %.0f -> %.0f)" % [xh, han.x])
+	mg.stocks.metal = 33.0
+	jp.noms[0] = "Test T."
+	var sv := mg.sauver()
+	var js: Variant = JSON.parse_string(JSON.stringify(sv))
+	var mr := CombatModele.depuis_sauvegarde(js)
+	verifier(mr.stocks.metal == 33.0 and mr.convoi.size() == mg.convoi.size() and mr.convoi[0].noms[0] == "Test T." and is_equal_approx(mr.x_tete, mg.x_tete), "sauvegarde puis reprise à l'identique (JSON)")
+	_avancer(mr, 20.0)
+	verifier(mr.temps > mg.temps, "la partie reprise continue de tourner")
+
 	# --- Déterminisme
 	var a1 := CombatModele.new(99)
 	var a2 := CombatModele.new(99)

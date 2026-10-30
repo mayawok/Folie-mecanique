@@ -150,3 +150,6 @@ lourd tant que le convoi roule, tirs, impacts, explosions, atelier, radio.
 - Capacité de chargement par véhicule, fantassins à pied, faune, nuit.
 - Remorquage d'un véhicule immobilisé, équipage blessé et soins.
 - Animations de casse, art définitif.
+
+## Menu, ordres, garage, reprise
+Voir DECISIONS.md : menu véhicule au toucher, bouton Ordres du convoi + Demi-tour, hangar/grange (garage), sauvegarde auto, sons synthétisés.

@@ -92,6 +92,12 @@ func _draw() -> void:
 						continue
 					_rect(fx - 0.11, fy - 0.06, fx - 0.07, fy + 0.07, Color("#5F7A5A") * T, W, H)   # volets verts
 					_rect(fx + 0.07, fy - 0.06, fx + 0.11, fy + 0.07, Color("#5F7A5A") * T, W, H)
+		"hangar":   # hangar de tôle : toit plat légèrement incliné, grande porte coulissante
+			_poly([[0.0, 0.34], [0.0, 1.0], [1.0, 1.0], [1.0, 0.28]], Color("#7B8186") * T, W, H)
+			_poly([[0.0, 0.34], [0.0, 0.22], [1.0, 0.16], [1.0, 0.28]], Color("#5A4A44") * T, W, H)
+			_poly([[0.14, 1.0], [0.14, 0.50], [0.86, 0.46], [0.86, 1.0]], Color("#3E3A36") * T, W, H)
+			for gx in [0.30, 0.46, 0.62, 0.78]:
+				draw_line(Vector2(W * gx, H * 0.48), Vector2(W * gx, H), sombre, maxf(1.0, ppm * 0.05))
 		"grange":   # grande grange de pierre, toit en bâtière, grand portail de bois
 			_poly([[0.02, 0.50], [0.02, 1.0], [0.98, 1.0], [0.98, 0.50]], Color("#A8987A") * T, W, H)
 			_poly([[0.0, 0.52], [0.5, 0.0], [1.0, 0.52]] if not ruine else [[0.0, 0.52], [0.25, 0.25], [0.5, 0.40], [1.0, 0.52]], Color("#8E4A36") * T, W, H)
@@ -182,7 +188,7 @@ func _draw() -> void:
 	# Planches clouées aux ouvertures et à la porte
 	if bat.barricade > 0.0:
 		var nb: int = int(ceil(bat.barricade * 3.0))
-		var portes := {"ferme": [0.5, 0.86], "maison": [0.5, 0.88], "grange": [0.5, 0.82], "eglise": [0.81, 0.90]}
+		var portes := {"ferme": [0.5, 0.86], "maison": [0.5, 0.88], "grange": [0.5, 0.82], "hangar": [0.5, 0.80], "eglise": [0.81, 0.90]}
 		var cibles: Array = []
 		for f4 in fen:
 			cibles.append([W * float(f4[0]), H * (1.0 - float(f4[1])), 0.55])

@@ -7,7 +7,8 @@ Mis à jour : 2026-10-30 (pivot : mode convoi). Fichier à lire en premier (cour
 - Phase : conception ; **prototype jouable** dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
   **Pivot (DEC-026) : le jeu démarre sur le mode convoi** (`docs/design/CONVOI.md`) ; la base est en pause
   (`scenes/main.tscn` conservée, test `tests/test_sim.gd` toujours vert).
-  Ajouts : embuscade, relief, carte de 12 secteurs, camps annoncés (factions 1 à 3), nuit et abri, fantassins, voyageurs.
+  Ajouts : embuscade, relief, carte 12 secteurs, camps (factions 1-3), nuit et abri, fantassins, voyageurs, fouille, survivants,
+  garage (hangar/grange), demi-tour, menu au toucher, sauvegarde auto, sons synthétisés.
 - Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
 - Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0 ; simulations 30 jours v2.0 (3 000 parties).
 

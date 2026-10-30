@@ -5,6 +5,7 @@
 extends Node
 
 const DOSSIER := "res://assets/audio/"
+const PREFERER_SYNTH := true
 const OPTIONS := "user://options.cfg"
 const BUS := ["Musique", "Effets", "Voix"]
 const FONDU := 1.5
@@ -55,9 +56,10 @@ func _flux(nom: String) -> AudioStream:
 		return _cache[nom]
 	var f: AudioStream = null
 	# Tolère un dossier « Audio » ou une majuscule au début du nom (envoi depuis GitHub)
-	for dossier in [DOSSIER, "res://assets/Audio/"]:
+	# Sons synthétisés (tools/synth_audio.py) d'abord : WAV simples, lisibles partout. Mettre PREFERER_SYNTH à false pour les mp3.
+	for dossier in ([DOSSIER + "synth/"] if PREFERER_SYNTH else []) + [DOSSIER, "res://assets/Audio/"]:
 		for n in [nom, nom.capitalize().replace(" ", "_"), nom[0].to_upper() + nom.substr(1)]:
-			for ext in ["ogg", "mp3", "wav"]:
+			for ext in (["wav", "ogg", "mp3"] if dossier.ends_with("synth/") else ["ogg", "mp3", "wav"]):
 				var chemin := "%s%s.%s" % [dossier, n, ext]
 				if f == null and ResourceLoader.exists(chemin):
 					f = load(chemin)

@@ -19,6 +19,7 @@ const FENETRES := {
 	"camp_pillard": [[0.1, 0.66], [0.35, 0.66], [0.65, 0.66], [0.9, 0.66]],
 	"camp_fortifie": [[0.08, 0.78], [0.28, 0.78], [0.5, 0.78], [0.72, 0.78], [0.92, 0.78], [0.5, 0.48]],
 	"camp_ami": [],
+	"hangar": [[0.2, 0.5], [0.8, 0.5], [0.5, 0.78]],
 }
 
 static var _data := {}
@@ -94,6 +95,7 @@ class Veh extends RefCounted:
 	var rep_piece := ""           # pièce à réparer (vide = automatique)
 	var x_prev := 0.0             # position au pas précédent (affichage fluide)
 	var camo_voulu := false
+	var garage := 0               # uid du bâtiment où le véhicule est rentré (réparation, à l'abri)
 	var camo_t := 0.0
 	var camoufle := false
 	var x_cible := 0.0
@@ -175,6 +177,8 @@ class Bat extends RefCounted:
 	var butin_pris := false
 	var ami := false              # camp allié : ne tire pas, ne se cible pas
 	var faction := 0
+	var garage: Array = []        # uid des véhicules rentrés
+	var garage_max := 0
 	var barricade := 0.0          # 0..1 : planches clouées aux ouvertures
 	var barricade_cible := false
 	var blindage_base := 0.0
@@ -341,6 +345,7 @@ func creer_batiment(type: String, x: float) -> Bat:
 	b.blindage = float(d.blindage)
 	b.arme_fixe = d.get("arme", "")
 	b.blindage_base = b.blindage
+	b.garage_max = int(d.get("garage", 0))
 	for i in int(d.tireurs):
 		b.tireurs.append({"pv": 12.0, "cd": rng.randf_range(0.5, 1.5), "slot": i})
 	var res := {}
@@ -547,6 +552,203 @@ func affecter(de_uid: int, idx: int, vers_uid: int) -> bool:
 	return true
 
 
+# --- Garage (hangar, grange) : à l'abri et réparé pendant la nuit -----------------
+
+func abri_garage():
+	var meilleur = null
+	var g_min := 45.0
+	for b in batiments:
+		if b.garage_max > 0 and b.statut == "neutralise" and b.pv > 0.0 and b.garage.size() < b.garage_max:
+			var g: float = ecart(x_tete - 1.0, 1.0, b.x, b.longueur)
+			if g < g_min:
+				g_min = g
+				meilleur = b
+	return meilleur
+
+
+func ordre_garer(uid: int) -> bool:
+	var v = trouver(uid)
+	if not (v is Veh) or not convoi.has(v) or v.garage != 0:
+		return false
+	var b = abri_garage()
+	if b == null:
+		log_("Aucun hangar ni grange à portée avec une place libre.", "alerte")
+		return false
+	v.garage = b.uid
+	v.camo_voulu = false
+	v.camoufle = false
+	b.garage.append(uid)
+	log_("%s rentre dans %s : à l'abri et en réparation." % [v.nom, b.nom], "ok")
+	evt({"t": "garage", "uid": b.uid})
+	return true
+
+
+func ordre_sortir(uid: int) -> bool:
+	var v = trouver(uid)
+	if not (v is Veh) or v.garage == 0:
+		return false
+	var b = trouver(v.garage)
+	if b is Bat:
+		b.garage.erase(uid)
+	v.garage = 0
+	log_("%s sort du garage." % v.nom, "info")
+	return true
+
+
+func _garage(dt: float) -> void:
+	var G: Dictionary = donnees().garage
+	for b in batiments:
+		if b.garage.is_empty():
+			continue
+		for uid in b.garage.duplicate():
+			var v = trouver(uid)
+			if not (v is Veh) or not convoi.has(v):
+				b.garage.erase(uid)
+				continue
+			if b.pv <= 0.0:   # le bâtiment s'effondre : les véhicules en sortent abîmés
+				v.garage = 0
+				v.pieces.chassis.pv *= 0.6
+				b.garage.erase(uid)
+				continue
+			var complet := true
+			for pid in v.pieces:
+				var pc: Dictionary = v.pieces[pid]
+				if pc.pv <= 0.0:
+					pc.pv = minf(pc.max * G.plafond_detruite, pc.pv + G.pv_detruite_s * dt + 0.001)
+					complet = false
+				elif pc.pv < pc.max:
+					pc.pv = minf(pc.max, pc.pv + G.pv_s * dt)
+					complet = false
+				elif pc.pv < pc.max * G.plafond_detruite:
+					complet = false
+			if complet and not v.get_meta("repare_dit", false):
+				v.set_meta("repare_dit", true)
+				log_("%s est remis en état." % v.nom, "ok")
+
+
+# --- Demi-tour : le convoi repart dans l'autre sens ---------------------------------
+
+func ordre_demi_tour() -> bool:
+	if menace() or not transits.is_empty() or monde.en_transit() and false:
+		log_("Demi-tour impossible : des ennemis sont trop proches.", "alerte")
+		return false
+	for v in convoi:
+		if v.garage != 0:
+			log_("Sortez les véhicules du garage avant le demi-tour.", "alerte")
+			return false
+	var arriere := INF
+	for v in convoi:
+		arriere = minf(arriere, v.x)
+	var c: float = (arriere + x_tete) * 0.5
+	for e in ennemis + epaves:
+		e.x = 2.0 * c - (e.x + e.longueur)
+		e.x_prev = e.x
+	for b in batiments:
+		b.x = 2.0 * c - (b.x + b.longueur)
+	for mn in mines:
+		mn.x = 2.0 * c - mn.x
+	for p in monde.pietons:
+		p.x = 2.0 * c - (p.x + p.longueur)
+		p.x_prev = p.x
+		p.dir = -p.dir
+	for pn in monde.pnj:
+		pn.x = 2.0 * c - pn.x
+	convoi.reverse()
+	x_tete = 2.0 * c - arriere
+	_replacer(true)
+	x_tete_prev = x_tete
+	for v in convoi:
+		v.x_prev = v.x
+	ennemis = ennemis.filter(func(e): return e.x > x_tete - 30.0)   # ceux qu'on laisse derrière ne reviennent pas
+	projectiles.clear()
+	fouille_demandee = 0
+	fouille_en_cours = {}
+	_prochain_x = x_tete + 150.0
+	monde.x_entree = x_tete
+	ordres.marche = "halte"
+	log_("Demi-tour : le convoi repart dans l'autre sens.", "info")
+	evt({"t": "demitour"})
+	return true
+
+
+# --- Sauvegarde : le convoi et ses réserves (pas les rencontres autour) -----------------
+
+func sauver() -> Dictionary:
+	var vehs := []
+	for v in convoi:
+		_aligner_noms(v)
+		var eq: Array = v.equipage.duplicate()
+		var nm: Array = v.noms.duplicate()
+		for b in batiments:
+			for g in b.garnison:
+				if g.veh == v.uid:
+					eq.append(g.pv)
+					nm.append(g.get("nom", "Survivant"))
+		for t in transits:
+			if t.veh == v.uid:
+				eq.append_array(t.pvs)
+				nm.append_array(t.noms)
+		var pcs := {}
+		for pid in v.pieces:
+			pcs[pid] = v.pieces[pid].pv
+		vehs.append({"type": v.type, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
+	var w := monde
+	return {"v": 1, "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
+		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
+		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs,
+		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
+
+
+static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
+	var m := CombatModele.new(int(d.graine))
+	m.convoi.clear()
+	m.temps = float(d.temps)
+	m.x_tete = float(d.x_tete)
+	for k in d.stocks:
+		m.stocks[k] = float(d.stocks[k])
+	m.composants = d.composants
+	m.distance_max = float(d.distance_max)
+	m.ennemis_detruits = int(d.tues)
+	m._n_rencontres = int(d.n_rencontres)
+	m._n_noms = int(d.n_noms)
+	m._lore_dit = bool(d.lore)
+	m.reserve_survivants = int(d.reserve)
+	for e in d.convoi:
+		var v := m.creer_vehicule(e.type, "joueur", 0.0)
+		for pid in e.pieces:
+			if v.pieces.has(pid):
+				v.pieces[pid].pv = float(e.pieces[pid])
+		v.equipage = []
+		for pv in e.equipage:
+			v.equipage.append(float(pv))
+		v.noms = e.noms.duplicate()
+		v.statut = e.statut
+		v.tir = bool(e.tir)
+		m.convoi.append(v)
+	m.ordres.marche = "halte"
+	m._replacer(true)
+	m.x_tete_prev = m.x_tete
+	for v in m.convoi:
+		v.x_prev = v.x
+	m._prochain_x = m.x_tete + 80.0
+	m.rng.state = int(d.rng)
+	var w: Dictionary = d.monde
+	m.monde.secteur = int(w.secteur)
+	m.monde.x_entree = float(w.x_entree)
+	m.monde.heure = float(w.heure)
+	m.monde.jour = int(w.jour)
+	m.monde.trajet = {}
+	if not w.trajet.is_empty():
+		m.monde.trajet = {"dest": int(w.trajet.dest), "reste": float(w.trajet.reste), "total": float(w.trajet.total)}
+		m._prochain_x = INF
+	m.monde.quete = {}
+	if not w.quete.is_empty():
+		m.monde.quete = {"titre": w.quete.titre, "abattre": int(w.quete.abattre), "depart": int(w.quete.depart), "recompense": w.quete.recompense}
+	m.journal.clear()
+	m.log_("Partie reprise.", "ok")
+	return m
+
+
 func monter(uid: int) -> void:
 	_deplacer_rang(uid, -1)
 
@@ -609,6 +811,7 @@ func avancer(dt := DT) -> void:
 	_mines(dt)
 	_transits(dt)
 	monde.avancer(dt)
+	_garage(dt)
 	_camouflage(dt)
 	_reparer(dt)
 	_fouiller(dt)
@@ -643,17 +846,21 @@ func _marche(dt: float) -> void:
 		var immobilise := false
 		var sans_equipage := false
 		var cache := false
+		var au_garage := false
 		for v in actifs:
 			vmax = minf(vmax, v.vitesse())
 			immobilise = immobilise or not v.mobile()
 			sans_equipage = sans_equipage or v.equipage_vivant() == 0
 			cache = cache or v.camo_voulu
+			au_garage = au_garage or v.garage != 0
 		if not transits.is_empty():
 			blocage = "Équipages en déplacement."
 		elif sans_equipage:
 			blocage = "Un véhicule n'a plus d'équipage : rembarquez-le avant de repartir."
 		elif not monde.dialogue.is_empty():
 			blocage = "Un voyageur vous parle."
+		elif au_garage:
+			blocage = "Un véhicule est au garage : sortez-le avant de repartir."
 		elif cache:
 			blocage = "Un véhicule est camouflé : découvrez-le avant de repartir."
 		elif immobilise:
@@ -698,7 +905,7 @@ func _ia_ennemis(dt: float) -> void:
 # --- Tir -------------------------------------------------------------------
 
 func _armes_vehicule(v: Veh, dt: float) -> void:
-	if v.equipage_vivant() == 0 or v.camoufle:
+	if v.equipage_vivant() == 0 or v.camoufle or v.garage != 0:
 		return
 	var D := donnees()
 	for a in v.armes:
@@ -754,7 +961,7 @@ func _choisir_cible(att, w: Dictionary):
 		var rang := 0
 		for v in convoi:
 			if v.actif():
-				if not v.camoufle and ecart(att.x, att.longueur, v.x, v.longueur) <= w.portee:
+				if not v.camoufle and v.garage == 0 and ecart(att.x, att.longueur, v.x, v.longueur) <= w.portee:
 					cands.append(v)
 					poids.append(1.0 / (1.0 + rang))
 				rang += 1
