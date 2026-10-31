@@ -1,13 +1,26 @@
 # Modèle du mode convoi : un convoi contrôlable avance de profil, affronte des ennemis
 class_name CombatModele
-extends "res://scripts/combat/modele_terrain.gd"
+extends "res://scripts/combat/modele_atelier.gd"
 
 
 # --- État de la partie -----------------------------------------------------
-func _init(g := 1) -> void:
+func _init(g := 1, options := {}) -> void:
 	graine = g
 	rng.seed = g
 	var D := donnees()
+	if options.get("ouverture", false):
+		# Début guidé (DEC-035) : pas de véhicule, une caisse de pièces et un survivant
+		ouverture = true
+		en_kit = true
+		var O: Dictionary = D.ouverture
+		stocks = O.stocks.duplicate()
+		reserve_survivants = int(O.survivants)
+		for id in O.kit:
+			pieces_stock.append({"piece": id, "etat": 1.0})
+		monde = MondeJeu.new(self)
+		_prochain_x = 120.0
+		log_("Une caisse de pièces au bord de la route. Assemblez la moto.", "info")
+		return
 	stocks = D.stocks_depart.duplicate()
 	for t in D.depart:
 		convoi.append(creer_vehicule(t, "joueur", 0.0))
@@ -212,9 +225,9 @@ func sauver() -> Dictionary:
 		var pcs := {}
 		for pid in v.pieces:
 			pcs[pid] = v.pieces[pid].pv
-		vehs.append({"type": v.type, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
+		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
 	var w := monde
-	return {"v": 1, "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
+	return {"v": 2, "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs,
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
@@ -233,8 +246,13 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m._n_noms = int(d.n_noms)
 	m._lore_dit = bool(d.lore)
 	m.reserve_survivants = int(d.reserve)
+	m.ouverture = bool(d.get("ouverture", false))
+	m.etape_ouverture = int(d.get("etape_ouverture", 0))
+	m.pieces_stock = d.get("pieces_stock", []).duplicate(true)
 	for e in d.convoi:
-		var v := m.creer_vehicule(e.type, "joueur", 0.0)
+		# v2 : véhicule rebâti depuis son assemblage ; v1 (ancienne sauvegarde) : depuis son type
+		var asm: Variant = e.get("assemblage", {})
+		var v := m.creer_depuis_assemblage(asm, "joueur", 0.0) if asm is Dictionary and not asm.is_empty() else m.creer_vehicule(e.type, "joueur", 0.0)
 		for pid in e.pieces:
 			if v.pieces.has(pid):
 				v.pieces[pid].pv = float(e.pieces[pid])
@@ -304,7 +322,7 @@ func abandonner(uid: int) -> void:
 
 # --- Pas de simulation -----------------------------------------------------
 func avancer(dt := DT) -> void:
-	if fini:
+	if fini or en_kit:
 		return
 	temps += dt
 	x_tete_prev = x_tete
@@ -409,8 +427,11 @@ func _ia_ennemis(dt: float) -> void:
 func _rencontres() -> void:
 	if x_tete + 120.0 < _prochain_x or ennemis.size() >= 5 or monde.en_transit():
 		return
+	if calme_ouverture() and not ouverture_en_cours():
+		return   # la dernière trouvaille (l'arme) n'est pas encore ramassée
 	var R: Dictionary = donnees().rencontres
 	_n_rencontres += 1
+	var scripte := choix_ouverture()
 	var r := RandomNumberGenerator.new()
 	r.seed = graine * 7919 + _n_rencontres
 	var niveau: int = monde.niveau_a(_prochain_x)
@@ -427,8 +448,10 @@ func _rencontres() -> void:
 		if tirage <= 0.0:
 			choix = e
 			break
-	if _n_rencontres == 1 and R.has("premiere"):
+	if _n_rencontres == 1 and R.has("premiere") and not ouverture:
 		choix = R.premiere
+	if not scripte.is_empty():
+		choix = scripte
 	var x := x_tete + 120.0
 	var debut := x
 	for t in choix.get("vehicules", []):
@@ -463,13 +486,21 @@ func _rencontres() -> void:
 		for t in b.tireurs:
 			t.pv = 0.0
 		b.butin.ressources["survivants"] = 1 if (choix.get("survivant", false) or r.randf() < 0.4) else 0
+		if choix.has("butin_fixe"):   # trouvaille prévue de l'ouverture : rien d'autre
+			var bf: Dictionary = choix.butin_fixe
+			for k in ["ammo", "fuel_l", "metal", "survivants"]:
+				b.butin.ressources[k] = bf.get(k, 0)
+			b.butin["pieces"] = bf.get("pieces", []).duplicate()
+		if choix.has("annonce"):
+			log_(choix.annonce, "info")
 		batiments.append(b)
 		x = b.x + b.longueur
 	x = monde.generer(choix, x, r)
 	var hostile := not ennemis.is_empty() or batiments.any(func(b): return b.actif()) or monde.vivants() > 0
 	evt({"t": "contact", "ennemi": hostile})
 	log_("%s à %d m." % ["Contact" if hostile else "Du nouveau", int(debut - x_tete)], "info")
-	_prochain_x = x + r.randf_range(R.intervalle[0], R.intervalle[1])
+	var iv: Array = ouv().intervalle if ouverture_en_cours() else R.intervalle
+	_prochain_x = x + r.randf_range(iv[0], iv[1])
 
 func _nettoyer() -> void:
 	var limite := x_tete - 260.0

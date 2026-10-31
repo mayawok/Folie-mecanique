@@ -7,6 +7,8 @@ class_name Assemblage
 extends RefCounted
 
 const FAMILLES_PV := ["chassis", "roulement", "suspension", "moteur", "cabine"]
+const NOMS_FAMILLES := {"chassis": "un châssis", "roulement": "des roues", "suspension": "une suspension", "moteur": "un moteur",
+	"cabine": "un siège", "arme": "une arme", "attelage": "un attelage"}
 
 static var _pieces := {}
 static var _assemblages := {}
@@ -92,7 +94,10 @@ static func valider(a: Dictionary) -> Array:
 			err.append({"code": "roulement_haut", "texte": "%s doit toucher le sol" % p.fiche.nom})
 		if fam == "arme" and pos.y + e.y < gh / 2:
 			err.append({"code": "arme_basse", "texte": "%s doit être en haut" % p.fiche.nom})
-		var couche: String = R.couches.get(fam, fam)
+		var couche: String = p.fiche.get("couche", R.couches.get(fam, fam))
+		for req in p.fiche.get("requiert", []):
+			if _famille(a, req).is_empty():
+				err.append({"code": "requiert", "texte": "%s demande : %s" % [p.fiche.nom, NOMS_FAMILLES.get(req, req)]})
 		if not occupe.has(couche):
 			occupe[couche] = {}
 		var chevauche := ""
@@ -151,6 +156,9 @@ static func statistiques(a: Dictionary) -> Dictionary:
 				p.pv.cabine = p.pv.get("cabine", 0.0) + float(f.pv)
 			"arme":
 				p.armes.append(f.arme)
+			_:
+				if f.famille in R.get("pv_chassis", []):
+					p.pv.chassis += float(f.pv)
 	for id in FAMILLES_PV:
 		if not p.pv.has(id):
 			p.pv[id] = 1.0
@@ -175,4 +183,44 @@ static func demonter(a: Dictionary, etats := {}) -> Dictionary:
 	for p in a.get("pieces", []):
 		var fam: String = piece(p.piece).get("famille", "")
 		res.pieces.append({"piece": p.piece, "etat": float(etats.get(fam, 1.0))})
+	return res
+
+
+# Liste des identifiants de pièces d'un assemblage, châssis compris (avec répétitions).
+static func ids(a: Dictionary) -> Array:
+	var res := [] if a.get("chassis", "") == "" else [a.chassis]
+	for p in a.get("pieces", []):
+		res.append(p.piece)
+	return res
+
+
+static func compter(liste: Array) -> Dictionary:
+	var c := {}
+	for id in liste:
+		c[id] = int(c.get(id, 0)) + 1
+	return c
+
+
+# Apparence (dessin) d'un assemblage : première règle dont toutes les pièces sont présentes.
+# En attendant le dessin pièce par pièce (G4), un assemblage inconnu prend le dessin le plus proche.
+static func apparence(a: Dictionary) -> String:
+	var c := compter(ids(a))
+	for r in catalogue().regles.get("apparences", []):
+		if r.requiert.all(func(id): return c.has(id)):
+			return r.type
+	for t in historiques():
+		if historiques()[t].chassis == a.get("chassis", ""):
+			return t
+	return ""
+
+
+# Pièces d'un plan qui manquent (multiensemble) par rapport à une liste de pièces disponibles.
+static func manquantes(plan: Dictionary, dispo: Array) -> Array:
+	var c := compter(dispo)
+	var res := []
+	for id in ids(plan):
+		if int(c.get(id, 0)) > 0:
+			c[id] -= 1
+		else:
+			res.append(id)
 	return res

@@ -1,13 +1,14 @@
 # Mode convoi — Folie Mécanique
 
 Statut : prototype jouable (DEC-026). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
-Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json`, véhicules `game/data/pieces.json` ; tests : `game/tests/test_combat.gd`, `test_assemblage.gd`.
+Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json`, véhicules `game/data/pieces.json` ; tests : `game/tests/test_combat.gd`, `test_assemblage.gd`, `test_ouverture.gd`, `capture_atelier.gd`.
 
 ## Principe
 
 Le cœur du jeu est le convoi visible et contrôlable qui avance de profil et combat.
 La base est mise en pause (code conservé, plus affichée au lancement). Le jeu démarre
-directement sur une **expédition permanente**. On part **très léger : une Jeep et deux survivants**.
+directement sur une **expédition permanente**. On part **de rien : une caisse de pièces et un survivant** ;
+le premier geste est d'assembler une moto sur la grille (DEC-035).
 Le convoi avance, rencontre des ruines à fouiller, des véhicules abandonnés à réparer et à récupérer,
 et des ennemis (véhicules, bâtiments) dont on prend le butin. Le danger augmente avec la distance.
 
@@ -55,8 +56,13 @@ Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'a
 
 ## Départ, trouvailles et survivants
 
-- Départ : Willys MB, 2 survivants. La première rencontre est toujours une ruine à fouiller et un
-  véhicule abandonné (BMW) : elle montre la boucle fouiller, réparer, récupérer.
+- **Ouverture guidée (DEC-035)** : une caisse de pièces au bord de la route. L'atelier sur grille s'ouvre :
+  le joueur glisse cadre, roues, fourche, moteur et selle à leur place → **moto BMW R75**, un pilote, 4 L d'essence,
+  pas d'arme. Puis, dans l'ordre, sans aucun ennemi : **grange** (attelage, panier, roue de side-car + un survivant)
+  → le convoi s'arrête, bouton « Assembler » → **side-car** au bord de la route ; **maison** (20 L d'essence) ;
+  **bunker** (mitrailleuse, 80 munitions, métal) → « Assembler » monte l'arme. Les ennemis et les rôdeurs de nuit
+  n'arrivent qu'une fois une arme trouvée. Données : bloc `ouverture` de `combat_proto.json`.
+- Ancien départ (Willys MB, 2 survivants, ruine + BMW) : conservé pour les tests (`CombatModele.new(graine)`).
 - Un véhicule ennemi **neutralisé** (équipage hors de combat) est réparable et récupérable ; un véhicule
   dont le châssis est détruit n'est que démontable.
 - Un véhicule récupéré rejoint le convoi avec 1 survivant ; les ruines peuvent livrer des survivants
@@ -160,6 +166,7 @@ Pour un changement, lire seulement la couche concernée.
 | `modele_base.gd` | Constantes, entités `Veh` et `Bat`, état de la partie, création |
 | `modele_tir.gd` | Tir, projectiles, dégâts, destruction, réparation |
 | `modele_terrain.gd` | Embuscade (garnison, mines, camouflage), garage, fouille |
+| `modele_atelier.gd` | Atelier (assembler, plans possibles) et ouverture guidée (trouvailles dans l'ordre, calme) |
 | `combat_modele.gd` | `CombatModele` : ordres, survivants, pas de simulation, rencontres, demi-tour, sauvegarde |
 | `monde.gd` | Carte, horloge et nuit, fantassins et animaux, camps, voyageurs |
 | `vue_base.gd` | Constantes et état de la vue, petites classes d'interface (cartes, carte du monde), outils |
@@ -168,6 +175,7 @@ Pour un changement, lire seulement la couche concernée.
 | `convoi_vue.gd` | `ConvoiVue` : démarrage, boucle, caméra, synchronisation, toucher |
 | `batiment_dessin.gd` | Bâtiments dessinés par le code |
 | `../vehicules/assemblage.gd` | Véhicules en pièces, statistiques calculées (`GRILLE.md`) |
+| `../vehicules/atelier_grille.gd` | Écran d'atelier : grille, emplacements en pointillés, glisser-déposer |
 
 Réutilise `VehiculeDessin`, `Silhouette` et `Terrain`. Prochains modules prévus : `modele_meteo.gd` (tempête), mines dans
 `modele_terrain.gd`.

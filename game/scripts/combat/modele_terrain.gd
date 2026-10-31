@@ -443,6 +443,15 @@ func _recolter(c) -> void:
 		else:
 			stocks[k] = stocks.get(k, 0.0) + res[k]
 			morceaux.append("+%d %s" % [int(res[k]), noms.get(k, k)])
+	# Pièces de véhicule (grille) : elles vont en réserve, prêtes à être assemblées
+	for pid in c.butin.get("pieces", []):
+		pieces_stock.append({"piece": pid, "etat": 1.0})
+		morceaux.append(Assemblage.piece(pid).get("nom", pid))
+	if not c.butin.get("pieces", []).is_empty():
+		evt({"t": "pieces"})
+		if ouverture:   # au bord de la route : on s'arrête pour assembler
+			ordres.marche = "halte"
+			log_("De quoi bricoler ! Touchez « Assembler ».", "ok")
 	# Les pièces ne se prennent que sur les épaves détruites ; un véhicule entier se répare
 	var comps: Array = c.butin.composants if (c is Bat or c.statut == "epave") else []
 	for comp in comps:

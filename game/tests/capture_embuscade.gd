@@ -26,7 +26,7 @@ func _process(_d: float) -> bool:
 	frame += 1
 	var m = vue.m
 	if frame == 3:
-		vue._nouvelle_partie(11)
+		vue._nouvelle_partie(11, {}, false)
 		m = vue.m
 		m._prochain_x = 1.0e9
 		m.batiments.clear()

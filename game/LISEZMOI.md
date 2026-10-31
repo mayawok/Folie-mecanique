@@ -2,8 +2,9 @@
 
 ## Mode convoi (lancement par défaut, DEC-026)
 
-Une Jeep et deux survivants avancent de profil dans le désert, affronte des ennemis (véhicules,
-bâtiments) et récupère leur butin. Appuyer sur **Avancer** pour partir. Le convoi tire seul :
+La partie commence par une caisse de pièces : glisser chaque pièce à sa place sur la grille pour assembler
+une moto. On trouve ensuite de quoi en faire un side-car (bouton **Assembler**, convoi arrêté), de l'essence,
+une arme, puis viennent les ennemis (véhicules, bâtiments) dont on récupère le butin. Appuyer sur **Avancer** pour partir. Le convoi tire seul :
 on donne des **ordres** (marche, cible, visée sur roues/armes/châssis, fouille) et, par véhicule,
 cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres restent possibles.
 Toucher un véhicule dans la scène affiche ses pièces cassées : toucher une icône envoie un mécanicien ;

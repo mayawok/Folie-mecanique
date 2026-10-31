@@ -26,6 +26,8 @@ var _amb_nom := ""
 var _t_nuit := 10.0
 var _btn_fouille: Button
 var _btn_surv: Button
+var _btn_atelier: Button
+var _atelier: AtelierGrille   # atelier sur grille ouvert (DEC-035)
 var _voile_surv: Control
 var _liste_surv: VBoxContainer
 var _pied_surv: VBoxContainer

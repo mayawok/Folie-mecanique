@@ -16,7 +16,33 @@
    "moteur": "caisse",
    "cabine": "caisse",
    "arme": "tourelle"
-  }
+  },
+  "apparences": [
+   {
+    "type": "bmw_r75",
+    "requiert": [
+     "cadre_r75",
+     "panier_r75",
+     "arme_mitrailleuse"
+    ]
+   },
+   {
+    "type": "side_bmw",
+    "requiert": [
+     "cadre_r75",
+     "panier_r75"
+    ]
+   },
+   {
+    "type": "moto_bmw",
+    "requiert": [
+     "cadre_r75"
+    ]
+   }
+  ],
+  "pv_chassis": [
+   "attelage"
+  ]
  },
  "pieces": {
   "chassis_willys_mb": {
@@ -92,71 +118,13 @@
     3,
     1
    ],
-   "metal": 1
-  },
-  "chassis_bmw_r75": {
-   "famille": "chassis",
-   "nom": "Châssis BMW R75 side-car",
-   "grille": [
-    10,
-    6
-   ],
-   "poids_kg": 223,
-   "pv": 40,
-   "blindage": 1,
-   "reservoir": 8,
-   "metal": 1
-  },
-  "roulement_bmw_r75": {
-   "famille": "roulement",
-   "nom": "Roues BMW R75 side-car",
-   "type": "roues",
-   "vitesse_max": 7.5,
-   "charge_kg": 483,
-   "poids_kg": 34,
-   "pv": 28,
-   "emprise": [
-    9,
-    2
-   ],
-   "metal": 1
-  },
-  "suspension_bmw_r75": {
-   "famille": "suspension",
-   "nom": "Suspension BMW R75 side-car",
-   "poids_kg": 21,
-   "pv": 20,
-   "emprise": [
-    5,
-    1
-   ],
-   "metal": 1
-  },
-  "moteur_bmw_r75": {
-   "famille": "moteur",
-   "nom": "BMW bicylindre 750 cm³",
-   "puissance_ch": 26,
-   "conso": 0.8,
-   "poids_kg": 60,
-   "pv": 28,
-   "emprise": [
-    2,
-    2
-   ],
-   "metal": 1
-  },
-  "cabine_bmw_r75": {
-   "famille": "cabine",
-   "nom": "Cabine BMW R75 side-car",
-   "sieges": 2,
-   "ouvert": true,
-   "poids_kg": 42,
-   "pv": 18,
-   "emprise": [
-    4,
-    2
-   ],
-   "metal": 1
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "armes": [
+     0
+    ]
+   }
   },
   "chassis_citroen_traction": {
    "famille": "chassis",
@@ -709,6 +677,196 @@
     2
    ],
    "metal": 8
+  },
+  "cadre_r75": {
+   "famille": "chassis",
+   "nom": "Cadre de BMW R75",
+   "grille": [
+    10,
+    6
+   ],
+   "poids_kg": 140,
+   "pv": 32,
+   "blindage": 1,
+   "reservoir": 8,
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     2,
+     4,
+     8,
+     9
+    ]
+   }
+  },
+  "roue_ar_r75": {
+   "famille": "roulement",
+   "nom": "Roue arrière",
+   "type": "roues",
+   "vitesse_max": 8.5,
+   "charge_kg": 260,
+   "poids_kg": 12,
+   "pv": 10,
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "roues": [
+     0
+    ]
+   },
+   "emprise": [
+    4,
+    3
+   ]
+  },
+  "roue_av_r75": {
+   "famille": "roulement",
+   "nom": "Roue avant",
+   "type": "roues",
+   "vitesse_max": 8.5,
+   "charge_kg": 260,
+   "poids_kg": 12,
+   "pv": 9,
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "roues": [
+     1
+    ]
+   },
+   "emprise": [
+    3,
+    3
+   ]
+  },
+  "fourche_r75": {
+   "famille": "suspension",
+   "nom": "Fourche et guidon",
+   "poids_kg": 15,
+   "pv": 20,
+   "metal": 0,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     5,
+     6,
+     7
+    ]
+   },
+   "emprise": [
+    4,
+    4
+   ]
+  },
+  "moteur_r75": {
+   "famille": "moteur",
+   "nom": "Moteur bicylindre 750 cm³",
+   "puissance_ch": 26,
+   "conso": 0.8,
+   "poids_kg": 60,
+   "pv": 28,
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     1
+    ]
+   },
+   "emprise": [
+    3,
+    2
+   ]
+  },
+  "selle_r75": {
+   "famille": "cabine",
+   "nom": "Selle",
+   "sieges": 1,
+   "ouvert": true,
+   "poids_kg": 8,
+   "pv": 8,
+   "metal": 0,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     3
+    ],
+    "equipage": [
+     0
+    ]
+   },
+   "emprise": [
+    2,
+    1
+   ]
+  },
+  "attelage_r75": {
+   "famille": "attelage",
+   "nom": "Attelage de side-car",
+   "couche": "attelage",
+   "poids_kg": 25,
+   "pv": 8,
+   "metal": 0,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     10
+    ]
+   },
+   "emprise": [
+    4,
+    1
+   ]
+  },
+  "panier_r75": {
+   "famille": "cabine",
+   "nom": "Panier de side-car",
+   "couche": "side",
+   "requiert": [
+    "attelage"
+   ],
+   "sieges": 1,
+   "ouvert": true,
+   "poids_kg": 70,
+   "pv": 10,
+   "metal": 1,
+   "dessin": {
+    "ref": "bmw_r75",
+    "formes": [
+     0
+    ],
+    "equipage": [
+     1
+    ]
+   },
+   "emprise": [
+    9,
+    3
+   ]
+  },
+  "roue_side_r75": {
+   "famille": "roulement",
+   "nom": "Roue du panier",
+   "couche": "side_train",
+   "requiert": [
+    "attelage"
+   ],
+   "type": "roues",
+   "vitesse_max": 7.5,
+   "charge_kg": 200,
+   "poids_kg": 12,
+   "pv": 9,
+   "metal": 0,
+   "dessin": {
+    "ref": "bmw_r75",
+    "roues_fond": [
+     0
+    ]
+   },
+   "emprise": [
+    3,
+    3
+   ]
   }
  }
 }

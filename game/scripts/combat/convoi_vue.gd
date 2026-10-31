@@ -125,6 +125,8 @@ func _synchroniser() -> void:
 			n.sol = Terrain.bosses
 			couche.add_child(n)
 			noeuds[v.uid] = n
+		elif n.type != v.type:   # véhicule transformé à l'atelier (moto -> side-car)
+			n.configurer(v.type)
 		if absf(n.ppm - ppm) > 0.01 and not n.D.is_empty():
 			n.ppm = ppm
 			n.size = Vector2(n.D.longueur, n.D.hauteur) * ppm

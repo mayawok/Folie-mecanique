@@ -14,13 +14,13 @@ func _initialize() -> void:
 func _process(_d: float) -> bool:
 	frame += 1
 	if frame == 3:
-		vue._nouvelle_partie(7)
+		vue._nouvelle_partie(7, {}, false)
 		vue.m.stocks.fuel_l = 1.0e6
 		vue.m.stocks.ammo = 1.0e6
 		vue.m.ordre_marche("avancer")
 		vue.vitesse_sim = 3
 	if frame > 3 and vue.m.fini:
-		vue._nouvelle_partie(frame)
+		vue._nouvelle_partie(frame, {}, false)
 		vue.m.stocks.fuel_l = 1.0e6
 		vue.m.stocks.ammo = 1.0e6
 		vue.m.ordre_marche("avancer")

@@ -51,12 +51,18 @@ static func existe(t: String) -> bool:
 
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
-	configurer(type)
+	if D.is_empty():
+		configurer(type)
 
 
 func configurer(t: String) -> void:
 	type = t
-	D = donnees().vehicules[t]
+	configurer_d(donnees().vehicules[t])
+
+
+# Dessin à partir d'une description directe (atelier : une pièce seule, découpée dans un véhicule).
+func configurer_d(d: Dictionary) -> void:
+	D = d
 	var teintes: Dictionary = donnees().teintes
 	_teinte = Color(teintes.pillards if ennemi else teintes[D.teinte])
 	custom_minimum_size = Vector2(D.longueur, D.hauteur) * ppm

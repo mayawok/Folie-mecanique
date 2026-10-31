@@ -20,6 +20,8 @@ func _construire_interface() -> void:
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
+	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), hb, 190)
+	_btn_atelier.visible = false
 	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 170)
 	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 130)
@@ -249,11 +251,14 @@ func _construire_interface() -> void:
 
 
 # --- Partie ----------------------------------------------------------------
-func _nouvelle_partie(g: int, sauve := {}) -> void:
+func _nouvelle_partie(g: int, sauve := {}, ouverture := true) -> void:
 	graine = g
+	if _atelier != null:
+		_atelier.queue_free()
+		_atelier = null
 	if sauve.is_empty():
 		_effacer_sauvegarde()
-		m = CombatModele.new(g)
+		m = CombatModele.new(g, {"ouverture": ouverture})   # début guidé : moto à assembler (DEC-035)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
 	_rng.seed = g
@@ -272,10 +277,30 @@ func _nouvelle_partie(g: int, sauve := {}) -> void:
 	_acc = 0.0
 	pause = false
 	_n_journal = -1
-	selection = m.convoi[0].uid
+	selection = m.convoi[0].uid if not m.convoi.is_empty() else 0
 	_voile_fin.visible = false
-	terrain.camera_x = m.convoi.back().x
+	terrain.camera_x = m.convoi.back().x if not m.convoi.is_empty() else 0.0
 	ppm = 34.0
+	if m.en_kit:
+		_ouvrir_atelier()
+
+# Atelier sur grille : premier assemblage, puis transformations au bord de la route (DEC-035)
+func _ouvrir_atelier() -> void:
+	var at: Dictionary = m.atelier_possible()
+	if at.is_empty() or _atelier != null:
+		return
+	_demarrer_audio()
+	var pause_avant := pause
+	pause = true
+	_atelier = AtelierGrille.new()
+	_atelier.ouvrir(m, int(at.uid), String(at.plan))
+	add_child(_atelier)
+	_atelier.ferme.connect(func(_ok: bool):
+		_atelier = null
+		pause = pause_avant and not m.convoi.is_empty()
+		if selection == 0 and not m.convoi.is_empty():
+			selection = m.convoi[0].uid
+			terrain.camera_x = m.convoi.back().x)
 
 func _ouvrir_surv() -> void:
 	_pause_surv = pause
@@ -442,7 +467,8 @@ func _maj_interface() -> void:
 			txt += " L"
 		l.text = txt
 		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
-	_chips.pieces[0].text = "Pièces %d" % m.composants.size()
+	_chips.pieces[0].text = "Pièces %d" % (m.composants.size() + m.pieces_stock.size())
+	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
 	_btn_pause.text = "Reprendre" if pause else "Pause"
 	for i in _btns_vitesse.size():
 		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)

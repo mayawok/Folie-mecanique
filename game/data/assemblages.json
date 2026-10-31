@@ -45,42 +45,70 @@
   },
   "bmw_r75": {
    "nom": "BMW R75 side-car",
-   "chassis": "chassis_bmw_r75",
+   "chassis": "cadre_r75",
    "plaques": 0,
    "pieces": [
     {
-     "piece": "roulement_bmw_r75",
+     "piece": "roue_ar_r75",
      "pos": [
       0,
       0
      ]
     },
     {
-     "piece": "suspension_bmw_r75",
+     "piece": "roue_av_r75",
      "pos": [
-      2,
+      6,
+      0
+     ]
+    },
+    {
+     "piece": "fourche_r75",
+     "pos": [
+      6,
       1
      ]
     },
     {
-     "piece": "moteur_bmw_r75",
+     "piece": "moteur_r75",
      "pos": [
-      8,
+      3,
+      1
+     ]
+    },
+    {
+     "piece": "selle_r75",
+     "pos": [
+      2,
       3
      ]
     },
     {
-     "piece": "cabine_bmw_r75",
+     "piece": "attelage_r75",
      "pos": [
-      4,
-      3
+      3,
+      1
+     ]
+    },
+    {
+     "piece": "panier_r75",
+     "pos": [
+      0,
+      1
+     ]
+    },
+    {
+     "piece": "roue_side_r75",
+     "pos": [
+      3,
+      0
      ]
     },
     {
      "piece": "arme_mitrailleuse",
      "pos": [
-      3,
-      5
+      5,
+      3
      ]
     }
    ]
@@ -431,6 +459,111 @@
      "pos": [
       9,
       10
+     ]
+    }
+   ]
+  },
+  "moto_bmw": {
+   "nom": "BMW R75",
+   "chassis": "cadre_r75",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roue_ar_r75",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "roue_av_r75",
+     "pos": [
+      6,
+      0
+     ]
+    },
+    {
+     "piece": "fourche_r75",
+     "pos": [
+      6,
+      1
+     ]
+    },
+    {
+     "piece": "moteur_r75",
+     "pos": [
+      3,
+      1
+     ]
+    },
+    {
+     "piece": "selle_r75",
+     "pos": [
+      2,
+      3
+     ]
+    }
+   ]
+  },
+  "side_bmw": {
+   "nom": "BMW R75 side-car (sans arme)",
+   "chassis": "cadre_r75",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roue_ar_r75",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "roue_av_r75",
+     "pos": [
+      6,
+      0
+     ]
+    },
+    {
+     "piece": "fourche_r75",
+     "pos": [
+      6,
+      1
+     ]
+    },
+    {
+     "piece": "moteur_r75",
+     "pos": [
+      3,
+      1
+     ]
+    },
+    {
+     "piece": "selle_r75",
+     "pos": [
+      2,
+      3
+     ]
+    },
+    {
+     "piece": "attelage_r75",
+     "pos": [
+      3,
+      1
+     ]
+    },
+    {
+     "piece": "panier_r75",
+     "pos": [
+      0,
+      1
+     ]
+    },
+    {
+     "piece": "roue_side_r75",
+     "pos": [
+      3,
+      0
      ]
     }
    ]

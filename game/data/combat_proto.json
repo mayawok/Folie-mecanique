@@ -707,5 +707,64 @@
   "pv_s": 2.5,
   "pv_detruite_s": 1.0,
   "plafond_detruite": 0.5
+ },
+ "ouverture": {
+  "_note": "Début de partie (DEC-035) : une caisse de pièces, la moto à assembler, puis des trouvailles dans l'ordre. Les ennemis n'arrivent qu'après la dernière étape.",
+  "survivants": 1,
+  "stocks": {
+   "ammo": 0,
+   "fuel_l": 4,
+   "metal": 0
+  },
+  "kit": [
+   "cadre_r75",
+   "roue_ar_r75",
+   "roue_av_r75",
+   "fourche_r75",
+   "moteur_r75",
+   "selle_r75"
+  ],
+  "premier_plan": "moto_bmw",
+  "plans": [
+   "moto_bmw",
+   "side_bmw",
+   "bmw_r75"
+  ],
+  "intervalle": [
+   45,
+   70
+  ],
+  "etapes": [
+   {
+    "ruine": "grange",
+    "annonce": "Une grange effondrée. Il y a peut-être de quoi faire un side-car.",
+    "butin_fixe": {
+     "pieces": [
+      "attelage_r75",
+      "panier_r75",
+      "roue_side_r75"
+     ],
+     "survivants": 1
+    }
+   },
+   {
+    "ruine": "maison",
+    "annonce": "Une maison abandonnée. Ça sent l'essence.",
+    "butin_fixe": {
+     "fuel_l": 20
+    }
+   },
+   {
+    "ruine": "bunker",
+    "annonce": "Un vieux bunker. Peut-être une arme.",
+    "butin_fixe": {
+     "pieces": [
+      "arme_mitrailleuse"
+     ],
+     "ammo": 80,
+     "metal": 8
+    }
+   }
+  ]
  }
 }

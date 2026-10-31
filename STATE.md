@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-31 (identité tranchée, code découpé, grille G1). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-31 (ouverture moto → side-car sur la grille). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
@@ -11,6 +11,7 @@ Mis à jour : 2026-10-31 (identité tranchée, code découpé, grille G1). Fichi
 - **Identité : roguelite de convoi** (DEC-032). Gestion de base, temps réel et achats : archivés (DEC-031).
 - Code découpé en couches (DEC-033, carte des fichiers dans `CONVOI.md`).
 - **Grille G1 faite** (DEC-034) : véhicules = châssis + pièces, statistiques calculées (`GRILLE.md`).
+- **La partie commence par la grille** (DEC-035) : moto assemblée, puis side-car, essence, arme, ennemis.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## Décidé, pas encore codé
@@ -29,8 +30,8 @@ Mis à jour : 2026-10-31 (identité tranchée, code découpé, grille G1). Fichi
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Coder tempête (`modele_meteo.gd`) et mines.
-3. Grille G2 : démontage dans la grange, stock de pièces.
+2. Atelier pour les gros véhicules (pièces tirées de leur dessin, plus de liberté), puis G2 (grange la nuit).
+3. Coder tempête (`modele_meteo.gd`) et mines.
 4. Godot 4.6, puis essai d'export iOS dans le nuage.
 
 ## Carte du dépôt

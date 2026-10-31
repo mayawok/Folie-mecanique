@@ -31,7 +31,7 @@ func _process(_d: float) -> bool:
 	frame += 1
 	var m = vue.m
 	if frame == 3:
-		vue._nouvelle_partie(11)
+		vue._nouvelle_partie(11, {}, false)
 		m = vue.m
 		m._prochain_x = 1.0e9
 		m.batiments.clear()
@@ -46,7 +46,7 @@ func _process(_d: float) -> bool:
 		_photo("m2_carte")
 		vue._fermer_carte()
 	if frame == 50:
-		vue._nouvelle_partie(12)
+		vue._nouvelle_partie(12, {}, false)
 		m = vue.m
 		m._prochain_x = 1.0e9
 		m.batiments.clear()
@@ -66,7 +66,7 @@ func _process(_d: float) -> bool:
 	if frame == 280:
 		_photo("m5_nuit_feu")
 	if frame == 610:
-		vue._nouvelle_partie(13)
+		vue._nouvelle_partie(13, {}, false)
 		m = vue.m
 		m._prochain_x = 1.0e9
 		m.batiments.clear()

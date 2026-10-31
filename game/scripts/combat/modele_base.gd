@@ -89,6 +89,7 @@ class Veh extends RefCounted:
 	var vitesse_act := 0.0
 	var butin := {}
 	var butin_pris := false
+	var assemblage := {}          # châssis + pièces placées (DEC-029)
 
 	func actif() -> bool:
 		return statut == "actif"
@@ -226,6 +227,10 @@ var fouille_demandee := 0         # uid du bâtiment ou de l'épave que le joueu
 var _lore_dit := false
 var _n_noms := 0
 var reserve_survivants := 0      # recrues sans place : elles monteront dans le prochain véhicule
+var pieces_stock: Array = []     # pièces de véhicule en réserve : {piece, etat} (grille, DEC-035)
+var ouverture := false           # début de partie guidé : moto à assembler, trouvailles dans l'ordre
+var etape_ouverture := 0         # indice de la prochaine trouvaille de l'ouverture
+var en_kit := false              # aucun véhicule encore assemblé
 func log_(txt: String, ton := "info") -> void:
 	journal.append({"t": temps, "txt": txt, "ton": ton})
 	if journal.size() > 60:
@@ -244,37 +249,50 @@ func vider_evenements() -> Array:
 
 # --- Création --------------------------------------------------------------
 func creer_vehicule(type: String, camp: String, x: float) -> Veh:
+	var a := Assemblage.de_type(type)
+	assert(not a.is_empty(), "Véhicule sans assemblage : %s" % type)
+	return creer_depuis_assemblage(a, camp, x, type)
+
+# Véhicule construit à partir d'un assemblage (châssis + pièces, DEC-029). Profil calculé, jamais saisi.
+func creer_depuis_assemblage(a: Dictionary, camp: String, x: float, type := "", equipage := -1) -> Veh:
 	var D := donnees()
-	# Profil calculé à partir des pièces (Assemblage, DEC-029)
-	var p: Dictionary = Assemblage.profil(type)
-	assert(not p.is_empty(), "Véhicule sans assemblage : %s" % type)
-	var forme: Dictionary = VehiculeDessin.donnees().vehicules[type]
 	var v := Veh.new()
 	v.uid = _uid
 	_uid += 1
-	v.type = type
 	v.camp = camp
+	v.x = x
+	v.x_prev = x
+	appliquer_assemblage(v, a, {}, type)
+	for i in (int(v.profil.equipage) if equipage < 0 else equipage):
+		v.equipage.append(float(D.equipage_pv))
+		v.noms.append(_nom_survivant())
+	return v
+
+# (Re)construit un véhicule à partir d'un assemblage. etats : famille -> état 0..1 des pièces montées
+# (pièces abîmées récupérées) ; une famille absente est neuve. L'équipage n'est pas touché.
+func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") -> void:
+	var D := donnees()
+	var p := Assemblage.statistiques(a)
+	v.assemblage = a.duplicate(true)
+	v.type = type if type != "" else Assemblage.apparence(a)
+	var forme: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
 	v.profil = p
 	v.nom = forme.nom
 	v.longueur = float(forme.longueur)
 	v.chenille = forme.has("chenille")
-	v.x = x
-	v.x_prev = x
+	v.pieces = {}
+	v.armes = []
 	for id in PIECES_BASE:
 		var pv := float(p.pv[id])
-		v.pieces[id] = {"id": id, "nom": NOMS[id], "pv": pv, "max": pv}
+		v.pieces[id] = {"id": id, "nom": NOMS[id], "pv": pv * float(etats.get(id, 1.0)), "max": pv}
 	if v.chenille:
 		v.pieces.roulement.nom = "Chenilles"
 	for i in p.armes.size():
 		var wid: String = p.armes[i]
 		var w: Dictionary = D.armes[wid]
 		var pid := "a%d" % i
-		v.pieces[pid] = {"id": pid, "nom": w.nom, "pv": float(w.pv), "max": float(w.pv)}
+		v.pieces[pid] = {"id": pid, "nom": w.nom, "pv": float(w.pv) * float(etats.get("arme", 1.0)), "max": float(w.pv)}
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.4, float(w.cadence)), "idx": i})
-	for i in int(p.equipage):
-		v.equipage.append(float(D.equipage_pv))
-		v.noms.append(_nom_survivant())
-	return v
 
 const PRENOMS := ["Pierre", "Marie", "Jules", "Léa", "Hugo", "Inès", "Louis", "Camille", "Noé", "Alice", "Paul", "Jeanne", "Marc", "Élise", "Théo", "Sarah", "Émile", "Clara", "Victor", "Nina"]
 const INITIALES := "BCDFGLMPRSTV"

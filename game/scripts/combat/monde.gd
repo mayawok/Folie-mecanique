@@ -383,6 +383,8 @@ func _pietons(dt: float) -> void:
 
 
 func _assauts(dt: float) -> void:
+	if m.calme_ouverture():
+		return   # début de partie : pas encore d'arme, pas de rôdeurs
 	if trajet.size() > 0 and not nuit():
 		return
 	if not nuit():

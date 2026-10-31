@@ -51,7 +51,7 @@ func _process(_d: float) -> bool:
 	match etape:
 		0:
 			if frame == 3:
-				vue._nouvelle_partie(11)
+				vue._nouvelle_partie(11, {}, false)
 				m = vue.m
 				m.stocks.fuel_l = 500.0
 				etape = 1
