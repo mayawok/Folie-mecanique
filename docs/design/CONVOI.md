@@ -93,6 +93,34 @@ roues et suspension). La garnison tire au fusil antichar ; sa **première salve 
 n'est visible qu'après avoir tiré ; si l'ennemi la repère, il peut la viser. Le convoi ne repart pas tant que
 l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprendre la route »).
 
+## Tempête de sable (décidé, DEC-027, à coder)
+
+- **Surtout le jour** (environ 4 tempêtes sur 5 entre l'aube et le crépuscule). Annoncée **à droite** comme une
+  embuscade : « Tempête de sable dans N s » (30 à 45 s), un mur de sable approche à l'horizon. Durée 60 à 120 s.
+- **Pendant la tempête** : visibilité réduite (voile de sable), précision ×0,5 pour tous, vitesse du convoi ×0,6,
+  pas de nouvelle vague ennemie.
+- **Véhicules légers** (Willys, BMW, Traction : véhicules ouverts) : usure légère du moteur et de la suspension
+  (de l'ordre de 1 point de vie toutes les 5 s). Un véhicule garé dans un hangar ou une grange est protégé.
+- **Équipages dehors** : un survivant qui n'est pas abrité dans un bâtiment perd de la santé (lentement, jamais
+  jusqu'à la mort pendant la tempête). Les équipages des véhicules fermés (blindés) sont protégés.
+- **S'abriter** : même mécanique que la nuit (l'équipage marche jusqu'au bâtiment, les véhicules se garent).
+  « Reprendre la route » une fois la tempête passée.
+- Ouvert : la tempête efface-t-elle les mines posées par le joueur ? Valeurs à régler en essai.
+
+## Champs de mines (décidé, DEC-028, à coder)
+
+- **Tirés au hasard** (graine) sur la route, plus fréquents avec le niveau du secteur. Toujours **détectés** avant
+  d'y entrer : alerte à droite « Champ de mines à N m » et le convoi s'arrête de lui-même s'il avance.
+- **Trois moyens de déminage** (chacun fait exploser les mines, sans danger pour le convoi s'il est bien mené) :
+  | Moyen | Où le trouver | Fonctionnement |
+  |---|---|---|
+  | Détecteur de métaux | Fouille de ruines et bunkers, troc, camp allié | Un survivant avance à pied et marque les mines une à une (lent, exposé aux tirs) ; la mitrailleuse les fait sauter. Peut récupérer quelques mines (pour les embuscades). |
+  | Chien | Ferme, réfugié, voyageur | Plus rapide que le détecteur ; le chien peut être blessé. Les mines marquées sont détruites au tir. |
+  | Fléau (rouleau à chaînes) | Pièce récupérée sur un **Sherman Crab** ennemi (barrages, niveau ≥ 4) | Monté à l'avant d'un véhicule à chenilles (Sherman, Stuart, half-track). Le convoi avance derrière lui ; chaque mine explose contre le fléau, qui s'use. |
+- **Sans aucun moyen** : faire demi-tour, ou traverser à l'aveugle (chaque mine touchée : gros dégâts roues et suspension,
+  comme les mines du joueur).
+- Ouvert : nombre de mines par champ, usure du fléau, statut du chien (survivant à part entière ou objet).
+
 ## Bâtiments
 
 Maison de village, ferme, grange, église (clocher de 14 m, plafond de zoom), bunker. Style européen.

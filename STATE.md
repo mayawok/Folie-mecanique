@@ -1,49 +1,36 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-30 (pivot : mode convoi). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-31 (board meeting). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
-- Phase : conception ; **prototype jouable** dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
-  **Pivot (DEC-026) : le jeu démarre sur le mode convoi** (`docs/design/CONVOI.md`) ; la base est en pause
-  (`scenes/main.tscn` conservée, test `tests/test_sim.gd` toujours vert).
-  Ajouts : embuscade, relief, carte 12 secteurs, camps (factions 1-3), nuit et abri, fantassins, voyageurs, fouille, survivants,
-  garage (hangar/grange), demi-tour, menu au toucher, sauvegarde auto, sons synthétisés.
-- Moteur : Godot 4 / GDScript (DEC-001, voir `docs/DECISIONS.md`).
-- Règles canoniques v1.8, base maître v1.9 (275 véhicules, 70 tables), backlog v1.0 ; simulations 30 jours v2.0 (3 000 parties).
+- **Mode convoi jouable** (DEC-026) dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
+  Contenu : embuscade, relief, carte 12 secteurs, camps et factions, nuit et abri, fantassins, voyageurs, fouille,
+  survivants, garage (hangar/grange), demi-tour, sauvegarde auto, sons.
+- Moteur : Godot 4.3 / GDScript (DEC-001). Passage à la 4.6 proposé.
+- Gestion de base, temps réel et achats : **archivés** dans `archive/` (DEC-031).
+- Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
-## Constats clés
+## Décidé, pas encore codé
 
-1. **Pas de tension en début de partie** (simulation de la base) : 0 % de pénurie d'eau et de
-   nourriture, 0 % de brèche ; seul le carburant contraint (2,9 % en profil agressif).
-2. **Données véhicules incomplètes** : jusqu'à 10 champs vides par fiche (`data/master/audit_completude_vehicule.csv`).
-3. **Tests limites non couverts** : raid pendant réparation, affectation exclusive, récupération après pénurie.
+- Tempête de sable (DEC-027) et champs de mines (DEC-028) : `docs/design/CONVOI.md`.
+- Grille « Frankenstein » (DEC-029) : `docs/design/GRILLE.md`, étapes G1 à G4.
+- Son : correctif iPhone silencieux et bus audio (DEC-030), à confirmer sur iPhone.
 
-## Périmètre V1 (DEC-013)
-Désert seul, faune en événements, solo hors ligne sans serveur, sièges en V1.1.
+## Décisions ouvertes (à trancher)
 
-## Décisions ouvertes
+1. Identité : roguelite de convoi (recommandé) ou gestion en temps réel.
+2. Gel des fonctions pour un cycle d'essais (`docs/design/ESSAIS.md`).
+3. But d'une partie et progression entre les parties.
+4. Passage à Godot 4.6 ; chemin de compilation iOS sans Mac.
 
-Cible d'équilibrage (pénurie, brèche sur 30 jours) ; lien convoi / base ; temps réel et absence.
-## Prochaines étapes
+## Prochaines étapes (ordre recommandé)
 
-0. **Prochain : jouer le mode convoi**, régler `game/data/combat_proto.json`, puis décider du lien avec la base
-   (butin, atelier) et du temps réel (`CONVOI.md`, section Ouvert). Tests : `tests/test_combat.gd`.
-1. Revue de conception thème par thème. Thème 1 (vision) : `docs/design/VISION.md`.
-   Thème 2 (boucle) : `docs/design/BOUCLE.md` (reste ouvert : jour/nuit, planchers, seuils).
-   Thème 3 (achats) : `docs/design/ACHATS.md`, garde-fou dans `regles_canoniques.json` (v1.7).
-   Thème 4 (périmètre V1) : `docs/design/PERIMETRE_V1.md` (DEC-013).
-   Thème 5 (systèmes) : `docs/design/SYSTEMES.md` — systèmes 1 ressources (DEC-014) 2 travailleurs (DEC-015) 3 véhicules (DEC-016) 4 expéditions (DEC-017) 5 combat (DEC-018) et 6 faune (DEC-019) validés.
-   Thème 6 (graphismes) : `docs/design/GRAPHISMES.md` (DEC-020) — IA générative, semi-réaliste peint, pièce par pièce sur gabarit (DEC-021), Willys MB complet. Production d'images : `docs/art/PRODUCTION.md` (file de priorité, lot en cours).
-   Système 7 (temps, absence, pénurie) validé (DEC-022) et codé dans le prototype.
-   Prototype : menu principal, pause, garage ; véhicules et personnages dessinés par le code (DEC-023).
-   Base : armurerie, améliorations de bâtiments par chantier, rapports plein écran (DEC-025).
-   Audio ElevenLabs (DEC-024) : liste et consignes dans `docs/audio/ELEVENLABS.md`, lecture prête.
-   Système 8 (récit) : en attente du mode convoi (DEC-026).
-2. Rééquilibrer l'économie de départ, relancer la simulation (désert seul, rattrapage hors ligne) avec jour/nuit,
-   planchers d'absence, profils « joueur absent » et « abonné » (voir `BOUCLE.md`).
-3. DATA-001 : schémas de données versionnés.
-4. Compléter les fiches véhicules prioritaires (contenu de départ P0 d'abord).
+1. Le porteur de projet joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
+2. Découper `combat_modele.gd` et `convoi_vue.gd` en modules (tests inchangés et verts).
+3. Grille G1 : véhicules décrits comme châssis + pièces.
+4. Coder tempête et mines.
+5. Godot 4.6, puis essai d'export iOS dans le nuage.
 
 ## Carte du dépôt
 
@@ -51,10 +38,9 @@ Cible d'équilibrage (pénurie, brèche sur 30 jours) ; lien convoi / base ; tem
 |---|---|
 | `AGENTS.md` | Règles pour développeurs et IA |
 | `docs/INDEX.md` | Ordre de lecture, sources de vérité |
-| `docs/TASKS.md` | Backlog par ID |
-| `docs/design/` | Spécification, équilibrage, rapports (Markdown) |
-| `data/rules/` | Règles canoniques (JSON) |
-| `data/master/` | Tables de la base maître (CSV, un onglet par fichier) |
-| `data/simulations/` | Résultats bruts des simulations |
-| `sources/` | Classeur Excel d'édition (ne pas lire directement) |
-| `tools/` | Scripts (export Excel → CSV) |
+| `docs/DECISIONS.md` | Journal des décisions |
+| `docs/design/` | VISION, CONVOI, GRILLE, LORE, GRAPHISMES, ESSAIS |
+| `game/` | Prototype Godot (`scripts/combat/` = mode convoi), tests dans `game/tests/` |
+| `data/master/` | Tables (catalogue de composants, grille) |
+| `archive/` | Éléments en sommeil (base, temps réel, simulations) |
+| `tools/` | Scripts (export Excel → CSV, sons synthétisés, gabarits) |

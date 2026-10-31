@@ -35,3 +35,14 @@
 - Garage : hangar (3 places) et grange (2), bâtiment neutralisé requis, réparation lente pièces + pièces détruites jusqu'à 50 %, convoi bloqué tant qu'un véhicule est garé, véhicules sortis abîmés si le bâtiment s'effondre.
 - Reprise : sauvegarde JSON auto toutes les 10 s et à la perte de focus (user://convoi_save.json), effacée à la défaite/nouvelle partie. Cause probable des « relances » à 10 min : rechargement de page iOS (test d'endurance : mémoire stable).
 - Son : WAV synthétisés par tools/synth_audio.py (assets/audio/synth/), préférés aux sons fournis.
+
+## Décisions du 31/10/2026 (board meeting)
+
+| Date | ID | Décision | Raison |
+|---|---|---|---|
+| 2026-10-31 | DEC-027 | Tempête de sable : surtout le jour, annoncée à droite, visibilité et précision réduites, usure légère des véhicules ouverts, santé des équipages non abrités en baisse ; on s'abrite comme la nuit | Demande du porteur de projet. Détail : `docs/design/CONVOI.md`. À coder après le découpage du code. |
+| 2026-10-31 | DEC-028 | Champs de mines aléatoires, toujours détectés ; déminage par détecteur de métaux, chien, ou fléau récupéré sur un Sherman Crab ; sinon demi-tour ou traversée à l'aveugle | Demande du porteur de projet. Détail : `docs/design/CONVOI.md`. À coder après le découpage. |
+| 2026-10-31 | DEC-029 | Grille de construction « Frankenstein » (démontage et assemblage dans une grange, la nuit) : conçue sur papier, codée par étapes G1 à G4 | Promesse centrale du jeu. Détail : `docs/design/GRILLE.md`. |
+| 2026-10-31 | DEC-030 | Son web : session audio iOS en mode « lecture » (le son passe même si l'iPhone est en silencieux) ; bus Musique, Effets, Voix déclarés dans `game/default_bus_layout.tres` | Absence de son signalée par le porteur de projet. |
+| 2026-10-31 | DEC-031 | Archivage dans `archive/` : prototype de base (scripts, scène, règles, test), documents base/temps réel/achats/simulations | Hors du chemin de lecture et du jeu exporté ; récupérable à tout moment. |
+| 2026-10-31 | — | Proposé, non tranché : identité du jeu (roguelite de convoi recommandé), gel des fonctions pour un cycle d'essais, découpage du code, Godot 4.6 | Voir `docs/audits/AUDIT_2026-10-31.md`. |

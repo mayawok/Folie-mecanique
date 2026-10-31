@@ -22,9 +22,9 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
     (un fichier par onglet, voir `data/master/INDEX.md`). Édition dans
     `sources/base_maitre.xlsx` (v1.9), puis
     `python3 tools/export_xlsx.py sources/base_maitre.xlsx data/master`.
--   Boucle de jeu : `docs/design/BOUCLE.md`
--   Spécification intégrée : `docs/design/specification_integree.md`
--   Équilibrage et feuille de route : `docs/design/equilibrage_feuille_de_route.md`
+-   Mode convoi (cœur du jeu) : `docs/design/CONVOI.md`
+-   Grille de construction : `docs/design/GRILLE.md`
+-   Éléments en sommeil : `archive/LISEZMOI.md`
 -   Backlog de développement : `docs/TASKS.md`
 -   Architecture modulaire : `docs/ARCHITECTURE_MODULAIRE.md`
 -   Instructions aux agents : `AGENTS.md`
@@ -34,12 +34,10 @@ Les versions sont portées par Git, pas par les noms de fichiers.
 ## Lecture économique
 
 -   Ne jamais ouvrir `sources/*.xlsx` : lire le CSV de l'onglet utile.
--   `data/simulations/` contient des sorties brutes (3 000 parties) :
-    lire `synthese_3_profils.csv` ou `tests_limites.csv`, pas le détail.
--   `docs/design/rapport_*.md` sont des rapports historiques ; les
-    règles en vigueur sont dans le JSON et la spécification.
+-   Ne pas lire `archive/` sauf demande explicite.
+-   Code du convoi : lire le module touché, pas les deux gros fichiers en entier.
 
 ## État
 
-Dépôt de conception uniquement : aucun code ni moteur choisi. Audit
-initial : `docs/audits/REPO_AUDIT.md`.
+Prototype Godot 4 jouable (mode convoi). Dernier audit :
+`docs/audits/AUDIT_2026-10-31.md`.
