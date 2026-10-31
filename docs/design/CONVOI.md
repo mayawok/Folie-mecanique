@@ -1,7 +1,7 @@
 # Mode convoi — Folie Mécanique
 
 Statut : prototype jouable (DEC-026). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
-Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json` ; test : `game/tests/test_combat.gd`.
+Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json`, véhicules `game/data/pieces.json` ; tests : `game/tests/test_combat.gd`, `test_assemblage.gd`.
 
 ## Principe
 
@@ -150,15 +150,27 @@ s'approche, s'arrête à 5 m et fouille. Plus de ligne « Cible » ni « Fouille
 la flèche fixe indique l'instant. **Regard libre** : glisser le doigt déplace la vue (70 m), elle revient au convoi après 3 s.
 **Survivants** : nom, état de santé, lieu ; « Affecter » les change de véhicule (convoi à l'arrêt, place libre). Lore : `LORE.md`.
 
-## Architecture
+## Architecture (découpée le 31/10, DEC-033)
+
+Chaque grand script est une chaîne d'héritage : une couche ne voit que les couches en dessous d'elle.
+Pour un changement, lire seulement la couche concernée.
 
 | Fichier | Rôle |
 |---|---|
-| `combat_modele.gd` | Toute la logique, sans dessin (testable sans écran) |
-| `convoi_vue.gd` | Caméra, dessin, effets, cartes de véhicules, panneau d'ordres |
-| `batiment_dessin.gd` | Bâtiments ennemis dessinés par le code |
+| `modele_base.gd` | Constantes, entités `Veh` et `Bat`, état de la partie, création |
+| `modele_tir.gd` | Tir, projectiles, dégâts, destruction, réparation |
+| `modele_terrain.gd` | Embuscade (garnison, mines, camouflage), garage, fouille |
+| `combat_modele.gd` | `CombatModele` : ordres, survivants, pas de simulation, rencontres, demi-tour, sauvegarde |
+| `monde.gd` | Carte, horloge et nuit, fantassins et animaux, camps, voyageurs |
+| `vue_base.gd` | Constantes et état de la vue, petites classes d'interface (cartes, carte du monde), outils |
+| `vue_dessin.gd` | Dessin du monde, effets, personnages, panneau d'état, sons |
+| `vue_interface.gd` | Construction et mise à jour de l'interface, actions du joueur, sauvegarde |
+| `convoi_vue.gd` | `ConvoiVue` : démarrage, boucle, caméra, synchronisation, toucher |
+| `batiment_dessin.gd` | Bâtiments dessinés par le code |
+| `../vehicules/assemblage.gd` | Véhicules en pièces, statistiques calculées (`GRILLE.md`) |
 
-Réutilise `VehiculeDessin`, `Silhouette` et `Terrain` du prototype de base.
+Réutilise `VehiculeDessin`, `Silhouette` et `Terrain`. Prochains modules prévus : `modele_meteo.gd` (tempête), mines dans
+`modele_terrain.gd`.
 
 ## Constat d'équilibrage (6 graines, ordres naïfs : avancer en continu)
 

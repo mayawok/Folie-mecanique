@@ -1,0 +1,439 @@
+{
+ "_lisez_moi": "Véhicules décrits comme un châssis + des pièces placées sur sa grille (pos = cellule en bas à gauche, origine en bas à gauche du châssis). Les 10 véhicules historiques ; les assemblages du joueur suivront le même format.",
+ "assemblages": {
+  "willys_mb": {
+   "nom": "Willys MB",
+   "chassis": "chassis_willys_mb",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_willys_mb",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_willys_mb",
+     "pos": [
+      3,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_willys_mb",
+     "pos": [
+      10,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_willys_mb",
+     "pos": [
+      5,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      5,
+      7
+     ]
+    }
+   ]
+  },
+  "bmw_r75": {
+   "nom": "BMW R75 side-car",
+   "chassis": "chassis_bmw_r75",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_bmw_r75",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_bmw_r75",
+     "pos": [
+      2,
+      1
+     ]
+    },
+    {
+     "piece": "moteur_bmw_r75",
+     "pos": [
+      8,
+      3
+     ]
+    },
+    {
+     "piece": "cabine_bmw_r75",
+     "pos": [
+      4,
+      3
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      3,
+      5
+     ]
+    }
+   ]
+  },
+  "citroen_traction": {
+   "nom": "Citroën Traction Avant",
+   "chassis": "chassis_citroen_traction",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_citroen_traction",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_citroen_traction",
+     "pos": [
+      5,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_citroen_traction",
+     "pos": [
+      14,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_citroen_traction",
+     "pos": [
+      7,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      8,
+      6
+     ]
+    }
+   ]
+  },
+  "citroen_t23": {
+   "nom": "Citroën T23",
+   "chassis": "chassis_citroen_t23",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_citroen_t23",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_citroen_t23",
+     "pos": [
+      6,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_citroen_t23",
+     "pos": [
+      17,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_citroen_t23",
+     "pos": [
+      9,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      10,
+      9
+     ]
+    }
+   ]
+  },
+  "diamond_t": {
+   "nom": "Diamond T 969 dépanneuse",
+   "chassis": "chassis_diamond_t",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_diamond_t",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_diamond_t",
+     "pos": [
+      7,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_diamond_t",
+     "pos": [
+      22,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_diamond_t",
+     "pos": [
+      12,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      13,
+      11
+     ]
+    }
+   ]
+  },
+  "dukw": {
+   "nom": "DUKW",
+   "chassis": "chassis_dukw",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_dukw",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_dukw",
+     "pos": [
+      9,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_dukw",
+     "pos": [
+      28,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_dukw",
+     "pos": [
+      15,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      17,
+      10
+     ]
+    }
+   ]
+  },
+  "m3_half_track": {
+   "nom": "M3 Half-Track",
+   "chassis": "chassis_m3_half_track",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_m3_half_track",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_m3_half_track",
+     "pos": [
+      6,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_m3_half_track",
+     "pos": [
+      0,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_m3_half_track",
+     "pos": [
+      6,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      11,
+      9
+     ]
+    }
+   ]
+  },
+  "m3_stuart": {
+   "nom": "M3 Stuart",
+   "chassis": "chassis_m3_stuart",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_m3_stuart",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_m3_stuart",
+     "pos": [
+      5,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_m3_stuart",
+     "pos": [
+      0,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_m3_stuart",
+     "pos": [
+      5,
+      4
+     ]
+    },
+    {
+     "piece": "arme_canon_leger",
+     "pos": [
+      6,
+      9
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      15,
+      10
+     ]
+    }
+   ]
+  },
+  "m4_sherman": {
+   "nom": "M4 Sherman",
+   "chassis": "chassis_m4_sherman",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_m4_sherman",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_m4_sherman",
+     "pos": [
+      6,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_m4_sherman",
+     "pos": [
+      0,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_m4_sherman",
+     "pos": [
+      6,
+      4
+     ]
+    },
+    {
+     "piece": "arme_canon_75",
+     "pos": [
+      7,
+      10
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      21,
+      11
+     ]
+    }
+   ]
+  },
+  "tiger_1": {
+   "nom": "Tiger I",
+   "chassis": "chassis_tiger_1",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_tiger_1",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_tiger_1",
+     "pos": [
+      8,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_tiger_1",
+     "pos": [
+      0,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_tiger_1",
+     "pos": [
+      8,
+      4
+     ]
+    },
+    {
+     "piece": "arme_canon_88",
+     "pos": [
+      9,
+      10
+     ]
+    }
+   ]
+  }
+ }
+}

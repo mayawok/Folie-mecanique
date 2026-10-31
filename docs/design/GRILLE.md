@@ -1,6 +1,6 @@
 # Grille de construction — véhicules « Frankenstein »
 
-Statut : **conception** (DEC-029). Rien n'est codé. S'appuie sur DEC-016 (véhicules modulaires) et sur les tables
+Statut : **G1 codé** (DEC-029, DEC-034) : véhicules décrits en pièces, statistiques calculées. G2 à G4 restent à faire. S'appuie sur DEC-016 (véhicules modulaires) et sur les tables
 existantes `data/master/echelle_et_grille.csv`, `catalogue_composants.csv` (29 pièces), `grille_et_chevauchements.csv`.
 
 ## Idée du porteur de projet
@@ -50,12 +50,32 @@ technique : aujourd'hui `vehicule_dessin.gd` dessine 10 types fixes depuis `form
 | Étape | Contenu | Quand |
 |---|---|---|
 | G0 | Ce document | Fait |
-| G1 | Modèle de données : un véhicule = un châssis + des pièces placées ; les 10 véhicules historiques réécrits ainsi ; statistiques calculées ; tests sans écran | Juste après le découpage du code (voir audit) |
+| G1 | Modèle de données : un véhicule = un châssis + des pièces placées ; les 10 véhicules historiques réécrits ainsi ; statistiques calculées ; tests sans écran | **Fait le 31/10** |
 | G2 | Démonter un véhicule dans la grange ; stock de pièces | Après G1 |
 | G3 | Éditeur de grille au toucher (glisser, aimanter, valider) | Après essais du mode convoi |
 | G4 | Dessin des véhicules assemblés ; combat avec véhicules composés | Avec G3 |
 
 G1 est le plus urgent : chaque fonction ajoutée sur des types de véhicules figés augmente le travail de reprise plus tard.
+
+## G1 tel que codé (31/10)
+
+| Fichier | Rôle |
+|---|---|
+| `game/data/pieces.json` | Catalogue : 54 pièces (châssis, roulement, suspension, moteur, cabine par véhicule, 4 armes) + règles (cellule 25 cm, 10 ch/t requis, surcharge maxi ×1,5, plaque de blindage) |
+| `game/data/assemblages.json` | Les 10 véhicules historiques : châssis + pièces placées (`pos` = cellule en bas à gauche) |
+| `game/scripts/vehicules/assemblage.gd` | `valider()` (« ça roule ? »), `statistiques()`, `profil(type)`, `demonter()` |
+| `game/tests/test_assemblage.gd` | 31 vérifications : historiques identiques au jeu, règles de grille, Frankenstein |
+
+- Le combat lit désormais le profil **calculé** ; les statistiques ont été retirées de `combat_proto.json` (une seule source).
+  Résultats d'équilibrage strictement identiques avant et après (test de déterminisme).
+- Calculs : poids = somme des pièces ; vitesse = plafond du roulement × min(1, puissance / poids ÷ 10 ch/t) × pénalité
+  de surcharge (charge / poids)² ; blindage = châssis + 2 par plaque ; équipage = sièges ; conso = moteur ; métal = somme.
+- Couches sans chevauchement : train (roulement), suspension, caisse (moteur, cabine), tourelle (armes). Roulement au sol,
+  armes dans la moitié haute.
+- Poids et puissances historiques approximatifs (Willys 1,1 t / 60 ch… Tiger 54 t / 700 ch), à affiner.
+- Exemples vérifiés : Willys à moteur de Sherman (il faut déplacer la cabine ; roule à 4,8 m/s au lieu de 6,5 car surchargé) ;
+  T23 armé du canon de 37 ; canon de 88 sur une Jeep refusé (trop long, trop lourd).
+- Régler un véhicule : modifier sa pièce dans `pieces.json` (ex. `vitesse_max` du roulement, `pv`, `blindage` du châssis).
 
 ## Ouvert
 

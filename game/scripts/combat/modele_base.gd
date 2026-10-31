@@ -245,7 +245,9 @@ func vider_evenements() -> Array:
 # --- Création --------------------------------------------------------------
 func creer_vehicule(type: String, camp: String, x: float) -> Veh:
 	var D := donnees()
-	var p: Dictionary = D.vehicules[type]
+	# Profil calculé à partir des pièces (Assemblage, DEC-029)
+	var p: Dictionary = Assemblage.profil(type)
+	assert(not p.is_empty(), "Véhicule sans assemblage : %s" % type)
 	var forme: Dictionary = VehiculeDessin.donnees().vehicules[type]
 	var v := Veh.new()
 	v.uid = _uid

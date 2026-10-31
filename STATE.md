@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-31 (board meeting). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-10-31 (identité tranchée, code découpé, grille G1). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
@@ -8,18 +8,20 @@ Mis à jour : 2026-10-31 (board meeting). Fichier à lire en premier (court, à 
   Contenu : embuscade, relief, carte 12 secteurs, camps et factions, nuit et abri, fantassins, voyageurs, fouille,
   survivants, garage (hangar/grange), demi-tour, sauvegarde auto, sons.
 - Moteur : Godot 4.3 / GDScript (DEC-001). Passage à la 4.6 proposé.
-- Gestion de base, temps réel et achats : **archivés** dans `archive/` (DEC-031).
+- **Identité : roguelite de convoi** (DEC-032). Gestion de base, temps réel et achats : archivés (DEC-031).
+- Code découpé en couches (DEC-033, carte des fichiers dans `CONVOI.md`).
+- **Grille G1 faite** (DEC-034) : véhicules = châssis + pièces, statistiques calculées (`GRILLE.md`).
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## Décidé, pas encore codé
 
 - Tempête de sable (DEC-027) et champs de mines (DEC-028) : `docs/design/CONVOI.md`.
-- Grille « Frankenstein » (DEC-029) : `docs/design/GRILLE.md`, étapes G1 à G4.
+- Grille : G2 démontage dans la grange, G3 éditeur au toucher, G4 dessin des assemblages (`GRILLE.md`).
 - Son : correctif iPhone silencieux et bus audio (DEC-030), à confirmer sur iPhone.
 
 ## Décisions ouvertes (à trancher)
 
-1. Identité : roguelite de convoi (recommandé) ou gestion en temps réel.
+1. Modèle économique adapté au roguelite (prix unique, démo + déblocage, cosmétiques).
 2. Gel des fonctions pour un cycle d'essais (`docs/design/ESSAIS.md`).
 3. But d'une partie et progression entre les parties.
 4. Passage à Godot 4.6 ; chemin de compilation iOS sans Mac.
@@ -27,10 +29,9 @@ Mis à jour : 2026-10-31 (board meeting). Fichier à lire en premier (court, à 
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Découper `combat_modele.gd` et `convoi_vue.gd` en modules (tests inchangés et verts).
-3. Grille G1 : véhicules décrits comme châssis + pièces.
-4. Coder tempête et mines.
-5. Godot 4.6, puis essai d'export iOS dans le nuage.
+2. Coder tempête (`modele_meteo.gd`) et mines.
+3. Grille G2 : démontage dans la grange, stock de pièces.
+4. Godot 4.6, puis essai d'export iOS dans le nuage.
 
 ## Carte du dépôt
 
@@ -40,7 +41,7 @@ Mis à jour : 2026-10-31 (board meeting). Fichier à lire en premier (court, à 
 | `docs/INDEX.md` | Ordre de lecture, sources de vérité |
 | `docs/DECISIONS.md` | Journal des décisions |
 | `docs/design/` | VISION, CONVOI, GRILLE, LORE, GRAPHISMES, ESSAIS |
-| `game/` | Prototype Godot (`scripts/combat/` = mode convoi), tests dans `game/tests/` |
+| `game/` | Prototype Godot (`scripts/combat/` = convoi, `scripts/vehicules/` = pièces), tests dans `game/tests/` |
 | `data/master/` | Tables (catalogue de composants, grille) |
 | `archive/` | Éléments en sommeil (base, temps réel, simulations) |
 | `tools/` | Scripts (export Excel → CSV, sons synthétisés, gabarits) |

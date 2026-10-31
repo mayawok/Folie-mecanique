@@ -8,7 +8,7 @@ on donne des **ordres** (marche, cible, visée sur roues/armes/châssis, fouille
 cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres restent possibles.
 Toucher un véhicule dans la scène affiche ses pièces cassées : toucher une icône envoie un mécanicien ;
 un véhicule trouvé et réparé peut rejoindre le convoi. Les cartes en bas sélectionnent un véhicule. Détails : `docs/design/CONVOI.md`.
-Test sans écran : `godot --headless --path game -s res://tests/test_combat.gd`.
+Tests sans écran : `godot --headless --path game -s res://tests/test_combat.gd` et `res://tests/test_assemblage.gd`.
 
 La gestion de base est archivée dans `archive/prototype_base/` (DEC-031).
 
@@ -24,6 +24,6 @@ puis lancer le jeu depuis l'icône. La barre d'adresse disparaît et le jeu va j
 
 ## Modifier l'équilibrage sans Claude
 
-Les valeurs du convoi sont dans `data/combat_proto.json`. Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstruit.
+Les valeurs du convoi sont dans `data/combat_proto.json` ; celles des véhicules dans `data/pieces.json` (une fiche par pièce : vitesse du roulement, points de vie, blindage du châssis…). Modifier le fichier sur GitHub (icône crayon), enregistrer : le jeu se reconstruit.
 
 **Son sur iPhone** : depuis le 31/10, le son passe même en mode silencieux. S'il reste muet, vérifier le volume et toucher l'écran une fois (le navigateur n'autorise le son qu'après un premier toucher).

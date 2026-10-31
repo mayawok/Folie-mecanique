@@ -1,0 +1,714 @@
+{
+ "_lisez_moi": "Pièces de véhicules (DEC-029, grille G1). Une pièce = une famille et ses valeurs. Unités : kg, ch, cellules de 25 cm (grille, emprise), vitesse en m/s de jeu. Les statistiques d'un véhicule sont calculées à partir de ses pièces par scripts/vehicules/assemblage.gd.",
+ "regles": {
+  "cellule_m": 0.25,
+  "ch_par_tonne_requis": 10.0,
+  "surcharge_max": 1.5,
+  "plaque": {
+   "nom": "Plaque de blindage",
+   "blindage": 2,
+   "poids_kg": 60,
+   "metal": 4
+  },
+  "couches": {
+   "roulement": "train",
+   "suspension": "suspension",
+   "moteur": "caisse",
+   "cabine": "caisse",
+   "arme": "tourelle"
+  }
+ },
+ "pieces": {
+  "chassis_willys_mb": {
+   "famille": "chassis",
+   "nom": "Châssis Willys MB",
+   "grille": [
+    14,
+    8
+   ],
+   "poids_kg": 657,
+   "pv": 55,
+   "blindage": 2,
+   "reservoir": 12,
+   "metal": 3
+  },
+  "roulement_willys_mb": {
+   "famille": "roulement",
+   "nom": "Roues Willys MB",
+   "type": "roues",
+   "vitesse_max": 6.5,
+   "charge_kg": 1265,
+   "poids_kg": 88,
+   "pv": 35,
+   "emprise": [
+    13,
+    3
+   ],
+   "metal": 1
+  },
+  "suspension_willys_mb": {
+   "famille": "suspension",
+   "nom": "Suspension Willys MB",
+   "poids_kg": 55,
+   "pv": 25,
+   "emprise": [
+    7,
+    1
+   ],
+   "metal": 1
+  },
+  "moteur_willys_mb": {
+   "famille": "moteur",
+   "nom": "Willys Go Devil 4 cyl.",
+   "puissance_ch": 60,
+   "conso": 1.0,
+   "poids_kg": 150,
+   "pv": 30,
+   "emprise": [
+    4,
+    2
+   ],
+   "metal": 1
+  },
+  "cabine_willys_mb": {
+   "famille": "cabine",
+   "nom": "Cabine Willys MB",
+   "sieges": 2,
+   "ouvert": true,
+   "poids_kg": 110,
+   "pv": 25,
+   "emprise": [
+    5,
+    3
+   ],
+   "metal": 1
+  },
+  "arme_mitrailleuse": {
+   "famille": "arme",
+   "nom": "Mitrailleuse",
+   "arme": "mitrailleuse",
+   "poids_kg": 40,
+   "emprise": [
+    3,
+    1
+   ],
+   "metal": 1
+  },
+  "chassis_bmw_r75": {
+   "famille": "chassis",
+   "nom": "Châssis BMW R75 side-car",
+   "grille": [
+    10,
+    6
+   ],
+   "poids_kg": 223,
+   "pv": 40,
+   "blindage": 1,
+   "reservoir": 8,
+   "metal": 1
+  },
+  "roulement_bmw_r75": {
+   "famille": "roulement",
+   "nom": "Roues BMW R75 side-car",
+   "type": "roues",
+   "vitesse_max": 7.5,
+   "charge_kg": 483,
+   "poids_kg": 34,
+   "pv": 28,
+   "emprise": [
+    9,
+    2
+   ],
+   "metal": 1
+  },
+  "suspension_bmw_r75": {
+   "famille": "suspension",
+   "nom": "Suspension BMW R75 side-car",
+   "poids_kg": 21,
+   "pv": 20,
+   "emprise": [
+    5,
+    1
+   ],
+   "metal": 1
+  },
+  "moteur_bmw_r75": {
+   "famille": "moteur",
+   "nom": "BMW bicylindre 750 cm³",
+   "puissance_ch": 26,
+   "conso": 0.8,
+   "poids_kg": 60,
+   "pv": 28,
+   "emprise": [
+    2,
+    2
+   ],
+   "metal": 1
+  },
+  "cabine_bmw_r75": {
+   "famille": "cabine",
+   "nom": "Cabine BMW R75 side-car",
+   "sieges": 2,
+   "ouvert": true,
+   "poids_kg": 42,
+   "pv": 18,
+   "emprise": [
+    4,
+    2
+   ],
+   "metal": 1
+  },
+  "chassis_citroen_traction": {
+   "famille": "chassis",
+   "nom": "Châssis Citroën Traction Avant",
+   "grille": [
+    19,
+    7
+   ],
+   "poids_kg": 677,
+   "pv": 70,
+   "blindage": 4,
+   "reservoir": 14,
+   "metal": 3,
+   "standoff": 24
+  },
+  "roulement_citroen_traction": {
+   "famille": "roulement",
+   "nom": "Roues Citroën Traction Avant",
+   "type": "roues",
+   "vitesse_max": 6.0,
+   "charge_kg": 1265,
+   "poids_kg": 88,
+   "pv": 40,
+   "emprise": [
+    18,
+    3
+   ],
+   "metal": 2
+  },
+  "suspension_citroen_traction": {
+   "famille": "suspension",
+   "nom": "Suspension Citroën Traction Avant",
+   "poids_kg": 55,
+   "pv": 28,
+   "emprise": [
+    9,
+    1
+   ],
+   "metal": 1
+  },
+  "moteur_citroen_traction": {
+   "famille": "moteur",
+   "nom": "Citroën 11 CV 4 cyl.",
+   "puissance_ch": 46,
+   "conso": 1.4,
+   "poids_kg": 130,
+   "pv": 35,
+   "emprise": [
+    5,
+    2
+   ],
+   "metal": 2
+  },
+  "cabine_citroen_traction": {
+   "famille": "cabine",
+   "nom": "Cabine Citroën Traction Avant",
+   "sieges": 2,
+   "ouvert": false,
+   "poids_kg": 110,
+   "pv": 30,
+   "emprise": [
+    7,
+    2
+   ],
+   "metal": 1
+  },
+  "chassis_citroen_t23": {
+   "famille": "chassis",
+   "nom": "Châssis Citroën T23",
+   "grille": [
+    23,
+    10
+   ],
+   "poids_kg": 1635,
+   "pv": 90,
+   "blindage": 5,
+   "reservoir": 25,
+   "metal": 8,
+   "standoff": 27
+  },
+  "roulement_citroen_t23": {
+   "famille": "roulement",
+   "nom": "Roues Citroën T23",
+   "type": "roues",
+   "vitesse_max": 5.0,
+   "charge_kg": 2875,
+   "poids_kg": 200,
+   "pv": 50,
+   "emprise": [
+    22,
+    3
+   ],
+   "metal": 2
+  },
+  "suspension_citroen_t23": {
+   "famille": "suspension",
+   "nom": "Suspension Citroën T23",
+   "poids_kg": 125,
+   "pv": 35,
+   "emprise": [
+    11,
+    1
+   ],
+   "metal": 1
+  },
+  "moteur_citroen_t23": {
+   "famille": "moteur",
+   "nom": "Citroën 23 6 cyl.",
+   "puissance_ch": 73,
+   "conso": 2.5,
+   "poids_kg": 250,
+   "pv": 45,
+   "emprise": [
+    6,
+    3
+   ],
+   "metal": 2
+  },
+  "cabine_citroen_t23": {
+   "famille": "cabine",
+   "nom": "Cabine Citroën T23",
+   "sieges": 2,
+   "ouvert": false,
+   "poids_kg": 250,
+   "pv": 35,
+   "emprise": [
+    8,
+    4
+   ],
+   "metal": 2
+  },
+  "chassis_diamond_t": {
+   "famille": "chassis",
+   "nom": "Châssis Diamond T 969 dépanneuse",
+   "grille": [
+    30,
+    12
+   ],
+   "poids_kg": 6290,
+   "pv": 130,
+   "blindage": 8,
+   "reservoir": 40,
+   "metal": 12
+  },
+  "roulement_diamond_t": {
+   "famille": "roulement",
+   "nom": "Roues Diamond T 969 dépanneuse",
+   "type": "roues",
+   "vitesse_max": 4.5,
+   "charge_kg": 10350,
+   "poids_kg": 720,
+   "pv": 70,
+   "emprise": [
+    29,
+    3
+   ],
+   "metal": 4
+  },
+  "suspension_diamond_t": {
+   "famille": "suspension",
+   "nom": "Suspension Diamond T 969 dépanneuse",
+   "poids_kg": 450,
+   "pv": 50,
+   "emprise": [
+    15,
+    1
+   ],
+   "metal": 2
+  },
+  "moteur_diamond_t": {
+   "famille": "moteur",
+   "nom": "Hercules RXC 6 cyl.",
+   "puissance_ch": 131,
+   "conso": 4.0,
+   "poids_kg": 600,
+   "pv": 70,
+   "emprise": [
+    8,
+    4
+   ],
+   "metal": 4
+  },
+  "cabine_diamond_t": {
+   "famille": "cabine",
+   "nom": "Cabine Diamond T 969 dépanneuse",
+   "sieges": 2,
+   "ouvert": false,
+   "poids_kg": 900,
+   "pv": 45,
+   "emprise": [
+    10,
+    4
+   ],
+   "metal": 2
+  },
+  "chassis_dukw": {
+   "famille": "chassis",
+   "nom": "Châssis DUKW",
+   "grille": [
+    38,
+    11
+   ],
+   "poids_kg": 4565,
+   "pv": 140,
+   "blindage": 6,
+   "reservoir": 40,
+   "metal": 11,
+   "standoff": 29
+  },
+  "roulement_dukw": {
+   "famille": "roulement",
+   "nom": "Roues DUKW",
+   "type": "roues",
+   "vitesse_max": 3.8,
+   "charge_kg": 7475,
+   "poids_kg": 520,
+   "pv": 65,
+   "emprise": [
+    37,
+    3
+   ],
+   "metal": 3
+  },
+  "suspension_dukw": {
+   "famille": "suspension",
+   "nom": "Suspension DUKW",
+   "poids_kg": 325,
+   "pv": 45,
+   "emprise": [
+    19,
+    1
+   ],
+   "metal": 2
+  },
+  "moteur_dukw": {
+   "famille": "moteur",
+   "nom": "GMC 270 6 cyl.",
+   "puissance_ch": 91,
+   "conso": 4.5,
+   "poids_kg": 400,
+   "pv": 60,
+   "emprise": [
+    10,
+    3
+   ],
+   "metal": 3
+  },
+  "cabine_dukw": {
+   "famille": "cabine",
+   "nom": "Cabine DUKW",
+   "sieges": 2,
+   "ouvert": true,
+   "poids_kg": 650,
+   "pv": 40,
+   "emprise": [
+    13,
+    4
+   ],
+   "metal": 2
+  },
+  "chassis_m3_half_track": {
+   "famille": "chassis",
+   "nom": "Châssis M3 Half-Track",
+   "grille": [
+    25,
+    10
+   ],
+   "poids_kg": 5780,
+   "pv": 150,
+   "blindage": 12,
+   "reservoir": 30,
+   "metal": 11,
+   "standoff": 30
+  },
+  "roulement_m3_half_track": {
+   "famille": "roulement",
+   "nom": "Chenilles M3 Half-Track",
+   "type": "chenilles",
+   "vitesse_max": 5.0,
+   "charge_kg": 10465,
+   "poids_kg": 1365,
+   "pv": 70,
+   "emprise": [
+    24,
+    3
+   ],
+   "metal": 4
+  },
+  "suspension_m3_half_track": {
+   "famille": "suspension",
+   "nom": "Suspension M3 Half-Track",
+   "poids_kg": 455,
+   "pv": 45,
+   "emprise": [
+    12,
+    1
+   ],
+   "metal": 2
+  },
+  "moteur_m3_half_track": {
+   "famille": "moteur",
+   "nom": "White 160AX 6 cyl.",
+   "puissance_ch": 147,
+   "conso": 3.5,
+   "poids_kg": 550,
+   "pv": 65,
+   "emprise": [
+    6,
+    3
+   ],
+   "metal": 4
+  },
+  "cabine_m3_half_track": {
+   "famille": "cabine",
+   "nom": "Cabine M3 Half-Track",
+   "sieges": 3,
+   "ouvert": true,
+   "poids_kg": 910,
+   "pv": 50,
+   "emprise": [
+    9,
+    4
+   ],
+   "metal": 2
+  },
+  "chassis_m3_stuart": {
+   "famille": "chassis",
+   "nom": "Châssis M3 Stuart",
+   "grille": [
+    19,
+    11
+   ],
+   "poids_kg": 8430,
+   "pv": 170,
+   "blindage": 28,
+   "reservoir": 30,
+   "metal": 13,
+   "standoff": 36
+  },
+  "roulement_m3_stuart": {
+   "famille": "roulement",
+   "nom": "Chenilles M3 Stuart",
+   "type": "chenilles",
+   "vitesse_max": 5.5,
+   "charge_kg": 14835,
+   "poids_kg": 1935,
+   "pv": 80,
+   "emprise": [
+    18,
+    3
+   ],
+   "metal": 4
+  },
+  "suspension_m3_stuart": {
+   "famille": "suspension",
+   "nom": "Suspension M3 Stuart",
+   "poids_kg": 645,
+   "pv": 50,
+   "emprise": [
+    9,
+    1
+   ],
+   "metal": 2
+  },
+  "moteur_m3_stuart": {
+   "famille": "moteur",
+   "nom": "Continental W-670 en étoile",
+   "puissance_ch": 250,
+   "conso": 3.5,
+   "poids_kg": 260,
+   "pv": 70,
+   "emprise": [
+    5,
+    3
+   ],
+   "metal": 4
+  },
+  "cabine_m3_stuart": {
+   "famille": "cabine",
+   "nom": "Cabine M3 Stuart",
+   "sieges": 3,
+   "ouvert": false,
+   "poids_kg": 1290,
+   "pv": 55,
+   "emprise": [
+    7,
+    4
+   ],
+   "metal": 3
+  },
+  "arme_canon_leger": {
+   "famille": "arme",
+   "nom": "Canon 37 mm",
+   "arme": "canon_leger",
+   "poids_kg": 300,
+   "emprise": [
+    6,
+    2
+   ],
+   "metal": 3
+  },
+  "chassis_m4_sherman": {
+   "famille": "chassis",
+   "nom": "Châssis M4 Sherman",
+   "grille": [
+    24,
+    12
+   ],
+   "poids_kg": 19650,
+   "pv": 240,
+   "blindage": 45,
+   "reservoir": 60,
+   "metal": 17,
+   "standoff": 40
+  },
+  "roulement_m4_sherman": {
+   "famille": "roulement",
+   "nom": "Chenilles M4 Sherman",
+   "type": "chenilles",
+   "vitesse_max": 4.5,
+   "charge_kg": 34845,
+   "poids_kg": 4545,
+   "pv": 110,
+   "emprise": [
+    23,
+    3
+   ],
+   "metal": 7
+  },
+  "suspension_m4_sherman": {
+   "famille": "suspension",
+   "nom": "Suspension M4 Sherman",
+   "poids_kg": 1515,
+   "pv": 70,
+   "emprise": [
+    12,
+    1
+   ],
+   "metal": 4
+  },
+  "moteur_m4_sherman": {
+   "famille": "moteur",
+   "nom": "Continental R975 en étoile",
+   "puissance_ch": 400,
+   "conso": 5.0,
+   "poids_kg": 520,
+   "pv": 100,
+   "emprise": [
+    6,
+    4
+   ],
+   "metal": 7
+  },
+  "cabine_m4_sherman": {
+   "famille": "cabine",
+   "nom": "Cabine M4 Sherman",
+   "sieges": 3,
+   "ouvert": false,
+   "poids_kg": 3030,
+   "pv": 80,
+   "emprise": [
+    8,
+    4
+   ],
+   "metal": 4
+  },
+  "arme_canon_75": {
+   "famille": "arme",
+   "nom": "Canon 75 mm",
+   "arme": "canon_75",
+   "poids_kg": 1000,
+   "emprise": [
+    10,
+    2
+   ],
+   "metal": 5
+  },
+  "chassis_tiger_1": {
+   "famille": "chassis",
+   "nom": "Châssis Tiger I",
+   "grille": [
+    34,
+    12
+   ],
+   "poids_kg": 33100,
+   "pv": 380,
+   "blindage": 80,
+   "reservoir": 90,
+   "metal": 29,
+   "standoff": 48
+  },
+  "roulement_tiger_1": {
+   "famille": "roulement",
+   "nom": "Chenilles Tiger I",
+   "type": "chenilles",
+   "vitesse_max": 3.2,
+   "charge_kg": 62100,
+   "poids_kg": 8100,
+   "pv": 160,
+   "emprise": [
+    33,
+    3
+   ],
+   "metal": 10
+  },
+  "suspension_tiger_1": {
+   "famille": "suspension",
+   "nom": "Suspension Tiger I",
+   "poids_kg": 2700,
+   "pv": 100,
+   "emprise": [
+    17,
+    1
+   ],
+   "metal": 6
+  },
+  "moteur_tiger_1": {
+   "famille": "moteur",
+   "nom": "Maybach HL230 V12",
+   "puissance_ch": 700,
+   "conso": 9.0,
+   "poids_kg": 1200,
+   "pv": 140,
+   "emprise": [
+    8,
+    4
+   ],
+   "metal": 10
+  },
+  "cabine_tiger_1": {
+   "famille": "cabine",
+   "nom": "Cabine Tiger I",
+   "sieges": 3,
+   "ouvert": false,
+   "poids_kg": 5400,
+   "pv": 120,
+   "emprise": [
+    12,
+    4
+   ],
+   "metal": 7
+  },
+  "arme_canon_88": {
+   "famille": "arme",
+   "nom": "Canon 88 mm",
+   "arme": "canon_88",
+   "poids_kg": 3500,
+   "emprise": [
+    16,
+    2
+   ],
+   "metal": 8
+  }
+ }
+}
