@@ -34,6 +34,10 @@ class Pieton:
 	var morsure := 2.5
 	var dir := -1.0
 	var ecrase_t := 0.0
+	var veh := 0                # soldat : uid de son véhicule
+	var mode := "pose"          # soldat : pose | retour
+	var calme_t := 0.0
+	var slot := 0
 
 	func actif() -> bool:
 		return statut == "actif"
@@ -300,7 +304,7 @@ func pieton_proche(x: float, longueur: float, portee: float):
 	var meilleur = null
 	var g_min := INF
 	for p in pietons:
-		if p.actif():
+		if p.actif() and p.camp == "ennemi":
 			var g: float = CombatModele.ecart(x, longueur, p.x, p.longueur)
 			if g <= portee and g < g_min:
 				g_min = g
@@ -311,9 +315,96 @@ func pieton_proche(x: float, longueur: float, portee: float):
 func vivants() -> int:
 	var n := 0
 	for p in pietons:
-		if p.actif():
+		if p.actif() and p.camp == "ennemi":
 			n += 1
 	return n
+
+
+# --- Troupes débarquées (DEC-063) ---------------------------------------------------------------
+func debarquer_troupes(v) -> int:
+	var n := 0
+	var centre: float = v.x + v.longueur * 0.5
+	for pv in v.troupes:
+		if pv <= 0.0:
+			continue
+		var s := creer_pieton("soldat", centre + (n - 1.5) * 0.9)
+		s.camp = "joueur"
+		s.veh = v.uid
+		s.pv = pv
+		s.pv_max = float(CombatModele.donnees().equipage_pv)
+		s.slot = n
+		s.dir = 1.0
+		n += 1
+	v.troupes = []
+	return n
+
+
+func troupes_dehors(uid := 0) -> int:
+	var n := 0
+	for p in pietons:
+		if p.camp == "joueur" and p.actif() and (uid == 0 or p.veh == uid):
+			n += 1
+	return n
+
+
+func rappeler_troupes(uid: int) -> void:
+	for p in pietons:
+		if p.camp == "joueur" and p.actif() and p.veh == uid:
+			p.mode = "retour"
+
+
+# Cible d'un soldat : l'ennemi le plus proche à portée de fusil (fantassin, animal ou véhicule)
+func _cible_troupe(p: Pieton):
+	var meilleur = null
+	var g_min := INF
+	for q in pietons:
+		if q.camp == "ennemi" and q.actif():
+			var g: float = CombatModele.ecart(p.x, p.longueur, q.x, q.longueur)
+			if g <= p.portee and g < g_min:
+				g_min = g
+				meilleur = q
+	for e in m.ennemis:
+		if e.actif():
+			var g2: float = CombatModele.ecart(p.x, p.longueur, e.x, e.longueur)
+			if g2 <= p.portee and g2 < g_min:
+				g_min = g2
+				meilleur = e
+	return meilleur
+
+
+func _troupe(p: Pieton, dt: float) -> void:
+	var T: Dictionary = CombatModele.donnees().troupes
+	var v = m.trouver(p.veh)
+	if not (v is CombatModele.Veh) or not m.convoi.has(v) or not v.actif():
+		m.reserve_survivants += 1   # son véhicule n'est plus là : il suivra à pied jusqu'au prochain
+		p.statut = "monte"
+		return
+	var centre: float = v.x + v.longueur * 0.5
+	if m.ordres.marche == "avancer":
+		p.mode = "retour"   # le convoi veut repartir : tout le monde remonte
+	var cible = _cible_troupe(p) if p.mode != "retour" else null
+	if cible != null:
+		p.calme_t = 0.0
+		var cx: float = cible.x + cible.longueur * 0.5
+		p.dir = signf(cx - p.x) if cx != p.x else p.dir
+		var gap: float = CombatModele.ecart(p.x, p.longueur, cible.x, cible.longueur)
+		if gap > p.portee * 0.8 and absf(p.x + p.dir * p.vit * dt - centre) < float(T.ecart_max):
+			p.x += p.dir * p.vit * dt   # s'approche un peu, sans s'éloigner de son véhicule
+		p.arme.cd -= dt
+		if p.arme.cd <= 0.0:
+			m._tirer(p, p.arme, CombatModele.donnees().armes.fusil, cible)
+		return
+	p.calme_t += dt
+	if p.mode != "retour" and p.calme_t >= float(T.calme_s):
+		p.mode = "retour"   # plus personne à portée : on remonte
+	if p.mode == "retour":
+		var dx: float = centre - p.x
+		p.dir = signf(dx) if absf(dx) > 0.01 else p.dir
+		if absf(dx) <= v.longueur * 0.5 + 0.4:
+			v.troupes.append(p.pv)
+			p.statut = "monte"
+		else:
+			p.x += signf(dx) * minf(float(T.vitesse_rembarquement) * dt, absf(dx))
 
 
 func toucher_pieton(p: Pieton, w: Dictionary) -> void:
@@ -323,6 +414,10 @@ func toucher_pieton(p: Pieton, w: Dictionary) -> void:
 	if p.pv <= 0.0:
 		p.statut = "mort"
 		p.mort_t = 0.0
+		if p.camp == "joueur":
+			m.log_("Un soldat est tombé.", "alerte")
+			m.evt({"t": "mort", "x": p.x, "animal": false})
+			return
 		m.ennemis_detruits += 1
 		if not p.animal:
 			m.stocks.ammo += 2.0
@@ -339,6 +434,12 @@ func _cible_pieton(p: Pieton):
 			if g < g_min:
 				g_min = g
 				meilleur = v
+	for s in pietons:
+		if s.camp == "joueur" and s.actif():
+			var gs: float = CombatModele.ecart(p.x, p.longueur, s.x, s.longueur)
+			if gs < g_min:
+				g_min = gs
+				meilleur = s
 	for b in m.batiments:
 		if b.statut == "neutralise" and b.garnison_vivants() > 0 and (p.animal or b.revele_t > 0.0):
 			var g2: float = CombatModele.ecart(p.x, p.longueur, b.x, b.longueur)
@@ -378,6 +479,9 @@ func _pietons(dt: float) -> void:
 		if not p.actif():
 			p.mort_t += dt
 			continue
+		if p.camp == "joueur":
+			_troupe(p, dt)
+			continue
 		var c = _cible_pieton(p)
 		if c == null:
 			continue
@@ -393,7 +497,9 @@ func _pietons(dt: float) -> void:
 			if p.arme.cd <= 0.0:
 				p.arme.cd = 0.9
 				m.evt({"t": "morsure", "x": p.x})
-				if c is CombatModele.Veh:
+				if c is Pieton:
+					toucher_pieton(c, {"degats": p.morsure * 2.0})
+				elif c is CombatModele.Veh:
 					if c.profil.get("ouvert", false):
 						m._blesser_equipage(c, p.morsure)
 					else:
@@ -602,5 +708,5 @@ func camp_action(id: String) -> bool:
 
 
 func nettoyer(limite: float) -> void:
-	pietons = pietons.filter(func(p): return (p.actif() or p.mort_t < 8.0) and p.x > limite - 60.0)
+	pietons = pietons.filter(func(p): return p.statut != "monte" and (p.actif() or p.mort_t < 8.0) and (p.x > limite - 60.0 or p.camp == "joueur"))
 	pnj = pnj.filter(func(v): return v.x > limite and v.x < m.x_tete + 900.0)

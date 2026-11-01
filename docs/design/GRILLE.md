@@ -144,3 +144,11 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
 - Fabriquer d'autres pièces simples (supports) avec du métal : plaques oui (DEC-039) ; le reste à trancher.
 - Nombre de véhicules maximum dans le convoi, rôle de la capacité de chargement.
 - Les véhicules historiques gardent-ils un bonus (fiabilité) par rapport aux assemblages ?
+
+
+## Postes, bancs et cabines (DEC-062)
+
+Onglet **Postes** : poste de conduite (conducteur obligatoire), poste de commande (chef de char), poste d'équipier, bancs de
+troupes de 4 places face à l'avant ou à l'arrière. Pièces fabriquées en métal. Onglet **Cabines** : formes décor (camion, voiture,
+blindée, bricolée, pare-brise) posées au-dessus des sièges ; une cabine fermée met l'équipage à couvert. Onglet Équipage : les
+postes fixes ne se changent pas.

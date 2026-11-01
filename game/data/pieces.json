@@ -83,6 +83,7 @@
    },
    "palette": [
     "moteur",
+    "poste",
     "cabine",
     "arme",
     "equipement"
@@ -95,7 +96,11 @@
    "grille_vue_min": [
     24,
     10
-   ]
+   ],
+   "troupes": {
+    "_note": "DEC-062 : soldats d'un banc. Pas de poids ajouté au calcul (équipement léger).",
+    "pv": 20
+   }
   }
  },
  "pieces": {
@@ -161,7 +166,8 @@
     5,
     3
    ],
-   "metal": 1
+   "metal": 1,
+   "style": "ouverte"
   },
   "arme_mitrailleuse": {
    "famille": "arme",
@@ -243,7 +249,8 @@
     7,
     2
    ],
-   "metal": 1
+   "metal": 1,
+   "style": "voiture"
   },
   "chassis_citroen_t23": {
    "famille": "chassis",
@@ -308,7 +315,8 @@
     8,
     4
    ],
-   "metal": 2
+   "metal": 2,
+   "style": "camion"
   },
   "chassis_diamond_t": {
    "famille": "chassis",
@@ -372,7 +380,8 @@
     10,
     4
    ],
-   "metal": 2
+   "metal": 2,
+   "style": "camion"
   },
   "chassis_dukw": {
    "famille": "chassis",
@@ -437,7 +446,8 @@
     13,
     4
    ],
-   "metal": 2
+   "metal": 2,
+   "style": "ouverte"
   },
   "chassis_m3_half_track": {
    "famille": "chassis",
@@ -502,7 +512,8 @@
     9,
     4
    ],
-   "metal": 2
+   "metal": 2,
+   "style": "ouverte"
   },
   "chassis_m3_stuart": {
    "famille": "chassis",
@@ -567,7 +578,8 @@
     7,
     4
    ],
-   "metal": 3
+   "metal": 3,
+   "style": "blindee"
   },
   "arme_canon_leger": {
    "famille": "arme",
@@ -643,7 +655,8 @@
     8,
     4
    ],
-   "metal": 4
+   "metal": 4,
+   "style": "blindee"
   },
   "arme_canon_75": {
    "famille": "arme",
@@ -719,7 +732,8 @@
     12,
     4
    ],
-   "metal": 7
+   "metal": 7,
+   "style": "blindee"
   },
   "arme_canon_88": {
    "famille": "arme",
@@ -1027,6 +1041,166 @@
    "metal": 1,
    "puissance_ch": 1.5,
    "_note": "Paire de phares avec dynamo : ~1,5 ch prélevés sur le moteur (réaliste : quelques centaines de watts, plus les pertes)."
+  },
+  "poste_conduite": {
+   "famille": "poste",
+   "nom": "Poste de conduite",
+   "poste": "conduite",
+   "sieges": 1,
+   "role": "conducteur",
+   "poids_kg": 60,
+   "pv": 15,
+   "metal": 2,
+   "emprise": [
+    2,
+    2
+   ],
+   "fabrique": true,
+   "_note": "Siège, volant, pédales et tableau de bord. Obligatoire : sans lui (ou une cabine avec siège) personne ne conduit."
+  },
+  "poste_commande": {
+   "famille": "poste",
+   "nom": "Poste de commandement",
+   "poste": "commande",
+   "sieges": 1,
+   "role": "chef",
+   "poids_kg": 90,
+   "pv": 20,
+   "metal": 3,
+   "emprise": [
+    2,
+    3
+   ],
+   "fabrique": true,
+   "_note": "Siège surélevé avec périscope : le chef de char reste à bord pendant les réparations (précision +10 %)."
+  },
+  "poste_equipier": {
+   "famille": "poste",
+   "nom": "Siège d'équipier",
+   "poste": "equipier",
+   "sieges": 1,
+   "role": "libre",
+   "poids_kg": 35,
+   "pv": 12,
+   "metal": 1,
+   "emprise": [
+    2,
+    2
+   ],
+   "fabrique": true,
+   "_note": "Siège au rôle choisi dans l'onglet Équipage : tireur, chargeur, mécanicien, infirmier, passager."
+  },
+  "banc_avant": {
+   "famille": "poste",
+   "nom": "Banc de troupes (face à l'avant)",
+   "poste": "banc",
+   "sens": 1,
+   "sieges": 4,
+   "role": "troupe",
+   "poids_kg": 70,
+   "pv": 20,
+   "metal": 2,
+   "emprise": [
+    4,
+    2
+   ],
+   "fabrique": true
+  },
+  "banc_arriere": {
+   "famille": "poste",
+   "nom": "Banc de troupes (face à l'arrière)",
+   "poste": "banc",
+   "sens": -1,
+   "sieges": 4,
+   "role": "troupe",
+   "poids_kg": 70,
+   "pv": 20,
+   "metal": 2,
+   "emprise": [
+    4,
+    2
+   ],
+   "fabrique": true
+  },
+  "cabine_camion": {
+   "famille": "cabine",
+   "nom": "Cabine de camion",
+   "style": "camion",
+   "sieges": 0,
+   "ouvert": false,
+   "habillage": true,
+   "poids_kg": 260,
+   "pv": 40,
+   "metal": 3,
+   "emprise": [
+    7,
+    5
+   ],
+   "fabrique": true
+  },
+  "cabine_voiture": {
+   "famille": "cabine",
+   "nom": "Carrosserie de voiture",
+   "style": "voiture",
+   "sieges": 0,
+   "ouvert": false,
+   "habillage": true,
+   "poids_kg": 170,
+   "pv": 30,
+   "metal": 2,
+   "emprise": [
+    9,
+    4
+   ],
+   "fabrique": true
+  },
+  "cabine_blindee": {
+   "famille": "cabine",
+   "nom": "Cabine blindée",
+   "style": "blindee",
+   "sieges": 0,
+   "ouvert": false,
+   "habillage": true,
+   "poids_kg": 780,
+   "pv": 70,
+   "metal": 6,
+   "emprise": [
+    7,
+    4
+   ],
+   "fabrique": true
+  },
+  "cabine_bricolee": {
+   "famille": "cabine",
+   "nom": "Cabine bricolée (tôles soudées)",
+   "style": "bricolee",
+   "sieges": 0,
+   "ouvert": false,
+   "habillage": true,
+   "poids_kg": 130,
+   "pv": 22,
+   "metal": 1,
+   "emprise": [
+    6,
+    4
+   ],
+   "fabrique": true
+  },
+  "cabine_pare_brise": {
+   "famille": "cabine",
+   "nom": "Pare-brise et portières",
+   "style": "ouverte",
+   "sieges": 0,
+   "ouvert": true,
+   "habillage": true,
+   "poids_kg": 55,
+   "pv": 12,
+   "metal": 1,
+   "emprise": [
+    5,
+    3
+   ],
+   "fabrique": true
   }
  }
 }

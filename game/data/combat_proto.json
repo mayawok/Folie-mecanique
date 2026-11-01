@@ -660,6 +660,13 @@
    "portee": 1.0,
    "animal": true,
    "morsure": 2.0
+  },
+  "soldat": {
+   "nom": "Soldat",
+   "pv": 20,
+   "vit": 2.8,
+   "portee": 40.0,
+   "animal": false
   }
  },
  "pnj": [
@@ -867,5 +874,13 @@
   "chef_precision": 1.1,
   "infirmier_pv_s": 0.08,
   "mecanicien_vitesse": 1.5
+ },
+ "troupes": {
+  "_note": "DEC-063 : troupes débarquées. Elles tiennent à 30 m au plus de leur véhicule et rembarquent seules après 4 s de calme.",
+  "ecart_max": 30.0,
+  "calme_s": 4.0,
+  "distance_calme": 90.0,
+  "vitesse_rembarquement": 3.4,
+  "cible_poids": 0.7
  }
 }

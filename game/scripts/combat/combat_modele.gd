@@ -110,6 +110,7 @@ func rejoindre(uid: int) -> bool:
 	while reserve_survivants > 0 and v.equipage.size() < int(v.profil.equipage):
 		v.equipage.append(float(donnees().equipage_pv))
 		reserve_survivants -= 1
+	_embarquer_troupes(v)
 	v.x_prev = v.x
 	for a in v.armes:
 		a.cd = 1.0
@@ -236,7 +237,11 @@ func sauver() -> Dictionary:
 		var pcs := {}
 		for pid in v.pieces:
 			pcs[pid] = v.pieces[pid].pv
-		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
+		var troupes: Array = v.troupes.duplicate()
+		for s in monde.pietons:   # les soldats à terre sont sauvegardés comme montés : ils rembarquent à la reprise
+			if s.camp == "joueur" and s.veh == v.uid and s.actif():
+				troupes.append(s.pv)
+		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir, "troupes": troupes})
 	var w := monde
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
@@ -276,6 +281,9 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 		for pv in e.equipage:
 			v.equipage.append(float(pv))
 		v.noms = e.noms.duplicate()
+		v.troupes = []
+		for pv in e.get("troupes", []):
+			v.troupes.append(float(pv))
 		v.statut = e.statut
 		v.tir = bool(e.tir)
 		m.convoi.append(v)
@@ -327,6 +335,8 @@ func abandonner(uid: int) -> void:
 				log_("Impossible d'abandonner le dernier véhicule.", "alerte")
 				return
 			convoi.remove_at(i)
+			reserve_survivants += v.troupes_vivantes()   # les soldats des bancs suivent le convoi
+			v.troupes = []
 			v.x_prev = v.x
 			v.statut = "abandonne"
 			v.reparation = false
@@ -393,6 +403,24 @@ func _soins(dt: float) -> void:
 				v.equipage[i] = minf(float(donnees().equipage_pv), v.equipage[i] + k * n)
 
 
+# Troupes (DEC-063) : descendre des bancs, tenir la position, remonter.
+func ordre_troupes(uid: int) -> bool:
+	var v = trouver(uid)
+	if not (v is Veh) or not convoi.has(v) or not v.actif():
+		return false
+	if v.troupes_vivantes() > 0:
+		if ordres.marche != "halte":
+			ordre_marche("halte")   # le convoi s'arrête pour laisser descendre les soldats
+		var n := monde.debarquer_troupes(v)
+		log_("%d soldat%s de %s débarque%s." % [n, "s" if n > 1 else "", v.nom, "nt" if n > 1 else ""], "info")
+		return n > 0
+	if monde.troupes_dehors(uid) > 0:
+		monde.rappeler_troupes(uid)
+		log_("Les soldats de %s regagnent leur véhicule." % v.nom, "info")
+		return true
+	return false
+
+
 func _marche(dt: float) -> void:
 	var vit := 0.0
 	blocage = ""
@@ -411,6 +439,8 @@ func _marche(dt: float) -> void:
 			au_garage = au_garage or v.garage != 0
 		if not transits.is_empty():
 			blocage = "Équipages en déplacement."
+		elif monde.troupes_dehors() > 0:
+			blocage = "Des soldats sont à terre : ils regagnent leurs véhicules."
 		elif sans_equipage:
 			blocage = "Un véhicule n'a plus d'équipage : rembarquez-le avant de repartir."
 		elif not monde.dialogue.is_empty():

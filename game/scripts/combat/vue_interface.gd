@@ -138,11 +138,15 @@ func _construire_elements() -> void:
 	# --- Actions du véhicule sélectionné
 	_bande_actions = _panneau(self)
 	_bande_actions.set_anchors_and_offsets_preset(PRESET_BOTTOM_LEFT)
+	_bande_actions.anchor_right = 1.0      # la bande s'arrête avant les boutons de marche et passe à la ligne (DEC-056)
 	_bande_actions.offset_top = -BARRE_H - 84
 	_bande_actions.offset_bottom = -BARRE_H
 	_bande_actions.offset_left = 0
-	var ab := HBoxContainer.new()
-	ab.add_theme_constant_override("separation", 10)
+	_bande_actions.offset_right = -340
+	_bande_actions.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	var ab := HFlowContainer.new()
+	ab.add_theme_constant_override("h_separation", 10)
+	ab.add_theme_constant_override("v_separation", 8)
 	_bande_actions.add_child(ab)
 	_btn_feu = _bouton("Cessez-le-feu", func(): _basculer_feu(), ab, 230)
 	_btn_rep = _bouton("Réparer", func(): _basculer_rep(), ab, 160)
@@ -154,6 +158,8 @@ func _construire_elements() -> void:
 	_btn_garage = _bouton("Garer", func(): _basculer_garage(), ab, 170)
 	_btn_modifier = _bouton("Grille", func(): _ouvrir_editeur(selection), ab, 150)
 	_btn_demonter = _bouton("Démonter", func(): m.ordre_demonter(selection), ab, 170)
+	_btn_troupes = _bouton("Débarquer les troupes", func(): m.ordre_troupes(selection), ab, 300)
+	_btn_troupes.visible = false
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
 	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
@@ -647,6 +653,12 @@ func _maj_interface() -> void:
 		_btn_demonter.disabled = m.raison_demontage(sel.uid) != "" and not travaille
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
+		_btn_troupes.visible = int(sel.profil.get("places_troupes", 0)) > 0
+		if _btn_troupes.visible:   # troupes : descendre des bancs ou y remonter
+			var a_bord: int = sel.troupes_vivantes()
+			var dehors: int = m.monde.troupes_dehors(sel.uid)
+			_btn_troupes.text = ("Débarquer les troupes (%d)" % a_bord) if a_bord > 0 else (("Rembarquer les troupes (%d)" % dehors) if dehors > 0 else "Aucune troupe à bord")
+			_btn_troupes.disabled = a_bord == 0 and dehors == 0
 	if m.fini and not _fin_son:
 		_fin_son = true
 		var so := get_node_or_null("/root/Son")

@@ -14,7 +14,7 @@ extends RefCounted
 
 const C := 0.25          # côté d'une cellule (m)
 const TOLERANCE := 0.5   # débattement de suspension (cellules) : une roue à moins de 12,5 cm du sol porte encore
-const FAMILLES_PIECES := ["moteur", "cabine", "arme", "equipement"]
+const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement"]
 const ROLES := ["tireur", "chargeur", "chef", "mecanicien", "infirmier", "passager"]   # le siège 1 est le conducteur (DEC-050)
 
 
@@ -58,17 +58,77 @@ static func _pieces(a: Dictionary) -> Array:   # [{i, id, fiche, pos, e}]
 	return res
 
 
-static func _occupation(a: Dictionary, sauf := -1) -> Dictionary:   # cellule -> "case" | indice de pièce
+static func _habillage(fiche: Dictionary) -> bool:   # carrosserie : posée au-dessus des sièges, sans les remplacer (DEC-062)
+	return bool(fiche.get("habillage", false))
+
+
+static func _siege(fiche: Dictionary) -> bool:
+	return int(fiche.get("sieges", 0)) > 0
+
+
+static func _occupation(a: Dictionary, sauf := -1) -> Dictionary:   # cellule -> "case" | indice de pièce (hors carrosseries)
 	var occ := {}
 	for c in _cases(a):
 		occ[c] = "case"
 	for p in _pieces(a):
-		if p.i == sauf:
+		if p.i == sauf or _habillage(p.fiche):
 			continue
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
 				occ[Vector2i(x, y)] = p.i
 	return occ
+
+
+static func _occ_hab(a: Dictionary, sauf := -1) -> Dictionary:   # cellule -> indice de carrosserie
+	var occ := {}
+	for p in _pieces(a):
+		if p.i == sauf or not _habillage(p.fiche):
+			continue
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				occ[Vector2i(x, y)] = p.i
+	return occ
+
+
+# Occupation complète (pièces et carrosseries), pour savoir si un tir est masqué
+static func _occ_totale(a: Dictionary) -> Dictionary:
+	var occ := _occupation(a)
+	var hab := _occ_hab(a)
+	for c in hab:
+		occ[c] = hab[c]
+	return occ
+
+
+# Une pièce posée est-elle valide ? Une carrosserie peut recouvrir des sièges ; les autres pièces ne chevauchent rien.
+static func _valide(a: Dictionary, p: Dictionary) -> bool:
+	var occ := _occupation(a, p.i)
+	var hab := _occ_hab(a, p.i)
+	if _habillage(p.fiche):
+		if not _libre(hab, p.pos, p.e):
+			return false
+		for x in range(p.pos.x, p.pos.x + p.e.x):   # pas de chevauchement avec autre chose qu'un siège ou le châssis
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				var c := Vector2i(x, y)
+				if occ.has(c) and occ[c] is String:
+					return false
+				if occ.has(c) and not _siege(_pieces(a)[int(occ[c])].fiche):
+					return false
+		return _portee(_union(occ, hab), p.pos, p.e)
+	var libre := _libre(occ, p.pos, p.e)
+	if libre and not _siege(p.fiche):
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				if hab.has(Vector2i(x, y)):
+					libre = false
+	return libre and _portee(_union(occ, hab), p.pos, p.e)
+
+
+static func _union(a: Dictionary, b: Dictionary) -> Dictionary:
+	var r := a.duplicate()
+	for c in b:
+		if not r.has(c):
+			r[c] = b[c]
+	return r
 
 
 # Hauteur de l'essieu d'une colonne : bas de la case la plus basse (-1 si la colonne est vide)
@@ -180,16 +240,16 @@ static func poser(a: Dictionary, piece_id: String, cell: Vector2i) -> Dictionary
 	if f.is_empty() or not f.get("famille", "") in FAMILLES_PIECES:
 		return {}
 	var e := _emprise(piece_id)
-	var occ := _occupation(a)
 	var cands := []
 	for dy in range(-4, 5):
 		for dx in range(-6, 7):
 			cands.append(cell + Vector2i(dx, dy))
 	cands.sort_custom(func(p, q): return (p - cell).length_squared() < (q - cell).length_squared())
+	var n: int = a.get("pieces", []).size()
 	for c in cands:
-		if _libre(occ, c, e) and _portee(occ, c, e):
-			var b := a.duplicate(true)
-			b.pieces.append({"piece": piece_id, "pos": [c.x, c.y]})
+		var b := a.duplicate(true)
+		b.pieces.append({"piece": piece_id, "pos": [c.x, c.y]})
+		if _valide(b, {"i": n, "fiche": f, "pos": c, "e": e}):
 			return b
 	return {}
 
@@ -203,7 +263,10 @@ static func retirer(a: Dictionary, index: int) -> Dictionary:
 
 static func piece_en(a: Dictionary, cell: Vector2i) -> int:
 	var occ := _occupation(a)
-	return int(occ[cell]) if occ.has(cell) and not (occ[cell] is String) else -1
+	if occ.has(cell) and not (occ[cell] is String):
+		return int(occ[cell])
+	var hab := _occ_hab(a)   # sinon la carrosserie qui recouvre cette cellule
+	return int(hab[cell]) if hab.has(cell) else -1
 
 
 # Retire ce qui ne tient plus : essieux sous une colonne vide, pièces qui ne reposent plus sur rien
@@ -214,8 +277,7 @@ static func nettoyer(a: Dictionary) -> Dictionary:
 	while change:
 		change = false
 		for p in _pieces(b):
-			var occ := _occupation(b, p.i)
-			if not _libre(occ, p.pos, p.e) or not _portee(occ, p.pos, p.e):
+			if not _valide(b, p):
 				b.pieces.remove_at(p.i)
 				change = true
 				break
@@ -242,6 +304,10 @@ static func cout_metal(a: Dictionary) -> float:
 		t += float(Assemblage.piece(String(e.piece)).get("metal", 0))
 		if String(e.get("train", "")) != "":
 			t += float(Assemblage.piece(String(e.train)).get("metal", 0))
+	for p in a.get("pieces", []):   # postes, bancs et cabines se fabriquent au métal (DEC-062)
+		var f := Assemblage.piece(String(p.piece))
+		if bool(f.get("fabrique", false)):
+			t += float(f.get("metal", 0))
 	return t
 
 
@@ -254,12 +320,8 @@ static func erreurs(a: Dictionary) -> Array:
 	var err := []
 	if _cases(a).is_empty():
 		_defaut(err, "chassis", "Peignez au moins une case de châssis", true)
-	var sieges := 0
-	for p in _pieces(a):
-		if p.fiche.get("famille", "") == "cabine":
-			sieges += int(p.fiche.sieges)
-	if sieges < 1:
-		_defaut(err, "cabine", "Aucun siège : personne pour conduire", true)
+	if not roles_de(a).has("conducteur"):
+		_defaut(err, "cabine", "Aucun poste de conduite : personne pour conduire", true)
 	return err
 
 
@@ -424,10 +486,11 @@ static func analyser(a: Dictionary) -> Dictionary:
 				if p.id == "phares":
 					phares += 1
 					ch_phares += float(p.fiche.get("puissance_ch", 0))
-			"cabine":
-				sieges += int(p.fiche.sieges)
-				ouvert = ouvert or bool(p.fiche.ouvert)
+			"cabine", "poste":
 				pv.cabine += float(p.fiche.pv)
+	sieges = sieges_de(a)
+	var troupes := places_troupes(a)
+	ouvert = _sieges_exposes(a)
 	# Plusieurs moteurs couplés (DEC-047) : rendement en baisse, consommation qui explose
 	if n_moteurs > 1:
 		var MM: Dictionary = RL.get("moteurs_multiples", {"rendement": 0.85, "conso_k": 0.6})
@@ -485,7 +548,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 	var roles := roles_de(a)
 	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size(), "metal": int(round(metal)),
-		"equipage": sieges, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
+		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
 		"infirmiers": roles.count("infirmier")}
@@ -505,11 +568,7 @@ static func statistiques(a: Dictionary) -> Dictionary:
 
 # Armes dans l'ordre du profil de combat : servies d'abord (même ordre pour le dessin et le combat)
 static func armes_ordonnees(a: Dictionary) -> Array:
-	var occ := _occupation(a)
-	var sieges := 0
-	for p in _pieces(a):
-		if p.fiche.get("famille", "") == "cabine":
-			sieges += int(p.fiche.sieges)
+	var occ := _occ_totale(a)
 	var tireurs := roles_de(a).count("tireur")
 	var res := []
 	for p in _pieces(a):
@@ -549,27 +608,76 @@ static func _gros_calibre(w: Dictionary) -> bool:
 	return id.begins_with("canon") or id == "mortier"
 
 
+# Sièges d'équipage (hors bancs de troupes), dans l'ordre de pose : [{piece, role, fixe, k}].
+# Poste de conduite : conducteur ; poste de commandement : chef ; les autres sièges ont un rôle au choix (a.roles[k]),
+# par défaut tireur. Sans poste de conduite, le premier siège libre conduit (anciens véhicules, DEC-062).
+static func sieges_equipage(a: Dictionary) -> Array:
+	var choix: Array = a.get("roles", [])
+	var res := []
+	var poste_conduite := false
+	for p in _pieces(a):
+		poste_conduite = poste_conduite or p.fiche.get("poste", "") == "conduite"
+	var k := 0
+	for p in _pieces(a):
+		var f: Dictionary = p.fiche
+		var n := int(f.get("sieges", 0))
+		if n <= 0 or f.get("poste", "") == "banc":
+			continue
+		if f.get("poste", "") == "conduite":
+			res.append({"piece": p.i, "role": "conducteur", "fixe": true, "k": -1})
+		elif f.get("poste", "") == "commande":
+			res.append({"piece": p.i, "role": "chef", "fixe": true, "k": -1})
+		else:
+			for _s in n:
+				var role := "tireur"
+				if k < choix.size() and String(choix[k]) in ROLES:
+					role = String(choix[k])
+				var fixe := false
+				if not poste_conduite and k == 0:
+					role = "conducteur"
+					fixe = true
+				res.append({"piece": p.i, "role": role, "fixe": fixe, "k": k})
+				k += 1
+	return res
+
+
 static func sieges_de(a: Dictionary) -> int:
+	return sieges_equipage(a).size()
+
+
+static func roles_de(a: Dictionary) -> Array:
+	return sieges_equipage(a).map(func(s): return s.role)
+
+
+# Places des bancs de troupes
+static func places_troupes(a: Dictionary) -> int:
 	var n := 0
 	for p in _pieces(a):
-		if p.fiche.get("famille", "") == "cabine":
+		if p.fiche.get("poste", "") == "banc":
 			n += int(p.fiche.sieges)
 	return n
 
 
-# Rôle de chaque siège (DEC-050). Siège 1 : conducteur. Sans choix du joueur (anciens véhicules) : tous tireurs.
-static func roles_de(a: Dictionary) -> Array:
-	var n := sieges_de(a)
-	var choix: Array = a.get("roles", [])
-	var res := []
-	for i in n:
-		if i == 0:
-			res.append("conducteur")
-		elif i < choix.size() and String(choix[i]) in ROLES:
-			res.append(String(choix[i]))
-		else:
-			res.append("tireur")
-	return res
+# Un siège est à couvert si une carrosserie fermée recouvre toute sa rangée du bas ; sinon l'équipage est exposé
+static func _sieges_exposes(a: Dictionary) -> bool:
+	var couvert := {}
+	for p in _pieces(a):
+		if _habillage(p.fiche) and not bool(p.fiche.get("ouvert", false)):
+			for x in range(p.pos.x, p.pos.x + p.e.x):
+				for y in range(p.pos.y, p.pos.y + p.e.y):
+					couvert[Vector2i(x, y)] = true
+	for p in _pieces(a):
+		var f: Dictionary = p.fiche
+		if _habillage(f) or int(f.get("sieges", 0)) <= 0:
+			continue
+		if f.get("famille", "") == "cabine" and not bool(f.get("ouvert", false)):
+			continue   # cabine complète fermée
+		var ok := true
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			ok = ok and couvert.has(Vector2i(x, p.pos.y))
+		if not ok:
+			return true
+	return false
 
 
 # Nombre de tireurs nécessaires pour servir toutes les armes non masquées
@@ -763,27 +871,44 @@ static func forme(a: Dictionary) -> Dictionary:
 				roues.append({"x": gx, "r": 0.375})
 	var armes := []
 	var equipage := []
+	var roles_par_piece := {}   # indice de pièce -> rôles de ses sièges d'équipage
+	for sg in sieges_equipage(a):
+		if not roles_par_piece.has(sg.piece):
+			roles_par_piece[sg.piece] = []
+		roles_par_piece[sg.piece].append(sg.role)
 	for p in _pieces(a):
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
+		if _habillage(p.fiche):
+			_formes_cabine(formes, String(p.fiche.get("style", "voiture")), r)
+			continue
 		match p.fiche.get("famille", ""):
 			"moteur":
 				formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x, r.position.y + r.size.y * 0.8],
 					[r.position.x + r.size.x * 0.85, r.end.y], [r.position.x + r.size.x * 0.1, r.end.y], [r.position.x, r.position.y + r.size.y * 0.7]], "c": "caisse", "z": 1})
 				formes.append({"ligne": [[r.position.x + r.size.x * 0.2, r.position.y + r.size.y * 0.5], [r.end.x - r.size.x * 0.2, r.position.y + r.size.y * 0.5]], "ep": 0.04, "c": "metal", "z": 2})
 			"cabine":
-				if bool(p.fiche.get("ouvert", false)):
-					formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x, r.position.y + r.size.y * 0.45], [r.position.x, r.position.y + r.size.y * 0.45]], "c": "caisse", "z": 1})
-					var n := int(p.fiche.get("sieges", 1))
-					for k in n:
-						var fx := 0.5 if n == 1 else 0.2 + 0.6 * float(k) / float(n - 1)
-						equipage.append({"x": r.position.x + r.size.x * fx, "y": r.position.y + r.size.y * 0.4,
-							"role": "conducteur" if k == 0 else ("tireur" if k == 1 else "passager")})
+				var style := String(p.fiche.get("style", "ouverte" if bool(p.fiche.get("ouvert", false)) else "voiture"))
+				_formes_cabine(formes, style, r)
+				var n := int(p.fiche.get("sieges", 0))
+				for k in n:   # cabine complète d'un véhicule historique : ses sièges sont dedans
+					var fx := 0.5 if n == 1 else 0.2 + 0.6 * float(k) / float(n - 1)
+					var role := String(roles_par_piece.get(p.i, [])[k]) if roles_par_piece.get(p.i, []).size() > k else "tireur"
+					if style == "blindee":   # le chef dépasse de la trappe
+						if k == 0:
+							equipage.append({"x": r.position.x + r.size.x * 0.5, "y": r.end.y, "role": "chef", "h": 0.26})
+					else:
+						equipage.append({"x": r.position.x + r.size.x * fx, "y": r.position.y + 0.28, "role": role})
+			"poste":
+				_formes_poste(formes, p.fiche, r)
+				var rl: Array = roles_par_piece.get(p.i, [])
+				if p.fiche.get("poste", "") == "banc":
+					var sens := float(p.fiche.get("sens", 1))
+					for k in int(p.fiche.sieges):
+						equipage.append({"x": r.position.x + r.size.x * (0.14 + 0.24 * float(k)), "y": r.position.y + 0.28, "role": "troupe", "dir": sens})
 				else:
-					formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.position.x + r.size.x * 0.95, r.position.y + r.size.y * 0.9],
-						[r.position.x + r.size.x * 0.8, r.end.y], [r.position.x + r.size.x * 0.15, r.end.y], [r.position.x, r.position.y + r.size.y * 0.85]], "c": "caisse", "z": 1})
-					formes.append({"pts": [[r.position.x + r.size.x * 0.3, r.position.y + r.size.y * 0.5], [r.position.x + r.size.x * 0.8, r.position.y + r.size.y * 0.5],
-						[r.position.x + r.size.x * 0.76, r.position.y + r.size.y * 0.82], [r.position.x + r.size.x * 0.34, r.position.y + r.size.y * 0.82]], "c": "vitre", "z": 2})
-					equipage.append({"x": r.position.x + r.size.x * 0.5, "y": r.end.y, "role": "chef", "h": 0.26})
+					var role := String(rl[0]) if not rl.is_empty() else "tireur"
+					var haut: bool = p.fiche.get("poste", "") == "commande"
+					equipage.append({"x": r.position.x + r.size.x * 0.40, "y": r.position.y + (0.46 if haut else 0.27), "role": role, "h": 0.58 if haut else 0.55})
 	for w in armes_ordonnees(a):
 		var p: Dictionary = w.place
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
@@ -815,6 +940,100 @@ static func forme(a: Dictionary) -> Dictionary:
 	if not chenille.is_empty():
 		res.chenille = chenille
 	return res
+
+
+# --- Formes simples des cabines et des postes (DEC-062) -----------------------------------------
+static func _pt(r: Rect2, fx: float, fy: float) -> Array:   # fraction de la pièce -> mètres (y vers le haut)
+	return [r.position.x + fx * r.size.x, r.position.y + fy * r.size.y]
+
+
+static func _poly(r: Rect2, pts: Array) -> Array:
+	return pts.map(func(q): return _pt(r, q[0], q[1]))
+
+
+# Cadre autour d'une ouverture : une bande par côté entre le contour et l'ouverture (même nombre de sommets)
+static func _cadre(formes: Array, ext: Array, int_: Array, couleur: String) -> void:
+	for i in ext.size():
+		var j := (i + 1) % ext.size()
+		formes.append({"pts": [ext[i], ext[j], int_[j], int_[i]], "c": couleur, "z": 1})
+
+
+# Cabine vue de profil, tournée vers la droite. Le fond sombre passe derrière l'équipage (z -1), la vitre
+# (z 2) est translucide : on voit les occupants à travers. Styles : camion, voiture, blindee, bricolee, ouverte.
+static func _formes_cabine(formes: Array, style: String, r: Rect2) -> void:
+	var vitre := "#2E3A40B8"
+	var bas := []
+	var ext := []
+	var inte := []
+	var fond := []
+	match style:
+		"camion":
+			bas = [[0, 0], [1, 0], [1, 0.36], [0, 0.36]]
+			ext = [[0.0, 0.36], [1.0, 0.36], [0.90, 1.0], [0.02, 1.0], [0.0, 0.94]]
+			inte = [[0.10, 0.42], [0.92, 0.42], [0.85, 0.88], [0.10, 0.88], [0.10, 0.88]]
+			fond = [[0, 0], [1, 0], [1, 0.36], [0.90, 1.0], [0.02, 1.0], [0, 0.94]]
+		"voiture":
+			bas = [[0, 0], [1, 0], [1, 0.30], [0.92, 0.40], [0.0, 0.40], [0.0, 0.12]]
+			ext = [[0.14, 0.40], [0.72, 0.40], [0.54, 0.92], [0.28, 0.92]]
+			inte = [[0.19, 0.44], [0.67, 0.44], [0.52, 0.86], [0.30, 0.86]]
+			fond = [[0, 0], [1, 0], [1, 0.30], [0.92, 0.40], [0.72, 0.40], [0.54, 0.92], [0.28, 0.92], [0.14, 0.40], [0.0, 0.40]]
+		"blindee":
+			bas = [[0, 0], [1, 0], [1, 0.45], [0, 0.45]]
+			ext = [[0.0, 0.45], [1.0, 0.45], [0.84, 0.88], [0.12, 0.96], [0.0, 0.80]]
+			inte = [[0.22, 0.62], [0.80, 0.62], [0.76, 0.70], [0.24, 0.74], [0.22, 0.72]]
+			fond = [[0, 0], [1, 0], [1, 0.45], [0.84, 0.88], [0.12, 0.96], [0.0, 0.80]]
+			formes.append({"pts": _poly(r, [[0.40, 0.92], [0.62, 0.89], [0.60, 1.0], [0.42, 1.0]]), "c": "metal", "z": 2})
+		"bricolee":
+			bas = [[0, 0], [1, 0], [1, 0.30], [0, 0.30]]
+			ext = [[0.0, 0.30], [1.0, 0.30], [0.95, 0.76], [0.80, 1.0], [0.12, 0.92], [0.0, 0.70]]
+			inte = [[0.12, 0.38], [0.82, 0.38], [0.84, 0.68], [0.74, 0.84], [0.18, 0.80], [0.12, 0.70]]
+			fond = [[0, 0], [1, 0], [1, 0.30], [0.95, 0.76], [0.80, 1.0], [0.12, 0.92], [0.0, 0.70]]
+			formes.append({"ligne": [_pt(r, 0.10, 0.95), _pt(r, 0.10, 1.2), _pt(r, 0.86, 1.2), _pt(r, 0.86, 0.95)], "ep": 0.03, "c": "metal", "z": 2})
+			formes.append({"ligne": [_pt(r, 0.45, 0.30), _pt(r, 0.45, 0.0)], "ep": 0.02, "c": "metal", "z": 2})
+		_:   # ouverte : portière basse et cadre de pare-brise
+			bas = [[0, 0], [1, 0], [1, 0.45], [0, 0.45]]
+			ext = [[0.82, 0.45], [0.98, 0.45], [0.88, 1.0], [0.80, 1.0]]
+			inte = [[0.85, 0.52], [0.94, 0.52], [0.86, 0.94], [0.83, 0.94]]
+	if not fond.is_empty():
+		formes.append({"pts": _poly(r, fond), "c": "sombre", "z": -1})
+	formes.append({"pts": _poly(r, bas), "c": "caisse", "z": 1})
+	if not ext.is_empty():
+		var E := _poly(r, ext)
+		var I := _poly(r, inte)
+		_cadre(formes, E, I, "caisse")
+		formes.append({"pts": I, "c": vitre, "z": 2})
+	if style == "camion" or style == "voiture":
+		var fx := 0.46 if style == "camion" else 0.44
+		formes.append({"ligne": [_pt(r, fx, 0.36 if style == "camion" else 0.40), _pt(r, fx, 0.04)], "ep": 0.02, "c": "sombre", "z": 2})
+		formes.append({"ligne": [_pt(r, fx + 0.08, 0.30), _pt(r, fx + 0.14, 0.30)], "ep": 0.025, "c": "metal", "z": 2})
+
+
+# Postes : siège, volant, banc (formes simples, tournées vers la droite ; le banc arrière est inversé)
+static func _formes_poste(formes: Array, f: Dictionary, r: Rect2) -> void:
+	var w := r.size.x
+	var X := func(fx: float) -> float: return r.position.x + fx * w
+	var Y := func(m: float) -> float: return r.position.y + m
+	match String(f.get("poste", "")):
+		"banc":
+			var sens := float(f.get("sens", 1))
+			var dos := 0.0 if sens > 0.0 else 1.0
+			formes.append({"pts": [[X.call(0.02), Y.call(0.20)], [X.call(0.98), Y.call(0.20)], [X.call(0.98), Y.call(0.27)], [X.call(0.02), Y.call(0.27)]], "c": "bois", "z": 2})
+			for fx in [0.10, 0.90]:
+				formes.append({"ligne": [[X.call(fx), Y.call(0.20)], [X.call(fx), Y.call(0.0)]], "ep": 0.03, "c": "metal", "z": 2})
+			formes.append({"ligne": [[X.call(dos), Y.call(0.27)], [X.call(dos), Y.call(0.50)]], "ep": 0.04, "c": "bois", "z": 2})
+		"commande":
+			formes.append({"ligne": [[X.call(0.40), Y.call(0.0)], [X.call(0.40), Y.call(0.38)]], "ep": 0.05, "c": "metal", "z": 2})
+			formes.append({"pts": [[X.call(0.08), Y.call(0.38)], [X.call(0.72), Y.call(0.38)], [X.call(0.72), Y.call(0.45)], [X.call(0.08), Y.call(0.45)]], "c": "sombre", "z": 2})
+			formes.append({"pts": [[X.call(0.04), Y.call(0.45)], [X.call(0.18), Y.call(0.45)], [X.call(0.14), Y.call(0.74)], [X.call(0.02), Y.call(0.74)]], "c": "sombre", "z": 2})
+			formes.append({"ligne": [[X.call(0.84), Y.call(0.40)], [X.call(0.84), Y.call(0.80)]], "ep": 0.03, "c": "metal", "z": 2})   # périscope
+			formes.append({"ligne": [[X.call(0.80), Y.call(0.80)], [X.call(0.96), Y.call(0.80)]], "ep": 0.04, "c": "metal", "z": 2})
+		_:
+			formes.append({"ligne": [[X.call(0.40), Y.call(0.0)], [X.call(0.40), Y.call(0.19)]], "ep": 0.05, "c": "metal", "z": 2})
+			formes.append({"pts": [[X.call(0.08), Y.call(0.19)], [X.call(0.72), Y.call(0.19)], [X.call(0.72), Y.call(0.26)], [X.call(0.08), Y.call(0.26)]], "c": "sombre", "z": 2})
+			formes.append({"pts": [[X.call(0.04), Y.call(0.26)], [X.call(0.18), Y.call(0.26)], [X.call(0.14), Y.call(0.50)], [X.call(0.02), Y.call(0.50)]], "c": "sombre", "z": 2})
+			if String(f.get("poste", "")) == "conduite":   # tableau de bord et volant
+				formes.append({"pts": [[X.call(0.80), Y.call(0.10)], [X.call(1.0), Y.call(0.10)], [X.call(1.0), Y.call(0.38)], [X.call(0.86), Y.call(0.38)]], "c": "metal", "z": 2})
+				formes.append({"ligne": [[X.call(0.82), Y.call(0.36)], [X.call(0.66), Y.call(0.46)]], "ep": 0.03, "c": "metal", "z": 2})
 
 
 static func signature(a: Dictionary) -> String:

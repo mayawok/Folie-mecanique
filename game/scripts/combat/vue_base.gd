@@ -100,6 +100,7 @@ var _ord_t := 0.0               # temps restant d'affichage du bandeau d'ordres
 var _btn_ordres: Button
 var _btn_marche: Button
 var _btn_garage: Button
+var _btn_troupes: Button
 var _save_t := 0.0
 const SAVE_PATH := "user://convoi_save.json"
 var _btn_feu: Button

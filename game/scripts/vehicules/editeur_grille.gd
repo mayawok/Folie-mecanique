@@ -21,9 +21,9 @@ const C_DISCRET := Color("#A8A196")
 const C_VERT := Color("#5FB36B")
 const C_ROUGE := Color("#D9674A")
 const C_SOL := Color(0.55, 0.45, 0.3)
-const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A")}
+const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A")}
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["moteur", "Moteurs"],
-	["cabine", "Cabines"], ["arme", "Armes"], ["equipement", "Équipement"], ["equipage", "Équipage"]]
+	["poste", "Postes"], ["cabine", "Cabines"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
 const ESSIEUX := ["essieu_leger", "essieu_lourd", "essieu_char"]
 const TRAINS := ["roue_petite", "roue_moyenne", "roue_grande", "chenille"]
 const NOMS_ROLES := {"conducteur": "Conducteur", "tireur": "Tireur", "chargeur": "Chargeur", "chef": "Chef de char",
@@ -145,14 +145,14 @@ func _disposer() -> void:
 	_btn_nom.position = Vector2(g, haut)
 	_btn_nom.custom_minimum_size = Vector2(0, 68)
 	_btn_nom.size = Vector2(maxf(200.0, x - g - 20.0), 68)
-	# Onglets : deux rangées de quatre en haut du panneau
-	var tw := (_panneau.size.x - 3 * 8.0) / 4.0
+	# Onglets : deux rangées de cinq en haut du panneau
+	var tw := (_panneau.size.x - 4 * 8.0) / 5.0
 	for i in _onglets.size():
 		var b: Button = _onglets[i]
 		b.custom_minimum_size = Vector2(tw, 64)
 		b.size = Vector2(tw, 64)
-		b.position = _panneau.position + Vector2((i % 4) * (tw + 8.0), (i / 4) * 72.0)
-		b.add_theme_font_size_override("font_size", 19)
+		b.position = _panneau.position + Vector2((i % 5) * (tw + 8.0), (i / 5) * 72.0)
+		b.add_theme_font_size_override("font_size", 17)
 		b.modulate = C_ACCENT if ONGLETS[i][0] == onglet else Color.WHITE
 	for b in [_btn_haut, _btn_bas]:
 		b.custom_minimum_size = Vector2(96, 64)
@@ -480,14 +480,19 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 			res.append({"titre": "Démonter la roue", "detail": "touchez un essieu pour lui retirer sa roue", "choisi": outil.roues == "",
 				"action": func(): outil.roues = "", "couleur": Color("#333")})
 		"equipage":
-			var roles := ConstructionLibre.roles_de(a)
-			if roles.is_empty():
-				res.append({"titre": "Aucun siège", "detail": "posez une cabine (onglet Cabines)", "actif": false, "couleur": Color("#333")})
-			for i in roles.size():
-				var k := i
-				var r: String = roles[i]
-				res.append({"titre": "Siège %d : %s" % [i + 1, NOMS_ROLES[r]], "detail": AIDE_ROLES[r],
-					"actif": i > 0, "action": func(): _changer_role(k), "couleur": Color("#5E6238")})
+			var sieges := ConstructionLibre.sieges_equipage(a)
+			if sieges.is_empty():
+				res.append({"titre": "Aucun siège", "detail": "posez un poste (onglet Postes) ou une cabine", "actif": false, "couleur": Color("#333")})
+			for i in sieges.size():
+				var s: Dictionary = sieges[i]
+				var k: int = s.k
+				var r: String = s.role
+				res.append({"titre": "Siège %d : %s" % [i + 1, NOMS_ROLES[r]], "detail": AIDE_ROLES[r] + (" · poste fixe" if s.fixe else ""),
+					"actif": not s.fixe, "action": func(): _changer_role(k), "couleur": Color("#5E6238")})
+			var nt := ConstructionLibre.places_troupes(a)
+			if nt > 0:
+				res.append({"titre": "Bancs : %d soldat%s" % [nt, "s" if nt > 1 else ""], "detail": "embarqués depuis la réserve, débarquables en combat",
+					"actif": false, "couleur": Color("#6E5A3A")})
 		_:
 			for it in _palette:
 				var f := Assemblage.piece(it.id)
@@ -509,10 +514,14 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 	return res
 
 
-func _changer_role(i: int) -> void:
-	var roles := ConstructionLibre.roles_de(a)
-	var k := ConstructionLibre.ROLES.find(roles[i])
-	roles[i] = ConstructionLibre.ROLES[(k + 1) % ConstructionLibre.ROLES.size()]
+func _changer_role(k: int) -> void:   # k : rang parmi les sièges libres (a.roles)
+	if k < 0:
+		return
+	var roles: Array = a.get("roles", []).duplicate()
+	while roles.size() <= k:
+		roles.append("tireur")
+	var j := ConstructionLibre.ROLES.find(String(roles[k]))
+	roles[k] = ConstructionLibre.ROLES[(j + 1) % ConstructionLibre.ROLES.size()]
 	a.roles = roles
 	_maj()
 
@@ -587,7 +596,9 @@ func _dessiner_dessus() -> void:
 	var aides := {"chassis": "Glissez d'un coin à l'autre pour tracer un rectangle de châssis.",
 		"essieux": "Touchez une colonne : l'essieu se fixe sous le châssis. Montez ensuite la roue.",
 		"roues": "Choisissez une roue ou une chenille, puis touchez (ou glissez sur) un essieu.",
-		"equipage": "Siège 1 : le conducteur. Touchez les autres sièges pour choisir leur rôle."}
+		"poste": "Poste de conduite, de commande ou banc de troupes (face avant ou arrière) : fabriqués en métal.",
+		"cabine": "Une cabine se pose par-dessus les sièges : camion, voiture, blindée… (décor).",
+		"equipage": "Les postes de conduite et de commande sont fixes. Touchez un autre siège pour changer son rôle."}
 	var txt: String = _message if _msg_t > 0.0 else String(aides.get(onglet, "Glissez une pièce sur la grille. Touchez une pièce posée pour la déplacer."))
 	c.draw_string(police, Vector2(_grille.position.x, _grille.position.y - 18), txt, HORIZONTAL_ALIGNMENT_LEFT, _panneau.position.x - _grille.position.x - 20.0,
 		22, C_ACCENT if _msg_t > 0.0 else C_DISCRET)

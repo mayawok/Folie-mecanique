@@ -199,7 +199,8 @@ func _terminer_demontage(v: Veh) -> void:
 	for p in res.pieces:
 		pieces_stock.append(p)
 	stocks.metal += float(res.metal)
-	reserve_survivants += v.equipage_vivant()
+	reserve_survivants += v.equipage_vivant() + v.troupes_vivantes()
+	v.troupes = []
 	for b in batiments:
 		b.garage.erase(v.uid)
 	convoi.erase(v)
@@ -282,7 +283,11 @@ func palette_grille(uid: int) -> Array:
 		for id in c:
 			if Assemblage.piece(id).get("famille", "") in fams and Assemblage.piece(id).has("emprise"):
 				res.append({"id": id, "n": int(c[id])})
-	var ordre := {"moteur": 0, "cabine": 1, "arme": 2, "equipement": 3}
+		for id in Assemblage.catalogue().pieces:   # postes, bancs et cabines : toujours disponibles, payés en métal
+			var fi := Assemblage.piece(id)
+			if bool(fi.get("fabrique", false)) and fi.get("famille", "") in fams and fi.has("emprise"):
+				res.append({"id": id, "n": -1})
+	var ordre := {"moteur": 0, "poste": 1, "cabine": 2, "arme": 3, "equipement": 4}
 	res.sort_custom(func(p, q):
 		var fp := Assemblage.piece(p.id)
 		var fq := Assemblage.piece(q.id)
@@ -364,6 +369,7 @@ func construire_grille(uid: int, a: Dictionary) -> bool:
 		v.noms.append(_nom_survivant())
 		if reserve_survivants > 0:
 			reserve_survivants -= 1
+	_embarquer_troupes(v)
 	_replacer(true)
 	v.x_prev = v.x
 	var p: Dictionary = v.profil

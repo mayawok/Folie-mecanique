@@ -188,6 +188,8 @@ static func demonter(a: Dictionary, etats := {}) -> Dictionary:
 	var metal := int(ConstructionLibre.cout_metal(a) * 0.5) if a.get("libre", false) else int(piece(a.chassis).metal)
 	var res := {"pieces": [], "metal": metal}
 	for p in a.get("pieces", []):
+		if bool(piece(p.piece).get("fabrique", false)):
+			continue   # pièce fabriquée : démontée en métal (déjà compté dans la ferraille)
 		var fam: String = piece(p.piece).get("famille", "")
 		res.pieces.append({"piece": p.piece, "etat": float(etats.get(fam, 1.0))})
 	return res
@@ -197,7 +199,8 @@ static func demonter(a: Dictionary, etats := {}) -> Dictionary:
 static func ids(a: Dictionary) -> Array:
 	var res := [] if a.get("chassis", "") == "" else [a.chassis]
 	for p in a.get("pieces", []):
-		res.append(p.piece)
+		if not bool(piece(p.piece).get("fabrique", false)):   # postes, bancs, cabines : fabriqués au métal, pas en réserve
+			res.append(p.piece)
 	return res
 
 

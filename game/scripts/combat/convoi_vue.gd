@@ -139,6 +139,8 @@ func _synchroniser() -> void:
 		n.x_monde = x
 		n.vitesse = v.vitesse_act if (v.actif() and not pause) else 0.0
 		n.equipage = v.actif()
+		n.equipage_dehors = m.equipage_dehors(v) > 0   # descendus réparer : on ne les voit plus à bord (DEC-064)
+		n.troupes_a_bord = v.troupes_vivantes() if v.camp == "joueur" else -1
 		var hs: bool = v.statut == "epave" and v.pieces.has("chassis") and v.pieces.chassis.pv <= 0.0
 		if n.sans_roues != hs:
 			n.sans_roues = hs

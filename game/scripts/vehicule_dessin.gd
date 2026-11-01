@@ -18,6 +18,8 @@ var miroir := false         # regarde vers la gauche
 var ennemi := false         # teinte et équipage de pillards
 var equipage := true
 var sans_roues := false     # épave irréparable : roues arrachées, la caisse repose au sol
+var equipage_dehors := false  # réparation : tout l'équipage est descendu sauf le chef de char (on ne le voit plus à bord)
+var troupes_a_bord := -1    # nombre de soldats encore sur les bancs (-1 = tous)
 var x_monde := 0.0          # position de l'arrière dans le monde (m), pour lire le relief
 var sol := Callable()       # sol(x_m) -> hauteur du sol (m) ; vide = sol plat
 
@@ -205,6 +207,7 @@ func _draw() -> void:
 		return
 	for r in D.get("roues_fond", []):
 		_roue(_c(Vector2(r.x, r.r)), r.r, 0.65)
+	_formes(-1)
 	if equipage:
 		_equipage()
 	_formes(0)
@@ -408,10 +411,18 @@ func _eclair(p: Vector2, taille: float) -> void:
 
 func _equipage() -> void:
 	var i := 0
+	var vus_troupes := 0
 	for m in D.get("equipage", []):
+		i += 1
+		if m.role == "troupe":
+			vus_troupes += 1
+			if troupes_a_bord >= 0 and vus_troupes > troupes_a_bord:
+				continue   # ce soldat est descendu
+		elif equipage_dehors and m.role != "chef":
+			continue   # descendu réparer : on ne le voit plus à bord
 		var var_id := "pillard" if ennemi else ("tireur" if m.role in ["tireur", "chef"] else ("survivante" if i % 2 else "survivant"))
 		var debout: bool = m.get("debout", false)
 		var pied := _c(Vector2(m.x, m.y))
+		var sens: bool = miroir != (float(m.get("dir", 1.0)) < 0.0)   # banc tourné vers l'arrière
 		Silhouette.dessiner(self, pied, ppm, var_id, {"assis": true, "h": m.get("h", 0.62 if debout else 0.55),
-			"miroir": miroir, "peau": i + type.length(), "bras": "vise" if m.role == "tireur" else ""})
-		i += 1
+			"miroir": sens, "peau": i + type.length(), "bras": "vise" if m.role == "tireur" else ""})

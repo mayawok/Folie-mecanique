@@ -223,3 +223,10 @@ lourd tant que le convoi roule, tirs, impacts, explosions, atelier, radio.
 
 ## Menu, ordres, garage, reprise
 Voir DECISIONS.md : menu véhicule au toucher, bouton Ordres du convoi + Demi-tour, hangar/grange (garage), sauvegarde auto, sons synthétisés.
+
+
+## Troupes et réparation (DEC-063, 064)
+
+Bouton « Débarquer les troupes » : le convoi s'arrête, les soldats combattent à moins de 30 m de leur véhicule et remontent
+après 4 s de calme ou sur ordre. En réparation, tout l'équipage descend sauf le chef de char ; il n'est plus visible à bord et les
+armes du véhicule se taisent.

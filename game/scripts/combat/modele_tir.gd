@@ -16,6 +16,8 @@ func _mecanicien_possible(v: Veh) -> bool:
 func _armes_vehicule(v: Veh, dt: float) -> void:
 	if v.equipage_vivant() == 0 or v.camoufle or v.garage != 0:
 		return
+	if equipage_dehors(v) > 0:
+		return   # l'équipage est descendu réparer : plus personne aux armes (DEC-064)
 	var D := donnees()
 	for a in v.armes:
 		a.cd -= dt
@@ -82,6 +84,10 @@ func _choisir_cible(att, w: Dictionary):
 			if b.revele_t > 0.0 and b.garnison_vivants() > 0 and ecart(att.x, att.longueur, b.x, b.longueur) <= w.portee:
 				cands.append(b)
 				poids.append(1.2)
+		for s in monde.pietons:   # soldats débarqués : cibles à découvert
+			if s.camp == "joueur" and s.actif() and ecart(att.x, att.longueur, s.x, s.longueur) <= w.portee:
+				cands.append(s)
+				poids.append(float(donnees().troupes.cible_poids))
 		if cands.is_empty():
 			return null
 		var total := 0.0
@@ -296,13 +302,22 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 	return zone
 
 func _blesser_equipage(v: Veh, d: float) -> void:
-	var vivants := []
+	var vivants := []   # équipage (indice >= 0) et soldats des bancs (indice -1 - j)
 	for i in v.equipage.size():
 		if v.equipage[i] > 0.0:
 			vivants.append(i)
+	for j in v.troupes.size():
+		if v.troupes[j] > 0.0:
+			vivants.append(-1 - j)
 	if vivants.is_empty():
 		return
 	var i: int = vivants[rng.randi() % vivants.size()]
+	if i < 0:
+		var j := -1 - i
+		v.troupes[j] = maxf(0.0, v.troupes[j] - d)
+		if v.troupes[j] <= 0.0 and v.camp == "joueur":
+			log_("%s : un soldat est tombé sur son banc." % v.nom, "alerte")
+		return
 	v.equipage[i] = maxf(0.0, v.equipage[i] - d)
 	if v.equipage[i] <= 0.0 and v.camp == "joueur":
 		log_("%s : un membre d'équipage est hors de combat." % v.nom, "alerte")
@@ -356,7 +371,30 @@ func _blesser_tireur(b: Bat, d: float) -> void:
 			t.pv = maxf(0.0, t.pv - d)
 			return
 
+# Complète les bancs de troupes avec les recrues de la réserve (le bac à sable en fournit sans limite)
+func _embarquer_troupes(v: Veh) -> void:
+	var places := int(v.profil.get("places_troupes", 0))
+	while v.troupes.size() > places:
+		v.troupes.pop_back()
+		reserve_survivants += 1
+	while v.troupes.size() < places and (reserve_survivants > 0 or bac_a_sable):
+		v.troupes.append(float(donnees().equipage_pv))
+		if reserve_survivants > 0:
+			reserve_survivants -= 1
+
+
+# Pendant une réparation, tout l'équipage descend sauf le chef de char (DEC-064) : nombre de personnes dehors
+func equipage_dehors(v: Veh) -> int:
+	if not (v.reparation and ordres.marche == "halte"):
+		return 0
+	return maxi(0, v.equipage_vivant() - (1 if v.a_un_chef() else 0))
+
+
 func _detruire(v: Veh) -> void:
+	for pv in v.troupes:   # les soldats d'un véhicule détruit sautent à terre : ils rejoindront un autre véhicule
+		if pv > 0.0:
+			reserve_survivants += 1
+	v.troupes = []
 	v.statut = "epave"
 	v.reparation = false
 	for id in v.pieces:

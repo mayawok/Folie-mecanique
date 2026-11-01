@@ -21,6 +21,9 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
   et centrée, châssis en rectangles, essieu puis roue, onglets par catégorie, vrai dessin pendant le glisser, nom proposé et
   modifiable, rôles d'équipage avec avertissement, phares, méga-char pénalisé, écrasement, lance-flammes, trajectoires réalistes,
   épave sans roues, dézoom de fin, brouillon de grille, rendu limité à 2 px/pt contre les rechargements.
+- **Postes, bancs, cabines, troupes** (DEC-062 à 064) : postes de conduite et de commande, bancs de troupes dans les deux sens,
+  cabines décor camion/voiture/blindée au-dessus des sièges, troupes débarquables en combat, équipage descendu (sauf le chef) en réparation.
+  Tests : 6 suites sans écran vertes ; capture `tests/capture_cabines.gd`. **À vérifier sur iPhone.**
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)

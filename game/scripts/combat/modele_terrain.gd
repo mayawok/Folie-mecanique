@@ -341,7 +341,7 @@ func alerte() -> Dictionary:
 func menace() -> bool:
 	var F: Dictionary = donnees().fouille
 	for p in monde.pietons:
-		if p.actif() and absf(p.x - x_tete) < F.menace_distance:
+		if p.actif() and p.camp == "ennemi" and absf(p.x - x_tete) < F.menace_distance:
 			return true
 	for e in ennemis:
 		if e.actif() and absf(e.x - x_tete) < F.menace_distance:

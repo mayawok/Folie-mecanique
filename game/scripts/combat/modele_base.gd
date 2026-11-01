@@ -90,6 +90,18 @@ class Veh extends RefCounted:
 	var butin := {}
 	var butin_pris := false
 	var assemblage := {}          # châssis + pièces placées (DEC-029)
+	var troupes: Array = []       # pv des soldats assis sur les bancs (DEC-063)
+
+	func troupes_vivantes() -> int:
+		var n := 0
+		for pv in troupes:
+			if pv > 0.0:
+				n += 1
+		return n
+
+	# Un chef de char est assis au poste de commandement (ou a reçu ce rôle) : il reste à bord pendant les réparations
+	func a_un_chef() -> bool:
+		return profil.get("roles", []).has("chef") and equipage_vivant() > 0
 
 	func actif() -> bool:
 		return statut == "actif"

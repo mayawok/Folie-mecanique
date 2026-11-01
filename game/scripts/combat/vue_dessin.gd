@@ -128,7 +128,8 @@ func _dessiner_monde(c: CanvasItem) -> void:
 		elif mort:
 			c.draw_rect(Rect2(pied + Vector2(-0.7 * ppm, -0.22 * ppm), Vector2(1.4 * ppm, 0.22 * ppm)), Color(0.18, 0.15, 0.12, 0.8))
 		else:
-			Silhouette.dessiner(c, pied, ppm, "pillard", {"phase": phase if marche else 0.0, "miroir": p.dir < 0.0, "peau": p.uid, "bras": "vise" if not marche else ""})
+			var allie: bool = p.camp == "joueur"   # soldat débarqué : tenue du convoi
+			Silhouette.dessiner(c, pied, ppm, "tireur" if allie else "pillard", {"phase": phase if marche else 0.0, "miroir": p.dir < 0.0, "peau": p.uid, "bras": "vise" if not marche else ""})
 	# Lueur des feux allumés dans les bâtiments
 	for b in m.batiments:
 		if b.feu:
@@ -479,7 +480,7 @@ func _maj_persos(delta: float) -> void:
 				var id: String = m._piece_a_reparer(v)
 				if id != "":
 					var cx: float = _ancre(v, id).x
-					voulus["rep%d" % v.uid] = {"cible": cx, "variante": "mecano", "n": 1, "origine": _origine_x(_rx(v) + v.longueur * 0.5)}
+					voulus["rep%d" % v.uid] = {"cible": cx, "variante": "mecano", "n": clampi(m.equipage_dehors(v), 1, 4), "origine": _origine_x(_rx(v) + v.longueur * 0.5)}
 	for cle in voulus:
 		var d: Dictionary = voulus[cle]
 		var existants := _persos.filter(func(q): return q.cle == cle)

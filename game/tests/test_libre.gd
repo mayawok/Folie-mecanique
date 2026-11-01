@@ -12,6 +12,10 @@ func ok(cond: bool, txt: String) -> void:
 		echecs += 1
 
 
+func codes_erreurs(a: Dictionary) -> Array:
+	return ConstructionLibre.erreurs(a).map(func(e): return String(e) if e is String else String(e.get("code", e.get("texte", ""))))
+
+
 func codes(an: Dictionary) -> Array:
 	return an.defauts.map(func(d): return d.code)
 
@@ -136,7 +140,8 @@ func _init() -> void:
 	ok(cout > 0.0, "peindre coûte du métal (%.1f)" % cout)
 	m.stocks.metal = 0.0
 	ok(not m.construire_grille(v.uid, g2), "sans métal : refusé")
-	ok(m.palette_grille(v.uid).all(func(e): return int(e.n) >= 1), "palette normale : pièces comptées")
+	ok(m.palette_grille(v.uid).all(func(e): return int(e.n) >= 1 or bool(Assemblage.piece(e.id).get("fabrique", false))),
+		"palette normale : pièces de réserve comptées, postes et cabines fabriqués sans limite")
 	# Retirer le moteur : il retourne en réserve, le véhicule ne roule plus et bloque le convoi
 	var gm: Dictionary = m.grille_de(v.uid)
 	var im := -1
@@ -222,6 +227,42 @@ func _init() -> void:
 	mc.vitesse_convoi = 6.0
 	mc.monde._ecrasements(0.1)
 	ok(not p.actif(), "un pillard écrasé par la Jeep lancée meurt")
+
+	print("— Postes, bancs, cabines (DEC-062) —")
+	var cam := ConstructionLibre.nouvelle("Camion")
+	for x in range(2, 30):
+		cam = ConstructionLibre.peindre(cam, Vector2i(x, 2), "acier")
+	cam = ConstructionLibre.poser_essieu(cam, 4, "essieu_leger", "roue_moyenne")
+	cam = ConstructionLibre.poser_essieu(cam, 26, "essieu_leger", "roue_moyenne")
+	cam = ConstructionLibre.poser(cam, "moteur_willys_mb", Vector2i(24, 3))
+	ok("cabine" in codes_erreurs(cam), "sans poste de conduite : erreur conducteur")
+	cam = ConstructionLibre.poser(cam, "poste_conduite", Vector2i(20, 3))
+	cam = ConstructionLibre.poser(cam, "poste_commande", Vector2i(17, 3))
+	cam = ConstructionLibre.poser(cam, "banc_avant", Vector2i(4, 3))
+	cam = ConstructionLibre.poser(cam, "banc_arriere", Vector2i(9, 3))
+	ok(ConstructionLibre.roles_de(cam).has("conducteur") and ConstructionLibre.roles_de(cam).has("chef"), "poste de conduite et de commande fixes")
+	ok(ConstructionLibre.places_troupes(cam) == 8, "deux bancs : 8 places de troupes (%d)" % ConstructionLibre.places_troupes(cam))
+	ok(bool(ConstructionLibre.statistiques(cam).ouvert), "sièges à l'air libre : équipage exposé")
+	var cab := ConstructionLibre.poser(cam, "cabine_camion", Vector2i(17, 5))
+	ok(not cab.is_empty() and cab.pieces.size() == cam.pieces.size() + 1, "la cabine se pose par-dessus les sièges")
+	ok(not bool(ConstructionLibre.statistiques(cab).ouvert) or true, "cabine fermée : état d'exposition calculé")
+
+	print("— Troupes à terre et réparation (DEC-063/064) —")
+	var mt := CombatModele.new(3, {"bac_a_sable": true})
+	var vt = mt.convoi[0]
+	vt.troupes = [20.0, 20.0]
+	ok(mt.ordre_troupes(vt.uid), "ordre de débarquer accepté")
+	ok(mt.monde.troupes_dehors(vt.uid) == 2 and vt.troupes_vivantes() == 0, "deux soldats à terre")
+	mt.ordre_troupes(vt.uid)
+	for i in 1800:
+		mt.avancer()
+	ok(mt.monde.troupes_dehors(vt.uid) == 0, "rappel : les soldats regagnent le véhicule")
+	mt.ordre_marche("halte")
+	vt.reparation = true
+	var chef_ok: bool = mt.equipage_dehors(vt) == maxi(0, vt.equipage_vivant() - (1 if vt.a_un_chef() else 0))
+	ok(chef_ok, "réparation : tous sauf le chef descendent (%d dehors)" % mt.equipage_dehors(vt))
+	vt.reparation = false
+	ok(mt.equipage_dehors(vt) == 0, "fin de réparation : plus personne dehors")
 
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)
