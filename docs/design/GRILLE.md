@@ -213,3 +213,32 @@ Famille `greffe` du catalogue (`pieces.json`), onglet Options. Se fixent **à l'
 | Drapeau de bande | décoratif |
 
 Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et un champ d'effet (`blindage_plus`, `piques`, `reservoir_plus`). Le dessin d'un nouveau modèle demande une entrée dans `_formes_greffe`. **À venir** : éperon, qui attend les collisions entre véhicules.
+
+## Grille du 01/11 soir (DEC-080)
+
+**Interface en icônes.** Barre à droite : coche (construire), croix (quitter), puis Châssis, Essieux, Roues, Suspension, Moteurs (et radiateurs), Postes, Carrosserie, Tôles, Armes, Options (équipement, greffes), Équipage, Peinture, Plans, Véhicules. La catégorie ouvre un tiroir de vignettes : chaque vignette est une miniature du vrai dessin de la pièce (aucune image à produire). Le texte se limite au nom, à un message bref et à une ligne de bilan. Grille portée à 48 × 18 cases, fenêtre minimale 20 × 9.
+
+**Déplacer, retirer.** Toute pièce posée se reprend au doigt depuis n'importe quelle catégorie (coques : seulement en Carrosserie) ; relâchée ailleurs elle se déplace, hors de la grille elle est retirée.
+
+**Coques superposées.** Les coques peuvent se chevaucher : on en pose une sur une autre pour la scier ; le toucher prend celle du dessus.
+
+**Poutres.** Matériau de châssis « poutre » (cadre en échelle : 30 kg, 7 pv, blindage 1). Un moteur se pose au travers des poutres et des tubes, pas d'une tôle d'acier pleine.
+
+**Radiateur.** Un moteur refroidi par eau exige des radiateurs à 2 cases au plus, de capacité au moins égale à sa puissance. Sans radiateur : immobile. Trop petit : lent (×capacité/besoin, au moins ×0,4). Refroidis par air : moteurs en étoile (Stuart, Sherman, avion) et bicylindre BMW. Exemptés : grilles d'avant DEC-080 (`v` < 2) et véhicules du jeu convertis (`origine`).
+
+| Radiateur | Refroidit | Cases |
+|---|---|---|
+| Voiture | 70 ch | 1 × 2 |
+| Camion | 160 ch | 1 × 3 |
+| Double | 380 ch | 2 × 3 |
+| Char | 800 ch | 3 × 3 |
+
+**Tôles.** Onglet Tôles : glisser d'un coin de case à un autre trace une tôle à l'angle voulu (l'angle s'affiche). Une tôle part du véhicule ou du bout d'une autre tôle ; toucher une tôle la retire. Par case de longueur : 35 kg, 5 pv, 0,75 métal, blindage 1,5 × facteur ; facteur = 1/cos(angle à la verticale), plafonné à 2,5 (au-delà de 75°, un toit compte 1). Une forme fermée devient une caisse blindée rivetée qui met l'équipage à couvert. Stockage : `a.toles = [[x0, y0, x1, y1]]`.
+
+**Peinture de bande.** Onglet Peinture : un ton pour tout le véhicule (`a.peinture`), appliqué au dessin et aux visuels ; servira à distinguer les factions.
+
+**Remorques.** Onglet Véhicules : « Remorque » démonte moteurs et radiateurs et pose un timon (greffe `greffe_timon`). Une remorque n'a besoin ni de moteur ni de conducteur, mais d'un timon. Dans le convoi, elle est tirée par le premier véhicule à moteur devant elle, qui ralentit (× √(M / (M + M remorques))) et consomme plus. Une remorque en tête bloque la marche.
+
+**Bac à sable : véhicules du jeu.** Onglet Véhicules : grille vide, ou n'importe quel véhicule du jeu converti, à modifier ou à transformer en remorque.
+
+**Plus tard** : gazogène, marques des pièces (demandés, notés pour plus tard).

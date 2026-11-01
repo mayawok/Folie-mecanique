@@ -29,6 +29,7 @@ func jeep() -> Dictionary:
 	a = ConstructionLibre.poser_essieu(a, 4, "essieu_leger", "roue_moyenne")
 	a = ConstructionLibre.poser_essieu(a, 15, "essieu_leger", "roue_moyenne")
 	a = ConstructionLibre.poser(a, "moteur_willys_mb", Vector2i(13, 3))
+	a = ConstructionLibre.poser(a, "radiateur_voiture", Vector2i(17, 3))
 	a = ConstructionLibre.poser(a, "cabine_willys_mb", Vector2i(5, 3))
 	return a
 
@@ -38,7 +39,7 @@ func _init() -> void:
 	var a := jeep()
 	ok(a.cases.size() == 16, "16 cases peintes")
 	ok(a.essieux.size() == 2, "deux essieux posés")
-	ok(a.pieces.size() == 2, "moteur et cabine posés (%d)" % a.pieces.size())
+	ok(a.pieces.size() == 3, "moteur, radiateur et cabine posés (%d)" % a.pieces.size())
 	ok(ConstructionLibre.poser(a, "moteur_willys_mb", Vector2i(30, 12)).is_empty() or true, "une pièce loin du châssis cherche un appui")
 	var flottant := ConstructionLibre.poser(ConstructionLibre.nouvelle(), "moteur_willys_mb", Vector2i(5, 5))
 	ok(flottant.is_empty(), "une pièce sans châssis dessous est refusée")
@@ -61,7 +62,7 @@ func _init() -> void:
 	var sans_moteur := ConstructionLibre.retirer(a, 0)
 	var an2 := ConstructionLibre.analyser(sans_moteur)
 	ok(an2.ok and float(an2.stats.vitesse) == 0.0 and String(an2.stats.immobile).contains("moteur"), "sans moteur : construit mais immobile (%s)" % an2.stats.immobile)
-	var sans_siege := ConstructionLibre.retirer(a, 1)
+	var sans_siege := ConstructionLibre.retirer(a, 2)
 	ok(not ConstructionLibre.analyser(sans_siege).ok, "sans siège : refusé (personne pour conduire)")
 	# Un seul essieu : bascule
 	var un := ConstructionLibre.retirer_essieu(a, 15)
@@ -284,7 +285,7 @@ func _init() -> void:
 	var k_remis := ConstructionLibre.poser(k_sans_mot, String(k_jc.pieces[k_i_mot].piece), Vector2i(int(k_pos_mot[0]), int(k_pos_mot[1])))
 	ok(not k_remis.is_empty() and k_remis.pieces[k_remis.pieces.size() - 1].pos == k_pos_mot, "un moteur se pose sous une coque, à la même place")
 	var k_pile := ConstructionLibre.poser(k_jc, "coque_berline", Vector2i(1, 6))
-	ok(not k_pile.is_empty() and int(k_pile.pieces[k_pile.pieces.size() - 1].pos[1]) >= 7, "deux coques s'empilent sans se chevaucher")
+	ok(not k_pile.is_empty() and int(k_pile.pieces[k_pile.pieces.size() - 1].pos[1]) == 6, "deux coques peuvent se chevaucher (DEC-080)")
 	ok(ConstructionLibre.piece_en(k_jc, Vector2i(5, 3), true) == k_jc.pieces.size() - 1, "onglet Carrosserie : toucher désigne la coque d'abord")
 	var k_nu := k_jc
 	for x in range(2, 18):
@@ -415,6 +416,79 @@ func _init() -> void:
 	ok(ConstructionLibre.poser(g_j, "greffe_drapeau", Vector2i(g_xmax + 12, g_ymin + 6)).is_empty(), "une greffe loin de tout n'est pas posée sans appui")
 	var g_sup := ConstructionLibre.poser(g_bi, "arme_mitrailleuse", Vector2i(g_xmax + 1, g_ymin + 1))
 	ok(g_sup.is_empty() or int(g_sup.pieces[g_sup.pieces.size() - 1].pos[0]) != g_xmax + 1 or int(g_sup.pieces[g_sup.pieces.size() - 1].pos[1]) != g_ymin + 1, "rien ne repose sur une greffe")
+
+	print("— Grille du 01/11 soir (DEC-080) —")
+	var d_j := jeep()
+	# Radiateur
+	var d_i_rad := -1
+	for kk in d_j.pieces.size():
+		if String(d_j.pieces[kk].piece) == "radiateur_voiture":
+			d_i_rad = kk
+	var d_sans_rad := ConstructionLibre.retirer(d_j, d_i_rad)
+	ok(String(ConstructionLibre.analyser(d_sans_rad).stats.immobile).contains("radiateur"), "sans radiateur, le moteur chauffe et cale")
+	var d_loin := ConstructionLibre.poser(d_sans_rad, "radiateur_voiture", Vector2i(2, 3))
+	ok(String(ConstructionLibre.analyser(d_loin).stats.immobile).contains("loin"), "un radiateur loin du moteur ne sert pas")
+	ok(float(ConstructionLibre.analyser(d_j).stats.vitesse) > 0.0, "radiateur collé au moteur : il roule")
+	var d_hist := ConstructionLibre.convertir(Assemblage.de_type("willys_mb"), "willys_mb")
+	ok(float(ConstructionLibre.analyser(d_hist).stats.vitesse) > 0.0, "un véhicule du jeu converti garde son radiateur d'origine")
+	var d_air := ConstructionLibre.refroidissement({"pieces": [{"piece": "moteur_avion", "pos": [0, 0]}]})
+	ok(float(d_air.besoin) == 0.0, "un moteur en étoile est refroidi par air")
+	# Poutres et moteur traversant
+	var d_p := ConstructionLibre.nouvelle("Poutres")
+	for x in range(2, 18):
+		d_p = ConstructionLibre.peindre(d_p, Vector2i(x, 2), "poutre")
+		d_p = ConstructionLibre.peindre(d_p, Vector2i(x, 3), "poutre")
+	var d_pm := ConstructionLibre.poser(d_p, "moteur_willys_mb", Vector2i(12, 2))
+	ok(not d_pm.is_empty() and int(d_pm.pieces[0].pos[1]) == 2, "un moteur se pose au travers des poutres")
+	var d_a := ConstructionLibre.nouvelle("Acier")
+	for x in range(2, 18):
+		d_a = ConstructionLibre.peindre(d_a, Vector2i(x, 2), "acier")
+		d_a = ConstructionLibre.peindre(d_a, Vector2i(x, 3), "acier")
+	var d_am := ConstructionLibre.poser(d_a, "moteur_willys_mb", Vector2i(12, 2))
+	ok(d_am.is_empty() or int(d_am.pieces[0].pos[1]) >= 4, "pas au travers d'une tôle d'acier pleine")
+	# Tôles
+	var d_t := ConstructionLibre.poser_tole(d_j, Vector2i(18, 3), Vector2i(18, 7))
+	var d_t2 := ConstructionLibre.poser_tole(d_j, Vector2i(18, 3), Vector2i(21, 7))
+	ok(not d_t.is_empty() and not d_t2.is_empty(), "une tôle se trace d'un coin du véhicule à un autre point")
+	ok(ConstructionLibre.poser_tole(d_j, Vector2i(30, 10), Vector2i(32, 12)).is_empty(), "une tôle qui ne touche rien est refusée")
+	var d_b0 := float(ConstructionLibre.analyser(d_j).stats.blindage)
+	var d_b1 := float(ConstructionLibre.analyser(d_t).stats.blindage)
+	var d_b2 := float(ConstructionLibre.analyser(d_t2).stats.blindage)
+	ok(d_b1 > d_b0 and d_b2 > d_b1, "tôle : plus de blindage, et plus encore inclinée (%.1f, %.1f, %.1f)" % [d_b0, d_b1, d_b2])
+	var d_f: Array = ConstructionLibre.toles_de(d_t2)
+	ok(absf(float(d_f[0].facteur) - 5.0 / 4.0) < 0.01, "facteur d'inclinaison = 1/cos(angle)")
+	var d_c := ConstructionLibre.nouvelle("Caisse")
+	for x in range(2, 18):
+		d_c = ConstructionLibre.peindre(d_c, Vector2i(x, 2), "acier")
+	d_c = ConstructionLibre.poser_essieu(d_c, 4, "essieu_leger", "roue_moyenne")
+	d_c = ConstructionLibre.poser_essieu(d_c, 15, "essieu_leger", "roue_moyenne")
+	d_c = ConstructionLibre.poser(d_c, "poste_conduite", Vector2i(6, 3))
+	ok(ConstructionLibre._sieges_exposes(d_c), "poste à l'air libre : exposé")
+	for q in [[2, 3, 2, 7], [2, 7, 12, 7], [12, 7, 14, 3]]:
+		d_c = ConstructionLibre.poser_tole(d_c, Vector2i(q[0], q[1]), Vector2i(q[2], q[3]))
+	ok(ConstructionLibre.toles_fermees(d_c).is_empty(), "forme ouverte : pas de caisse")
+	d_c = ConstructionLibre.poser_tole(d_c, Vector2i(14, 3), Vector2i(2, 3))
+	ok(ConstructionLibre.toles_fermees(d_c).size() == 1, "forme fermée par 4 tôles détectée")
+	ok(not ConstructionLibre._sieges_exposes(d_c), "dans une caisse de tôles fermée, l'équipage est à couvert")
+	var d_fc: Array = ConstructionLibre.forme(d_c).formes.filter(func(f): return String(f.get("c", "")).begins_with("#4C5236"))
+	ok(not d_fc.is_empty(), "la forme fermée prend l'aspect blindé")
+	ok(ConstructionLibre.tole_en(d_c, Vector2(7.0, 7.1)) >= 0, "toucher une tôle la retrouve")
+	# Remorque, peinture
+	var d_r := ConstructionLibre.en_remorque(d_j)
+	ok(ConstructionLibre.remorque(d_r) and not d_r.pieces.any(func(p): return Assemblage.piece(String(p.piece)).famille in ["moteur", "radiateur"]), "en remorque : moteur et radiateur démontés")
+	ok(d_r.pieces.any(func(p): return String(p.piece) == "greffe_timon"), "un timon est posé à l'avant")
+	var d_ra := ConstructionLibre.analyser(d_r)
+	ok(d_ra.ok and float(d_ra.stats.vitesse) > 0.0 and float(d_ra.stats.conso) == 0.0, "une remorque roule sans moteur et ne consomme rien")
+	var d_rs := d_r.duplicate(true)
+	d_rs.pieces = d_rs.pieces.filter(func(p): return String(p.piece) != "greffe_timon")
+	ok(String(ConstructionLibre.analyser(d_rs).stats.immobile).contains("timon"), "sans timon, impossible de l'atteler")
+	d_j.peinture = "#B0623A"
+	ok(String(ConstructionLibre.forme(d_j).get("peinture", "")) == "#B0623A", "la peinture de bande passe au dessin")
+	# Coques superposées
+	var d_k := ConstructionLibre.poser(jeep(), "coque_berline", Vector2i(1, 2))
+	var d_k2 := ConstructionLibre.poser(d_k, "coque_cabine_camion", Vector2i(10, 2))
+	ok(not d_k2.is_empty() and int(d_k2.pieces.back().pos[0]) == 10, "une coque se pose par-dessus une autre, pour la découper")
+	ok(ConstructionLibre.piece_en(d_k2, Vector2i(11, 3), true) == d_k2.pieces.size() - 1, "toucher prend la coque du dessus")
 
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)

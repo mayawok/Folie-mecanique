@@ -40,6 +40,8 @@ var _rafale := 0
 var _t_rafale := 0.0
 var _fumee := []            # {pos, age}
 var _teinte := Color.OLIVE
+var _voile := Color.WHITE    # peinture de bande (DEC-080) : ton posé sur les visuels dessinés
+var roues_perdues: Array = []   # indices des roues arrachées en combat (DEC-080) : on ne les dessine plus
 
 
 static func donnees() -> Dictionary:
@@ -69,6 +71,10 @@ func configurer_d(d: Dictionary) -> void:
 	D = d
 	var teintes: Dictionary = donnees().teintes
 	_teinte = Color(teintes.pillards if ennemi else teintes[D.teinte])
+	_voile = Color.WHITE
+	if D.has("peinture") and not ennemi:
+		_teinte = Color(String(D.peinture))
+		_voile = Color.WHITE.lerp(_teinte.lightened(0.25), 0.55)
 	custom_minimum_size = Vector2(D.longueur, D.hauteur) * ppm
 	size = custom_minimum_size
 	_appuis.clear()
@@ -255,7 +261,7 @@ func _formes(z: int) -> void:
 # Visuel dessiné (planches de la grille) : quadrilatère texturé qui suit le relief et le sens du véhicule
 func _sprite(id: String, x: float, y: float, w: float, h: float, decal: float, opac := 1.0, miroir := false, uv := []) -> void:
 	var t: Texture2D = _tex(id)
-	_quad(t, _c(Vector2(x + decal, y + h)), _c(Vector2(x + w + decal, y + h)), _c(Vector2(x + decal, y)), Color(1, 1, 1, opac), miroir, uv)
+	_quad(t, _c(Vector2(x + decal, y + h)), _c(Vector2(x + w + decal, y + h)), _c(Vector2(x + decal, y)), Color(_voile, opac), miroir, uv)
 
 
 # Les visuels restent en mémoire : une texture qu'aucun objet ne retient est libérée puis rechargée à chaque image (blanche entre-temps)
@@ -328,8 +334,9 @@ func _train() -> void:
 		_ressort(moyeu, attache)
 	if D.has("chenille"):
 		_chenille()
-	for a in _appuis:
-		if not a.has("galet"):
+	for i in _appuis.size():
+		var a: Dictionary = _appuis[i]
+		if not a.has("galet") and not roues_perdues.has(i):
 			_roue(_e(Vector2(a.x, a.y)), a.r)
 
 

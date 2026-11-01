@@ -76,6 +76,9 @@ func _evenement(e: Dictionary) -> void:
 			var v = m.trouver(e.uid)
 			if v != null:
 				_explosions.append({"p": _ancre(v, e.piece), "age": 0.0, "taille": 1.1})
+		"roue_perdue":
+			_roues_tombees.append({"p": Vector2(e.x, float(e.r) + 0.4), "v": Vector2(float(e.sens) * _rng.randf_range(1.0, 2.5), 3.0), "r": float(e.r), "age": 0.0})
+			_son("sfx_impact_blindage", -6.0)
 		"epave":
 			var v = m.trouver(e.uid)
 			if v != null:
@@ -94,6 +97,15 @@ func _vieillir(delta: float) -> void:
 	_etincelles = _etincelles.filter(func(x): return x.age < 0.3)
 	_explosions = _explosions.filter(func(x): return x.age < 1.4)
 	_bouffees = _bouffees.filter(func(x): return x.age < 0.1)
+	for w in _roues_tombees:   # chute, rebonds, puis la roue roule et s'arrête sur la route
+		w.age += delta
+		w.v.y -= 9.8 * delta
+		w.p += w.v * delta
+		if w.p.y < w.r:
+			w.p.y = w.r
+			w.v.y = -w.v.y * 0.35
+			w.v.x *= 0.85
+	_roues_tombees = _roues_tombees.filter(func(w): return w.age < 6.0)
 
 func _loup(c: CanvasItem, pied: Vector2, dir: float, phase: float, mort: bool, teinte: Color) -> void:
 	var k := ppm
@@ -364,6 +376,17 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_line(p, p + Vector2.from_angle(k * TAU / nb + s.age * 3) * ((9 if gros else 6) + (34 if gros else 22) * s.age), Color(1, 0.8, 0.3, fade2), 2.0)
 	for s in _bouffees:
 		c.draw_circle(_px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
+	for v in m.convoi:   # timon entre une remorque et son tracteur (DEC-080)
+		if v.remorque() and v.actif() and v.garage == 0:
+			var t = m.tracteur_de(v)
+			if t != null and t.garage == 0:
+				c.draw_line(_px(Vector2(_rx(v) + v.longueur - 0.1, 0.55)), _px(Vector2(_rx(t) + 0.1, 0.55)), Color("#2E2C28"), maxf(3.0, ppm * 0.07))
+	for w in _roues_tombees:
+		var rp: float = w.r * ppm
+		var tex: Texture2D = VehiculeDessin._tex("roue_petite" if w.r < 0.3 else ("roue_moyenne" if w.r < 0.5 else "roue_grande"))
+		c.draw_set_transform(_px(w.p), -w.p.x / w.r, Vector2.ONE)
+		c.draw_texture_rect(tex, Rect2(-rp, -rp, 2.0 * rp, 2.0 * rp), false, Color(1, 1, 1, clampf(6.0 - w.age, 0.0, 1.0)))
+		c.draw_set_transform(Vector2.ZERO)
 	for x in _explosions:
 		var p := _px(x.p)
 		var k: float = x.age / 1.4

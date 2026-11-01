@@ -14,7 +14,8 @@ extends RefCounted
 
 const C := 0.25          # côté d'une cellule (m)
 const TOLERANCE := 0.5   # débattement de suspension (cellules) : une roue à moins de 12,5 cm du sol porte encore
-const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement", "coque", "greffe"]
+const FAMILLES_PIECES := ["moteur", "radiateur", "poste", "cabine", "arme", "equipement", "coque", "greffe"]
+const TRAVERSABLES := ["poutre", "tube"]   # un moteur peut traverser ces cases (cadre en échelle, treillis), DEC-080
 const OPAC_ECORCHE := 0.3   # vue écorchée : coque transparente pour voir la mécanique (DEC-067)
 const ROLES := ["tireur", "chargeur", "chef", "mecanicien", "infirmier", "passager"]   # le siège 1 est le conducteur (DEC-050)
 
@@ -28,12 +29,38 @@ static func taille() -> Vector2i:
 	return Vector2i(int(g[0]), int(g[1]))
 
 
+static func remorque(a: Dictionary) -> bool:   # remorque (DEC-080) : ni moteur ni conducteur, un timon pour l'atteler
+	return bool(a.get("remorque", false))
+
+
+# Fait d'une grille une remorque : moteurs et radiateurs démontés, timon posé à l'avant, contre le bas du châssis
+static func en_remorque(a: Dictionary) -> Dictionary:
+	var b := a.duplicate(true)
+	b.pieces = b.get("pieces", []).filter(func(p): return not Assemblage.piece(String(p.piece)).get("famille", "") in ["moteur", "radiateur"])
+	b.remorque = true
+	if not _pieces(b).any(func(q): return int(q.fiche.get("timon", 0)) > 0):
+		var xmax := -1
+		var ymin := 99
+		for c in _cases(b):
+			xmax = maxi(xmax, c.x)
+		for c in _cases(b):
+			if c.x == xmax:
+				ymin = mini(ymin, c.y)
+		if xmax >= 0:
+			var t := poser(b, "greffe_timon", Vector2i(xmax + 1, ymin))
+			if not t.is_empty():
+				b = t
+	if not String(b.get("nom", "")).ends_with("(remorque)"):
+		b.nom = String(b.get("nom", "Remorque")) + " (remorque)"
+	return nettoyer(b)
+
+
 static func est_libre(a: Dictionary) -> bool:
 	return bool(a.get("libre", false))
 
 
 static func nouvelle(nom := "Frankenstein") -> Dictionary:
-	return {"libre": true, "nom": nom, "cases": [], "essieux": [], "pieces": [], "plaques": 0}
+	return {"libre": true, "nom": nom, "cases": [], "essieux": [], "pieces": [], "plaques": 0, "v": 2}   # v 2 : radiateur exigé (DEC-080)
 
 
 # --- Lecture de la grille --------------------------------------------------------------------
@@ -142,9 +169,7 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 				if hab.has(Vector2i(x, y)):
 					return false
 		return _colle(_union(occ_sup, coq), p.pos, p.e)   # collée au châssis, à une pièce ou à une carrosserie
-	if _coque(p.fiche):   # ne chevauche aucune autre coque ; tenue si elle recouvre le châssis ou une pièce, ou repose dessus (empilable)
-		if not _libre(coq, p.pos, p.e):
-			return false
+	if _coque(p.fiche):   # peut chevaucher d'autres coques (pour les découper, DEC-080) ; tenue si elle recouvre le châssis ou une pièce, ou repose dessus
 		var tout := _union(_union(occ_sup, hab), coq)
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
@@ -162,6 +187,21 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 				if occ.has(c) and not _siege(_pieces(a)[int(occ[c])].fiche):
 					return false
 		return _portee(_union(_union(occ_sup, hab), toits), p.pos, p.e)
+	if p.fiche.get("famille", "") == "moteur":   # un moteur traverse les poutres et les tubes du châssis (DEC-080)
+		var cs := _cases(a)
+		var traverse := false
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				var c := Vector2i(x, y)
+				if cs.has(c) and String(cs[c]) in TRAVERSABLES:
+					occ.erase(c)
+					traverse = true
+		if traverse and _libre(occ, p.pos, p.e):
+			for x in range(p.pos.x, p.pos.x + p.e.x):
+				for y in range(p.pos.y, p.pos.y + p.e.y):
+					if hab.has(Vector2i(x, y)):
+						return false
+			return true
 	var libre := _libre(occ, p.pos, p.e)
 	if libre and not _siege(p.fiche):
 		for x in range(p.pos.x, p.pos.x + p.e.x):
@@ -169,6 +209,138 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 				if hab.has(Vector2i(x, y)):
 					libre = false
 	return libre and _portee(_union(_union(occ_sup, hab), toits), p.pos, p.e)   # une pièce peut reposer sur une coque (arme sur le toit)
+
+
+# --- Tôles tracées (DEC-080) : [[x0, y0, x1, y1]] en coins de cases ----------------------------
+static func toles_de(a: Dictionary) -> Array:   # [{a, b, long (cases), facteur, milieu}]
+	var TL: Dictionary = R().get("toles", {"facteur_max": 2.5})
+	var res := []
+	for t in a.get("toles", []):
+		var pa := Vector2(float(t[0]), float(t[1]))
+		var pb := Vector2(float(t[2]), float(t[3]))
+		var d := (pb - pa).abs()
+		var theta := atan2(d.x, d.y)   # 0 : tôle verticale, face aux tirs
+		var f := 1.0 if theta > deg_to_rad(75.0) else minf(float(TL.facteur_max), 1.0 / cos(theta))
+		res.append({"a": pa, "b": pb, "long": pa.distance_to(pb), "facteur": f, "milieu": (pa + pb) * 0.5})
+	return res
+
+
+# Un coin de case est-il accroché au véhicule (case, pièce, carrosserie) ou au bout d'une autre tôle ?
+static func coin_accroche(a: Dictionary, q: Vector2i) -> bool:
+	var occ := _union(_occ_totale(a), _occ_coque(a))
+	for d in [Vector2i(0, 0), Vector2i(-1, 0), Vector2i(0, -1), Vector2i(-1, -1)]:
+		if occ.has(q + d):
+			return true
+	for t in a.get("toles", []):
+		if Vector2i(int(t[0]), int(t[1])) == q or Vector2i(int(t[2]), int(t[3])) == q:
+			return true
+	return false
+
+
+# Trace une tôle d'un coin à l'autre ; {} si elle ne s'accroche à rien ou existe déjà
+static func poser_tole(a: Dictionary, q0: Vector2i, q1: Vector2i) -> Dictionary:
+	var G := taille()
+	if q0 == q1 or q0.x < 0 or q0.y < 0 or q1.x < 0 or q1.y < 0 or q0.x > G.x or q1.x > G.x or q0.y > G.y or q1.y > G.y:
+		return {}
+	if not (coin_accroche(a, q0) or coin_accroche(a, q1)):
+		return {}
+	for t in a.get("toles", []):
+		var u := [Vector2i(int(t[0]), int(t[1])), Vector2i(int(t[2]), int(t[3]))]
+		if (u[0] == q0 and u[1] == q1) or (u[0] == q1 and u[1] == q0):
+			return {}
+	var b := a.duplicate(true)
+	if not b.has("toles"):
+		b.toles = []
+	b.toles.append([q0.x, q0.y, q1.x, q1.y])
+	return b
+
+
+# Tôle la plus proche d'un point (en cases), à moins de `dist` ; -1 sinon
+static func tole_en(a: Dictionary, p: Vector2, dist := 0.45) -> int:
+	var best := -1
+	var dm := dist
+	var ts: Array = a.get("toles", [])
+	for i in ts.size():
+		var t: Array = ts[i]
+		var q := Geometry2D.get_closest_point_to_segment(p, Vector2(float(t[0]), float(t[1])), Vector2(float(t[2]), float(t[3])))
+		if q.distance_to(p) < dm:
+			dm = q.distance_to(p)
+			best = i
+	return best
+
+
+static func retirer_tole(a: Dictionary, i: int) -> Dictionary:
+	var b := a.duplicate(true)
+	if i >= 0 and i < b.get("toles", []).size():
+		b.toles.remove_at(i)
+	return b
+
+
+# Formes fermées par des tôles : pour chaque tôle, le plus court chemin qui relie ses deux bouts sans elle
+static func toles_fermees(a: Dictionary) -> Array:   # [PackedVector2Array] en cases
+	var ts: Array = a.get("toles", [])
+	var voisins := {}
+	for t in ts:
+		var u := Vector2i(int(t[0]), int(t[1]))
+		var v := Vector2i(int(t[2]), int(t[3]))
+		if not voisins.has(u):
+			voisins[u] = []
+		if not voisins.has(v):
+			voisins[v] = []
+		voisins[u].append(v)
+		voisins[v].append(u)
+	var vus := {}
+	var res := []
+	for t in ts:
+		var u := Vector2i(int(t[0]), int(t[1]))
+		var v := Vector2i(int(t[2]), int(t[3]))
+		var prec := {u: u}
+		var file := [u]
+		while not file.is_empty() and not prec.has(v):
+			var c: Vector2i = file.pop_front()
+			for n in voisins[c]:
+				if (c == u and n == v) or prec.has(n):
+					continue
+				prec[n] = c
+				file.append(n)
+		if not prec.has(v):
+			continue
+		var chemin := [v]
+		while chemin.back() != u:
+			chemin.append(prec[chemin.back()])
+		if chemin.size() < 3:
+			continue
+		var cle := chemin.duplicate()
+		cle.sort()
+		if vus.has(str(cle)):
+			continue
+		vus[str(cle)] = true
+		var poly := PackedVector2Array()
+		for q in chemin:
+			poly.append(Vector2(q))
+		res.append(poly)
+	return res
+
+
+# Refroidissement (DEC-080) : puissance des moteurs à eau, capacité des radiateurs à 2 cases au plus d'un tel moteur
+static func refroidissement(a: Dictionary) -> Dictionary:
+	var moteurs := []
+	var besoin := 0.0
+	for p in _pieces(a):
+		if p.fiche.get("famille", "") == "moteur" and not bool(p.fiche.get("refroidi_air", false)):
+			moteurs.append(Rect2i(p.pos, p.e))
+			besoin += float(p.fiche.get("puissance_ch", 0))
+	var cap := 0.0
+	var loin := 0
+	for p in _pieces(a):
+		if p.fiche.get("famille", "") != "radiateur":
+			continue
+		var r := Rect2i(p.pos, p.e).grow(2)
+		if moteurs.any(func(m): return r.intersects(m)):
+			cap += float(p.fiche.get("refroidit_ch", 0))
+		else:
+			loin += 1
+	return {"besoin": besoin, "capacite": cap, "loin": loin}
 
 
 static func _greffe(fiche: Dictionary) -> bool:
@@ -233,7 +405,8 @@ static func peindre(a: Dictionary, cell: Vector2i, sorte: String) -> Dictionary:
 		return a
 	var occ := _occupation(a)
 	if sorte != "" and occ.has(cell) and not (occ[cell] is String):
-		return a
+		if not (sorte in TRAVERSABLES and _pieces(a)[int(occ[cell])].fiche.get("famille", "") == "moteur"):
+			return a
 	var b := a.duplicate(true)
 	var garde := []
 	for c in b.cases:
@@ -497,6 +670,8 @@ static func cout_metal(a: Dictionary) -> float:
 	for c in cases:
 		if cases[c] != "origine":
 			t += float(_sorte(a, cases[c]).metal)
+	for tl in toles_de(a):
+		t += float(R().get("toles", {"metal_case": 0.75}).metal_case) * float(tl.long)
 	for e in a.get("essieux", []):
 		t += float(Assemblage.piece(String(e.piece)).get("metal", 0))
 		if String(e.get("train", "")) != "":
@@ -517,7 +692,7 @@ static func erreurs(a: Dictionary) -> Array:
 	var err := []
 	if _cases(a).is_empty():
 		_defaut(err, "chassis", "Peignez au moins une case de châssis", true)
-	if not roles_de(a).has("conducteur"):
+	if not roles_de(a).has("conducteur") and not remorque(a):
 		_defaut(err, "cabine", "Aucun poste de conduite : personne pour conduire", true)
 	return err
 
@@ -589,6 +764,14 @@ static func analyser(a: Dictionary) -> Dictionary:
 		x_avant = maxf(x_avant, c.x + 1.0)
 	if plaques > 0:
 		masses.append([plaques * float(PL.poids_kg), x_avant - 0.5, corps_bas + 2.0])
+	# Tôles de blindage tracées d'un point à un autre (DEC-080) : une tôle inclinée compte plus épaisse
+	var TL: Dictionary = RL.get("toles", {"poids_kg_case": 35, "pv_case": 5, "metal_case": 0.75, "blindage_case": 1.5, "facteur_max": 2.5})
+	var blindage_toles := 0.0
+	for t in toles_de(a):
+		masses.append([float(TL.poids_kg_case) * t.long, t.milieu.x, t.milieu.y])
+		pv.chassis += float(TL.pv_case) * t.long
+		metal += float(TL.metal_case) * t.long
+		blindage_toles += float(TL.blindage_case) * t.long * t.facteur
 	var M := 0.0
 	var xg := 0.0
 	var yg := 0.0
@@ -724,7 +907,14 @@ static func analyser(a: Dictionary) -> Dictionary:
 	puissance = maxf(0.0, puissance - ch_phares)
 	var tonnes := M / 1000.0
 	var ch_t := puissance / maxf(tonnes, 0.001)
-	if immobile == "":
+	var est_remorque := remorque(a)
+	if est_remorque:   # remorque (DEC-080) : tirée par un autre véhicule ; un moteur posé dessus n'est qu'un poids mort
+		conso = 0.0
+		if n_moteurs > 0:
+			_defaut(defauts, "remorque_moteur", "Remorque : le moteur ne sert à rien, c'est du poids mort")
+		if not pieces.any(func(q): return int(q.fiche.get("timon", 0)) > 0):
+			immobile = "pas de timon pour l'atteler (onglet Options)"
+	elif immobile == "":
 		if puissance <= 0.0:
 			immobile = "pas de moteur"
 		elif ch_t < float(RL.ch_par_tonne_min):
@@ -732,6 +922,14 @@ static func analyser(a: Dictionary) -> Dictionary:
 		elif ch_t < float(RL.ch_par_tonne_requis):
 			f_vit *= ch_t / float(RL.ch_par_tonne_requis)
 			_defaut(defauts, "puissance", "Moteur faible pour le poids (%.0f ch/t) : lent en côte" % ch_t)
+	# Radiateur (DEC-080) : obligatoire pour un moteur refroidi par eau, à 2 cases au plus du moteur
+	var refr := refroidissement(a)
+	if immobile == "" and not est_remorque and int(a.get("v", 1)) >= 2 and not a.has("origine") and float(refr.besoin) > 0.0:
+		if float(refr.capacite) <= 0.0:
+			immobile = "pas de radiateur : le moteur chauffe et cale" if int(refr.loin) == 0 else "radiateur trop loin du moteur (2 cases au plus)"
+		elif float(refr.capacite) < float(refr.besoin):
+			f_vit *= maxf(0.4, float(refr.capacite) / float(refr.besoin))
+			_defaut(defauts, "radiateur", "Radiateur trop petit (%d ch pour %d ch) : le moteur chauffe, lent" % [int(refr.capacite), int(refr.besoin)])
 	if defauts.any(func(d): return d.code == "frottent"):
 		f_vit *= 0.5
 	# Stabilité : demi-empattement rapporté à la hauteur du centre de gravité
@@ -768,7 +966,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
 	var roles := roles_de(a)
-	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes,
+	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes + blindage_toles, "remorque": remorque(a),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size() + reservoir_plus, "piques": piques, "metal": int(round(metal)),
 		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
@@ -895,6 +1093,14 @@ static func _sieges_exposes(a: Dictionary) -> bool:
 				for y in range(p.pos.y, p.pos.y + p.e.y):
 					if not coque_ok or toits.has(x):
 						couvert[Vector2i(x, y)] = true
+	for poly in toles_fermees(a):   # forme fermée par des tôles : abrite ce qu'elle entoure (DEC-080)
+		var bb := Rect2(poly[0], Vector2.ZERO)
+		for q in poly:
+			bb = bb.expand(q)
+		for x in range(int(bb.position.x), int(bb.end.x)):
+			for y in range(int(bb.position.y), int(bb.end.y)):
+				if Geometry2D.is_point_in_polygon(Vector2(x + 0.5, y + 0.5), poly):
+					couvert[Vector2i(x, y)] = true
 	for p in _pieces(a):
 		var f: Dictionary = p.fiche
 		if _habillage(f) or _coque(f) or int(f.get("sieges", 0)) <= 0:
@@ -1064,6 +1270,10 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 	for e in essieux:
 		x0 = minf(x0, e.x + 0.5 - e.r)
 		x1 = maxf(x1, e.x + 0.5 + e.r)
+	for t in a.get("toles", []):
+		x0 = minf(x0, minf(float(t[0]), float(t[2])))
+		x1 = maxf(x1, maxf(float(t[0]), float(t[2])))
+		y1 = maxf(y1, maxf(float(t[1]), float(t[3])))
 	if x0 == INF:
 		x0 = 0.0
 		x1 = 4.0
@@ -1078,6 +1288,15 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 			var yb: float = Y.call(c.y + 1.0)
 			for l in [[[xa, ya + 0.02], [xb, ya + 0.02]], [[xa, yb - 0.02], [xb, yb - 0.02]], [[xa, ya], [xb, yb]] if (c.x + c.y) % 2 == 0 else [[xa, yb], [xb, ya]]]:
 				formes.append({"ligne": l, "ep": 0.035, "c": "metal", "z": 0})
+			continue
+		if cases[c] == "poutre":   # poutre en I : âme sombre, semelles claires (DEC-080)
+			var pa: float = X.call(c.x)
+			var pb: float = X.call(c.x + 1.0)
+			var pya: float = Y.call(c.y)
+			var pyb: float = Y.call(c.y + 1.0)
+			formes.append({"pts": [[pa, pya + 0.07], [pb, pya + 0.07], [pb, pyb - 0.07], [pa, pyb - 0.07]], "c": "sombre", "z": 0})
+			formes.append({"pts": [[pa, pya], [pb, pya], [pb, pya + 0.06], [pa, pya + 0.06]], "c": "#5A5A52", "z": 0})
+			formes.append({"pts": [[pa, pyb - 0.06], [pb, pyb - 0.06], [pb, pyb], [pa, pyb]], "c": "#5A5A52", "z": 0})
 			continue
 		var col := "sombre" if cases[c] == "blindage" else "caisse"
 		formes.append({"pts": [[X.call(c.x), Y.call(c.y)], [X.call(c.x + 1.0), Y.call(c.y)], [X.call(c.x + 1.0), Y.call(c.y + 1.0)], [X.call(c.x), Y.call(c.y + 1.0)]], "c": col, "z": 0})
@@ -1140,6 +1359,13 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		match p.fiche.get("famille", ""):
 			"greffe":
 				_formes_greffe(formes, String(p.fiche.get("dessin", "")), r)
+			"radiateur":   # cadre et faisceau à ailettes (DEC-080)
+				formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x, r.end.y], [r.position.x, r.end.y]], "c": "#2E2C28", "z": 2})
+				var nf := maxi(3, int(r.size.x / 0.05))
+				for k in nf:
+					var fx := r.position.x + 0.04 + (r.size.x - 0.08) * (float(k) + 0.5) / nf
+					formes.append({"ligne": [[fx, r.position.y + 0.05], [fx, r.end.y - 0.05]], "ep": 0.018, "c": "#8C867A", "z": 2})
+				formes.append({"pts": _poly_cercle(r.position.x + r.size.x * 0.5, r.end.y - 0.03, 0.04, 8), "c": "#8C867A", "z": 2})
 			"moteur":
 				var surface: int = int(p.e.x) * int(p.e.y)
 				_sprite(formes, "moteur_leger" if surface <= 8 else ("moteur_moyen" if surface <= 18 else "moteur_lourd"), r, 1)
@@ -1196,9 +1422,32 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		if p.id == "phares":
 			var rp := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
 			_sprite(formes, "phares", rp, 2, false)
+	# Tôles (DEC-080) : une forme fermée prend l'aspect d'une caisse blindée rivetée ; transparente en vue écorchée
+	var XY := func(q: Vector2) -> Array: return [X.call(q.x), Y.call(q.y)]
+	for poly in toles_fermees(a):
+		var fond := "#4C5236" if String(a.get("peinture", "")) == "" else "#" + Color(String(a.peinture)).darkened(0.3).to_html(false)
+		formes.append({"pts": Array(poly).map(func(q): return XY.call(q)), "c": fond + ("55" if ecorche else ""), "z": 3})
+		var ctr := Vector2.ZERO
+		for q in poly:
+			ctr += q
+		ctr /= poly.size()
+		for i in poly.size():
+			var qa: Vector2 = poly[i]
+			var qb: Vector2 = poly[(i + 1) % poly.size()]
+			var n := maxi(1, int(qa.distance_to(qb) * 1.5))
+			for k in n:   # rivets le long du bord, un peu à l'intérieur
+				var q := qa.lerp(qb, (float(k) + 0.5) / n)
+				q = q.lerp(ctr, 0.18 / maxf(0.5, q.distance_to(ctr)))
+				formes.append({"pts": _poly_cercle(X.call(q.x), Y.call(q.y), 0.022, 6), "c": "#9A9A88" + ("55" if ecorche else ""), "z": 3})
+	for t in toles_de(a):
+		formes.append({"ligne": [XY.call(t.a), XY.call(t.b)], "ep": 0.06, "c": "#3A3F2C", "z": 3})
 	var res := {"x0": x0, "sol": sol, "nom": String(a.get("nom", "Frankenstein")), "longueur": maxf(0.5, (x1 - x0) * C), "hauteur": maxf(0.5, (y1 - sol) * C),
 		"teinte": "joueur", "moteur": moteur, "course": 0.09, "fiche": "Véhicule construit sur la grille.",
 		"roues": roues, "formes": formes, "armes": armes, "equipage": equipage, "libre": true}
+	if String(a.get("peinture", "")) != "":   # peinture de bande (DEC-080) : ton de tout le véhicule
+		res.peinture = String(a.peinture)
+	if remorque(a):
+		res.remorque = true
 	if not chenille.is_empty():
 		res.chenille = chenille
 	return res
@@ -1274,6 +1523,10 @@ static func _formes_greffe(formes: Array, dessin: String, r: Rect2) -> void:
 				var bw := w * 0.42
 				formes.append({"pts": [[bx, y0], [bx + bw, y0], [bx + bw, y0 + h * 0.8], [bx + bw * 0.7, y0 + h * 0.95], [bx, y0 + h * 0.95]], "c": "#6E7038" if k == 0 else "#8A4A2A", "z": 3})
 				formes.append({"ligne": [[bx + bw * 0.15, y0 + h * 0.5], [bx + bw * 0.85, y0 + h * 0.5]], "ep": 0.02, "c": "sombre", "z": 3})
+		"timon":   # barre triangulée et anneau d'attelage
+			formes.append({"ligne": [[x0, y0 + h * 0.9], [x0 + w * 0.92, y0 + h * 0.4]], "ep": 0.05, "c": "#B9B2A0", "z": 3})
+			formes.append({"ligne": [[x0, y0 + h * 0.1], [x0 + w * 0.92, y0 + h * 0.4]], "ep": 0.05, "c": "#B9B2A0", "z": 3})
+			formes.append({"pts": _poly_cercle(x0 + w * 0.95, y0 + h * 0.4, 0.06, 8), "c": "sombre", "z": 3})
 		"drapeau":   # mât et fanion
 			formes.append({"ligne": [[x0 + w * 0.2, y0], [x0 + w * 0.2, y0 + h]], "ep": 0.03, "c": "#B9B2A0", "z": 3})
 			formes.append({"pts": [[x0 + w * 0.2, y0 + h], [x0 + w * 1.0, y0 + h * 0.82], [x0 + w * 0.2, y0 + h * 0.62]], "c": "#9A2F2F", "z": 3})

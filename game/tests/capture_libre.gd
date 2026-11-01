@@ -74,13 +74,13 @@ func _process(_d: float) -> bool:
 			var ed = vue._editeur
 			# 1. Châssis tracé en rectangles (DEC-057) : une rangée d'acier, une de blindage
 			ed._choisir_onglet("chassis")
-			_clic(ed, _ecran(ed, 10, 3), true)
-			_glisser(ed, _ecran(ed, 27, 3))
-			_clic(ed, _ecran(ed, 27, 3), false)
+			_clic(ed, _ecran(ed, 16, 3), true)
+			_glisser(ed, _ecran(ed, 33, 3))
+			_clic(ed, _ecran(ed, 33, 3), false)
 			ed.outil.chassis = "blindage"
-			_clic(ed, _ecran(ed, 12, 4), true)
-			_glisser(ed, _ecran(ed, 25, 4))
-			_clic(ed, _ecran(ed, 25, 4), false)
+			_clic(ed, _ecran(ed, 18, 4), true)
+			_glisser(ed, _ecran(ed, 31, 4))
+			_clic(ed, _ecran(ed, 31, 4), false)
 			_verifier(ed.a.cases.size() == 32, "32 cases tracées en deux rectangles (%d)" % ed.a.cases.size())
 			_verifier(ed._cell >= 40.0, "cases assez grandes pour le doigt (%d px)" % int(ed._cell))
 		38:
@@ -89,41 +89,41 @@ func _process(_d: float) -> bool:
 			# 2. Essieux d'abord, roues ensuite (DEC-051)
 			ed._choisir_onglet("essieux")
 			ed.outil.essieux = "essieu_lourd"
-			for x in [12, 15, 18, 21, 24]:
+			for x in [18, 21, 24, 27, 30]:
 				_clic(ed, _ecran(ed, x, 3), true)
 				_clic(ed, _ecran(ed, x, 3), false)
 			ed.outil.essieux = "essieu_leger"
-			_clic(ed, _ecran(ed, 27, 3), true)
-			_clic(ed, _ecran(ed, 27, 3), false)
+			_clic(ed, _ecran(ed, 33, 3), true)
+			_clic(ed, _ecran(ed, 33, 3), false)
 			_verifier(ConstructionLibre.essieux_nus(ed.a).size() == 6, "six essieux posés, encore sans roue")
 			ed._choisir_onglet("roues")
 			ed.outil.roues = "chenille"
-			for x in [12, 15, 18, 21, 24]:
+			for x in [18, 21, 24, 27, 30]:
 				_clic(ed, _ecran(ed, x, 3), true)
 				_clic(ed, _ecran(ed, x, 3), false)
 			ed.outil.roues = "roue_grande"
-			_clic(ed, _ecran(ed, 27, 3), true)
-			_clic(ed, _ecran(ed, 27, 3), false)
+			_clic(ed, _ecran(ed, 33, 3), true)
+			_clic(ed, _ecran(ed, 33, 3), false)
 			_verifier(ConstructionLibre.essieux_nus(ed.a).is_empty(), "roues et chenilles montées sur les essieux")
 		42:
 			_photo("libre_3_essieux")
 			var ed = vue._editeur
 			# 3. Pièces glissées depuis leur catégorie
-			for p in [["moteur", "moteur_m3_half_track", 13, 5], ["cabine", "cabine_m3_half_track", 20, 5], ["arme", "arme_mortier", 13, 8], ["arme", "arme_mitrailleuse", 22, 9]]:
+			for p in [["moteur", "moteur_m3_half_track", 19, 5], ["moteur", "radiateur_camion", 25, 5], ["cabine", "cabine_m3_half_track", 26, 5], ["arme", "arme_mortier", 19, 8], ["arme", "arme_mitrailleuse", 28, 9]]:
 				ed._choisir_onglet(p[0])
 				var e: Array = Assemblage.piece(p[1]).emprise
 				ed._glisse = p[1]
 				var pos: Vector2 = ed._px(p[2] + e[0] * 0.5, p[3] + e[1] * 0.5) + Vector2(0, ed.DECALAGE_DOIGT * ed._cell)
 				_glisser(ed, pos)
 				_clic(ed, pos, false)
-			_verifier(ed.a.pieces.size() == 4, "moteur, cabine, mortier, mitrailleuse posés (%d)" % ed.a.pieces.size())
+			_verifier(ed.a.pieces.size() == 5, "moteur, radiateur, cabine, mortier, mitrailleuse posés (%d)" % ed.a.pieces.size())
 			_verifier(not String(ed.a.nom).begins_with("Frankenstein"), "nom proposé : %s" % ed.a.nom)
 		46:
 			var ed = vue._editeur
 			ed._choisir_onglet("arme")
 			ed._glisse = "arme_canon_75"
 			ed._appui = true
-			_glisser(ed, ed._px(16, 11) + Vector2(0, ed.DECALAGE_DOIGT * ed._cell))
+			_glisser(ed, ed._px(22, 11) + Vector2(0, ed.DECALAGE_DOIGT * ed._cell))
 			_photo("libre_4_pieces")
 			ed._glisse = ""
 			ed._appui = false

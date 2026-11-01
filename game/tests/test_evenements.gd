@@ -43,6 +43,7 @@ func _init() -> void:
 	_tempete()
 	_mines()
 	_abordage()
+	_remorques_et_roues()
 	print("\n%s" % ("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs))
 	quit(1 if echecs > 0 else 0)
 
@@ -277,3 +278,41 @@ func _abordage() -> void:
 	verifier(apres < avant - 10.0, "la lance explosive endommage le véhicule abordé (%.0f PV perdus)" % (avant - apres))
 	verifier(not m2.convoi.any(func(v): return false) and m2.blocage != "La route est barrée par un véhicule ennemi.", "un poursuivant à côté ne barre pas la route")
 
+
+
+func _remorques_et_roues() -> void:
+	print("\n— Remorques et roues arrachées (DEC-080) —")
+	var m := _modele(7, {})
+	var tete = m.convoi[0]
+	var v0: float = m.vitesse_attelee(tete)
+	var r := ConstructionLibre.nouvelle("Remorque")
+	for x in range(2, 14):
+		r = ConstructionLibre.peindre(r, Vector2i(x, 2), "acier")
+	r = ConstructionLibre.poser_essieu(r, 4, "essieu_leger", "roue_moyenne")
+	r = ConstructionLibre.poser_essieu(r, 11, "essieu_leger", "roue_moyenne")
+	r = ConstructionLibre.en_remorque(r)
+	var an := ConstructionLibre.analyser(r)
+	verifier(an.ok and bool(an.stats.remorque) and float(an.stats.vitesse) > 0.0, "une remorque sans moteur ni conducteur se construit et roule (%s)" % str(an.stats.get("immobile", "")))
+	var rv = m.creer_depuis_assemblage(r, "joueur", 0.0, "", 0)
+	m.convoi.insert(1, rv)
+	m._replacer(true)
+	verifier(m.tracteur_de(rv) == tete, "la remorque est tirée par le véhicule devant elle")
+	verifier(m.vitesse_attelee(tete) < v0, "le tracteur ralentit avec sa remorque (%.1f → %.1f m/s)" % [v0, m.vitesse_attelee(tete)])
+	verifier(absf(rv.x + rv.longueur - (tete.x - float(m.donnees().ecart_remorque))) < 0.01, "la remorque suit au plus près")
+	m.ordre_marche("avancer")
+	var x0: float = m.x_tete
+	_avancer(m, 10.0)
+	verifier(m.x_tete > x0 + 5.0, "le convoi roule avec une remorque vide d'équipage (%s)" % m.blocage)
+	# Roues arrachées
+	var j = m.convoi[0]
+	var n_roues: int = VehiculeDessin.donnees().vehicules[j.type].roues.size()
+	j.pieces.roulement.pv = j.pieces.roulement.max * 0.1
+	var w := {"degats": 1.0, "penetration": 100.0, "classe": "balle"}
+	m._toucher_vehicule(null, w, j, "roulement", "roulement")
+	verifier(j.roues_perdues.size() >= 1 and j.roues_perdues.size() < n_roues, "roues très abîmées : une roue tombe (%d/%d)" % [j.roues_perdues.size(), n_roues])
+	verifier(m.evenements.any(func(e): return e.t == "roue_perdue"), "la roue arrachée part sur la route (événement pour la vue)")
+	var f: float = j.facteur_vitesse()
+	verifier(f < 0.8, "sans une roue, le véhicule ralentit (x%.2f)" % f)
+	j.pieces.roulement.pv = j.pieces.roulement.max
+	m._remonter_roues(j)
+	verifier(j.roues_perdues.is_empty(), "réparé : les roues sont remontées")

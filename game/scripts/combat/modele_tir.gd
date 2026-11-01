@@ -291,6 +291,8 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 		dc = d * E.cabine_hs_equipage
 	if dc > 0.0:
 		_blesser_equipage(v, dc)
+	if zone == "roulement":
+		_perdre_roues(v)
 	if avant > 0.0 and p.pv <= 0.0 and zone != "chassis":
 		evt({"t": "casse", "uid": v.uid, "piece": zone})
 		if v.camp == "joueur":
@@ -300,6 +302,40 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 	elif v.equipage_vivant() == 0 and v.actif():
 		_neutraliser(v)
 	return zone
+
+# Roues arrachées (DEC-080) : plus les roues sont abîmées, plus il en tombe (jamais toutes) ; elles roulent sur la route
+func _roues_voulues(v: Veh) -> int:
+	if v.chenille:
+		return 0
+	var n: int = VehiculeDessin.donnees().vehicules.get(v.type, {}).get("roues", []).size()
+	if n < 2:
+		return 0
+	return mini(n - 1, int(floor((1.0 - v.ratio("roulement")) * n * float(donnees().effets.get("roues_tombent", 0.6)))))
+
+
+func _perdre_roues(v: Veh) -> void:
+	var D: Dictionary = VehiculeDessin.donnees().vehicules.get(v.type, {})
+	var roues: Array = D.get("roues", [])
+	var voulu := _roues_voulues(v)
+	while v.roues_perdues.size() < voulu:
+		var libres := []
+		for i in roues.size():
+			if not v.roues_perdues.has(i):
+				libres.append(i)
+		var i: int = libres[rng.randi() % libres.size()]
+		v.roues_perdues.append(i)
+		var rx: float = float(roues[i].x)
+		var L: float = float(D.longueur)
+		evt({"t": "roue_perdue", "uid": v.uid, "x": v.x + (L - rx if v.camp == "ennemi" and v.mode != "poursuite" else rx), "r": float(roues[i].r), "sens": -1.0 if v.camp == "joueur" or v.mode == "poursuite" else 1.0})
+		if v.camp == "joueur":
+			log_("%s perd une roue !" % v.nom, "alerte")
+
+
+func _remonter_roues(v: Veh) -> void:   # roues remontées au fil de la réparation
+	var voulu := _roues_voulues(v)
+	while v.roues_perdues.size() > voulu:
+		v.roues_perdues.pop_back()
+
 
 func _blesser_equipage(v: Veh, d: float) -> void:
 	var vivants := []   # équipage (indice >= 0) et soldats des bancs (indice -1 - j)
@@ -522,6 +558,8 @@ func _reparer(dt: float) -> void:
 			else:
 				stocks.metal -= cout
 				p.pv = minf(p.max, p.pv + gain)
+		if id == "roulement":
+			_remonter_roues(v)
 
 func _composant_pour(v: Veh, id: String) -> int:
 	var meilleur := -1

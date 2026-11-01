@@ -46,9 +46,10 @@
   "libre": {
    "_note": "Construction libre (DEC-043) : châssis peint case par case, essieux, trains, pièces. Valeurs à régler en essai.",
    "grille": [
-    40,
-    16
+    48,
+    18
    ],
+   "toles": {"_note": "DEC-080 : tôle tracée d'un coin à l'autre, valeurs par case de longueur (0,25 m). Inclinée : blindage x 1/cos(angle), plafonné.", "poids_kg_case": 35, "pv_case": 5, "metal_case": 0.75, "blindage_case": 1.5, "facteur_max": 2.5},
    "cases": {
     "acier": {
      "nom": "Acier",
@@ -63,6 +64,13 @@
      "pv": 12,
      "blindage": 45,
      "metal": 1
+    },
+    "poutre": {
+     "nom": "Poutres",
+     "poids_kg": 30,
+     "pv": 7,
+     "blindage": 1,
+     "metal": 0.3
     },
     "tube": {
      "nom": "Tubes soudés",
@@ -101,8 +109,8 @@
     "conso_k": 0.6
    },
    "grille_vue_min": [
-    24,
-    10
+    20,
+    9
    ],
    "troupes": {
     "_note": "DEC-062 : soldats d'un banc. Pas de poids ajouté au calcul (équipement léger).",
@@ -562,6 +570,7 @@
    "metal": 2
   },
   "moteur_m3_stuart": {
+   "refroidi_air": true,
    "famille": "moteur",
    "nom": "Continental W-670 en étoile",
    "puissance_ch": 250,
@@ -639,6 +648,7 @@
    "metal": 4
   },
   "moteur_m4_sherman": {
+   "refroidi_air": true,
    "famille": "moteur",
    "nom": "Continental R975 en étoile",
    "puissance_ch": 400,
@@ -835,6 +845,7 @@
    ]
   },
   "moteur_r75": {
+   "refroidi_air": true,
    "famille": "moteur",
    "nom": "Moteur bicylindre 750 cm³",
    "puissance_ch": 26,
@@ -1223,10 +1234,15 @@
   "roue_geante": {"famille": "train", "nom": "Roue géante (1,5 m)", "type": "roues", "diametre_cases": 6, "vitesse_max": 7.0, "sable": 0.97, "charge_kg": 6500, "poids_kg": 260, "pv": 50, "metal": 3},
   "roue_tracteur": {"famille": "train", "nom": "Roue de tracteur (2 m)", "type": "roues", "diametre_cases": 8, "vitesse_max": 5.5, "sable": 1.0, "charge_kg": 9000, "poids_kg": 420, "pv": 70, "metal": 4},
   "moteur_compresseur": {"famille": "moteur", "nom": "V8 à compresseur", "puissance_ch": 220, "conso": 4.5, "poids_kg": 300, "pv": 45, "emprise": [5, 3], "metal": 5},
-  "moteur_avion": {"famille": "moteur", "nom": "Moteur d'avion en étoile", "puissance_ch": 450, "conso": 6.0, "poids_kg": 420, "pv": 50, "emprise": [5, 4], "metal": 6},
+  "moteur_avion": {"famille": "moteur", "refroidi_air": true, "nom": "Moteur d'avion en étoile", "puissance_ch": 450, "conso": 6.0, "poids_kg": 420, "pv": 50, "emprise": [5, 4], "metal": 6},
   "greffe_pare_buffle": {"famille": "greffe", "nom": "Pare-buffle", "dessin": "pare_buffle", "poids_kg": 85, "emprise": [1, 2], "metal": 5, "pv": 60, "blindage_plus": 3, "fabrique": true, "_note": "Barres d'acier soudées à l'avant : protège le moteur et la calandre."},
   "greffe_piques": {"famille": "greffe", "nom": "Piques de toit", "dessin": "piques", "poids_kg": 30, "emprise": [2, 1], "metal": 2, "pv": 20, "piques": 1, "fabrique": true, "_note": "Rangée de piques : blesse les pillards qui sautent à bord."},
   "greffe_bidons": {"famille": "greffe", "nom": "Bidons de réserve", "dessin": "bidons", "poids_kg": 45, "emprise": [1, 1], "metal": 2, "pv": 15, "reservoir_plus": 14, "fabrique": true, "_note": "Deux jerrycans arrimés : +14 L de réservoir, mais plus de poids."},
-  "greffe_drapeau": {"famille": "greffe", "nom": "Drapeau de bande", "dessin": "drapeau", "poids_kg": 3, "emprise": [1, 2], "metal": 1, "pv": 2, "fabrique": true, "_note": "Décoratif : identifie la bande."}
+  "greffe_drapeau": {"famille": "greffe", "nom": "Drapeau de bande", "dessin": "drapeau", "poids_kg": 3, "emprise": [1, 2], "metal": 1, "pv": 2, "fabrique": true, "_note": "Décoratif : identifie la bande."},
+  "radiateur_voiture": {"famille": "radiateur", "nom": "Radiateur de voiture", "refroidit_ch": 70, "poids_kg": 14, "pv": 8, "emprise": [1, 2], "metal": 1, "fabrique": true, "_note": "DEC-080 : à 2 cases au plus d'un moteur refroidi par eau."},
+  "radiateur_camion": {"famille": "radiateur", "nom": "Radiateur de camion", "refroidit_ch": 160, "poids_kg": 32, "pv": 14, "emprise": [1, 3], "metal": 2, "fabrique": true},
+  "radiateur_double": {"famille": "radiateur", "nom": "Double radiateur", "refroidit_ch": 380, "poids_kg": 70, "pv": 25, "emprise": [2, 3], "metal": 4, "fabrique": true},
+  "radiateur_char": {"famille": "radiateur", "nom": "Radiateur de char", "refroidit_ch": 800, "poids_kg": 150, "pv": 40, "emprise": [3, 3], "metal": 6, "fabrique": true},
+  "greffe_timon": {"famille": "greffe", "nom": "Timon de remorque", "dessin": "timon", "poids_kg": 40, "emprise": [2, 1], "metal": 2, "pv": 15, "timon": 1, "fabrique": true, "_note": "DEC-080 : à l'avant d'une remorque, pour l'atteler."}
  }
 }

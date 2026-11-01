@@ -8,7 +8,7 @@
   "fuel_l": 70,
   "metal": 20
  },
- "ecart_convoi": 1.4,
+ "ecart_convoi": 1.4, "ecart_remorque": 0.6,
  "equipage_pv": 20,
  "fouille": {
   "portee": 5.0,
@@ -144,7 +144,7 @@
   "visee_chance": 0.65,
   "visee_precision": 0.8
  },
- "effets": {
+ "effets": {"_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75", "roue_perdue": 0.75, "roues_tombent": 0.6,
   "roulement_bas": 0.7,
   "moteur_bas": 0.7,
   "suspension_bas": 0.8,

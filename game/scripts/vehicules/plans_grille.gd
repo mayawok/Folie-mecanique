@@ -73,4 +73,7 @@ static func normaliser(b: Dictionary) -> Dictionary:
 		e.x = int(e.x)
 	for p in b.get("pieces", []):
 		p.pos = [int(p.pos[0]), int(p.pos[1])]
+	for t in b.get("toles", []):   # tôles tracées (DEC-080)
+		for k in 4:
+			t[k] = int(t[k])
 	return b

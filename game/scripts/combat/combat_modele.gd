@@ -433,13 +433,17 @@ func _marche(dt: float) -> void:
 		var sans_equipage := false
 		var cache := false
 		var au_garage := false
+		var sans_tracteur := false
 		for v in actifs:
-			vmax = minf(vmax, v.vitesse())
+			vmax = minf(vmax, vitesse_attelee(v))
 			immobilise = immobilise or not v.mobile()
-			sans_equipage = sans_equipage or v.equipage_vivant() == 0
+			sans_equipage = sans_equipage or (v.equipage_vivant() == 0 and not v.remorque())   # une remorque roule à vide
+			sans_tracteur = sans_tracteur or (v.remorque() and tracteur_de(v) == null)
 			cache = cache or v.camo_voulu
 			au_garage = au_garage or v.garage != 0
-		if not transits.is_empty():
+		if sans_tracteur:
+			blocage = "Une remorque est en tête : mettez un véhicule à moteur devant elle."
+		elif not transits.is_empty():
 			blocage = "Équipages en déplacement."
 		elif monde.troupes_dehors() > 0:
 			blocage = "Des soldats sont à terre : ils regagnent leurs véhicules."
@@ -480,7 +484,10 @@ func _marche(dt: float) -> void:
 	if vit != 0.0:
 		var litres := 0.0
 		for v in actifs:
-			litres += v.profil.conso / 100.0 * absf(vit) * dt
+			var kr := 1.0
+			for r in remorques_de(v):   # tirer une remorque fait consommer plus
+				kr += 0.5 * float(r.profil.get("poids_kg", 0.0)) / maxf(1.0, float(v.profil.get("poids_kg", 1000.0)))
+			litres += v.profil.conso / 100.0 * absf(vit) * dt * kr
 		stocks.fuel_l = maxf(0.0, stocks.fuel_l - litres)
 	_replacer()
 	for v in convoi:

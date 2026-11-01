@@ -91,6 +91,10 @@ class Veh extends RefCounted:
 	var butin_pris := false
 	var assemblage := {}          # châssis + pièces placées (DEC-029)
 	var troupes: Array = []       # pv des soldats assis sur les bancs (DEC-063)
+	var roues_perdues: Array = [] # indices des roues arrachées (DEC-080) : chacune ralentit, elles reviennent à la réparation
+
+	func remorque() -> bool:
+		return bool(profil.get("remorque", false))
 
 	func troupes_vivantes() -> int:
 		var n := 0
@@ -137,6 +141,7 @@ class Veh extends RefCounted:
 			f *= E.suspension_hs_vitesse
 		elif ratio("suspension") < E.seuil_bas:
 			f *= E.suspension_bas
+		f *= pow(float(E.get("roue_perdue", 0.75)), roues_perdues.size())
 		return f
 
 	func vitesse() -> float:
@@ -429,10 +434,45 @@ func _replacer(immediat := false) -> void:
 	var gap: float = donnees().ecart_convoi
 	var bord := x_tete
 	for v in convoi:
+		if v.remorque() and v != convoi[0]:
+			bord += gap - float(donnees().get("ecart_remorque", 0.5))   # attelée au véhicule de devant (DEC-080)
 		v.x_cible = bord - v.longueur
 		bord = v.x_cible - gap
 		if immediat:
 			v.x = v.x_cible
+
+
+# Remorques (DEC-080) : un véhicule tire les remorques qui le suivent dans le convoi
+func tracteur_de(v: Veh):
+	var i := convoi.find(v)
+	if i < 0 or not v.remorque():
+		return null
+	for k in range(i - 1, -1, -1):
+		if not convoi[k].remorque():
+			return convoi[k]
+	return null
+
+
+func remorques_de(v: Veh) -> Array:
+	var res := []
+	var i := convoi.find(v)
+	if i < 0 or v.remorque():
+		return res
+	for k in range(i + 1, convoi.size()):
+		if not convoi[k].remorque():
+			break
+		res.append(convoi[k])
+	return res
+
+
+# Vitesse avec ses remorques : la puissance se partage sur la masse totale
+func vitesse_attelee(v: Veh) -> float:
+	var M := float(v.profil.get("poids_kg", 1000.0))
+	var Mr := 0.0
+	for r in remorques_de(v):
+		if r.actif():
+			Mr += float(r.profil.get("poids_kg", 0.0))
+	return v.vitesse() * sqrt(M / (M + Mr))
 
 
 # --- Lecture pour tests et interface --------------------------------------

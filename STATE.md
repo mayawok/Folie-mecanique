@@ -51,7 +51,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet essaie le **Bac à sable** (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Essayer dans le Bac à sable : Carrosserie (coques, scie), Suspension, Plans, Greffes (onglet Options, DEC-079). Reste de la phase 3 de DEC-067 : éperon (avec collisions), base roulante trouvée.
+2. Essayer dans le Bac à sable la nouvelle grille en icônes (DEC-080) : tôles, poutres, radiateurs, peinture, remorques, véhicules du jeu ; Carrosserie, Suspension, Plans, Greffes. Reste de la phase 3 de DEC-067 : éperon (avec collisions), base roulante trouvée. Plus tard : gazogène, marques des pièces.
 3. Coder le lore des marchands sur châssis de char et des villes traversées (DEC-061) ; intégrer les visuels de la grille.
 4. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
 5. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
