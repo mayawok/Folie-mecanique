@@ -32,6 +32,9 @@ func _armes_vehicule(v: Veh, dt: float) -> void:
 					log_("Plus de munitions : récupérez-en sur les épaves.", "alerte")
 				a.cd = 0.0
 				continue
+		if w.classe == "mortier" and absf(v.vitesse_act) > 0.3:
+			a.cd = 0.0   # le mortier ne tire qu'à l'arrêt
+			continue
 		var cible = _choisir_cible(v, w)
 		if cible == null:
 			a.cd = 0.0
@@ -99,7 +102,7 @@ func _choisir_cible(att, w: Dictionary):
 		if w.classe == "mitrailleuse" and e.profil.blindage > 25.0:
 			continue   # la mitrailleuse ne perce pas un blindé : on économise les munitions
 		var g := ecart(att.x, att.longueur, e.x, e.longueur)
-		if g > w.portee:
+		if g > w.portee or g < float(w.get("portee_min", 0.0)):
 			continue
 		var s := g + (1000.0 if ordres.cible == "batiments" else 0.0)
 		if s < score_min:
@@ -109,7 +112,7 @@ func _choisir_cible(att, w: Dictionary):
 		if not b.actif():
 			continue
 		var g := ecart(att.x, att.longueur, b.x, b.longueur)
-		if g > w.portee:
+		if g > w.portee or g < float(w.get("portee_min", 0.0)):
 			continue
 		var s := g + (1000.0 if ordres.cible == "vehicules" else 0.0)
 		if s < score_min:
@@ -189,6 +192,9 @@ func _bouche(att, a: Dictionary) -> Vector2:
 		if ar.type == "mitrailleuse":
 			lx = ar.x + ar.long - 0.16
 			ly = ar.y + ar.get("pied", 0.0) + 0.02
+		elif ar.type == "mortier":
+			lx = ar.x + ar.long * 0.57
+			ly = ar.y + ar.long * 0.82
 		else:
 			lx = ar.x + ar.long
 			ly = ar.y
@@ -263,7 +269,7 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 	var p: Dictionary = v.pieces[zone]
 	var avant: float = p.pv
 	p.pv = maxf(0.0, p.pv - d)
-	if w.classe == "canon" and zone != "chassis":
+	if w.classe in ["canon", "mortier"] and zone != "chassis":
 		v.pieces.chassis.pv = maxf(0.0, v.pieces.chassis.pv - d * 0.25)
 	var dc := 0.0
 	if genre == "cabine":
@@ -297,7 +303,7 @@ func _blesser_equipage(v: Veh, d: float) -> void:
 func _toucher_batiment(w: Dictionary, b: Bat, visee: String) -> String:
 	if b.statut == "neutralise":   # ruine : abri éventuel de la garnison
 		var d0: float = w.degats * w.penetration / (w.penetration + b.blindage)
-		if w.classe == "canon":
+		if w.classe in ["canon", "mortier"]:
 			b.pv = maxf(0.0, b.pv - d0)
 			_blesser_garnison(b, d0 * 0.6)
 		elif b.garnison_vivants() > 0 and rng.randf() < 0.4:
@@ -310,7 +316,7 @@ func _toucher_batiment(w: Dictionary, b: Bat, visee: String) -> String:
 		return "structure"
 	var d: float = w.degats * w.penetration / (w.penetration + b.blindage)
 	var zone := "structure"
-	if w.classe == "canon":
+	if w.classe in ["canon", "mortier"]:
 		b.pv = maxf(0.0, b.pv - d)
 		_blesser_tireur(b, d * 0.6)   # l'éclat de l'obus blesse les tireurs
 	elif b.tireurs_vivants() > 0 and (visee in ["libre", "armement"]) :

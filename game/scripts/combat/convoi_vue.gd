@@ -28,6 +28,7 @@ func _ready() -> void:
 		_nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1)
 	else:
 		_nouvelle_partie(int(sv.graine), sv)
+	afficher_menu(not sv.is_empty())   # menu principal : continuer, nouvelle expédition, bac à sable
 
 
 # --- Sauvegarde : reprise après rechargement de la page (iPhone) ---------------------

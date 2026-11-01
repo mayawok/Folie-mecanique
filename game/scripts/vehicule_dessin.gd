@@ -91,7 +91,7 @@ func configurer_d(d: Dictionary) -> void:
 func tirer(arme := "") -> String:
 	var canon := false
 	for a in D.get("armes", []):
-		canon = canon or a.type == "canon"
+		canon = canon or a.type in ["canon", "mortier"]
 	if arme != "":
 		canon = canon and arme == "canon"
 	if canon:
@@ -355,6 +355,12 @@ func _armes() -> void:
 			draw_line(_c(haut + Vector2(0.16, 0.02)), _c(bout), Color("#24231F"), maxf(1.0, ep * ppm))
 			if _flash_mg > 0.0:
 				_eclair(_c(bout), 0.22)
+		elif a.type == "mortier":   # tube court levé à 55°, sur sa plaque de base
+			var bout: Vector2 = base + Vector2(0.57, 0.82) * a.long
+			draw_line(_c(base), _c(bout), _teinte.darkened(0.45), maxf(2.0, ep * ppm))
+			draw_line(_c(base + Vector2(0.15, 0.0)), _c(base + Vector2(0.3, 0.35) * a.long), Color("#2F2E2B"), maxf(1.0, 0.03 * ppm))
+			if _flash > 0.0:
+				_eclair(_c(bout), 0.4)
 		else:
 			var recul := _recul * 0.3
 			var debut := base + Vector2(-recul, 0)

@@ -139,7 +139,7 @@ class Veh extends RefCounted:
 			f *= E.suspension_bas_precision
 		if not piece_ok("cabine"):
 			f *= E.cabine_hs_precision
-		return f
+		return f * float(profil.get("precision", 1.0))   # construction libre : recul, instabilité (DEC-043)
 
 	func bord_avant() -> float:
 		return x + longueur if camp == "joueur" else x
@@ -230,6 +230,7 @@ var reserve_survivants := 0      # recrues sans place : elles monteront dans le 
 var pieces_stock: Array = []     # pièces de véhicule en réserve : {piece, etat} (grille, DEC-035)
 var ouverture := false           # début de partie guidé : moto à assembler, trouvailles dans l'ordre
 var etape_ouverture := 0         # indice de la prochaine trouvaille de l'ouverture
+var bac_a_sable := false         # mode de développement : toutes les pièces, sans limite, métal infini (DEC-043)
 var en_kit := false              # aucun véhicule encore assemblé
 # Événements du monde (DEC-027, DEC-028) : actifs dans la partie jouée, désactivés pour les anciens tests d'équilibrage
 var meteo_on := false

@@ -238,3 +238,135 @@ func choix_ouverture() -> Dictionary:
 	var e: Dictionary = ouv().etapes[etape_ouverture]
 	etape_ouverture += 1
 	return e
+
+
+# --- Grille libre (DEC-043) ------------------------------------------------------------------
+# Accessible à tout moment, pour chaque véhicule : l'écran met le jeu en pause pendant l'édition.
+# Un véhicule historique est converti en construction libre à l'ouverture de sa grille (châssis d'origine,
+# essieux sous ses roues, mêmes moteur, cabine et armes). Bac à sable : toutes les pièces, sans limite, métal infini.
+
+# Grille actuelle d'un véhicule (uid 0 = véhicule neuf, grille vide)
+func grille_de(uid: int) -> Dictionary:
+	var v = trouver(uid) if uid != 0 else null
+	if v is Veh:
+		return ConstructionLibre.convertir(v.assemblage, v.type)
+	return ConstructionLibre.nouvelle("Frankenstein %d" % (convoi.size() + 1))
+
+
+func raison_grille(uid: int) -> String:
+	if en_kit:
+		return "Assemblez d'abord la moto."
+	if fini:
+		return "La partie est terminée."
+	if uid != 0:
+		var v = trouver(uid)
+		if not (v is Veh and convoi.has(v)):
+			return "Ce véhicule n'est pas dans le convoi."
+	return ""
+
+
+# Pièces mécaniques utilisables sur la grille : [{id, n}] ; n = -1 : sans limite (bac à sable)
+func palette_grille(uid: int) -> Array:
+	var res := []
+	var fams: Array = ConstructionLibre.FAMILLES_PIECES
+	if bac_a_sable:
+		for id in Assemblage.catalogue().pieces:
+			var f := Assemblage.piece(id)
+			if f.get("famille", "") in fams and f.has("emprise"):
+				res.append({"id": id, "n": -1})
+	else:
+		var liste := ids_stock()
+		if uid != 0:
+			liste += Assemblage.ids(grille_de(uid))
+		var c := Assemblage.compter(liste)
+		for id in c:
+			if Assemblage.piece(id).get("famille", "") in fams and Assemblage.piece(id).has("emprise"):
+				res.append({"id": id, "n": int(c[id])})
+	var ordre := {"moteur": 0, "cabine": 1, "arme": 2}
+	res.sort_custom(func(p, q):
+		var fp := Assemblage.piece(p.id)
+		var fq := Assemblage.piece(q.id)
+		if fp.famille != fq.famille:
+			return ordre[fp.famille] < ordre[fq.famille]
+		return float(fp.get("poids_kg", 0)) < float(fq.get("poids_kg", 0)))
+	return res
+
+
+# Métal à payer pour passer de la grille actuelle à a (0 en bac à sable). Rien n'est remboursé en retirant.
+func cout_grille(uid: int, a: Dictionary) -> float:
+	if bac_a_sable:
+		return 0.0
+	var avant := grille_de(uid)
+	var cout := maxf(0.0, ConstructionLibre.cout_metal(a) - ConstructionLibre.cout_metal(avant))
+	var dp := maxi(0, int(a.get("plaques", 0)) - int(avant.get("plaques", 0)))
+	return cout + dp * float(Assemblage.catalogue().regles.plaque.metal)
+
+
+# Construit (uid 0) ou reconstruit un véhicule selon la grille a. Renvoie false (et un message) si impossible.
+func construire_grille(uid: int, a: Dictionary) -> bool:
+	var r := raison_grille(uid)
+	if r != "":
+		log_(r, "alerte")
+		return false
+	var err := ConstructionLibre.erreurs(a)
+	if not err.is_empty():
+		log_(String(err[0].texte) + ".", "alerte")
+		return false
+	var v = trouver(uid) if uid != 0 else null
+	var avant := grille_de(uid)
+	var etats := {}
+	if v != null:
+		for fam in PIECES_BASE:
+			if v.pieces.has(fam):
+				etats[fam] = v.ratio(fam)
+		if not v.armes.is_empty():
+			etats.arme = _etat_arme(v)
+	if not bac_a_sable:
+		var cout := cout_grille(uid, a)
+		if stocks.metal < cout:
+			log_("Il faut %d métal (vous en avez %d)." % [int(ceil(cout)), int(stocks.metal)], "alerte")
+			return false
+		var manque := Assemblage.manquantes(a, Assemblage.ids(avant) + ids_stock())
+		if not manque.is_empty():
+			log_("Il manque : %s." % Assemblage.piece(manque[0]).get("nom", manque[0]), "alerte")
+			return false
+		var reste := Assemblage.compter(Assemblage.ids(a))
+		for id in Assemblage.ids(avant):   # pièces du véhicule : réutilisées d'abord, sinon rangées en réserve
+			if int(reste.get(id, 0)) > 0:
+				reste[id] -= 1
+			else:
+				var fam: String = Assemblage.piece(id).get("famille", "")
+				pieces_stock.append({"piece": id, "etat": float(etats.get(fam, 1.0))})
+		for id in reste:
+			for k in int(reste[id]):
+				for i in pieces_stock.size():
+					if pieces_stock[i].piece == id:
+						pieces_stock.remove_at(i)
+						break
+		stocks.metal -= cout
+	if v == null:
+		var premier := convoi.is_empty()
+		v = creer_depuis_assemblage(a, "joueur", 0.0, "", 0)
+		convoi.append(v)
+		v.x = x_tete - 30.0 if not premier else 0.0
+		if premier:
+			x_tete = v.longueur
+	else:
+		appliquer_assemblage(v, a, etats)
+		_aligner_noms(v)
+		while v.equipage.size() > int(v.profil.equipage):   # moins de places : les passagers attendent
+			v.equipage.pop_back()
+			v.noms.pop_back()
+			reserve_survivants += 1
+	var D := donnees()
+	while v.equipage.size() < int(v.profil.equipage) and (reserve_survivants > 0 or bac_a_sable):
+		v.equipage.append(float(D.equipage_pv))
+		v.noms.append(_nom_survivant())
+		if reserve_survivants > 0:
+			reserve_survivants -= 1
+	_replacer(true)
+	v.x_prev = v.x
+	var p: Dictionary = v.profil
+	log_("%s construit%s." % [v.nom, "" if float(p.vitesse) > 0.0 else " : il ne roule pas (%s)" % p.get("immobile", "")], "ok" if float(p.vitesse) > 0.0 else "alerte")
+	evt({"t": "assemble", "uid": v.uid})
+	return true

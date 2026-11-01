@@ -10,7 +10,8 @@ cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres re
 Toucher un véhicule dans la scène affiche ses pièces cassées : toucher une icône envoie un mécanicien ;
 un véhicule trouvé et réparé peut rejoindre le convoi. Les cartes en bas sélectionnent un véhicule. Détails : `docs/design/CONVOI.md`.
 Tests sans écran (`godot --headless --path game -s res://tests/<nom>.gd`) : `test_combat`, `test_assemblage`, `test_ouverture`,
-`test_evenements` (tempête de sable, champs de mines) et `test_grange` (démontage, éditeur libre, dessin des assemblages).
+`test_evenements` (tempête de sable, champs de mines), `test_grange` (démontage) et `test_libre` (construction libre).
+Parcours écran de la grille : `capture_libre.gd`. Bac à sable : menu principal, toutes les pièces sans limite.
 La nuit ou pendant une tempête, un véhicule garé dans une grange se **démonte** ou se **modifie**, et le bouton **Nouveau véhicule**
 en construit un avec les pièces de la réserve. Devant un champ de mines : déminer (détecteur, chien), faire demi-tour ou traverser.
 

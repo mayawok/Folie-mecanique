@@ -1,6 +1,6 @@
 # Grille de construction — véhicules « Frankenstein »
 
-Statut : **G1 à G4 codés** (DEC-029, DEC-034, DEC-038 à DEC-040) ; **atelier guidé codé pour la moto et le side-car** (DEC-035).
+Statut : **construction libre codée le 01/11 (DEC-043 à DEC-046)**, voir plus bas ; avant elle, **G1 à G4 codés** (DEC-029, DEC-034, DEC-038 à DEC-040) ; **atelier guidé codé pour la moto et le side-car** (DEC-035).
 À faire : atelier guidé pour les gros véhicules, améliorer le dessin des assemblages, quelques pièces à fabriquer en plus des plaques. S'appuie sur DEC-016 (véhicules modulaires) et sur les tables
 existantes `data/master/echelle_et_grille.csv`, `catalogue_composants.csv` (29 pièces), `grille_et_chevauchements.csv`.
 
@@ -112,6 +112,20 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
   cabine, tourelle et tube, mitrailleuse sur son appui, plaques, équipage), clé `asm_…`, reconstruite à la sauvegarde. Les ancrages de tir
   lisent cette fiche comme les autres. Limite : apparence volontairement simple, sans l'art définitif.
 - Tests : `test_grange.gd` (51 vérifications), parcours écran `capture_grange.gd`, planche `capture_assemblages.gd`.
+
+## Construction libre (01/11, DEC-043 à DEC-046) — la grille de référence
+
+- **Ordre** : 1. peindre le châssis (acier ou blindage, gomme ; plaques de blindage) ; 2. essieux sous la case la plus basse
+  d'une colonne (léger, lourd, de char) avec leur train (roue petite, moyenne, grande, chenille) ; 3. moteurs, cabines, armes.
+- **Tout est compatible** : on peut tout poser partout où la pièce repose sur quelque chose. Construction refusée seulement
+  sans châssis ou sans siège. Le reste se paie en pratique (voir DEC-043) et s'affiche en direct : sol, centre de gravité,
+  charge de chaque essieu, liste des défauts.
+- **À tout moment** (DEC-044), jeu en pause pendant l'édition dans le prototype. **Bac à sable** au menu principal (DEC-045).
+- Code : `scripts/vehicules/construction_libre.gd` (règles, physique, dessin, conversion), `editeur_grille.gd` (écran),
+  `modele_atelier.gd` (`grille_de`, `palette_grille`, `cout_grille`, `construire_grille`). Tests : `test_libre.gd`,
+  parcours écran `capture_libre.gd`.
+- Ouvert : édition en temps réel et risquée (après le prototype) ; vue de face ou largeur (non modélisée) ; vitesses des
+  véhicules convertis à rapprocher de l'historique ; zoom de la grille sur iPhone (cases de 20 points).
 
 ## Ouvert
 

@@ -42,7 +42,50 @@
   ],
   "pv_chassis": [
    "attelage"
-  ]
+  ],
+  "libre": {
+   "_note": "Construction libre (DEC-043) : châssis peint case par case, essieux, trains, pièces. Valeurs à régler en essai.",
+   "grille": [
+    40,
+    16
+   ],
+   "cases": {
+    "acier": {
+     "nom": "Acier",
+     "poids_kg": 45,
+     "pv": 5,
+     "blindage": 3,
+     "metal": 0.25
+    },
+    "blindage": {
+     "nom": "Blindage",
+     "poids_kg": 380,
+     "pv": 12,
+     "blindage": 45,
+     "metal": 1
+    }
+   },
+   "reservoir_base": 10,
+   "reservoir_par_case": 0.4,
+   "ch_par_tonne_requis": 15.0,
+   "ch_par_tonne_min": 2.0,
+   "surcharge_casse": 2.0,
+   "garde_min_m": 0.25,
+   "stabilite_instable": 1.0,
+   "stabilite_critique": 0.5,
+   "recul_t": {
+    "mitrailleuse": 0,
+    "canon_leger": 2,
+    "canon_75": 6,
+    "canon_88": 12,
+    "mortier": 1.5
+   },
+   "palette": [
+    "moteur",
+    "cabine",
+    "arme"
+   ]
+  }
  },
  "pieces": {
   "chassis_willys_mb": {
@@ -867,6 +910,89 @@
     3,
     3
    ]
+  },
+  "essieu_leger": {
+   "famille": "essieu",
+   "nom": "Essieu léger",
+   "charge_kg": 1200,
+   "poids_kg": 30,
+   "pv": 15,
+   "metal": 1
+  },
+  "essieu_lourd": {
+   "famille": "essieu",
+   "nom": "Essieu lourd",
+   "charge_kg": 5000,
+   "poids_kg": 160,
+   "pv": 35,
+   "metal": 2
+  },
+  "essieu_char": {
+   "famille": "essieu",
+   "nom": "Essieu de char",
+   "charge_kg": 15000,
+   "poids_kg": 450,
+   "pv": 60,
+   "metal": 4
+  },
+  "roue_petite": {
+   "famille": "train",
+   "nom": "Petite roue (50 cm)",
+   "type": "roues",
+   "diametre_cases": 2,
+   "vitesse_max": 8.0,
+   "sable": 0.6,
+   "charge_kg": 500,
+   "poids_kg": 15,
+   "pv": 10,
+   "metal": 0.5
+  },
+  "roue_moyenne": {
+   "famille": "train",
+   "nom": "Roue moyenne (75 cm)",
+   "type": "roues",
+   "diametre_cases": 3,
+   "vitesse_max": 7.5,
+   "sable": 0.85,
+   "charge_kg": 1600,
+   "poids_kg": 45,
+   "pv": 20,
+   "metal": 1
+  },
+  "roue_grande": {
+   "famille": "train",
+   "nom": "Grande roue (1 m)",
+   "type": "roues",
+   "diametre_cases": 4,
+   "vitesse_max": 6.0,
+   "sable": 0.92,
+   "charge_kg": 5000,
+   "poids_kg": 130,
+   "pv": 35,
+   "metal": 2
+  },
+  "chenille": {
+   "famille": "train",
+   "nom": "Galet de chenille",
+   "type": "chenilles",
+   "diametre_cases": 3,
+   "vitesse_max": 4.6,
+   "sable": 1.0,
+   "charge_kg": 15000,
+   "poids_kg": 700,
+   "pv": 40,
+   "metal": 3
+  },
+  "arme_mortier": {
+   "famille": "arme",
+   "nom": "Mortier 81 mm",
+   "arme": "mortier",
+   "poids_kg": 60,
+   "emprise": [
+    2,
+    2
+   ],
+   "metal": 2
   }
  }
 }

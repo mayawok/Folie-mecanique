@@ -49,6 +49,8 @@ static func _famille(a: Dictionary, fam: String) -> Array:
 
 
 static func poids(a: Dictionary) -> float:
+	if a.get("libre", false):
+		return float(ConstructionLibre.analyser(a).stats.get("poids_kg", 0.0))
 	var R: Dictionary = catalogue().regles
 	var t := float(piece(a.get("chassis", "")).get("poids_kg", 0.0))
 	for p in _places(a):
@@ -72,6 +74,8 @@ static func puissance(a: Dictionary) -> float:
 
 # Liste des défauts qui empêchent le véhicule de rouler (vide = valide). Chaque défaut : {code, texte}.
 static func valider(a: Dictionary) -> Array:
+	if a.get("libre", false):   # construction libre (DEC-043) : seules les absurdités bloquent
+		return ConstructionLibre.erreurs(a)
 	var R: Dictionary = catalogue().regles
 	var err := []
 	var ch := piece(a.get("chassis", ""))
@@ -129,6 +133,8 @@ static func valider(a: Dictionary) -> Array:
 # Statistiques au format des profils de combat (vitesse, blindage, conso, reservoir, metal, equipage,
 # ouvert, armes, pv, standoff). Appeler seulement sur un assemblage valide.
 static func statistiques(a: Dictionary) -> Dictionary:
+	if a.get("libre", false):
+		return ConstructionLibre.statistiques(a)
 	var R: Dictionary = catalogue().regles
 	var ch := piece(a.chassis)
 	var plaques := int(a.get("plaques", 0))
@@ -179,7 +185,8 @@ static func profil(type: String) -> Dictionary:
 
 # Démontage (prépare G2) : pièces récupérées avec leur état, plus le métal du châssis.
 static func demonter(a: Dictionary, etats := {}) -> Dictionary:
-	var res := {"pieces": [], "metal": int(piece(a.chassis).metal)}
+	var metal := int(ConstructionLibre.cout_metal(a) * 0.5) if a.get("libre", false) else int(piece(a.chassis).metal)
+	var res := {"pieces": [], "metal": metal}
 	for p in a.get("pieces", []):
 		var fam: String = piece(p.piece).get("famille", "")
 		res.pieces.append({"piece": p.piece, "etat": float(etats.get(fam, 1.0))})

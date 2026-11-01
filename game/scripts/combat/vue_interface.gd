@@ -1,6 +1,9 @@
 # Couche 2 de la vue : construction et mise à jour de l'interface, actions du joueur, sauvegarde.
 extends "res://scripts/combat/vue_dessin.gd"
 
+var _voile_menu: ColorRect       # menu principal : continuer, nouvelle expédition, bac à sable (DEC-043)
+var _btn_continuer: Button
+
 
 # --- Construction ----------------------------------------------------------
 func _construire_interface() -> void:
@@ -113,7 +116,7 @@ func _construire_interface() -> void:
 	_bouton("S'abriter", func(): m.ordre_debarquer(selection), ab, 190)
 	_btn_camo = _bouton("Camoufler", func(): _basculer_camo(), ab, 200)
 	_btn_garage = _bouton("Garer", func(): _basculer_garage(), ab, 170)
-	_btn_modifier = _bouton("Modifier", func(): _ouvrir_editeur(selection), ab, 150)
+	_btn_modifier = _bouton("Grille", func(): _ouvrir_editeur(selection), ab, 150)
 	_btn_demonter = _bouton("Démonter", func(): m.ordre_demonter(selection), ab, 170)
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
@@ -258,11 +261,40 @@ func _construire_interface() -> void:
 	_lbl_fin = _label("", vb, 40)
 	_lbl_fin.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vb, 420)
+	_bouton("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
+	# --- Menu principal
+	_voile_menu = ColorRect.new()
+	_voile_menu.color = Color(0.03, 0.03, 0.03, 0.86)
+	_voile_menu.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_voile_menu.visible = false
+	add_child(_voile_menu)
+	var cm := CenterContainer.new()
+	cm.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_voile_menu.add_child(cm)
+	var vm := VBoxContainer.new()
+	vm.add_theme_constant_override("separation", 26)
+	cm.add_child(vm)
+	var titre := _label("FOLIE MÉCANIQUE", vm, 56)
+	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_btn_continuer = _bouton("Continuer", func():
+		_voile_menu.visible = false
+		pause = _atelier != null or _editeur != null, vm, 460)
+	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vm, 460)
+	_bouton("Bac à sable (toutes les pièces)", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vm, 460)
+
+
+func afficher_menu(continuer: bool) -> void:
+	_btn_continuer.visible = continuer
+	_voile_menu.visible = true
+	move_child(_voile_menu, get_child_count() - 1)
+	pause = true
 
 
 # --- Partie ----------------------------------------------------------------
-func _nouvelle_partie(g: int, sauve := {}, ouverture := true) -> void:
+func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> void:
 	graine = g
+	if _voile_menu != null:
+		_voile_menu.visible = false
 	if _atelier != null:
 		_atelier.queue_free()
 		_atelier = null
@@ -271,7 +303,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := true) -> void:
 		_editeur = null
 	if sauve.is_empty():
 		_effacer_sauvegarde()
-		m = CombatModele.new(g, {"ouverture": ouverture})   # début guidé : moto à assembler (DEC-035)
+		m = CombatModele.new(g, {"bac_a_sable": true} if bac else {"ouverture": ouverture})   # début guidé : moto à assembler (DEC-035)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
 	_rng.seed = g
@@ -319,12 +351,9 @@ func _ouvrir_atelier() -> void:
 func _ouvrir_editeur(vehicule_uid: int) -> void:
 	if _editeur != null or _atelier != null:
 		return
-	var raison: String = m.raison_atelier_libre()
+	var raison: String = m.raison_grille(vehicule_uid)   # grille accessible à tout moment, jeu en pause (DEC-043)
 	if raison != "":
 		m.log_(raison, "alerte")
-		return
-	if vehicule_uid == 0 and m.chassis_en_reserve().is_empty():
-		m.log_("Aucun châssis en réserve : démontez un véhicule.", "alerte")
 		return
 	_demarrer_audio()
 	var pause_avant := pause
@@ -503,7 +532,7 @@ func _maj_interface() -> void:
 		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
 	_chips.pieces[0].text = "Pièces %d" % (m.composants.size() + m.pieces_stock.size())
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
-	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.chassis_en_reserve().is_empty() and m.raison_atelier_libre() == ""
+	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.fini
 	_btn_pause.text = "Reprendre" if pause else "Pause"
 	for i in _btns_vitesse.size():
 		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)
@@ -562,8 +591,8 @@ func _maj_interface() -> void:
 		var ab_g = m.abri_garage()
 		_btn_garage.text = "Sortir du garage" if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
 		_btn_garage.disabled = sel.garage == 0 and ab_g == null
-		_btn_modifier.visible = sel.garage != 0
-		_btn_modifier.disabled = m.raison_atelier_libre() != ""
+		_btn_modifier.visible = true
+		_btn_modifier.disabled = m.raison_grille(sel.uid) != ""
 		_btn_demonter.visible = sel.garage != 0
 		var travaille: bool = not m.travaux.is_empty() and m.travaux.uid == sel.uid
 		_btn_demonter.text = "Démontage %d %%" % int(100.0 * (1.0 - m.travaux.reste / m.travaux.total)) if travaille else "Démonter"

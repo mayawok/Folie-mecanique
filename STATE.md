@@ -14,6 +14,9 @@ Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fich
 - **La partie commence par la grille** (DEC-035) : moto assemblée, puis side-car, essence, arme, ennemis.
 - **Codés le 01/11** : tempête de sable (DEC-036), champs de mines (DEC-037), grille G2 démontage (DEC-038), G3 éditeur libre
   (DEC-039), G4 dessin des assemblages (DEC-040). Tests : 221 vérifications sans écran + parcours écran (`game/tests/`).
+- **Refonte de la grille le 01/11** (DEC-043 à 046) : châssis peint case par case, essieux, roues de trois tailles ou chenilles,
+  moteurs, cabines, armes (mitrailleuse, canons, **mortier**) ; tout compatible, mauvais résultats calculés ; grille ouverte
+  à tout moment (jeu en pause) ; **menu principal avec Bac à sable**.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
@@ -31,7 +34,7 @@ Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fich
 
 ## Prochaines étapes (ordre recommandé)
 
-1. Le porteur de projet joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
+1. Le porteur de projet essaie le **Bac à sable** (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
 2. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
 3. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
 4. Godot 4.6, puis essai d'export iOS dans le nuage.

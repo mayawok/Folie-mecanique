@@ -20,6 +20,8 @@ static func signature(a: Dictionary) -> String:
 
 # Type de dessin d'un assemblage : règles d'apparence (BMW), véhicule historique identique, sinon fiche fabriquée
 static func type_dessin(a: Dictionary) -> String:
+	if a.get("libre", false):
+		return enregistrer(a)
 	var c := Assemblage.compter(Assemblage.ids(a))
 	for r in Assemblage.catalogue().regles.get("apparences", []):
 		if r.requiert.all(func(id): return c.has(id)):
@@ -33,9 +35,10 @@ static func type_dessin(a: Dictionary) -> String:
 
 # Fabrique la fiche, l'enregistre (une fois) et renvoie sa clé
 static func enregistrer(a: Dictionary) -> String:
-	var cle := "asm_%x" % hash(signature(a))
+	var libre: bool = a.get("libre", false)
+	var cle := "asm_%x" % hash(ConstructionLibre.signature(a) if libre else signature(a))
 	if not VehiculeDessin.existe(cle):
-		VehiculeDessin.donnees().vehicules[cle] = forme(a)
+		VehiculeDessin.donnees().vehicules[cle] = ConstructionLibre.forme(a) if libre else forme(a)
 	return cle
 
 

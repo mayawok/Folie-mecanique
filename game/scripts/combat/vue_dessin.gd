@@ -11,11 +11,11 @@ func _evenement(e: Dictionary) -> void:
 				return
 			var n = noeuds.get(e.de)
 			if n is VehiculeDessin:
-				n.tirer("canon" if e.classe == "canon" else "mitrailleuse")
+				n.tirer("canon" if e.classe in ["canon", "mortier"] else "mitrailleuse")
 			var a: Vector2 = m.projectiles.back().a
-			_bouffees.append({"p": a, "age": 0.0, "grand": e.classe == "canon"})
+			_bouffees.append({"p": a, "age": 0.0, "grand": e.classe in ["canon", "mortier"]})
 			var joueur: bool = (tireur is CombatModele.Veh and tireur.camp == "joueur") or (tireur is CombatModele.Bat and tireur.statut == "neutralise")
-			if e.classe == "canon":
+			if e.classe in ["canon", "mortier"]:
 				_son("sfx_tir_canon", 0.0 if joueur else -6.0)
 			elif _temps - _t_son.mitrailleuse > 0.35:
 				_t_son.mitrailleuse = _temps
@@ -23,7 +23,7 @@ func _evenement(e: Dictionary) -> void:
 		"impact":
 			var p := Vector2(e.x, e.y)
 			if e.touche and e.reel:
-				_etincelles.append({"p": p, "age": 0.0, "gros": e.classe == "canon"})
+				_etincelles.append({"p": p, "age": 0.0, "gros": e.classe in ["canon", "mortier"]})
 				if e.ricoche:
 					_ricochets.append({"p": p, "age": 0.0, "sens": 1.0 if _rng.randf() < 0.5 else -1.0})
 				if e.sur_joueur and _temps - _t_son.impact > 0.25:
@@ -32,8 +32,8 @@ func _evenement(e: Dictionary) -> void:
 			elif e.touche:
 				_etincelles.append({"p": p, "age": 0.0, "gros": false})
 			else:
-				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe == "canon"})
-				if e.classe == "canon":
+				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe in ["canon", "mortier"]})
+				if e.classe in ["canon", "mortier"]:
 					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
 		"meute":
 			_son("sfx_meute", -3.0)
@@ -306,7 +306,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 	for pr in m.projectiles:
 		var tt: float = clampf((pr.t + (0.0 if pause else _alpha * CombatModele.DT)) / pr.T, 0.0, 1.0)
 		var dist: float = pr.a.distance_to(pr.b)
-		var arc: float = (0.03 if pr.classe == "canon" else (0.012 if pr.classe == "fusil" else 0.004)) * dist
+		var arc: float = (0.35 if pr.classe == "mortier" else (0.03 if pr.classe == "canon" else (0.012 if pr.classe == "fusil" else 0.004))) * dist
 		var t0: float = maxf(0.0, tt - (3.2 if pr.classe != "canon" else 2.0) / maxf(dist, 1.0))
 		var pa: Vector2 = pr.a.lerp(pr.b, tt) + Vector2(0, sin(PI * tt) * arc)
 		var pb: Vector2 = pr.a.lerp(pr.b, t0) + Vector2(0, sin(PI * t0) * arc)

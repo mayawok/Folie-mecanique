@@ -96,6 +96,19 @@
    "munitions": 1,
    "pv": 0,
    "vitesse": 120
+  },
+  "mortier": {
+   "nom": "Mortier 81 mm",
+   "classe": "mortier",
+   "degats": 38,
+   "penetration": 22,
+   "cadence": 4.5,
+   "portee": 110,
+   "portee_min": 22,
+   "precision": 0.42,
+   "munitions": 2,
+   "pv": 30,
+   "vitesse": 45
   }
  },
  "zones": {
@@ -705,11 +718,20 @@
  },
  "tempete": {
   "_note": "DEC-027. Délais en secondes de jeu. proba_nuit : chance qu'une tempête qui tombe de nuit ait lieu (sinon reportée).",
-  "intervalle": [240, 420],
+  "intervalle": [
+   240,
+   420
+  ],
   "report_s": 40,
   "proba_nuit": 0.2,
-  "annonce": [30, 45],
-  "duree": [60, 120],
+  "annonce": [
+   30,
+   45
+  ],
+  "duree": [
+   60,
+   120
+  ],
   "precision": 0.5,
   "vitesse": 0.6,
   "usure_s": 5.0,
@@ -724,11 +746,20 @@
  },
  "mines_champs": {
   "_note": "DEC-028. Champs tirés à graine fixe, plus fréquents avec le niveau. Distances en mètres, durées en secondes.",
-  "intervalle": [520, 900],
+  "intervalle": [
+   520,
+   900
+  ],
   "proba_base": 0.12,
   "proba_par_niveau": 0.07,
-  "mines": [6, 10],
-  "pas": [4.0, 8.0],
+  "mines": [
+   6,
+   10
+  ],
+  "pas": [
+   4.0,
+   8.0
+  ],
   "alerte_m": 130.0,
   "arret_m": 14.0,
   "detecteur_s": 7.0,

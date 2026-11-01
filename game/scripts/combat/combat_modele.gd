@@ -8,8 +8,9 @@ func _init(g := 1, options := {}) -> void:
 	graine = g
 	rng.seed = g
 	var D := donnees()
-	meteo_on = bool(options.get("meteo", options.get("ouverture", false)))
-	champs_on = bool(options.get("champs", options.get("ouverture", false)))
+	bac_a_sable = bool(options.get("bac_a_sable", false))
+	meteo_on = bool(options.get("meteo", options.get("ouverture", bac_a_sable)))
+	champs_on = bool(options.get("champs", options.get("ouverture", bac_a_sable)))
 	_init_meteo()
 	_init_mines()
 	if options.get("ouverture", false):
@@ -37,6 +38,12 @@ func _init(g := 1, options := {}) -> void:
 	for v in convoi:
 		v.x_prev = v.x
 	monde = MondeJeu.new(self)
+	if bac_a_sable:
+		for k in ["fuel_l", "ammo", "metal"]:
+			if stocks.has(k):
+				stocks[k] = 99999.0
+		log_("Bac à sable : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
+		return
 	log_("Une Jeep et deux survivants. Avancez pour trouver de quoi vous équiper.", "info")
 
 
@@ -231,7 +238,7 @@ func sauver() -> Dictionary:
 			pcs[pid] = v.pieces[pid].pv
 		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
 	var w := monde
-	return {"v": 2, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
+	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs,
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
@@ -251,6 +258,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m._lore_dit = bool(d.lore)
 	m.reserve_survivants = int(d.reserve)
 	m.ouverture = bool(d.get("ouverture", false))
+	m.bac_a_sable = bool(d.get("bac", false))
 	m.meteo_on = bool(d.get("meteo", m.ouverture))
 	m.champs_on = bool(d.get("champs", m.ouverture))
 	for k in d.get("equip_demin", {}):
@@ -398,6 +406,9 @@ func _marche(dt: float) -> void:
 			blocage = "Un véhicule est au garage : sortez-le avant de repartir."
 		elif cache:
 			blocage = "Un véhicule est camouflé : découvrez-le avant de repartir."
+		elif actifs.any(func(v): return float(v.profil.vitesse) <= 0.0):
+			var v0 = actifs.filter(func(v): return float(v.profil.vitesse) <= 0.0)[0]
+			blocage = "%s ne roule pas : %s. Ouvrez sa grille." % [v0.nom, v0.profil.get("immobile", "conception à revoir")]
 		elif immobilise:
 			blocage = "Un véhicule est immobilisé : réparez-le ou abandonnez-le."
 		elif stocks.fuel_l <= 0.0:
