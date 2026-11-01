@@ -53,6 +53,9 @@ static func deplacer(a: Dictionary, dx: int, dy: int) -> Dictionary:
 		p.pos = [int(p.pos[0]) + dx, int(p.pos[1]) + dy]
 		if p.pos[0] < 0 or p.pos[1] < 0 or p.pos[0] + int(em[0]) > G.x or p.pos[1] + int(em[1]) > G.y:
 			return {}
+	if b.has("plateforme"):
+		b.plateforme.x = int(b.plateforme.x) + dx
+		b.plateforme.y = int(b.plateforme.y) + dy
 	for t in b.get("toles", []):
 		t[0] = int(t[0]) + dx
 		t[2] = int(t[2]) + dx
@@ -93,6 +96,168 @@ static func nouvelle(nom := "Frankenstein") -> Dictionary:
 	return {"libre": true, "nom": nom, "cases": [], "essieux": [], "pieces": [], "plaques": 0, "v": 2}   # v 2 : radiateur exigé (DEC-080)
 
 
+# --- Plateformes de voiture (DEC-083) ---------------------------------------------------------
+# Une voiture repose sur une plateforme (court, moyen, long) : châssis de poutres et deux ponts rigides.
+# Hors mode créatif elle ne change pas ; carrosserie, moteur, arme, greffes et garde au sol s'échangent sur des emplacements.
+static func _plateformes() -> Dictionary:
+	return R().get("plateformes", {})
+
+
+static func tailles_plateforme() -> Array:
+	return ["court", "moyen", "long"]
+
+
+static func plateforme_de(a: Dictionary) -> String:
+	return String(a.get("plateforme", {}).get("taille", ""))
+
+
+# Nouvelle voiture : complete = avec poste, radiateur, moteur et carrosserie par défaut ; sinon châssis et roues seuls
+static func voiture(t: String, complete := true) -> Dictionary:
+	var P := _plateformes()
+	if not P.has(t):
+		return {}
+	var fp: Dictionary = P[t]
+	var B: Dictionary = P.base
+	var n := int(fp.longueur)
+	var x0 := (taille().x - n) / 2
+	var y0 := 5
+	var a := nouvelle(String(fp.nom))
+	a.plateforme = {"taille": t, "x": x0, "y": y0, "rehausse": 0}
+	for x in range(x0, x0 + n):
+		a.cases.append([x, y0, String(B.sorte)])
+	for x in [x0 + int(B.essieu_arriere), x0 + n - 1 - int(B.essieu_avant_depuis_bout)]:
+		a.essieux.append({"x": x, "piece": String(B.essieu), "train": String(B.roue), "y": y0 - int(B.hauteur_pont)})
+	a = rehausser(a, int(B.get("rehausse_defaut", 0)))   # un peu plus haute que d'origine
+	if complete:
+		for id in [String(fp.carrosserie), String(B.radiateur), String(fp.moteur)]:
+			var r := poser_emplacement(a, id, Vector2i(-1, -1))
+			if not r.is_empty():
+				a = r.a
+		var b := poser(a, String(B.poste), Vector2i(x0 + n - 9, y0 + 1))
+		if not b.is_empty():
+			a = b
+	return a
+
+
+# Emplacements de la plateforme, en cases absolues : [{nom, rect, cible, famille | ids}]
+static func emplacements(a: Dictionary) -> Array:
+	if not a.has("plateforme"):
+		return []
+	var n := int(_plateformes()[plateforme_de(a)].longueur)
+	var o := Vector2i(int(a.plateforme.x), int(a.plateforme.y))
+	return [
+		{"nom": "caisse", "rect": Rect2i(o, Vector2i(n, 5)), "cible": o, "famille": "coque"},
+		{"nom": "capot", "rect": Rect2i(o + Vector2i(n - 6, 1), Vector2i(5, 4)), "cible": o + Vector2i(n - 1, 1), "famille": "moteur", "droite": true},
+		{"nom": "calandre", "rect": Rect2i(o + Vector2i(n - 1, 1), Vector2i(1, 2)), "cible": o + Vector2i(n - 1, 1), "famille": "radiateur"},
+		{"nom": "nez", "rect": Rect2i(o + Vector2i(n, -1), Vector2i(2, 4)), "cible": o + Vector2i(n, 0), "ids": ["greffe_pare_buffle"]},
+		{"nom": "arriere", "rect": Rect2i(o + Vector2i(0, 1), Vector2i(6, 6)), "cible": o + Vector2i(1, 3), "famille": "arme", "affut": true},
+		{"nom": "toit", "rect": Rect2i(o + Vector2i(n / 2 - 4, 4), Vector2i(8, 3)), "cible": o + Vector2i(n / 2 - 1, 5), "ids": ["greffe_piques", "greffe_drapeau"]}]
+
+
+static func _accepte(a: Dictionary, s: Dictionary, id: String) -> bool:
+	if s.has("ids"):
+		return id in s.ids
+	var f := Assemblage.piece(id)
+	if String(f.get("famille", "")) != String(s.famille):
+		return false
+	return s.famille != "coque" or String(f.get("taille", "")) == plateforme_de(a)
+
+
+# Pose une pièce sur l'emplacement qu'elle vise (cell = son coin ; (-1, -1) : le premier emplacement qui l'accepte).
+# La pièce qui l'occupait est retirée (elle retourne à la réserve). {a, remplace} ou {} si aucun emplacement ne convient.
+static func poser_emplacement(a: Dictionary, id: String, cell: Vector2i, extra := {}) -> Dictionary:
+	if extra.has("coupe"):
+		return {}   # morceau scié : posé librement
+	var e := _emprise(id)
+	for s in emplacements(a):
+		if not _accepte(a, s, id):
+			continue
+		if cell.x >= 0 and not Rect2i(cell, e).intersects(s.rect):
+			continue
+		var b := a.duplicate(true)
+		var ancien := ""
+		var i: int = b.pieces.size() - 1
+		while i >= 0:
+			var pid := String(b.pieces[i].piece)
+			var q: Dictionary = _pieces(b)[i]
+			if _accepte(b, s, pid) and Rect2i(q.pos, q.e).intersects(s.rect):
+				ancien = pid
+				b.pieces.remove_at(i)
+			i -= 1
+		var cible: Vector2i = s.cible
+		if s.get("droite", false):
+			cible.x -= e.x
+		var c := poser(b, id, cible, false, extra)
+		if s.get("affut", false):   # arme sur affût soudé à la caisse : tenue sans appui, à hauteur de ceinture
+			c = b.duplicate(true)
+			c.pieces.append({"piece": id, "pos": [cible.x, cible.y], "affut": true})
+			for k in extra:
+				c.pieces[c.pieces.size() - 1][k] = extra[k]
+			if not _libre(_occupation(c, c.pieces.size() - 1), cible, e):
+				return {}
+		if c.is_empty():
+			return {}
+		return {"a": c, "remplace": ancien}
+	return {}
+
+
+# Garde au sol (0 à rehausse_max crans de 25 cm) : les ponts descendent, la suspension qui convient est montée
+static func rehausser(a: Dictionary, crans: int) -> Dictionary:
+	if not a.has("plateforme"):
+		return {}
+	var B: Dictionary = _plateformes().base
+	crans = clampi(crans, 0, int(B.rehausse_max))
+	var h := int(B.hauteur_pont) + crans
+	var b := a.duplicate(true)
+	b.plateforme.rehausse = crans
+	var ls := liaisons_pour(h)
+	for e in b.essieux:
+		if bool(Assemblage.piece(String(e.piece)).get("pont", false)):
+			e.y = y_essieu(b, int(e.x)) - h
+			e.liaison = ls[0] if not ls.is_empty() else ""
+	return b
+
+
+# Mode créatif : change la longueur de la plateforme. Les pièces des emplacements suivent (l'avant reste à l'avant) ;
+# la carrosserie d'une autre taille est remplacée par celle de la nouvelle plateforme.
+static func changer_plateforme(a: Dictionary, t: String) -> Dictionary:
+	if not a.has("plateforme"):
+		return voiture(t)
+	var b := voiture(t, false)
+	if b.is_empty():
+		return {}
+	b = rehausser(b, int(a.plateforme.get("rehausse", 0)))
+	for k in ["nom", "nom_choisi", "peinture"]:
+		if a.has(k):
+			b[k] = a[k]
+	var n0 := int(_plateformes()[plateforme_de(a)].longueur)
+	var n1 := int(_plateformes()[t].longueur)
+	var o0 := Vector2i(int(a.plateforme.x), int(a.plateforme.y))
+	var o1 := Vector2i(int(b.plateforme.x), int(b.plateforme.y))
+	var avec_caisse := false
+	for p in _pieces(a):
+		if _coque(p.fiche) and p.fiche.has("taille"):
+			continue
+		var rel: Vector2i = p.pos - o0
+		if rel.x >= n0 / 2:
+			rel.x += n1 - n0   # avant : reste à la même distance du nez
+		var cell: Vector2i = o1 + rel
+		var r := poser_emplacement(b, p.id, cell)
+		if not r.is_empty():
+			b = r.a
+			continue
+		var c := poser(b, p.id, cell, p.miroir)
+		if not c.is_empty():
+			b = c
+	for p in _pieces(b):
+		avec_caisse = avec_caisse or (_coque(p.fiche) and p.fiche.has("taille"))
+	if not avec_caisse:
+		var r2 := poser_emplacement(b, String(_plateformes()[t].carrosserie), Vector2i(-1, -1))
+		if not r2.is_empty():
+			b = r2.a
+	return b
+
+
 # --- Lecture de la grille --------------------------------------------------------------------
 static func _cases(a: Dictionary) -> Dictionary:   # Vector2i -> sorte
 	var res := {}
@@ -116,7 +281,7 @@ static func _pieces(a: Dictionary) -> Array:   # [{i, id, fiche, pos, e}]
 			e = Vector2i(int(p.emprise[0]), int(p.emprise[1]))
 		res.append({"i": i, "id": String(p.piece), "fiche": Assemblage.piece(String(p.piece)),
 			"pos": Vector2i(int(p.pos[0]), int(p.pos[1])), "e": e, "miroir": bool(p.get("miroir", false)),
-			"coupe": coupe, "k": (float(coupe[1]) - float(coupe[0])) * (float(coupe[3]) - float(coupe[2]))})
+			"coupe": coupe, "k": (float(coupe[1]) - float(coupe[0])) * (float(coupe[3]) - float(coupe[2])), "affut": bool(p.get("affut", false))})
 		i += 1
 	return res
 
@@ -191,6 +356,8 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 	for c in occ:
 		if occ[c] is int and _greffe(_pieces(a)[int(occ[c])].fiche):
 			occ_sup.erase(c)
+	if p.get("affut", false) and a.has("plateforme"):   # arme sur l'affût arrière d'une voiture (DEC-083)
+		return _libre(occ, p.pos, p.e)
 	if _greffe(p.fiche):   # accrochée à l'extérieur : libre, et collée (côté, dessus ou dessous) au châssis ou à une pièce
 		if not _libre(occ, p.pos, p.e) or not _libre(coq, p.pos, p.e):
 			return false
@@ -359,7 +526,7 @@ static func refroidissement(a: Dictionary) -> Dictionary:
 	for p in _pieces(a):
 		if p.fiche.get("famille", "") == "moteur" and not bool(p.fiche.get("refroidi_air", false)):
 			moteurs.append(Rect2i(p.pos, p.e))
-			besoin += float(p.fiche.get("puissance_ch", 0))
+			besoin += float(p.fiche.get("puissance_ch", 0)) * (1.3 if bool(p.fiche.get("a_nu", false)) else 1.0)   # moteur à nu : chauffe plus (DEC-083)
 	var cap := 0.0
 	var loin := 0
 	for p in _pieces(a):
@@ -1036,12 +1203,24 @@ static func analyser(a: Dictionary) -> Dictionary:
 		pv[k] = maxf(1.0, pv[k])
 	if immobile != "":
 		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
+	var classe := ""   # classe Intercepteur (DEC-083) : petite voiture rapide, une arme au plus, à l'arrière
+	var IC: Dictionary = RL.get("plateformes", {}).get("intercepteur", {})
+	if not IC.is_empty() and immobile == "" and not remorque(a) and essieux.size() == 2 and n_moteurs == 1:
+		var arm := _pieces(a).filter(func(p): return p.fiche.get("famille", "") == "arme")
+		var xs := cases.keys().map(func(c): return c.x)
+		var milieu := (float(xs.min()) + float(xs.max()) + 1.0) * 0.5
+		var roues_ok: bool = essieux.all(func(e): return String(e.fiche_t.get("type", "roues")) == "roues")
+		var petit: bool = _pieces(a).any(func(p): return p.fiche.get("famille", "") == "moteur" and float(p.fiche.get("puissance_ch", 0)) <= float(IC.puissance_max_ch))
+		if roues_ok and petit and M <= float(IC.poids_max_kg) and arm.size() <= 1 and arm.all(func(p): return float(p.pos.x) + p.e.x * 0.5 <= milieu):
+			classe = "intercepteur"   # nerveux : chaque ch par tonne au-delà du requis compte, jusqu'à un plafond
+			var exces := maxf(0.0, ch_t / float(RL.ch_par_tonne_requis) - 1.0)
+			f_vit *= float(IC.bonus_vitesse) + minf(float(IC.bonus_puissance_max), exces * float(IC.bonus_par_exces))
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
 	var roles := roles_de(a)
 	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes + blindage_toles, "remorque": remorque(a),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size() + reservoir_plus, "piques": piques, "metal": int(round(metal)),
 		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
-		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
+		"precision": precision, "immobile": immobile, "phares": phares, "classe": classe, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
 		"infirmiers": roles.count("infirmier")}
 	if a.has("origine"):
@@ -1440,7 +1619,23 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 				formes.append({"pts": _poly_cercle(r.position.x + r.size.x * 0.5, r.end.y - 0.03, 0.04, 8), "c": "#8C867A", "z": 2})
 			"moteur":
 				var surface: int = int(p.e.x) * int(p.e.y)
-				_sprite(formes, "moteur_leger" if surface <= 8 else ("moteur_moyen" if surface <= 18 else "moteur_lourd"), r, 1)
+				if bool(p.fiche.get("a_nu", false)):   # moteur à nu (DEC-083) : bloc en bas, compresseur et pipes qui sortent du capot
+					var rb := Rect2(r.position, Vector2(r.size.x, r.size.y * 0.55))
+					_sprite(formes, "moteur_leger", rb, 1)
+					var yb := rb.end.y
+					var w := r.size.x
+					var xn := r.position.x
+					formes.append({"pts": [[xn + w * 0.2, yb - 0.02], [xn + w * 0.8, yb - 0.02], [xn + w * 0.76, yb + r.size.y * 0.28], [xn + w * 0.24, yb + r.size.y * 0.28]], "c": "#3A3631", "z": 4})
+					for k in 4:
+						var fx := xn + w * (0.28 + 0.15 * k)
+						formes.append({"ligne": [[fx, yb + 0.02], [fx, yb + r.size.y * 0.26]], "ep": 0.02, "c": "#8C867A", "z": 4})
+					formes.append({"pts": [[xn + w * 0.42, yb + r.size.y * 0.28], [xn + w * 0.62, yb + r.size.y * 0.28], [xn + w * 0.66, r.end.y], [xn + w * 0.38, r.end.y]], "c": "#B8B2A6", "z": 4})
+					formes.append({"pts": _poly_cercle(xn + w * 0.86, yb + r.size.y * 0.12, w * 0.08, 10), "c": "#8C867A", "z": 4})
+					for k in 3:
+						var py := yb - r.size.y * (0.1 + 0.12 * k)
+						formes.append({"ligne": [[xn + w * 0.15, py], [xn - w * 0.25, py - 0.06]], "ep": 0.035, "c": "#B8B2A6", "z": 4})
+				else:
+					_sprite(formes, "moteur_leger" if surface <= 8 else ("moteur_moyen" if surface <= 18 else "moteur_lourd"), r, 1)
 			"cabine":
 				var style := String(p.fiche.get("style", "ouverte" if bool(p.fiche.get("ouvert", false)) else "voiture"))
 				if STYLE_SPRITE.has(style):

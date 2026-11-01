@@ -254,3 +254,19 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 **Penché.** L'analyse cherche le segment du bas de coque qui contient le centre de gravité et au-dessus duquel toutes les roues restent ; sa pente est l'`assiette` (positive = nez en bas). Max 30° ; sinon « il se renverse ». Pénalités : vitesse −1,2 %/° (min ×0,4), précision −0,8 %/° (min ×0,5), défaut « penche ». Réglages dans `pieces.json` → `libre.inclinaison`. En jeu le dessin pivote autour du point d'appui ; l'aperçu de l'éditeur reste droit.
 
 **Déplacer.** Onglet « Véhicule » : glisser le véhicule entier (cases, essieux, pièces, tôles) ; refus hors grille. Vue : pincement/déplacer/cadrer de DEC-081.
+
+## Voitures sur plateforme et Intercepteurs (DEC-083)
+
+**Plateformes.** Onglet *Voitures* (première icône). Châssis court (15 cases), moyen (18), long (21) : poutres, deux ponts rigides, roues moyennes. Une nouvelle voiture arrive avec carrosserie, radiateur, petit moteur et poste de conduite. Données : `pieces.json` → `libre.plateformes`.
+
+**Verrou.** Hors mode créatif, une grille qui a une plateforme garde son châssis et ses essieux (message « le châssis ne change pas »). Une carrosserie d'une autre taille est refusée. En mode créatif : on change la longueur ; les pièces des emplacements suivent (l'avant reste à l'avant) et la carrosserie est remplacée par celle de la nouvelle taille.
+
+**Emplacements.** Caisse (carrosserie de la taille), capot (moteur, calé contre le radiateur), calandre (radiateur), nez (pare-buffle), arrière (une arme sur affût, à hauteur de ceinture, sans appui), toit (piques, drapeau). Poser une pièce dessus remplace l'ancienne, qui retourne à la réserve. Un morceau de carrosserie scié se pose librement.
+
+**Carrosseries.** Rouillées, trouées, sans vitres (sauf le coupé : pare-brise fêlé). Images tirées de la berline peinte par `tools/carrosseries.py` (porte arrière retirée ou doublée, toit découpé, rouille et trous ajoutés) : pas de nouvelle illustration à commander.
+
+**Garde au sol.** Ponts sous le châssis : d'origine (roue dans l'aile), +25 cm par défaut, jusqu'à +75 cm ; la suspension qui convient est montée seule.
+
+**Intercepteur.** Classe reconnue et affichée sous la grille. Conditions et bonus dans `libre.plateformes.intercepteur`. Tests : `test_voiture.gd` ; capture : `capture_voiture.gd`.
+
+**À faire.** Définir les modèles de voitures pour chaque longueur (plusieurs par longueur) et comment on les trouve en jeu.

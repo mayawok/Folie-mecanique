@@ -42,7 +42,7 @@ func _init(g := 1, options := {}) -> void:
 		for k in ["fuel_l", "ammo", "metal"]:
 			if stocks.has(k):
 				stocks[k] = 99999.0
-		log_("Bac à sable : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
+		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
 		return
 	log_("Une Jeep et deux survivants. Avancez pour trouver de quoi vous équiper.", "info")
 

@@ -27,10 +27,10 @@ const C_SOL := Color(0.55, 0.45, 0.3)
 const C_TUILE := Color(0.12, 0.115, 0.11, 0.82)
 # Barre d'icônes : deux actions, puis les catégories dans l'ordre de construction
 const ACTIONS := ["valider", "quitter"]
-const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["suspension", "Suspension"], ["moteur", "Moteurs"],
+const ONGLETS := [["voitures", "Voitures"], ["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["suspension", "Suspension"], ["moteur", "Moteurs"],
 	["poste", "Postes"], ["coque", "Carrosserie"], ["toles", "Tôles"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"],
 	["peinture", "Peinture"], ["vehicule", "Véhicule"], ["plans", "Plans"], ["vehicules", "Véhicules"]]
-const AIDES := {"chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Glissez vers un essieu",
+const AIDES := {"voitures": "Plateforme et garde au sol", "chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Glissez vers un essieu",
 	"suspension": "Glissez sur un pont rigide", "moteur": "Glissez sur la grille", "poste": "Glissez sur la grille",
 	"coque": "Glissez ; se superposent", "toles": "Glissez d'un point à un autre", "arme": "Glissez sur la grille",
 	"equipement": "Collées à l'extérieur", "equipage": "Touchez un siège", "peinture": "Ton de tout le véhicule",
@@ -318,7 +318,7 @@ func _placer_apercu(b := {}) -> void:
 	if source.get("cases", []).is_empty():
 		_apercu.visible = false
 		return
-	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles", "vehicule"])   # coques transparentes quand on règle la mécanique
+	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles", "vehicule", "voitures"])   # coques transparentes quand on règle la mécanique
 	_apercu.ppm = _cell / ConstructionLibre.C
 	_apercu.configurer_d(F)
 	_apercu.visible = true
@@ -514,7 +514,19 @@ func _annuler_geste() -> void:
 	_placer_apercu()
 
 
+# Voiture sur plateforme hors mode créatif : châssis et essieux ne changent pas (DEC-083)
+func _verrou() -> bool:
+	return a.has("plateforme") and not (m != null and m.bac_a_sable)
+
+
 func _appuyer(cell: Vector2i) -> void:
+	if _verrou() and onglet in ["chassis", "essieux"]:
+		var ipv := ConstructionLibre.piece_en(a, cell)
+		if ipv >= 0 and not _est_coque(String(a.pieces[ipv].piece)):
+			_prendre(ipv)
+		else:
+			_dire("Voiture : le châssis ne change pas (mode créatif seulement).")
+		return
 	if onglet == "vehicule":
 		_depl = true
 		_depl0 = cell
@@ -669,11 +681,15 @@ func _relacher(pos: Vector2) -> void:
 	if not _dans_grille(pos):
 		_dire("%s retiré." % Assemblage.piece(_glisse).get("nom", "Pièce"))
 	else:
-		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse), _miroir and _est_coque(_glisse), _extra)
-		if b.is_empty():
+		var r := _poser_ici(_cible(pos, _glisse))
+		if r.has("refus"):
+			_dire(r.refus)
+		elif r.is_empty():
 			_dire("Pas de place ni d'appui ici.")
 		else:
-			a = b
+			a = r.a
+			if String(r.get("remplace", "")) != "" and String(r.remplace) != _glisse:
+				_dire("%s remplace %s." % [Assemblage.piece(_glisse).get("nom", ""), Assemblage.piece(String(r.remplace)).get("nom", "")])
 			_son()
 	_glisse = ""
 	_maj(true)
@@ -788,7 +804,21 @@ func _candidat() -> Dictionary:
 		return {}
 	if not Assemblage.piece(_glisse).get("famille", "") in ConstructionLibre.FAMILLES_PIECES:
 		return {}
-	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse), _extra)
+	return _poser_ici(_cible(_doigt, _glisse)).get("a", {})
+
+
+# Sur une voiture, la pièce va sur son emplacement et remplace celle qui l'occupait (DEC-083) ; sinon pose libre.
+# {a, remplace} | {refus} | {}
+func _poser_ici(cell: Vector2i) -> Dictionary:
+	if a.has("plateforme"):
+		var t := String(Assemblage.piece(_glisse).get("taille", ""))
+		if _verrou() and t != "" and t != ConstructionLibre.plateforme_de(a):
+			return {"refus": "Cette carrosserie n'est pas faite pour ce châssis."}
+		var r := ConstructionLibre.poser_emplacement(a, _glisse, cell, _extra)
+		if not r.is_empty():
+			return r
+	var b := ConstructionLibre.poser(a, _glisse, cell, _miroir and _est_coque(_glisse), _extra)
+	return {} if b.is_empty() else {"a": b}
 
 
 func _prendre(i: int) -> void:   # pièce posée reprise au doigt : la relâcher ailleurs la déplace, hors de la grille la retire
@@ -973,6 +1003,29 @@ func _items() -> Array:
 			res.append({"ligne": true, "titre": "Tout retirer", "detail": "enlève toutes les tôles", "actif": n_t > 0, "action": func():
 				a.toles = []
 				_maj()})
+		"voitures":   # plateformes (DEC-083) : longueur au choix en mode créatif seulement ; garde au sol toujours
+			var creatif: bool = m != null and m.bac_a_sable
+			var P: Dictionary = Assemblage.catalogue().regles.libre.plateformes
+			for t in ConstructionLibre.tailles_plateforme():
+				var fp: Dictionary = P[t]
+				if creatif:
+					res.append({"titre": String(fp.nom).replace("Châssis ", "").capitalize(), "detail": "%.2f m" % (float(fp.longueur) * 0.25),
+						"choisi": ConstructionLibre.plateforme_de(a) == t, "ar": 2.6, "action": func():
+							a = ConstructionLibre.changer_plateforme(a, t)
+							_son()
+							_maj(true), "mini": func(c, r): _tex_dans(c, r, VehiculeDessin._tex("coques/" + String(fp.carrosserie)))})
+				elif ConstructionLibre.plateforme_de(a) == t:
+					res.append({"ligne": true, "titre": String(fp.nom), "detail": "ne change pas (mode créatif seulement)", "actif": false})
+			if not a.has("plateforme") and not creatif:
+				res.append({"ligne": true, "titre": "Pas une voiture", "detail": "construction libre", "actif": false})
+			if a.has("plateforme"):
+				var rh := int(a.plateforme.get("rehausse", 0))
+				for k in int(P.base.rehausse_max) + 1:
+					var crans: int = k
+					res.append({"ligne": true, "titre": "Garde au sol d'origine" if crans == 0 else "Garde au sol +%d cm" % (crans * 25), "choisi": rh == crans, "actif": rh != crans, "action": func():
+						a = ConstructionLibre.rehausser(a, crans)
+						_son()
+						_maj(true)})
 		"vehicule":
 			res.append({"ligne": true, "titre": "Glisser le véhicule", "detail": "le déplace sur la grille", "actif": false})
 		"peinture":
@@ -1426,7 +1479,7 @@ func _dessiner_bilan(c: Control, police: Font) -> void:
 	var s: Dictionary = _an.stats
 	var roule := float(s.vitesse) > 0.0
 	c.draw_string(police, Vector2(x, y), ("▶ %.1f m/s" % s.vitesse) if roule else "■ immobile", HORIZONTAL_ALIGNMENT_LEFT, 170, 22, C_VERT if roule else C_ROUGE)
-	var ligne := "%d kg   ·   blindage %d   ·   %d place%s" % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
+	var ligne := ("Intercepteur   ·   " if String(s.get("classe", "")) == "intercepteur" else "") + "%d kg   ·   blindage %d   ·   %d place%s" % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
 	var cout: float = m.cout_grille(uid, a)
 	if cout > 0.0:
 		ligne += "   ·   %d / %d métal" % [int(ceil(cout)), int(m.stocks.metal)]
@@ -1494,6 +1547,8 @@ func _icone(c: Control, r: Rect2, id: String, col: Color) -> void:
 				c.draw_line(o + Vector2(w * 0.25, w * (0.25 + 0.17 * k)), o + Vector2(w * 0.75, w * (0.25 + 0.17 * k)), Color("#C8D8E8"), 2.0)
 		"vehicules":
 			_tex_dans(c, r, VehiculeDessin._tex("vehicules/willys_mb"))
+		"voitures":
+			_tex_dans(c, r, VehiculeDessin._tex("coques/carrosserie_coupe"))
 		"vehicule":   # caisse et flèche : déplacer le véhicule entier
 			c.draw_rect(Rect2(o + Vector2(w * 0.1, w * 0.3), Vector2(w * 0.55, w * 0.3)), col, false, ep)
 			c.draw_circle(o + Vector2(w * 0.22, w * 0.66), w * 0.08, col)

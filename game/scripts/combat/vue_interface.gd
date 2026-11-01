@@ -318,7 +318,7 @@ func _construire_elements() -> void:
 	_lbl_fin = _label("", vb, 40)
 	_lbl_fin.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vb, 420)
-	_bouton("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
+	_bouton("Mode créatif", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
 	# --- Menu principal
 	_voile_menu = ColorRect.new()
 	_voile_menu.color = Color(0.03, 0.03, 0.03, 0.86)
@@ -337,7 +337,7 @@ func _construire_elements() -> void:
 		_voile_menu.visible = false
 		pause = _atelier != null or _editeur != null, vm, 460)
 	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vm, 460)
-	_bouton("Bac à sable (toutes les pièces)", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vm, 460)
+	_bouton("Mode créatif (toutes les pièces)", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vm, 460)
 
 
 # Écran plein (grille, atelier) posé sur son propre calque : au-dessus de toute l'interface, y compris pour le toucher
