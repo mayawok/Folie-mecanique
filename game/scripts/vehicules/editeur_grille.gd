@@ -23,9 +23,12 @@ const C_ROUGE := Color("#D9674A")
 const C_SOL := Color(0.55, 0.45, 0.3)
 const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A"), "coque": Color("#7A6A55")}
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["moteur", "Moteurs"],
-	["poste", "Postes"], ["cabine", "Cabines"], ["coque", "Carrosserie"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
-const ESSIEUX := ["essieu_leger", "essieu_lourd", "essieu_char"]
-const TRAINS := ["roue_petite", "roue_moyenne", "roue_grande", "chenille"]
+	["poste", "Postes"], ["suspension", "Suspension"], ["coque", "Carrosserie"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
+# Essieux, roues et liaisons : lus dans le catalogue par famille (ajouter un modèle = une entrée dans pieces.json)
+static func _famille(fam: String) -> Array:
+	var res: Array = Assemblage.catalogue().pieces.keys().filter(func(id): return Assemblage.piece(id).get("famille", "") == fam and not Assemblage.piece(id).get("retire", false))
+	res.sort_custom(func(p, q): return float(Assemblage.piece(p).get("charge_kg", 0)) < float(Assemblage.piece(q).get("charge_kg", 0)))
+	return res
 const NOMS_ROLES := {"conducteur": "Conducteur", "tireur": "Tireur", "chargeur": "Chargeur", "chef": "Chef de char",
 	"mecanicien": "Mécanicien", "infirmier": "Infirmier", "passager": "Passager"}
 const AIDE_ROLES := {"conducteur": "obligatoire", "tireur": "1 canon + 1 mitrailleuse coaxiale, ou 1 arme",
@@ -39,7 +42,7 @@ var m                       # CombatModele
 var uid := 0                # véhicule modifié (0 = véhicule neuf)
 var a := {}                 # grille en cours
 var onglet := "chassis"
-var outil := {"chassis": "acier", "essieux": "essieu_leger", "roues": "roue_moyenne"}
+var outil := {"chassis": "acier", "essieux": "essieu_leger", "roues": "roue_moyenne", "suspension": "liaison_lames"}
 var _palette: Array = []    # [{id, n}] ; n = -1 : sans limite
 var _glisse := ""           # pièce tenue au doigt
 var _miroir := false        # coque retournée (avant vers l'arrière), DEC-067
@@ -63,6 +66,7 @@ var _onglets: Array = []
 var _btn_ok: Button
 var _btn_annuler: Button
 var _btn_nom: Button
+var _btn_plans: Button
 var _btn_haut: Button
 var _btn_bas: Button
 var _apercu: VehiculeDessin
@@ -98,6 +102,7 @@ func _ready() -> void:
 	_btn_nom = _bouton("", _renommer)
 	_btn_nom.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_btn_ok = _bouton("Construire", _terminer)
+	_btn_plans = _bouton("Plans", func(): _choisir_onglet("plans"))
 	_btn_annuler = _bouton("Annuler", func():
 		_effacer_brouillon()
 		ferme.emit(false)
@@ -137,13 +142,14 @@ func _disposer() -> void:
 	_panneau = Rect2(Vector2(d - pw, haut + 84.0), Vector2(pw, bas - haut - 84.0))
 	# Barre du haut : nom à gauche, Annuler et Construire à droite
 	var x := d
-	for b in [_btn_ok, _btn_annuler]:
+	for b in [_btn_ok, _btn_annuler, _btn_plans]:
 		b.custom_minimum_size = Vector2(0, 68)
 		b.reset_size()
 		b.size.x = maxf(b.size.x, 190.0)
 		x -= b.size.x
 		b.position = Vector2(x, haut)
 		x -= 14.0
+	_btn_plans.modulate = C_ACCENT if onglet == "plans" else Color.WHITE
 	_btn_nom.position = Vector2(g, haut)
 	_btn_nom.custom_minimum_size = Vector2(0, 68)
 	_btn_nom.size = Vector2(maxf(200.0, x - g - 20.0), 68)
@@ -297,6 +303,14 @@ func _appuyer(cell: Vector2i) -> void:
 			_maj()
 		"roues":
 			_monter_roue(cell.x)
+		"suspension":
+			var b := ConstructionLibre.relier(a, cell.x, outil.suspension)
+			if b.is_empty():
+				_dire("Posez d'abord un pont rigide sous cette colonne (onglet Essieux).")
+				return
+			a = b
+			_son()
+			_maj(true)
 		"equipage":
 			pass
 		_:
@@ -362,6 +376,14 @@ func _candidat() -> Dictionary:
 	if _glisse == "" or onglet == "roues" or not _dans_grille(_doigt):
 		return {}
 	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse))
+
+
+func _charger_plan(plan: Dictionary) -> void:
+	var r := PlansGrille.adapter(plan.a, _palette)
+	a = r.a
+	a.nom_choisi = true
+	_dire("Plan chargé." if r.manquantes.is_empty() else "Plan chargé ; absent de la réserve : " + ", ".join(r.manquantes))
+	_maj(true)
 
 
 func _basculer_ecorche() -> void:
@@ -449,15 +471,7 @@ func _lire_brouillon() -> Dictionary:
 	var b: Dictionary = d.get("a", {})
 	if not ConstructionLibre.est_libre(b):
 		return {}
-	# Le JSON lit les nombres en flottants : on remet des entiers là où la grille en attend
-	for c in b.get("cases", []):
-		c[0] = int(c[0])
-		c[1] = int(c[1])
-	for e in b.get("essieux", []):
-		e.x = int(e.x)
-	for p in b.get("pieces", []):
-		p.pos = [int(p.pos[0]), int(p.pos[1])]
-	return b
+	return PlansGrille.normaliser(b)
 
 
 func _effacer_brouillon() -> void:
@@ -478,12 +492,12 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 				"action": func(): _plaque(1), "couleur": Color("#4C5236")})
 			res.append({"titre": "− plaque de blindage", "detail": "retirer une plaque", "action": func(): _plaque(-1), "couleur": Color("#333")})
 		"essieux":
-			for id in ESSIEUX:
+			for id in _famille("essieu"):
 				var f := Assemblage.piece(id)
-				res.append({"titre": f.nom, "detail": "%d kg max · touchez une colonne (retouchez pour retirer)" % int(f.charge_kg),
+				res.append({"titre": f.nom, "detail": "%d kg max%s · touchez une colonne (retouchez pour retirer)" % [int(f.charge_kg), " · à relier (onglet Suspension)" if f.get("pont", false) else ""],
 					"choisi": outil.essieux == id, "action": func(): outil.essieux = id, "couleur": Color("#6B6A64")})
 		"roues":
-			for id in TRAINS:
+			for id in _famille("train"):
 				var f := Assemblage.piece(id)
 				res.append({"titre": String(f.nom), "detail": "%d kg max · %.1f m/s max · touchez un essieu" % [int(f.charge_kg), float(f.get("vitesse_max", 0))],
 					"choisi": outil.roues == id, "action": func():
@@ -491,10 +505,31 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 						_glisse = id, "couleur": Color("#3E3C37")})
 			res.append({"titre": "Démonter la roue", "detail": "touchez un essieu pour lui retirer sa roue", "choisi": outil.roues == "",
 				"action": func(): outil.roues = "", "couleur": Color("#333")})
+		"plans":   # plans enregistrés (DEC-071)
+			var nom := String(a.get("nom", "Plan"))
+			res.append({"titre": "Enregistrer « %s »" % nom, "detail": "remplace un plan du même nom ; renommez en haut à gauche pour en garder plusieurs",
+				"actif": not a.get("cases", []).is_empty(), "action": func():
+					PlansGrille.enregistrer(a)
+					_dire("Plan « %s » enregistré." % nom), "couleur": Color("#4A6A4A")})
+			for pl in PlansGrille.lire():
+				var plan: Dictionary = pl
+				res.append({"titre": "Charger : " + String(plan.nom), "detail": "%d cases · %d pièces · remplace la grille en cours" % [plan.a.get("cases", []).size(), plan.a.get("pieces", []).size()],
+					"action": func(): _charger_plan(plan), "couleur": Color("#4A4A4A")})
+				res.append({"titre": "Supprimer : " + String(plan.nom), "detail": "efface ce plan",
+					"action": func():
+						PlansGrille.supprimer(String(plan.nom))
+						_disposer(), "couleur": Color("#3A2A2A")})
+		"suspension":
+			for id in _famille("liaison"):
+				var f := Assemblage.piece(id)
+				res.append({"titre": f.nom, "detail": "rehausse %d cm · %d kg max · débattement %d %% · touchez un pont" % [int(f.hauteur_cases) * 25, int(f.charge_kg), int(float(f.debattement) * 100)],
+					"choisi": outil.suspension == id, "action": func(): outil.suspension = id, "couleur": Color("#5A5040")})
+			res.append({"titre": "Détacher", "detail": "touchez un pont pour retirer sa liaison", "choisi": outil.suspension == "",
+				"action": func(): outil.suspension = "", "couleur": Color("#333")})
 		"equipage":
 			var sieges := ConstructionLibre.sieges_equipage(a)
 			if sieges.is_empty():
-				res.append({"titre": "Aucun siège", "detail": "posez un poste (onglet Postes) ou une cabine", "actif": false, "couleur": Color("#333")})
+				res.append({"titre": "Aucun siège", "detail": "posez un poste (onglet Postes)", "actif": false, "couleur": Color("#333")})
 			for i in sieges.size():
 				var s: Dictionary = sieges[i]
 				var k: int = s.k
@@ -515,7 +550,7 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 					"action": _basculer_ecorche, "couleur": Color("#4A4A4A")})
 			for it in _palette:
 				var f := Assemblage.piece(it.id)
-				if f.get("famille", "") != onglet:
+				if f.get("famille", "") != onglet and not (onglet == "poste" and f.get("famille", "") == "cabine"):   # sièges d'origine (stock) rangés avec les postes
 					continue
 				var reste := _restant(it.id, int(it.n))
 				var detail := ""
@@ -616,6 +651,8 @@ func _dessiner_dessus() -> void:
 	var aides := {"chassis": "Glissez d'un coin à l'autre pour tracer un rectangle de châssis.",
 		"essieux": "Touchez une colonne : l'essieu se fixe sous le châssis. Montez ensuite la roue.",
 		"roues": "Choisissez une roue ou une chenille, puis touchez (ou glissez sur) un essieu.",
+		"plans": "Enregistrez la grille en cours ou chargez un plan : les pièces absentes de la réserve sont laissées de côté.",
+		"suspension": "Un pont rigide se relie au châssis : lames (bas), tirants (+50 cm) ou grands tirants (+1 m). Touchez un pont.",
 		"poste": "Poste de conduite, de commande ou banc de troupes (face avant ou arrière) : fabriqués en métal.",
 		"cabine": "Une cabine se pose par-dessus les sièges : camion, voiture, blindée… (décor).",
 		"equipage": "Les postes de conduite et de commande sont fixes. Touchez un autre siège pour changer son rôle."}

@@ -273,7 +273,7 @@ func palette_grille(uid: int) -> Array:
 	if bac_a_sable:
 		for id in Assemblage.catalogue().pieces:
 			var f := Assemblage.piece(id)
-			if f.get("famille", "") in fams and f.has("emprise"):
+			if f.get("famille", "") in fams and f.has("emprise") and not f.get("retire", false) and f.get("famille", "") != "cabine":   # sièges : les postes (DEC-069)
 				res.append({"id": id, "n": -1})
 	else:
 		var liste := ids_stock()
@@ -285,7 +285,7 @@ func palette_grille(uid: int) -> Array:
 				res.append({"id": id, "n": int(c[id])})
 		for id in Assemblage.catalogue().pieces:   # postes, bancs et cabines : toujours disponibles, payés en métal
 			var fi := Assemblage.piece(id)
-			if bool(fi.get("fabrique", false)) and fi.get("famille", "") in fams and fi.has("emprise"):
+			if bool(fi.get("fabrique", false)) and fi.get("famille", "") in fams and fi.has("emprise") and not fi.get("retire", false):
 				res.append({"id": id, "n": -1})
 	var ordre := {"moteur": 0, "poste": 1, "cabine": 2, "coque": 3, "arme": 4, "equipement": 5}
 	res.sort_custom(func(p, q):

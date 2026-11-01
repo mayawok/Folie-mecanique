@@ -312,5 +312,41 @@ func _init() -> void:
 	k_mb.bac_a_sable = true
 	ok(k_mb.palette_grille(0).any(func(q): return q.id == "coque_blindee"), "bac à sable : les coques sont dans la palette")
 
+	print("— Cabines retirées, ponts rigides, plans (DEC-069 à DEC-071) —")
+	var s_mb := CombatModele.new(4)
+	s_mb.bac_a_sable = true
+	var s_pal: Array = s_mb.palette_grille(0)
+	ok(not s_pal.any(func(q): return Assemblage.piece(q.id).get("famille", "") == "cabine"), "bac à sable : plus de cabines (sièges = postes, carrosserie = coques)")
+	var s_j := jeep()
+	s_j = ConstructionLibre.poser_essieu(s_j, 4, "pont_rigide_leger", "roue_moyenne")
+	s_j = ConstructionLibre.poser_essieu(s_j, 15, "pont_rigide_leger", "roue_moyenne")
+	var s_an := ConstructionLibre.analyser(s_j)
+	ok(codes(s_an).has("pont_libre") and float(s_an.stats.vitesse) == 0.0, "un pont rigide sans liaison ne porte rien : le véhicule ne roule pas")
+	ok(ConstructionLibre.relier(jeep(), 4, "liaison_lames").is_empty(), "un essieu simple ne prend pas de liaison")
+	var gardes := {}
+	for lid in ConstructionLibre._famille_ids("liaison"):
+		var s_b := ConstructionLibre.relier(ConstructionLibre.relier(s_j, 4, lid), 15, lid)
+		var s_a2 := ConstructionLibre.analyser(s_b)
+		gardes[lid] = float(s_a2.detail.garde_m)
+		ok(s_a2.ok, "%s : le véhicule roule" % lid)
+	ok(absf(gardes.liaison_tirants - gardes.liaison_lames - 0.5) < 0.01 and absf(gardes.liaison_rehausse - gardes.liaison_lames - 1.0) < 0.01,
+		"tirants : +50 cm de garde au sol, grands tirants : +1 m")
+	var s_r := ConstructionLibre.relier(ConstructionLibre.relier(s_j, 4, "liaison_rehausse"), 15, "liaison_rehausse")
+	var s_l := ConstructionLibre.relier(ConstructionLibre.relier(s_j, 4, "liaison_lames"), 15, "liaison_lames")
+	ok(float(ConstructionLibre.analyser(s_r).stats.precision) > float(ConstructionLibre.analyser(s_l).stats.precision), "plus de débattement : meilleure précision en roulant")
+	ok(ConstructionLibre.forme(s_r).formes.filter(func(f): return f.has("ligne")).size() > ConstructionLibre.forme(s_l).formes.filter(func(f): return f.has("ligne")).size(), "tirants et ressorts dessinés")
+	var s_rp := ConstructionLibre.poser_essieu(s_r, 4, "pont_rigide_lourd", "roue_grande")
+	ok(String(ConstructionLibre.essieu_en(s_rp, 4).get("liaison", "")) == "liaison_rehausse", "changer de pont garde la liaison")
+	PlansGrille.supprimer("Essai plan")
+	var s_p := s_r.duplicate(true)
+	s_p.nom = "Essai plan"
+	PlansGrille.enregistrer(s_p)
+	var s_lu: Array = PlansGrille.lire().filter(func(q): return q.nom == "Essai plan")
+	ok(s_lu.size() == 1 and s_lu[0].a.pieces.size() == s_p.pieces.size() and s_lu[0].a.essieux[0].liaison == "liaison_rehausse", "un plan s'enregistre et se relit à l'identique")
+	var s_ad := PlansGrille.adapter(s_lu[0].a, [])
+	ok(s_ad.a.pieces.is_empty() and s_ad.manquantes.size() == s_p.pieces.size(), "plan chargé sans réserve : les pièces manquantes sont listées et laissées de côté")
+	PlansGrille.supprimer("Essai plan")
+	ok(PlansGrille.lire().filter(func(q): return q.nom == "Essai plan").is_empty(), "un plan se supprime")
+
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)

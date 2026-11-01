@@ -178,8 +178,13 @@ static func _essieux(a: Dictionary) -> Array:   # triés par x : [{x, piece, tra
 			continue   # essieu posé, roue pas encore montée (DEC-051)
 		var x := int(e.x)
 		var ft := Assemblage.piece(String(e.train))
-		res.append({"x": x, "piece": String(e.piece), "train": String(e.train), "y": float(y_essieu(a, x)),
-			"r": float(ft.get("diametre_cases", 2)) * 0.5, "fiche_e": Assemblage.piece(String(e.piece)), "fiche_t": ft})
+		var fe := Assemblage.piece(String(e.piece))
+		if bool(fe.get("pont", false)) and String(e.get("liaison", "")) == "":
+			continue   # pont rigide non relié : il ne porte rien (DEC-070)
+		var fl := Assemblage.piece(String(e.get("liaison", ""))) if bool(fe.get("pont", false)) else {}
+		var h := float(fl.get("hauteur_cases", 0))   # la liaison abaisse la roue sous le châssis (rehausse, DEC-070)
+		res.append({"x": x, "piece": String(e.piece), "train": String(e.train), "y": float(y_essieu(a, x)) - h, "h": h,
+			"r": float(ft.get("diametre_cases", 2)) * 0.5, "fiche_e": fe, "fiche_t": ft, "fiche_l": fl})
 	res.sort_custom(func(p, q): return p.x < q.x)
 	return res
 
@@ -212,8 +217,11 @@ static func peindre(a: Dictionary, cell: Vector2i, sorte: String) -> Dictionary:
 static func poser_essieu(a: Dictionary, x: int, essieu_id: String, train_id: String) -> Dictionary:
 	if y_essieu(a, x) < 0:
 		return {}
+	var avant := essieu_en(a, x)
 	var b := retirer_essieu(a, x)
 	b.essieux.append({"x": x, "piece": essieu_id, "train": train_id})
+	if bool(Assemblage.piece(essieu_id).get("pont", false)) and String(avant.get("liaison", "")) != "":
+		b.essieux[b.essieux.size() - 1].liaison = avant.liaison
 	return b
 
 
@@ -226,6 +234,28 @@ static func monter_train(a: Dictionary, x: int, train_id: String) -> Dictionary:
 		if int(e.x) == x:
 			e.train = train_id
 	return b
+
+
+# Modèles d'une famille du catalogue (hors pièces retirées) : aucune liste de modèles écrite dans le code
+static func _famille_ids(fam: String) -> Array:
+	return Assemblage.catalogue().pieces.keys().filter(func(id): return Assemblage.piece(id).get("famille", "") == fam and not Assemblage.piece(id).get("retire", false))
+
+
+# Relie (liaison_id) ou détache ("") le pont rigide de la colonne x. {} s'il n'y a pas de pont (DEC-070).
+static func relier(a: Dictionary, x: int, liaison_id: String) -> Dictionary:
+	var ex := essieu_en(a, x)
+	if ex.is_empty() or not bool(Assemblage.piece(String(ex.piece)).get("pont", false)):
+		return {}
+	var b := a.duplicate(true)
+	for e in b.essieux:
+		if int(e.x) == x:
+			e.liaison = liaison_id
+	return b
+
+
+# Ponts rigides sans liaison (défaut grave : rien ne les tient au châssis)
+static func ponts_libres(a: Dictionary) -> Array:
+	return a.get("essieux", []).filter(func(e): return bool(Assemblage.piece(String(e.piece)).get("pont", false)) and String(e.get("liaison", "")) == "")
 
 
 # Essieux sans roue (affichage et défaut)
@@ -385,6 +415,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		blindage_somme += float(s.blindage)
 		metal += float(s.metal)
 		corps_bas = minf(corps_bas, float(c.y))
+	var debattement := 0.0   # moyenne des liaisons (essieu simple : 0,2) ; améliore la précision en roulant
 	var blindage_coques := 0.0   # coques : blindage au prorata des cases de châssis recouvertes (DEC-067)
 	for p in pieces:
 		masses.append([float(p.fiche.get("poids_kg", 0)), p.pos.x + p.e.x * 0.5, p.pos.y + p.e.y * 0.5])
@@ -398,10 +429,17 @@ static func analyser(a: Dictionary) -> Dictionary:
 		metal += float(p.fiche.get("metal", 0))
 		corps_bas = minf(corps_bas, float(p.pos.y))
 	for e in essieux:
-		masses.append([float(e.fiche_e.poids_kg) + float(e.fiche_t.poids_kg), e.x + 0.5, e.y])
-		pv.suspension += float(e.fiche_e.pv)
+		masses.append([float(e.fiche_e.poids_kg) + float(e.fiche_t.poids_kg) + float(e.fiche_l.get("poids_kg", 0)), e.x + 0.5, e.y])
+		pv.suspension += float(e.fiche_e.pv) + float(e.fiche_l.get("pv", 0))
+		metal += float(e.fiche_l.get("metal", 0))
+		debattement += float(e.fiche_l.get("debattement", 0.2))
 		pv.roulement += float(e.fiche_t.pv)
 		metal += (float(e.fiche_e.metal) + float(e.fiche_t.metal)) * 0.5
+	if not essieux.is_empty():
+		debattement /= essieux.size()
+	for e in ponts_libres(a):
+		masses.append([float(Assemblage.piece(String(e.piece)).poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
+		_defaut(defauts, "pont_libre", "Pont rigide sans liaison (colonne %d) : il ne porte rien, reliez-le au châssis (onglet Suspension)" % int(e.x), true)
 	for e in essieux_nus(a):
 		var fe := Assemblage.piece(String(e.piece))
 		masses.append([float(fe.poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
@@ -504,7 +542,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 				for k in charges.size():
 					charges[k] = charges[k] * M / maxf(somme, 0.001)
 					var e: Dictionary = appuis[k]
-					var cap := minf(float(e.fiche_e.charge_kg), float(e.fiche_t.charge_kg))
+					var cap := minf(minf(float(e.fiche_e.charge_kg), float(e.fiche_t.charge_kg)), float(e.fiche_l.get("charge_kg", INF)))
 					e.charge = charges[k]
 					e.capacite = cap
 					surcharge = maxf(surcharge, charges[k] / cap)
@@ -585,7 +623,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 			if req > 0.0 and tonnes < req:
 				f_recul = minf(f_recul, clampf(sqrt(tonnes / req), 0.3, 1.0))
 				_defaut(defauts, "recul", "%s : trop lourd pour %.1f t, le recul secoue le véhicule" % [w.fiche.nom, tonnes])
-	precision *= f_recul
+	precision *= f_recul * (0.92 + 0.16 * debattement)
 	for k in pv:
 		pv[k] = maxf(1.0, pv[k])
 	if immobile != "":
@@ -897,6 +935,8 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		var cx: float = X.call(e.x + 0.5)
 		var r: float = e.r * C
 		formes.append({"ligne": [[cx, Y.call(e.y)], [cx, Y.call(e.y) - 0.08]], "ep": 0.06, "c": "metal", "z": 1})
+		if not e.fiche_l.is_empty():
+			_formes_liaison(formes, String(e.fiche_l.get("dessin", "lames")), cx, Y.call(e.y + e.h), Y.call(e.y), cx < X.call((x0 + x1) * 0.5))
 		if e.get("piste", -1) >= 0 and e.get("touche", false):
 			if not pistes.has(e.piste):
 				pistes[e.piste] = []
@@ -1020,6 +1060,30 @@ static func _rect_sprite(id: String, r: Rect2, remplir: bool) -> Array:
 
 static func _sprite(formes: Array, id: String, r: Rect2, z: int, remplir := true) -> void:
 	formes.append({"sprite": id, "r": _rect_sprite(id, r, remplir), "z": z})
+
+
+# Liaison d'un pont rigide (DEC-070) : y_ch = dessous du châssis, y_p = centre du pont (m) ; vers_c = le centre du véhicule est à droite
+static func _formes_liaison(formes: Array, dessin: String, cx: float, y_ch: float, y_p: float, vers_c: bool) -> void:
+	var s := 1.0 if vers_c else -1.0
+	formes.append({"pts": _poly_cercle(cx, y_p, 0.11, 8), "c": "sombre", "z": 1})   # carter du pont
+	match dessin:
+		"lames":   # paquet de lames sous le châssis, jumelles aux extrémités
+			for k in 3:
+				var yk := y_p + 0.05 + k * 0.035
+				formes.append({"ligne": [[cx - 0.55, y_ch - 0.02], [cx, yk]], "ep": 0.03, "c": "metal", "z": 1})
+				formes.append({"ligne": [[cx, yk], [cx + 0.55, y_ch - 0.02]], "ep": 0.03, "c": "metal", "z": 1})
+		_:   # tirants vers le centre du véhicule, ressort hélicoïdal et amortisseur
+			var long := 0.9 if dessin == "tirants" else 1.4
+			formes.append({"ligne": [[cx, y_p], [cx + s * long, y_ch]], "ep": 0.05, "c": "metal", "z": 1})
+			formes.append({"ligne": [[cx, y_p - 0.06], [cx + s * long * 0.8, y_ch - 0.04]], "ep": 0.035, "c": "metal", "z": 1})
+			var n := 7 if dessin == "tirants" else 11
+			var xr := cx - s * 0.12
+			for k in n:
+				var ya := lerpf(y_p, y_ch, float(k) / n)
+				var yb := lerpf(y_p, y_ch, float(k + 1) / n)
+				formes.append({"ligne": [[xr - 0.07, ya], [xr + 0.07, yb]], "ep": 0.03, "c": "#8A4A2A", "z": 1})
+			if dessin == "rehausse":
+				formes.append({"ligne": [[cx + s * 0.14, y_p], [cx + s * 0.22, y_ch]], "ep": 0.045, "c": "sombre", "z": 1})
 
 
 # --- Formes simples des cabines et des postes (DEC-062) -----------------------------------------

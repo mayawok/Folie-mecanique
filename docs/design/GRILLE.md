@@ -162,6 +162,13 @@ Gigahorse : deux Cadillac 1959 empilées ; FDK : coccinelle découpée soudée s
   le toit d'une coque. Onglet Carrosserie : retourner, vue écorchée ; coques transparentes dans les autres onglets.
 - Restent : scie (phase 2), greffes et base roulante (phase 3), donneur du nez d'avion, réglage des valeurs en essai.
 
+### Ponts rigides, liaisons, plans (DEC-069 à DEC-071)
+
+- Cabines décor retirées ; sièges = postes ; allure = coques.
+- Onglet **Suspension** : un pont rigide se relie au châssis (lames, tirants +50 cm, grands tirants +1 m). Les hauteurs différentes
+  à l'avant et à l'arrière sont possibles mais une roue trop haute ne touche plus le sol (comme en vrai).
+- Bouton **Plans** : enregistrer, charger, supprimer ; les pièces manquantes en réserve sont laissées de côté.
+
 ### Extensibilité (exigence du porteur de projet)
 
 D'autres moteurs, roues, châssis, suspensions, **hauteurs de suspension**, coques et greffes viendront. Règle : **ajouter un modèle

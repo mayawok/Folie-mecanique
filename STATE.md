@@ -28,6 +28,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 - **Visuels de la grille intégrés** (DEC-066) : roues, moteurs, cabines, phares, armes. Restent : tuiles de châssis, essieux, chenilles, benne.
 - **Construction en deux plans** (DEC-067, phase 1 codée : DEC-068, à vérifier sur iPhone) : mécanique sur la grille, carrosserie de donneur posée par-dessus ;
   catalogues extensibles sans code (moteurs, roues, châssis, suspensions et leur hauteur, coques, greffes). Détails : `GRILLE.md`.
+- **Ponts rigides, onglet Suspension, plans enregistrés, cabines décor retirées** (DEC-069 à 071). À vérifier sur iPhone.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)

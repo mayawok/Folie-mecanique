@@ -1136,7 +1136,7 @@
     7,
     5
    ],
-   "fabrique": true
+   "fabrique": true, "retire": true
   },
   "cabine_voiture": {
    "famille": "cabine",
@@ -1152,7 +1152,7 @@
     9,
     4
    ],
-   "fabrique": true
+   "fabrique": true, "retire": true
   },
   "cabine_blindee": {
    "famille": "cabine",
@@ -1168,7 +1168,7 @@
     7,
     4
    ],
-   "fabrique": true
+   "fabrique": true, "retire": true
   },
   "cabine_bricolee": {
    "famille": "cabine",
@@ -1184,7 +1184,7 @@
     6,
     4
    ],
-   "fabrique": true
+   "fabrique": true, "retire": true
   },
   "cabine_pare_brise": {
    "famille": "cabine",
@@ -1200,12 +1200,17 @@
     5,
     3
    ],
-   "fabrique": true
+   "fabrique": true, "retire": true
   },
   "coque_berline": {"famille": "coque", "nom": "Coque de berline", "image": "coques/coque_berline", "emprise": [18, 5], "poids_kg": 450, "pv": 60, "blindage": 2, "metal": 6, "couvert": true, "donneurs": ["citroen_traction"]},
   "coque_nez_avion": {"famille": "coque", "nom": "Nez d'avion", "image": "coques/coque_nez_avion", "emprise": [12, 5], "poids_kg": 180, "pv": 40, "blindage": 1, "metal": 5, "couvert": true, "donneurs": []},
   "coque_cabine_camion": {"famille": "coque", "nom": "Cabine de camion", "image": "coques/coque_cabine_camion", "emprise": [10, 8], "poids_kg": 380, "pv": 70, "blindage": 3, "metal": 6, "couvert": true, "donneurs": ["citroen_t23", "diamond_t"]},
   "coque_caisse_camion": {"famille": "coque", "nom": "Caisse de camion", "image": "coques/coque_caisse_camion", "emprise": [16, 6], "poids_kg": 300, "pv": 50, "blindage": 1, "metal": 4, "couvert": false, "donneurs": ["citroen_t23", "dukw"]},
-  "coque_blindee": {"famille": "coque", "nom": "Coque blindée", "image": "coques/coque_blindee", "emprise": [24, 7], "poids_kg": 2600, "pv": 220, "blindage": 25, "metal": 30, "couvert": true, "donneurs": ["m3_half_track", "m3_stuart", "m4_sherman"]}
+  "coque_blindee": {"famille": "coque", "nom": "Coque blindée", "image": "coques/coque_blindee", "emprise": [24, 7], "poids_kg": 2600, "pv": 220, "blindage": 25, "metal": 30, "couvert": true, "donneurs": ["m3_half_track", "m3_stuart", "m4_sherman"]},
+  "pont_rigide_leger": {"famille": "essieu", "nom": "Pont rigide léger", "pont": true, "charge_kg": 2200, "poids_kg": 90, "pv": 30, "metal": 2},
+  "pont_rigide_lourd": {"famille": "essieu", "nom": "Pont rigide lourd", "pont": true, "charge_kg": 7000, "poids_kg": 260, "pv": 55, "metal": 3},
+  "liaison_lames": {"famille": "liaison", "nom": "Ressorts à lames", "dessin": "lames", "hauteur_cases": 0, "charge_kg": 7000, "debattement": 0.3, "poids_kg": 70, "pv": 30, "metal": 1},
+  "liaison_tirants": {"famille": "liaison", "nom": "Tirants et ressorts", "dessin": "tirants", "hauteur_cases": 2, "charge_kg": 3500, "debattement": 0.65, "poids_kg": 60, "pv": 22, "metal": 1},
+  "liaison_rehausse": {"famille": "liaison", "nom": "Grands tirants (rehausse)", "dessin": "rehausse", "hauteur_cases": 4, "charge_kg": 2800, "debattement": 0.85, "poids_kg": 95, "pv": 18, "metal": 2}
  }
 }

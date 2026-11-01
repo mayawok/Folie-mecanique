@@ -38,6 +38,16 @@ func _vehicules() -> Array:
 	g = _p(g, "coque_berline", Vector2i(3, 7))
 	g = _p(g, "moteur_m4_sherman", Vector2i(20, 3))
 	res.append([g, false])
+	var h := _base("Rehausse", 26, "roue_grande", "essieu_lourd")   # ponts rigides sur grands tirants (DEC-070)
+	h = ConstructionLibre.poser_essieu(h, 4, "pont_rigide_lourd", "roue_grande")
+	h = ConstructionLibre.poser_essieu(h, 23, "pont_rigide_lourd", "roue_grande")
+	h = ConstructionLibre.relier(ConstructionLibre.relier(h, 4, "liaison_rehausse"), 23, "liaison_rehausse")
+	h = _p(h, "poste_conduite", Vector2i(10, 3))
+	h = _p(h, "coque_berline", Vector2i(3, 2))
+	h = _p(h, "moteur_m4_sherman", Vector2i(20, 3))
+	res.append([h, false])
+	var l := ConstructionLibre.relier(ConstructionLibre.relier(ConstructionLibre.poser_essieu(ConstructionLibre.poser_essieu(h, 4, "pont_rigide_lourd", "roue_grande"), 23, "pont_rigide_lourd", "roue_grande"), 4, "liaison_lames"), 23, "liaison_lames")
+	res.append([l, true])
 	var c := _base("Bricole", 30, "chenille", "essieu_char")   # cabine de camion + nez d'avion retourné
 	c = _p(c, "poste_conduite", Vector2i(22, 3))
 	c = _p(c, "coque_cabine_camion", Vector2i(18, 2))
@@ -57,10 +67,10 @@ func _initialize() -> void:
 		print(v[0].nom, " pièces=", v[0].pieces.map(func(p): return p.piece))
 		VehiculeDessin.donnees().vehicules[cle] = ConstructionLibre.forme(v[0], v[1])
 		var d := VehiculeDessin.new()
-		d.ppm = 55.0
+		d.ppm = 42.0
 		d.equipage = true
 		d.configurer(cle)
-		d.position = Vector2(20.0 + (i % 2) * 630.0, 340.0 + (i / 2) * 350.0 - d.size.y)
+		d.position = Vector2(20.0 + (i % 2) * 630.0, 240.0 + (i / 2) * 240.0 - d.size.y)
 		root.add_child(d)
 		i += 1
 
