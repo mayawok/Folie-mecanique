@@ -177,5 +177,51 @@ func _init() -> void:
 	var Dm: Dictionary = VehiculeDessin.donnees().vehicules[vm.type]
 	ok(Dm.armes.size() == 1 and Dm.armes[0].type == "mortier", "dessiné comme un mortier")
 
+	print("— Demandes du 01/11 après-midi (DEC-047 à DEC-058) —")
+	var j := jeep()
+	var nu := ConstructionLibre.poser_essieu(j, 9, "essieu_leger", "")
+	ok(ConstructionLibre.essieux_nus(nu).size() == 1 and "sans_roue" in codes(ConstructionLibre.analyser(nu)), "essieu posé sans roue : signalé")
+	nu = ConstructionLibre.monter_train(nu, 9, "roue_petite")
+	ok(ConstructionLibre.essieux_nus(nu).is_empty(), "roue montée ensuite sur l'essieu")
+	ok(ConstructionLibre.monter_train(j, 1, "roue_petite").is_empty(), "pas de roue sans essieu")
+	var s1: Dictionary = ConstructionLibre.statistiques(j)
+	var ph := ConstructionLibre.poser(j, "phares", Vector2i(16, 3))
+	var s2: Dictionary = ConstructionLibre.statistiques(ph)
+	ok(int(s1.phares) == 0 and int(s2.phares) == 1, "pas de phares par défaut ; phares posés")
+	ok(ConstructionLibre.analyser(ph).detail.puissance < ConstructionLibre.analyser(j).detail.puissance, "les phares prennent un peu de puissance")
+	var mega := ConstructionLibre.nouvelle("Méga")
+	for x in range(2, 38):
+		for y in [2, 3]:
+			mega = ConstructionLibre.peindre(mega, Vector2i(x, y), "acier")
+	for x in range(3, 38, 3):
+		mega = ConstructionLibre.poser_essieu(mega, x, "essieu_char", "chenille")
+	var mega1 := ConstructionLibre.poser(mega, "moteur_tiger_1", Vector2i(2, 4))
+	mega1 = ConstructionLibre.poser(mega1, "cabine_tiger_1", Vector2i(20, 4))
+	var mega4 := mega1
+	for x in [8, 14, 28]:
+		mega4 = ConstructionLibre.poser(mega4, "moteur_tiger_1", Vector2i(x, 4))
+	var c1 := float(ConstructionLibre.statistiques(mega1).conso)
+	var c4 := float(ConstructionLibre.statistiques(mega4).conso)
+	ok(c4 > c1 * 4.0 * 3.0, "méga-char à 4 moteurs : consommation ×%.1f pour 4 moteurs" % (c4 / c1))
+	ok("moteurs" in codes(ConstructionLibre.analyser(mega4)), "moteurs couplés signalés")
+	var arm := ConstructionLibre.poser(j, "arme_mitrailleuse", Vector2i(9, 7))
+	arm = ConstructionLibre.poser(arm, "arme_mortier", Vector2i(14, 7))
+	ok(ConstructionLibre.tireurs_requis(arm) == 2, "mortier + mitrailleuse : 2 tireurs (pas de coaxiale sur un mortier)")
+	var cx := ConstructionLibre.poser(ConstructionLibre.poser(mega1, "arme_canon_75", Vector2i(24, 9)), "arme_mitrailleuse", Vector2i(30, 4))
+	ok(ConstructionLibre.tireurs_requis(cx) == 1, "canon + mitrailleuse : 1 tireur (coaxiale)")
+	arm.roles = ["conducteur", "infirmier"]
+	ok(ConstructionLibre.statistiques(arm).armes.is_empty(), "sans tireur, aucune arme ne tire")
+	arm.roles = ["conducteur", "tireur"]
+	ok(ConstructionLibre.statistiques(arm).armes.size() == 1, "un tireur sert le mortier (pas de coaxiale sur un mortier)")
+	ok(not ConstructionLibre.nom_propose(arm).begins_with("Frankenstein"), "nom proposé : %s" % ConstructionLibre.nom_propose(arm))
+	var fl: Dictionary = CombatModele.donnees().armes.lance_flammes
+	ok(float(fl.carburant) > 0.0 and int(fl.munitions) == 0, "lance-flammes : brûle du carburant, pas de munitions")
+	var mc := CombatModele.new(3, {"bac_a_sable": true})
+	ok(mc.monde.niveau_a(mc.x_tete) >= 5, "bac à sable : niveau des rencontres relevé (%d), chars rapidement" % mc.monde.niveau_a(mc.x_tete))
+	var p = mc.monde.creer_pieton("pillard", mc.convoi[0].x + 1.0)
+	mc.vitesse_convoi = 6.0
+	mc.monde._ecrasements(0.1)
+	ok(not p.actif(), "un pillard écrasé par la Jeep lancée meurt")
+
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)

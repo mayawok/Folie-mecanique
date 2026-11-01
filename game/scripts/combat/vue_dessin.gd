@@ -203,7 +203,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 	if obs > 0.01:
 		c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.04, 0.12, 0.2 * obs))
 		for v in m.convoi:   # phares
-			if v.actif() and not v.camoufle:
+			if v.actif() and not v.camoufle and int(v.profil.get("phares", 0)) > 0:   # seulement s'il en a (DEC-048)
 				var av := _px(Vector2(_rx(v) + v.longueur, 0.9))
 				c.draw_colored_polygon(PackedVector2Array([av, av + Vector2(14.0 * ppm, -1.2 * ppm), av + Vector2(14.0 * ppm, 1.8 * ppm)]), Color(1.0, 0.95, 0.7, 0.16 * obs))
 	_dessiner_monde(c)
@@ -306,13 +306,25 @@ func dessiner_fx(c: CanvasItem) -> void:
 	for pr in m.projectiles:
 		var tt: float = clampf((pr.t + (0.0 if pause else _alpha * CombatModele.DT)) / pr.T, 0.0, 1.0)
 		var dist: float = pr.a.distance_to(pr.b)
-		var arc: float = (0.35 if pr.classe == "mortier" else (0.03 if pr.classe == "canon" else (0.012 if pr.classe == "fusil" else 0.004))) * dist
+		# Trajectoire : flèche réelle d'après la vitesse à la bouche du calibre (DEC-054) ; le mortier tire en cloche
+		var arc: float
+		if pr.classe == "mortier":
+			arc = 0.35 * dist
+		else:
+			var v0: float = {"canon": 700.0, "fusil": 820.0, "flamme": 30.0}.get(pr.classe, 760.0)
+			var tv: float = dist / v0
+			arc = minf(9.81 * tv * tv / 8.0, dist * 0.25)
 		var t0: float = maxf(0.0, tt - (3.2 if pr.classe != "canon" else 2.0) / maxf(dist, 1.0))
 		var pa: Vector2 = pr.a.lerp(pr.b, tt) + Vector2(0, sin(PI * tt) * arc)
 		var pb: Vector2 = pr.a.lerp(pr.b, t0) + Vector2(0, sin(PI * t0) * arc)
 		var sa := _px(pa)
 		var sb := _px(pb)
-		if pr.classe == "canon":
+		if pr.classe == "flamme":   # jet de feu : boules qui grossissent
+			for k in 4:
+				var tk: float = maxf(0.0, tt - 0.07 * k)
+				var pk := _px(pr.a.lerp(pr.b, tk) + Vector2(0, sin(PI * tk) * arc))
+				c.draw_circle(pk, ppm * (0.18 + 0.35 * tk), Color(1.0, 0.45 + 0.1 * k, 0.1, 0.75 - 0.15 * k))
+		elif pr.classe == "canon":
 			c.draw_line(sb, sa, Color(0.8, 0.8, 0.75, 0.35), maxf(3.0, ppm * 0.14))
 			c.draw_line(sb.lerp(sa, 0.4), sa, Color(1.0, 0.75, 0.3, 0.95), maxf(4.0, ppm * 0.12))
 			c.draw_circle(sa, maxf(3.5, ppm * 0.1), Color(1.0, 0.95, 0.7))

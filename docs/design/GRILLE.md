@@ -127,6 +127,17 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
 - Ouvert : édition en temps réel et risquée (après le prototype) ; vue de face ou largeur (non modélisée) ; vitesses des
   véhicules convertis à rapprocher de l'historique ; zoom de la grille sur iPhone (cases de 20 points).
 
+## Grille pour l'iPhone (01/11 après-midi, DEC-047 à DEC-058)
+
+- **Écran** (`editeur_grille.gd`) : nom en haut à gauche (toucher pour renommer ; vide = nom proposé), Annuler et Construire en haut
+  à droite, panneau de catégories à droite (8 onglets), grille centrée entre les marges sûres, bilan en bas.
+- **Châssis en rectangles** (glisser d'un coin à l'autre) ; **essieu puis roue** ; pièces **glissées** depuis leur onglet, vrai dessin
+  affiché sur la grille ; une pièce posée se reprend au doigt ; lâchée hors de la grille, elle retourne au bac.
+- **Équipage** en dernier : rôle de chaque siège ; armes sans tireur signalées (« tireurs 1/2 ») et confirmées à la construction.
+- **Phares** (onglet Équipement), **lance-flammes** (onglet Armes), **moteurs multiples** pénalisés, nom proposé, brouillon gardé.
+- Tests : `test_libre.gd` (section « Demandes du 01/11 après-midi »), parcours écran `capture_libre.gd`.
+- Ouvert : zoom à deux doigts si les cases restent petites ; visuels des pièces (planches ChatGPT) à intégrer.
+
 ## Ouvert
 
 - Sous-ensemble de pièces V0 parmi les 29 du catalogue (proposition : 8 à 10).

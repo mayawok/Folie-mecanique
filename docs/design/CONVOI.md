@@ -136,6 +136,15 @@ l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprend
   faute de modèle « Crab »). Boutons « Déminer : détecteur / chien » et « Traverser à l'aveugle » (demi-tour : bandeau d'ordres). Option `champs`.
 - Ouvert : fléau à acheter ou fabriquer ? modèle de Sherman Crab dédié ? chien : blessure et soins.
 
+## Équipage, phares, écrasement, lance-flammes (DEC-048 à DEC-052)
+
+- Rôles choisis dans la grille (conducteur, tireur, chargeur, chef, mécanicien, infirmier, passager) ; une arme sans tireur ne tire pas.
+- Phares : seulement si posés ; de nuit, précision normale mais rôdeurs plus fréquents.
+- Écrasement : tonnes × vitesse × 3 dégâts à un fantassin ou un animal sous un véhicule en marche.
+- Lance-flammes : brûle 1,2 L du carburant du convoi par jet, inutile contre les blindés.
+- Trajectoires : quasi rectilignes (flèche réelle selon le calibre), mortier en cloche. Épave irréparable à roues : sans roues.
+- Convoi anéanti : grand dézoom, musique de fin, puis bilan.
+
 ## Bâtiments
 
 Maison de village, ferme, grange, église (clocher de 14 m, plafond de zoom), bunker. Style européen.

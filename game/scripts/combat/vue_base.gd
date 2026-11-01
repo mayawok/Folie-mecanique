@@ -112,6 +112,10 @@ var _n_journal := -1
 var _btn_pause: Button
 var _btns_vitesse := []
 var _voile_fin: ColorRect
+var _fin_son := false
+var _ui_noeuds: Array = []       # éléments d'interface (décalés hors des bords, DEC-056)
+var _mg := {"g": 0.0, "h": 0.0, "d": 0.0, "b": 0.0}
+var _fin_t := 0.0                 # temps depuis l'anéantissement (dézoom, puis écran de fin)
 var _lbl_fin: Label
 class Carte extends Button:
 	var vue: ConvoiVue

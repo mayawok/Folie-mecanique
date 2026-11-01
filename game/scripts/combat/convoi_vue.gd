@@ -97,7 +97,10 @@ func _camera(delta: float) -> void:
 			plafond = minf(plafond, 600.0 / b.hauteur)   # un grand bâtiment (église) doit tenir à l'écran
 	var span := maxf(droite - gauche + 4.0, 26.0)
 	var cible := clampf(1560.0 / span, 24.0, plafond)
-	ppm = lerpf(ppm, cible, 1.0 - exp(-2.2 * delta))
+	if m.fini:   # convoi anéanti : grand dézoom lent sur le désert (DEC-055)
+		_fin_t += delta
+		cible = 6.0
+	ppm = lerpf(ppm, cible, 1.0 - exp(-(0.35 if m.fini else 2.2) * delta))
 	terrain.ppm = ppm
 	if not (_pressing and _drag):
 		_look_t -= delta
@@ -136,6 +139,10 @@ func _synchroniser() -> void:
 		n.x_monde = x
 		n.vitesse = v.vitesse_act if (v.actif() and not pause) else 0.0
 		n.equipage = v.actif()
+		var hs: bool = v.statut == "epave" and v.pieces.has("chassis") and v.pieces.chassis.pv <= 0.0
+		if n.sans_roues != hs:
+			n.sans_roues = hs
+			n.queue_redraw()
 		n.modulate = Color.WHITE if v.actif() else (Color(0.82, 0.8, 0.78) if v.recuperable() else Color(0.4, 0.38, 0.36))
 		if v.camo_voulu:
 			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)

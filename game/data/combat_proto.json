@@ -109,6 +109,19 @@
    "munitions": 2,
    "pv": 30,
    "vitesse": 45
+  },
+  "lance_flammes": {
+   "nom": "Lance-flammes",
+   "classe": "flamme",
+   "degats": 16,
+   "penetration": 5,
+   "cadence": 0.7,
+   "portee": 28,
+   "precision": 0.8,
+   "munitions": 0,
+   "carburant": 1.2,
+   "pv": 25,
+   "vitesse": 25
   }
  },
  "zones": {
@@ -837,5 +850,22 @@
     }
    }
   ]
+ },
+ "ecrasement": {
+  "_note": "DEC-049 : dégâts infligés à un fantassin ou un animal écrasé = tonnes × vitesse (m/s) × k, vitesse mini.",
+  "k": 3.0,
+  "vitesse_min": 1.5
+ },
+ "phares": {
+  "_note": "DEC-048 : de nuit, un véhicule avec phares tire sans malus de précision mais attire les rôdeurs.",
+  "attire": 1.5
+ },
+ "equipage_roles": {
+  "_note": "DEC-050",
+  "chargeur_canon": 0.7,
+  "chargeur_mitrailleuse": 0.8,
+  "chef_precision": 1.1,
+  "infirmier_pv_s": 0.08,
+  "mecanicien_vitesse": 1.5
  }
 }

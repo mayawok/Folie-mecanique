@@ -1,7 +1,10 @@
-# Grille de construction libre (DEC-043), accessible à tout moment pour chaque véhicule (le jeu est en pause).
-# Trois étapes : 1. peindre le châssis case par case (acier ou blindage), 2. poser les essieux dessous et choisir
-# leurs roues (trois tailles) ou chenilles, 3. poser moteurs, cabines et armes (mitrailleuse, canon, mortier).
-# Tout est compatible ; l'écran montre en direct le sol, le centre de gravité, la charge de chaque essieu et les défauts.
+# Grille de construction libre (DEC-043), refaite pour l'iPhone (DEC-056 à DEC-058) :
+# - grille agrandie et centrée entre les marges sûres (Dynamic Island, coins), fenêtre ajustée au véhicule ;
+# - éléments classés par catégorie (onglets), dans l'ordre de construction, l'équipage en dernier ;
+# - châssis tracé en rectangles (glisser d'un coin à l'autre) au lieu d'être peint case par case ;
+# - essieu posé d'abord, roue ou chenille montée ensuite dessus ;
+# - le vrai dessin du véhicule s'affiche sur la grille, y compris la pièce qu'on glisse ;
+# - nom proposé d'après la construction, modifiable ; brouillon gardé si la page se recharge.
 # Aucune règle ici : tout passe par ConstructionLibre et CombatModele (grille_de, palette_grille, construire_grille).
 class_name EditeurGrille
 extends Control
@@ -9,7 +12,8 @@ extends Control
 signal ferme(construit: bool)
 
 const C_FOND := Color(0.06, 0.065, 0.07)
-const C_GRILLE := Color(1, 1, 1, 0.06)
+const C_ZONE := Color(0.09, 0.095, 0.1)
+const C_GRILLE := Color(1, 1, 1, 0.07)
 const C_CADRE := Color(1, 1, 1, 0.22)
 const C_ACCENT := Color("#E8A33D")
 const C_TEXTE := Color("#F2EEE6")
@@ -17,40 +21,50 @@ const C_DISCRET := Color("#A8A196")
 const C_VERT := Color("#5FB36B")
 const C_ROUGE := Color("#D9674A")
 const C_SOL := Color(0.55, 0.45, 0.3)
-const COULEURS := {"acier": Color("#77736A"), "blindage": Color("#4C5236"), "origine": Color("#6E6A5C"),
-	"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "arme": Color("#9A2F2F")}
+const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A")}
+const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["moteur", "Moteurs"],
+	["cabine", "Cabines"], ["arme", "Armes"], ["equipement", "Équipement"], ["equipage", "Équipage"]]
 const ESSIEUX := ["essieu_leger", "essieu_lourd", "essieu_char"]
 const TRAINS := ["roue_petite", "roue_moyenne", "roue_grande", "chenille"]
-const PAR_PAGE := 6
+const NOMS_ROLES := {"conducteur": "Conducteur", "tireur": "Tireur", "chargeur": "Chargeur", "chef": "Chef de char",
+	"mecanicien": "Mécanicien", "infirmier": "Infirmier", "passager": "Passager"}
+const AIDE_ROLES := {"conducteur": "obligatoire", "tireur": "1 canon + 1 mitrailleuse coaxiale, ou 1 arme",
+	"chargeur": "recharge plus vite", "chef": "précision +10 %", "mecanicien": "répare plus vite", "infirmier": "soigne l'équipage",
+	"passager": "aucun rôle"}
+const BROUILLON := "user://grille_brouillon.json"
+const CARTE_H := 84.0
+const DECALAGE_DOIGT := 1.6   # la pièce glissée flotte au-dessus du doigt (en cases) pour rester visible
 
 var m                       # CombatModele
 var uid := 0                # véhicule modifié (0 = véhicule neuf)
 var a := {}                 # grille en cours
-var etape := 1
-var pinceau := "acier"      # acier | blindage | "" (gomme)
-var essieu_choisi := "essieu_leger"
-var train_choisi := "roue_moyenne"
+var onglet := "chassis"
+var outil := {"chassis": "acier", "essieux": "essieu_leger", "roues": "roue_moyenne"}
 var _palette: Array = []    # [{id, n}] ; n = -1 : sans limite
-var _sel := ""              # pièce choisie (étape 3)
+var _glisse := ""           # pièce tenue au doigt
+var _rect0 := Vector2i(-99, -99)   # coin de départ du rectangle de châssis
+var _rect1 := Vector2i(-99, -99)
 var _appui := false
-var _derniere := Vector2i(-99, -99)
 var _doigt := Vector2.ZERO
+var _vue := Rect2i(8, 0, 24, 10)   # fenêtre de la grille affichée (en cases)
 var _grille := Rect2()
-var _cell := 18.0
+var _cell := 40.0
+var _panneau := Rect2()
+var _mg := {}
 var _page := 0
-var _cartes: Array = []
+var _cartes: Array = []     # [{rect, action, id, actif}]
 var _an := {}
 var _message := ""
 var _msg_t := 0.0
-var _boutons_etape: Array = []
-var _boutons_outils: Array = []
+var _confirmer := false     # armes sans tireur : deuxième appui sur Construire pour confirmer
+var _onglets: Array = []
 var _btn_ok: Button
 var _btn_annuler: Button
+var _btn_nom: Button
 var _btn_haut: Button
 var _btn_bas: Button
-var _btn_prec: Button
-var _btn_suiv: Button
 var _apercu: VehiculeDessin
+var _dessus: Control
 
 
 func ouvrir(modele, vehicule_uid: int) -> void:
@@ -58,6 +72,10 @@ func ouvrir(modele, vehicule_uid: int) -> void:
 	uid = vehicule_uid
 	a = m.grille_de(uid)
 	_palette = m.palette_grille(uid)
+	var b := _lire_brouillon()
+	if not b.is_empty():
+		a = b
+		_dire("Brouillon repris là où vous l'aviez laissé.")
 
 
 func _ready() -> void:
@@ -65,107 +83,151 @@ func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_STOP
 	_apercu = VehiculeDessin.new()
 	_apercu.equipage = true
+	_apercu.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(_apercu)
-	for i in 3:
-		var b := _bouton(["1 · Châssis", "2 · Essieux", "3 · Pièces"][i], func(): _etape(i + 1), 190)
-		_boutons_etape.append(b)
-	_btn_ok = _bouton("Construire", _terminer, 230)
+	_dessus = Control.new()
+	_dessus.mouse_filter = MOUSE_FILTER_IGNORE
+	_dessus.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_dessus.draw.connect(_dessiner_dessus)
+	add_child(_dessus)
+	for o in ONGLETS:
+		var id: String = o[0]
+		_onglets.append(_bouton(o[1], func(): _choisir_onglet(id)))
+	_btn_nom = _bouton("", _renommer)
+	_btn_nom.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_btn_ok = _bouton("Construire", _terminer)
 	_btn_annuler = _bouton("Annuler", func():
+		_effacer_brouillon()
 		ferme.emit(false)
-		queue_free(), 180)
-	_btn_prec = _bouton("← Précédent", func(): _etape(maxi(1, etape - 1)), 190)
-	_btn_suiv = _bouton("Suivant →", func(): _etape(mini(3, etape + 1)), 230)
-	_btn_haut = _bouton("▲", func(): _page = maxi(0, _page - 1), 80)
-	_btn_bas = _bouton("▼", func(): _page += 1, 80)
-	_etape(1)
+		queue_free())
+	_btn_haut = _bouton("▲", func(): _page = maxi(0, _page - 1))
+	_btn_bas = _bouton("▼", func(): _page += 1)
 	resized.connect(_disposer)
+	_maj(true)
 
 
-func _bouton(texte: String, action: Callable, largeur: float) -> Button:
+func _bouton(texte: String, action: Callable) -> Button:
 	var b := Button.new()
 	b.text = texte
-	b.custom_minimum_size = Vector2(largeur, 58)
+	b.add_theme_font_size_override("font_size", 26)
 	b.pressed.connect(action)
 	add_child(b)
 	return b
 
 
-# Outils de l'étape : pinceaux, essieux et trains, ou rien (les pièces sont des cartes dessinées)
-func _etape(n: int) -> void:
-	etape = n
-	for b in _boutons_outils:
-		b.queue_free()
-	_boutons_outils.clear()
-	match n:
-		1:
-			for p in [["Acier", "acier"], ["Blindage", "blindage"], ["Gomme", ""]]:
-				var sorte: String = p[1]
-				_boutons_outils.append(_bouton(p[0], func(): pinceau = sorte, 150))
-			_boutons_outils.append(_bouton("+ plaque", func(): _plaque(1), 150))
-			_boutons_outils.append(_bouton("− plaque", func(): _plaque(-1), 150))
-		2:
-			for id in ESSIEUX:
-				_boutons_outils.append(_bouton(Assemblage.piece(id).nom.replace("Essieu ", "Ess. "), func(): essieu_choisi = id, 150))
-			for id in TRAINS:
-				_boutons_outils.append(_bouton({"roue_petite": "Petite roue", "roue_moyenne": "Roue moy.", "roue_grande": "Grande roue", "chenille": "Chenille"}[id], func(): train_choisi = id, 150))
-	_maj()
-
-
-func _plaque(d: int) -> void:
-	a.plaques = maxi(0, int(a.get("plaques", 0)) + d)
-	_maj()
-
-
-func _disposer() -> void:
-	var g := ConstructionLibre.taille()
-	var zone := Vector2(size.x * 0.62, size.y * 0.52)
-	_cell = floorf(minf(zone.x / g.x, zone.y / g.y))
-	_grille = Rect2(Vector2(size.x * 0.02, size.y * 0.13), Vector2(g) * _cell)
-	for i in _boutons_etape.size():
-		_boutons_etape[i].position = Vector2(size.x * 0.40 + i * 200, 24)
-		_boutons_etape[i].modulate = C_ACCENT if etape == i + 1 else Color.WHITE
-	var x_bac := size.x * 0.66
-	for i in _boutons_outils.size():
-		var col := i % 3 if etape == 1 or i < 3 else (i - 3) % 2
-		var lig := i / 3 if etape == 1 or i < 3 else 1 + (i - 3) / 2
-		_boutons_outils[i].position = Vector2(x_bac + col * (158.0 if etape == 1 or i < 3 else 215.0), size.y * 0.15 + lig * 66)
-		_boutons_outils[i].custom_minimum_size.x = 150 if etape == 1 or i < 3 else 205
-	_btn_haut.visible = etape == 3
-	_btn_bas.visible = etape == 3
-	_btn_haut.position = Vector2(x_bac, size.y * 0.15 + PAR_PAGE * 52 + 4)
-	_btn_bas.position = Vector2(x_bac + 90, size.y * 0.15 + PAR_PAGE * 52 + 4)
-	_btn_suiv.text = "Suivant : %s →" % ["", "Essieux", "Pièces", "Pièces"][etape]
-	var x := size.x - 16.0
-	for b in [_btn_ok, _btn_annuler, _btn_suiv, _btn_prec]:   # en bas à droite, de droite à gauche
-		b.reset_size()
-		x -= b.size.x
-		b.position = Vector2(x, size.y - 72)
-		x -= 12.0
-	_btn_prec.disabled = etape <= 1
-	_btn_suiv.disabled = etape >= 3
-	queue_redraw()
-
-
-# Recalcule l'analyse et l'aperçu dessiné après chaque changement
-func _maj() -> void:
-	_an = ConstructionLibre.analyser(a)
-	if not a.cases.is_empty():
-		var F := ConstructionLibre.forme(a)
-		_apercu.ppm = clampf(minf(size.y * 0.24 / maxf(0.5, float(F.hauteur)), size.x * 0.55 / maxf(0.5, float(F.longueur))), 8.0, 70.0)
-		_apercu.configurer_d(F)
-		_apercu.visible = true
-	else:
-		_apercu.visible = false
+func _choisir_onglet(id: String) -> void:
+	onglet = id
+	_page = 0
+	_glisse = ""
 	_disposer()
-	_apercu.position = Vector2(size.x * 0.03, size.y * 0.985 - _apercu.size.y)
+
+
+# --- Mise en page : marges sûres, panneau à droite, grille centrée dans le reste ------------
+func _disposer() -> void:
+	if size.x < 10.0:
+		return
+	_mg = ZonesSures.marges(size)
+	var g: float = _mg.g
+	var d: float = size.x - _mg.d
+	var haut := 16.0 + float(_mg.h)
+	var bas := size.y - float(_mg.b)
+	var pw := clampf(size.x * 0.27, 420.0, 620.0)
+	_panneau = Rect2(Vector2(d - pw, haut + 84.0), Vector2(pw, bas - haut - 84.0))
+	# Barre du haut : nom à gauche, Annuler et Construire à droite
+	var x := d
+	for b in [_btn_ok, _btn_annuler]:
+		b.custom_minimum_size = Vector2(0, 68)
+		b.reset_size()
+		b.size.x = maxf(b.size.x, 190.0)
+		x -= b.size.x
+		b.position = Vector2(x, haut)
+		x -= 14.0
+	_btn_nom.position = Vector2(g, haut)
+	_btn_nom.custom_minimum_size = Vector2(0, 68)
+	_btn_nom.size = Vector2(maxf(200.0, x - g - 20.0), 68)
+	# Onglets : deux rangées de quatre en haut du panneau
+	var tw := (_panneau.size.x - 3 * 8.0) / 4.0
+	for i in _onglets.size():
+		var b: Button = _onglets[i]
+		b.custom_minimum_size = Vector2(tw, 64)
+		b.size = Vector2(tw, 64)
+		b.position = _panneau.position + Vector2((i % 4) * (tw + 8.0), (i / 4) * 72.0)
+		b.add_theme_font_size_override("font_size", 19)
+		b.modulate = C_ACCENT if ONGLETS[i][0] == onglet else Color.WHITE
+	for b in [_btn_haut, _btn_bas]:
+		b.custom_minimum_size = Vector2(96, 64)
+		b.size = Vector2(96, 64)
+	_btn_bas.position = Vector2(_panneau.end.x - 96.0, _panneau.end.y - 64.0)
+	_btn_haut.position = Vector2(_panneau.end.x - 200.0, _panneau.end.y - 64.0)
+	# Grille : tout l'espace à gauche du panneau, sous la barre, au-dessus du bilan
+	var zone := Rect2(Vector2(g, haut + 84.0), Vector2(_panneau.position.x - 24.0 - g, bas - haut - 84.0 - 120.0))
+	var sous_sol := 2.2   # place pour les roues sous la ligne 0
+	_cell = floorf(minf(zone.size.x / float(_vue.size.x), zone.size.y / (float(_vue.size.y) + sous_sol)))
+	var taille := Vector2(_vue.size) * _cell
+	_grille = Rect2(zone.position + Vector2((zone.size.x - taille.x) * 0.5, (zone.size.y - taille.y - sous_sol * _cell) * 0.5), taille)
+	_placer_apercu()
+	queue_redraw()
+	_dessus.queue_redraw()
+
+
+# Fenêtre affichée : le véhicule et une marge autour, au moins `grille_vue_min` cases (24 × 10)
+func _ajuster_vue() -> void:
+	var G := ConstructionLibre.taille()
+	var mini_v: Array = ConstructionLibre.R().get("grille_vue_min", [24, 10])
+	var x0 := G.x
+	var x1 := 0
+	var y1 := 0
+	for c in a.get("cases", []):
+		x0 = mini(x0, int(c[0]))
+		x1 = maxi(x1, int(c[0]) + 1)
+		y1 = maxi(y1, int(c[1]) + 1)
+	for p in a.get("pieces", []):
+		var e: Array = Assemblage.piece(String(p.piece)).emprise
+		x0 = mini(x0, int(p.pos[0]))
+		x1 = maxi(x1, int(p.pos[0]) + int(e[0]))
+		y1 = maxi(y1, int(p.pos[1]) + int(e[1]))
+	if x1 <= x0:
+		x0 = G.x / 2
+		x1 = x0
+	var w := clampi(x1 - x0 + 8, int(mini_v[0]), G.x)
+	var h := clampi(y1 + 3, int(mini_v[1]), G.y)
+	var cx := (x0 + x1) / 2
+	var gx := clampi(cx - w / 2, 0, G.x - w)
+	_vue = Rect2i(gx, 0, w, h)
+
+
+# --- Changements ------------------------------------------------------------------------------
+func _maj(revoir_vue := false) -> void:
+	if not a.get("nom_choisi", false):
+		a.nom = ConstructionLibre.nom_propose(a)
+	_an = ConstructionLibre.analyser(a)
+	_confirmer = false
+	if revoir_vue:
+		_ajuster_vue()
+	_btn_nom.text = "✎  " + String(a.get("nom", "Véhicule")) + ("  ·  bac à sable" if m.bac_a_sable else "")
+	_ecrire_brouillon()
+	_disposer()
+
+
+func _placer_apercu(b := {}) -> void:
+	var source: Dictionary = a if b.is_empty() else b
+	if source.get("cases", []).is_empty():
+		_apercu.visible = false
+		return
+	var F := ConstructionLibre.forme(source)
+	_apercu.ppm = _cell / ConstructionLibre.C
+	_apercu.configurer_d(F)
+	_apercu.visible = true
+	_apercu.position = _px(float(F.x0), float(F.sol)) - Vector2(0, _apercu.size.y)
 
 
 func _process(delta: float) -> void:
+	if m == null:
+		return
 	_msg_t = maxf(0.0, _msg_t - delta)
 	_btn_ok.disabled = not _an.get("ok", false) or (not m.bac_a_sable and m.stocks.metal < m.cout_grille(uid, a))
 	_btn_haut.disabled = _page <= 0
-	_btn_bas.disabled = (_page + 1) * PAR_PAGE >= _palette.size()
-	queue_redraw()
+	_dessus.queue_redraw()
 
 
 func _restant(id: String, n: int) -> int:
@@ -175,89 +237,128 @@ func _restant(id: String, n: int) -> int:
 
 
 func _case(pos: Vector2) -> Vector2i:
-	return Vector2i(int(floor((pos.x - _grille.position.x) / _cell)), int(floor((_grille.end.y - pos.y) / _cell)))
+	return Vector2i(_vue.position.x + int(floor((pos.x - _grille.position.x) / _cell)), int(floor((_grille.end.y - pos.y) / _cell)))
 
 
+func _px(x: float, y: float) -> Vector2:   # cases (absolues) -> écran
+	return Vector2(_grille.position.x + (x - _vue.position.x) * _cell, _grille.end.y - y * _cell)
+
+
+func _dans_grille(pos: Vector2) -> bool:
+	return _grille.grow_individual(0, 0, 0, 2.2 * _cell).has_point(pos)
+
+
+# --- Toucher ----------------------------------------------------------------------------------
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
 		_doigt = e.position
 		if e.pressed:
 			_appui = true
-			_derniere = Vector2i(-99, -99)
-			if etape == 3:
-				for c in _cartes:
-					if c.rect.has_point(e.position) and c.reste != 0:
-						_sel = c.id
-						accept_event()
-						return
-			if _grille.has_point(e.position):
-				_toucher(_case(e.position), true)
+			for c in _cartes:
+				if c.rect.has_point(e.position):
+					if c.actif:
+						c.action.call()
+					accept_event()
+					return
+			if _dans_grille(e.position):
+				_appuyer(_case(e.position))
 		else:
-			if etape == 3 and _sel != "" and _grille.grow(_cell).has_point(e.position) and _derniere == Vector2i(-99, -99):
-				_poser_piece(e.position)
+			_relacher(e.position)
 			_appui = false
 		accept_event()
 	elif e is InputEventMouseMotion:
 		_doigt = e.position
-		if _appui and etape == 1 and _grille.has_point(e.position):
-			_toucher(_case(e.position), false)
+		if _appui and onglet == "chassis" and _rect0.x > -99:
+			var c := _case(e.position)
+			_rect1 = Vector2i(clampi(c.x, 0, ConstructionLibre.taille().x - 1), clampi(c.y, 0, ConstructionLibre.taille().y - 1))
+		if _glisse != "":
+			_placer_apercu(_candidat())
 		accept_event()
 
 
-func _toucher(cell: Vector2i, premier: bool) -> void:
-	if cell == _derniere:
-		return
-	match etape:
-		1:
-			_derniere = cell
-			a = ConstructionLibre.peindre(a, cell, pinceau)
-			_maj()
-		2:
-			if not premier:
-				return
-			_derniere = cell
+func _appuyer(cell: Vector2i) -> void:
+	match onglet:
+		"chassis":
+			_rect0 = cell
+			_rect1 = cell
+		"essieux":
 			var ex := ConstructionLibre.essieu_en(a, cell.x)
-			if not ex.is_empty() and ex.piece == essieu_choisi and ex.train == train_choisi:
+			if not ex.is_empty() and ex.piece == outil.essieux:
 				a = ConstructionLibre.retirer_essieu(a, cell.x)
 			else:
-				var b := ConstructionLibre.poser_essieu(a, cell.x, essieu_choisi, train_choisi)
+				var b := ConstructionLibre.poser_essieu(a, cell.x, outil.essieux, String(ex.get("train", "")))
 				if b.is_empty():
-					_dire("Peignez d'abord une case de châssis dans cette colonne.")
-				else:
-					a = b
-					_son()
+					_dire("Tracez d'abord le châssis au-dessus de cette colonne.")
+					return
+				a = b
+				_son()
 			_maj()
-		3:
-			if not premier:
-				return
+		"roues":
+			_monter_roue(cell.x)
+		"equipage":
+			pass
+		_:
 			var i := ConstructionLibre.piece_en(a, cell)
-			if i >= 0:   # toucher une pièce posée la reprend
-				_derniere = cell
-				_sel = String(a.pieces[i].piece)
+			if i >= 0:   # une pièce posée se reprend au doigt pour la déplacer
+				_glisse = String(a.pieces[i].piece)
 				a = ConstructionLibre.retirer(a, i)
-				_maj()
+				_an = ConstructionLibre.analyser(a)
+				_placer_apercu(_candidat())
 
 
+func _relacher(pos: Vector2) -> void:
+	if onglet == "chassis" and _rect0.x > -99:
+		var sorte: String = outil.chassis
+		var b := a
+		for x in range(mini(_rect0.x, _rect1.x), maxi(_rect0.x, _rect1.x) + 1):
+			for y in range(mini(_rect0.y, _rect1.y), maxi(_rect0.y, _rect1.y) + 1):
+				b = ConstructionLibre.peindre(b, Vector2i(x, y), sorte)
+		_rect0 = Vector2i(-99, -99)
+		if b != a:
+			a = b
+			_son()
+		_maj(true)
+		return
+	if _glisse == "":
+		return
+	if onglet == "roues":
+		if _dans_grille(pos):
+			_monter_roue(_case(pos).x)
+		_glisse = ""
+		return
+	if _dans_grille(pos):
+		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse))
+		if b.is_empty():
+			_dire("%s doit reposer sur le châssis ou une autre pièce, sans chevaucher : rendue au bac." % Assemblage.piece(_glisse).nom)
+		else:
+			a = b
+			_son()
+	_glisse = ""
+	_maj(true)
+
+
+func _monter_roue(x: int) -> void:
+	var b := ConstructionLibre.monter_train(a, x, outil.roues)
+	if b.is_empty():
+		_dire("Posez d'abord un essieu sous cette colonne (onglet Essieux).")
+		return
+	a = b
+	_son()
+	_maj()
+
+
+# Case visée par la pièce tenue : centrée sur le doigt, un peu au-dessus pour rester visible
 func _cible(pos: Vector2, id: String) -> Vector2i:
 	var e: Array = Assemblage.piece(id).emprise
-	return Vector2i(int(floor((pos.x - _grille.position.x) / _cell - float(e[0]) * 0.5 + 0.5)), int(floor((_grille.end.y - pos.y) / _cell - float(e[1]) * 0.5 + 0.5)))
+	var p := pos - Vector2(0, DECALAGE_DOIGT * _cell)
+	return Vector2i(_vue.position.x + int(floor((p.x - _grille.position.x) / _cell - float(e[0]) * 0.5 + 0.5)),
+		int(floor((_grille.end.y - p.y) / _cell - float(e[1]) * 0.5 + 0.5)))
 
 
-func _poser_piece(pos: Vector2) -> void:
-	var reste := 0
-	for c in _palette:
-		if c.id == _sel:
-			reste = _restant(c.id, int(c.n))
-	if reste == 0:
-		_dire("Plus de %s en réserve." % Assemblage.piece(_sel).nom)
-		return
-	var b := ConstructionLibre.poser(a, _sel, _cible(pos, _sel))
-	if b.is_empty():
-		_dire("%s doit reposer sur le châssis ou une autre pièce, sans chevaucher." % Assemblage.piece(_sel).nom)
-	else:
-		a = b
-		_son()
-		_maj()
+func _candidat() -> Dictionary:
+	if _glisse == "" or onglet == "roues" or not _dans_grille(_doigt):
+		return {}
+	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse))
 
 
 func _son() -> void:
@@ -267,7 +368,15 @@ func _son() -> void:
 
 
 func _terminer() -> void:
+	var manque := ConstructionLibre.tireurs_requis(a) - ConstructionLibre.roles_de(a).count("tireur")
+	if manque > 0 and not _confirmer:
+		_confirmer = true
+		_btn_ok.text = "Construire quand même"
+		_dire("Attention : %d arme%s sans tireur ne tirer%s pas. Onglet Équipage, ou appuyez encore pour construire." % [manque, "s" if manque > 1 else "", "ont" if manque > 1 else "a"])
+		_choisir_onglet("equipage")
+		return
 	if m.construire_grille(uid, a):
+		_effacer_brouillon()
 		ferme.emit(true)
 		queue_free()
 	else:
@@ -276,139 +385,259 @@ func _terminer() -> void:
 
 func _dire(t: String) -> void:
 	_message = t
-	_msg_t = 3.5
+	_msg_t = 4.0
 
 
-# --- Dessin ------------------------------------------------------------------------------------
-func _px(x: float, y: float) -> Vector2:   # cellules -> écran
-	return Vector2(_grille.position.x + x * _cell, _grille.end.y - y * _cell)
+# --- Nom ----------------------------------------------------------------------------------------
+func _renommer() -> void:
+	if OS.has_feature("web"):
+		var r = JavaScriptBridge.eval("prompt('Nom du véhicule', %s)" % JSON.stringify(String(a.get("nom", ""))), true)
+		if typeof(r) == TYPE_STRING:
+			_nommer(String(r))
+		return
+	var champ := LineEdit.new()
+	champ.text = String(a.get("nom", ""))
+	champ.add_theme_font_size_override("font_size", 28)
+	champ.position = _btn_nom.position
+	champ.size = _btn_nom.size
+	add_child(champ)
+	champ.grab_focus()
+	champ.select_all()
+	champ.text_submitted.connect(func(t):
+		_nommer(t)
+		champ.queue_free())
+	champ.focus_exited.connect(func():
+		if is_instance_valid(champ):
+			champ.queue_free())
 
 
-func _draw() -> void:
-	var police := get_theme_default_font()
-	var g := ConstructionLibre.taille()
-	draw_rect(Rect2(Vector2.ZERO, size), C_FOND)
-	var titre := String(a.get("nom", "Véhicule")) + ("  ·  bac à sable" if m.bac_a_sable else "")
-	draw_string(police, Vector2(size.x * 0.02, 46), titre, HORIZONTAL_ALIGNMENT_LEFT, size.x * 0.37, 32, C_TEXTE)
-	var aides := ["Peignez le châssis au doigt. Acier : léger ; blindage : lourd mais protège.",
-		"Touchez une colonne : l'essieu se fixe sous la case la plus basse. Retouchez pour l'enlever.",
-		"Choisissez une pièce puis touchez la grille. Touchez une pièce posée pour la reprendre."]
-	draw_string(police, Vector2(size.x * 0.02, size.y * 0.115), _message if _msg_t > 0.0 else aides[etape - 1], HORIZONTAL_ALIGNMENT_LEFT, size.x * 0.62, 20, C_ACCENT if _msg_t > 0.0 else C_DISCRET)
-	for i in g.x + 1:
-		draw_line(_px(i, 0), _px(i, g.y), C_GRILLE, 1.0)
-	for j in g.y + 1:
-		draw_line(_px(0, j), _px(g.x, j), C_GRILLE, 1.0)
-	draw_rect(_grille, C_CADRE, false, 2.0)
-	var det: Dictionary = _an.get("detail", {})
-	# Sol calculé : le point le plus bas, roue ou caisse
-	if det.has("sol"):
-		draw_line(_px(-0.5, det.sol), _px(g.x + 0.5, det.sol), C_SOL, 3.0)
-	# Châssis
-	for c in a.get("cases", []):
-		var r := Rect2(_px(int(c[0]), int(c[1]) + 1), Vector2(_cell, _cell))
-		draw_rect(r.grow(-1.0), COULEURS.get(String(c[2]), COULEURS.acier))
-	# Essieux et trains, à leur vraie hauteur ; charge sous chaque roue
-	var details: Array = det.get("essieux", [])
-	for e in a.get("essieux", []):
-		var x := int(e.x)
-		var y := float(ConstructionLibre.y_essieu(a, x))
-		var ft := Assemblage.piece(String(e.train))
-		var rr := float(ft.diametre_cases) * 0.5 * _cell
-		var centre := _px(x + 0.5, y)
-		var info := {}
-		for d in details:
-			if d.x == x:
-				info = d
-		var porte: bool = info.get("touche", true)
-		var col := Color("#3E3C37") if porte else Color(0.35, 0.2, 0.2)
-		if ft.get("type", "") == "chenilles":
-			draw_rect(Rect2(centre - Vector2(rr, rr), Vector2(rr, rr) * 2.0), col)
-		else:
-			draw_circle(centre, rr, col)
-		draw_arc(centre, rr, 0, TAU, 20, Color(0, 0, 0, 0.7), 2.0)
-		draw_circle(centre, maxf(2.0, _cell * 0.18), Color("#9A9890") if e.piece == "essieu_leger" else (Color("#C9C6BC") if e.piece == "essieu_lourd" else Color("#E8E4D8")))
-		if info.has("charge"):
-			var sur: bool = float(info.charge) > float(info.capacite)
-			draw_string(police, centre + Vector2(-40, rr + 18), "%d/%d kg" % [int(info.charge), int(info.capacite)], HORIZONTAL_ALIGNMENT_CENTER, 80, 14, C_ROUGE if sur else C_DISCRET)
-		elif not porte:
-			draw_string(police, centre + Vector2(-40, rr + 18), "en l'air", HORIZONTAL_ALIGNMENT_CENTER, 80, 14, C_ROUGE)
-	# Pièces
-	for p in a.get("pieces", []):
-		var f := Assemblage.piece(String(p.piece))
-		var e: Array = f.emprise
-		var r := Rect2(_px(int(p.pos[0]), int(p.pos[1]) + int(e[1])), Vector2(int(e[0]), int(e[1])) * _cell)
-		draw_rect(r.grow(-1.0), COULEURS.get(f.famille, Color("#555")))
-		draw_rect(r, Color(0, 0, 0, 0.6), false, 2.0)
-		if r.size.x > 50.0:
-			draw_string(police, r.position + Vector2(4, minf(r.size.y - 4.0, 17.0)), String(f.nom), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 6.0, 13, C_TEXTE)
-	# Centre de gravité
-	if det.has("cg"):
-		var cg := _px(det.cg.x, det.cg.y)
-		draw_circle(cg, 7.0, Color(1, 1, 1, 0.9))
-		draw_line(cg - Vector2(10, 0), cg + Vector2(10, 0), Color.BLACK, 2.0)
-		draw_line(cg - Vector2(0, 10), cg + Vector2(0, 10), Color.BLACK, 2.0)
-	# Pièce choisie : fantôme là où elle se poserait
-	if etape == 3 and _sel != "" and _grille.has_point(_doigt):
-		var b := ConstructionLibre.poser(a, _sel, _cible(_doigt, _sel))
-		if not b.is_empty():
-			var q: Dictionary = b.pieces.back()
-			var e: Array = Assemblage.piece(_sel).emprise
-			draw_rect(Rect2(_px(int(q.pos[0]), int(q.pos[1]) + int(e[1])), Vector2(int(e[0]), int(e[1])) * _cell), Color(C_VERT, 0.45))
-	_draw_panneau(police)
+func _nommer(t: String) -> void:
+	t = t.strip_edges().left(40)
+	if t == "":   # nom vidé : on revient au nom proposé
+		a.erase("nom_choisi")
+	else:
+		a.nom = t
+		a.nom_choisi = true
+	_maj()
 
 
-func _draw_panneau(police: Font) -> void:
-	var x_bac := size.x * 0.66
-	var lw := size.x - x_bac - size.x * 0.02
-	var y := size.y * 0.15
-	match etape:
-		1:
-			var nom: String = {"acier": "Acier", "blindage": "Blindage", "": "Gomme"}[pinceau]
-			draw_string(police, Vector2(x_bac, y - 12), "Pinceau : %s · plaques : %d" % [nom, int(a.get("plaques", 0))], HORIZONTAL_ALIGNMENT_LEFT, lw, 20, C_TEXTE)
-			y += 140
-		2:
-			var fe := Assemblage.piece(essieu_choisi)
-			var ft := Assemblage.piece(train_choisi)
-			draw_string(police, Vector2(x_bac, y - 12), "%s (%d kg max) + %s (%d kg max)" % [fe.nom, int(fe.charge_kg), String(ft.nom).get_slice(" (", 0), int(ft.charge_kg)], HORIZONTAL_ALIGNMENT_LEFT, lw, 18, C_TEXTE)
-			y += 210
-		3:
-			_cartes.clear()
-			draw_string(police, Vector2(x_bac, y - 12), "Pièces%s" % (" (sans limite)" if m.bac_a_sable else ""), HORIZONTAL_ALIGNMENT_LEFT, lw, 20, C_TEXTE)
-			for k in range(_page * PAR_PAGE, mini(_palette.size(), (_page + 1) * PAR_PAGE)):
-				var it: Dictionary = _palette[k]
+# --- Brouillon (la page web peut se recharger : on ne perd pas sa construction) ----------------
+func _ecrire_brouillon() -> void:
+	var f := FileAccess.open(BROUILLON, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify({"uid": uid, "bac": m.bac_a_sable, "a": a}))
+
+
+func _lire_brouillon() -> Dictionary:
+	if not FileAccess.file_exists(BROUILLON):
+		return {}
+	var d = JSON.parse_string(FileAccess.get_file_as_string(BROUILLON))
+	if typeof(d) != TYPE_DICTIONARY or int(d.get("uid", -1)) != uid or bool(d.get("bac", false)) != m.bac_a_sable:
+		return {}
+	var b: Dictionary = d.get("a", {})
+	if not ConstructionLibre.est_libre(b):
+		return {}
+	# Le JSON lit les nombres en flottants : on remet des entiers là où la grille en attend
+	for c in b.get("cases", []):
+		c[0] = int(c[0])
+		c[1] = int(c[1])
+	for e in b.get("essieux", []):
+		e.x = int(e.x)
+	for p in b.get("pieces", []):
+		p.pos = [int(p.pos[0]), int(p.pos[1])]
+	return b
+
+
+func _effacer_brouillon() -> void:
+	if FileAccess.file_exists(BROUILLON):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(BROUILLON))
+
+
+# --- Panneau des catégories -----------------------------------------------------------------
+func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}]
+	var res := []
+	match onglet:
+		"chassis":
+			for s in [["acier", "Acier", "léger, peu protégé"], ["blindage", "Blindage", "lourd, blindage 45"], ["", "Gomme", "effacer des cases"]]:
+				var sorte: String = s[0]
+				res.append({"titre": s[1], "detail": "Glisser d'un coin à l'autre : " + s[2], "choisi": outil.chassis == sorte,
+					"action": func(): outil.chassis = sorte, "couleur": Color("#77736A") if sorte == "acier" else (Color("#4C5236") if sorte == "blindage" else Color("#333"))})
+			res.append({"titre": "+ plaque de blindage", "detail": "à l'avant (%d posée%s)" % [int(a.get("plaques", 0)), "s" if int(a.get("plaques", 0)) > 1 else ""],
+				"action": func(): _plaque(1), "couleur": Color("#4C5236")})
+			res.append({"titre": "− plaque de blindage", "detail": "retirer une plaque", "action": func(): _plaque(-1), "couleur": Color("#333")})
+		"essieux":
+			for id in ESSIEUX:
+				var f := Assemblage.piece(id)
+				res.append({"titre": f.nom, "detail": "%d kg max · touchez une colonne (retouchez pour retirer)" % int(f.charge_kg),
+					"choisi": outil.essieux == id, "action": func(): outil.essieux = id, "couleur": Color("#6B6A64")})
+		"roues":
+			for id in TRAINS:
+				var f := Assemblage.piece(id)
+				res.append({"titre": String(f.nom), "detail": "%d kg max · %.1f m/s max · touchez un essieu" % [int(f.charge_kg), float(f.get("vitesse_max", 0))],
+					"choisi": outil.roues == id, "action": func():
+						outil.roues = id
+						_glisse = id, "couleur": Color("#3E3C37")})
+			res.append({"titre": "Démonter la roue", "detail": "touchez un essieu pour lui retirer sa roue", "choisi": outil.roues == "",
+				"action": func(): outil.roues = "", "couleur": Color("#333")})
+		"equipage":
+			var roles := ConstructionLibre.roles_de(a)
+			if roles.is_empty():
+				res.append({"titre": "Aucun siège", "detail": "posez une cabine (onglet Cabines)", "actif": false, "couleur": Color("#333")})
+			for i in roles.size():
+				var k := i
+				var r: String = roles[i]
+				res.append({"titre": "Siège %d : %s" % [i + 1, NOMS_ROLES[r]], "detail": AIDE_ROLES[r],
+					"actif": i > 0, "action": func(): _changer_role(k), "couleur": Color("#5E6238")})
+		_:
+			for it in _palette:
 				var f := Assemblage.piece(it.id)
+				if f.get("famille", "") != onglet:
+					continue
 				var reste := _restant(it.id, int(it.n))
-				var r := Rect2(Vector2(x_bac, y + (k - _page * PAR_PAGE) * 52), Vector2(lw, 46))
-				_cartes.append({"rect": r, "id": it.id, "reste": reste})
-				var c: Color = COULEURS.get(f.famille, Color("#555"))
-				draw_rect(r, Color(c.r, c.g, c.b, 0.35 if reste != 0 else 0.12))
-				draw_rect(r, C_ACCENT if it.id == _sel else Color(1, 1, 1, 0.2), false, 2.0)
 				var detail := ""
 				match f.famille:
 					"moteur": detail = "%d ch" % int(f.puissance_ch)
 					"cabine": detail = "%d place%s%s" % [int(f.sieges), "s" if int(f.sieges) > 1 else "", ", ouverte" if f.ouvert else ""]
 					"arme": detail = String(CombatModele.donnees().armes[f.arme].nom)
-				draw_string(police, r.position + Vector2(10, 20), "%s%s" % [f.nom, "" if reste < 0 else " ×%d" % reste], HORIZONTAL_ALIGNMENT_LEFT, lw - 20, 17, C_TEXTE if reste != 0 else C_DISCRET)
-				draw_string(police, r.position + Vector2(10, 40), "%s · %d×%d cases · %d kg" % [detail, int(f.emprise[0]), int(f.emprise[1]), int(f.get("poids_kg", 0))], HORIZONTAL_ALIGNMENT_LEFT, lw - 20, 14, C_DISCRET)
-			y += PAR_PAGE * 52 + 92
-	# Bilan : ça roule ? et tous les défauts
+					"equipement": detail = "prend %.1f ch au moteur" % float(f.get("puissance_ch", 0))
+				var id: String = it.id
+				res.append({"titre": "%s%s" % [f.nom, "" if reste < 0 else "  ×%d" % reste], "id": id,
+					"detail": "%s · %d×%d cases · %d kg · glissez sur la grille" % [detail, int(f.emprise[0]), int(f.emprise[1]), int(f.get("poids_kg", 0))],
+					"actif": reste != 0, "choisi": _glisse == id, "action": func(): _glisse = id, "couleur": COULEURS.get(f.famille, Color("#555"))})
+			if res.is_empty():
+				res.append({"titre": "Rien en réserve", "detail": "fouillez des épaves ou démontez un véhicule", "actif": false, "couleur": Color("#333")})
+	return res
+
+
+func _changer_role(i: int) -> void:
+	var roles := ConstructionLibre.roles_de(a)
+	var k := ConstructionLibre.ROLES.find(roles[i])
+	roles[i] = ConstructionLibre.ROLES[(k + 1) % ConstructionLibre.ROLES.size()]
+	a.roles = roles
+	_maj()
+
+
+func _plaque(d: int) -> void:
+	a.plaques = maxi(0, int(a.get("plaques", 0)) + d)
+	_maj()
+
+
+# --- Dessin -----------------------------------------------------------------------------------
+func _draw() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), C_FOND)
+	draw_rect(Rect2(_grille.position - Vector2(8, 8), _grille.size + Vector2(16, 16 + 2.2 * _cell)), C_ZONE)
+	for i in _vue.size.x + 1:
+		draw_line(_grille.position + Vector2(i * _cell, 0), _grille.position + Vector2(i * _cell, _grille.size.y), C_GRILLE, 1.0)
+	for j in _vue.size.y + 1:
+		draw_line(_grille.position + Vector2(0, j * _cell), _grille.position + Vector2(_grille.size.x, j * _cell), C_GRILLE, 1.0)
+	draw_rect(_grille, C_CADRE, false, 2.0)
+
+
+# Au-dessus du dessin du véhicule : repères, pièce tenue, rectangle tracé, panneau, bilan
+func _dessiner_dessus() -> void:
+	var c := _dessus
+	var police := get_theme_default_font()
+	var det: Dictionary = _an.get("detail", {})
+	if det.has("sol"):
+		c.draw_line(_px(_vue.position.x, det.sol), _px(_vue.end.x, det.sol), C_SOL, 3.0)
+	# Contour léger des pièces posées (pour les reprendre au doigt)
+	for p in a.get("pieces", []):
+		var e: Array = Assemblage.piece(String(p.piece)).emprise
+		var r := Rect2(_px(int(p.pos[0]), int(p.pos[1]) + int(e[1])), Vector2(int(e[0]), int(e[1])) * _cell)
+		c.draw_rect(r, Color(1, 1, 1, 0.18), false, 1.5)
+	# Essieux sans roue : un moyeu nu à monter
+	for e in ConstructionLibre.essieux_nus(a):
+		var ctr := _px(int(e.x) + 0.5, ConstructionLibre.y_essieu(a, int(e.x)))
+		c.draw_circle(ctr, _cell * 0.28, Color("#C9C6BC"))
+		c.draw_arc(ctr, _cell * 0.9, 0, TAU, 24, Color(C_ACCENT, 0.8), 2.0)
+	# Charge sous chaque essieu
+	for d in det.get("essieux", []):
+		var ctr := _px(float(d.x) + 0.5, float(d.y) - float(d.r))
+		if d.has("charge"):
+			var sur: bool = float(d.charge) > float(d.capacite)
+			c.draw_string(police, ctr + Vector2(-60, 26), "%.1f/%.0f t" % [float(d.charge) / 1000.0, float(d.capacite) / 1000.0], HORIZONTAL_ALIGNMENT_CENTER, 120, 16, C_ROUGE if sur else C_DISCRET)
+		elif not d.get("touche", true):
+			c.draw_string(police, ctr + Vector2(-60, 26), "en l'air", HORIZONTAL_ALIGNMENT_CENTER, 120, 18, C_ROUGE)
+	if det.has("cg"):
+		var cg := _px(det.cg.x, det.cg.y)
+		c.draw_circle(cg, 9.0, Color(1, 1, 1, 0.9))
+		c.draw_line(cg - Vector2(12, 0), cg + Vector2(12, 0), Color.BLACK, 2.0)
+		c.draw_line(cg - Vector2(0, 12), cg + Vector2(0, 12), Color.BLACK, 2.0)
+	# Rectangle de châssis en cours
+	if onglet == "chassis" and _rect0.x > -99:
+		var x0 := mini(_rect0.x, _rect1.x)
+		var r := Rect2(_px(x0, maxi(_rect0.y, _rect1.y) + 1), Vector2(absi(_rect1.x - _rect0.x) + 1, absi(_rect1.y - _rect0.y) + 1) * _cell)
+		c.draw_rect(r, Color(C_ROUGE, 0.25) if outil.chassis == "" else Color(C_ACCENT, 0.3))
+		c.draw_rect(r, C_ACCENT, false, 3.0)
+		c.draw_string(police, r.position + Vector2(6, -10), "%d × %d cases (%.2f × %.2f m)" % [int(r.size.x / _cell), int(r.size.y / _cell),
+			r.size.x / _cell * ConstructionLibre.C, r.size.y / _cell * ConstructionLibre.C], HORIZONTAL_ALIGNMENT_LEFT, -1, 20, C_TEXTE)
+	# Pièce tenue : son vrai dessin est déjà sur la grille ; ici le cadre vert (posable) ou rouge (non)
+	if _glisse != "" and onglet != "roues" and _dans_grille(_doigt):
+		var e: Array = Assemblage.piece(_glisse).emprise
+		var q := _cible(_doigt, _glisse)
+		var ok := not _candidat().is_empty()
+		var r := Rect2(_px(q.x, q.y + int(e[1])), Vector2(int(e[0]), int(e[1])) * _cell)
+		if not ok:
+			c.draw_rect(r, Color(C_ROUGE, 0.35))
+		c.draw_rect(r, C_VERT if ok else C_ROUGE, false, 3.0)
+	elif _glisse != "" and _appui:
+		var f := Assemblage.piece(_glisse)
+		c.draw_string(police, _doigt + Vector2(-80, -40), String(f.nom), HORIZONTAL_ALIGNMENT_CENTER, 160, 22, C_ACCENT)
+	# Aide ou message, sous la barre du haut
+	var aides := {"chassis": "Glissez d'un coin à l'autre pour tracer un rectangle de châssis.",
+		"essieux": "Touchez une colonne : l'essieu se fixe sous le châssis. Montez ensuite la roue.",
+		"roues": "Choisissez une roue ou une chenille, puis touchez (ou glissez sur) un essieu.",
+		"equipage": "Siège 1 : le conducteur. Touchez les autres sièges pour choisir leur rôle."}
+	var txt: String = _message if _msg_t > 0.0 else String(aides.get(onglet, "Glissez une pièce sur la grille. Touchez une pièce posée pour la déplacer."))
+	c.draw_string(police, Vector2(_grille.position.x, _grille.position.y - 18), txt, HORIZONTAL_ALIGNMENT_LEFT, _panneau.position.x - _grille.position.x - 20.0,
+		22, C_ACCENT if _msg_t > 0.0 else C_DISCRET)
+	_dessiner_panneau(c, police)
+	_dessiner_bilan(c, police)
+
+
+func _dessiner_panneau(c: Control, police: Font) -> void:
+	_cartes.clear()
+	var items := _items()
+	var y0 := _panneau.position.y + 152.0
+	var place := int((_panneau.end.y - 76.0 - y0) / (CARTE_H + 8.0))
+	_page = clampi(_page, 0, maxi(0, (items.size() - 1) / maxi(1, place)))
+	_btn_bas.disabled = (_page + 1) * place >= items.size()
+	_btn_haut.visible = items.size() > place
+	_btn_bas.visible = items.size() > place
+	for k in range(_page * place, mini(items.size(), (_page + 1) * place)):
+		var it: Dictionary = items[k]
+		var actif: bool = it.get("actif", true)
+		var r := Rect2(Vector2(_panneau.position.x, y0 + (k - _page * place) * (CARTE_H + 8.0)), Vector2(_panneau.size.x, CARTE_H))
+		_cartes.append({"rect": r, "action": it.get("action", func(): pass), "actif": actif})
+		var col: Color = it.get("couleur", Color("#555"))
+		c.draw_rect(r, Color(col.r, col.g, col.b, 0.4 if actif else 0.12))
+		c.draw_rect(r, C_ACCENT if it.get("choisi", false) else Color(1, 1, 1, 0.2), false, 3.0 if it.get("choisi", false) else 1.5)
+		c.draw_string(police, r.position + Vector2(14, 34), String(it.titre), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 24, 24, C_TEXTE if actif else C_DISCRET)
+		c.draw_string(police, r.position + Vector2(14, 66), String(it.detail), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 24, 17, C_DISCRET)
+
+
+func _dessiner_bilan(c: Control, police: Font) -> void:
+	var x := _grille.position.x
+	var lw := _panneau.position.x - x - 24.0
+	var y := size.y - float(_mg.get("b", 20.0)) - 96.0
 	if not _an.get("ok", false):
 		for d in _an.get("erreurs", []):
-			draw_string(police, Vector2(x_bac, y), "• " + String(d.texte) + (" (étape 3)" if d.code == "cabine" else (" (étape 1)" if d.code == "chassis" else "")), HORIZONTAL_ALIGNMENT_LEFT, lw, 17, C_ROUGE)
-			y += 22
+			c.draw_string(police, Vector2(x, y), "• " + String(d.texte), HORIZONTAL_ALIGNMENT_LEFT, lw, 22, C_ROUGE)
+			y += 28
 		return
 	var s: Dictionary = _an.stats
 	var det: Dictionary = _an.detail
 	var roule := float(s.vitesse) > 0.0
-	draw_string(police, Vector2(x_bac, y), ("Roule : %.1f m/s" % s.vitesse) if roule else "Ne roule pas", HORIZONTAL_ALIGNMENT_LEFT, lw, 20, C_VERT if roule else C_ROUGE)
-	y += 22
-	draw_string(police, Vector2(x_bac, y), "%d kg · %.0f ch/t · blindage %d · %d place%s · %d arme%s" % [int(s.poids_kg), det.ch_t, int(s.blindage),
-		int(s.equipage), "s" if int(s.equipage) > 1 else "", s.armes.size(), "s" if s.armes.size() > 1 else ""], HORIZONTAL_ALIGNMENT_LEFT, lw, 15, C_DISCRET)
-	y += 20
+	var tireurs := ConstructionLibre.roles_de(a).count("tireur")
+	var requis := ConstructionLibre.tireurs_requis(a)
+	c.draw_string(police, Vector2(x, y), ("Roule : %.1f m/s" % s.vitesse) if roule else "Ne roule pas", HORIZONTAL_ALIGNMENT_LEFT, 260, 24, C_VERT if roule else C_ROUGE)
+	var ligne := "%d kg · %.0f ch/t · conso %.1f L/km · blindage %d · %d place%s · tireurs %d/%d" % [int(s.poids_kg), det.ch_t, float(s.conso) * 10.0,
+		int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else "", tireurs, requis]
 	var cout: float = m.cout_grille(uid, a)
 	if cout > 0.0:
-		draw_string(police, Vector2(x_bac, y), "Coût : %d métal (stock %d)" % [int(ceil(cout)), int(m.stocks.metal)], HORIZONTAL_ALIGNMENT_LEFT, lw, 15, C_ACCENT)
-		y += 20
-	for d in _an.defauts.slice(0, 5):
-		draw_string(police, Vector2(x_bac, y), "• " + String(d.texte), HORIZONTAL_ALIGNMENT_LEFT, lw, 15, C_ROUGE if d.grave else C_ACCENT)
-		y += 19
+		ligne += " · coût %d métal (stock %d)" % [int(ceil(cout)), int(m.stocks.metal)]
+	c.draw_string(police, Vector2(x + 270, y), ligne, HORIZONTAL_ALIGNMENT_LEFT, lw - 270, 19, C_ACCENT if tireurs < requis else C_DISCRET)
+	y += 30
+	for d in _an.defauts.slice(0, 3):
+		c.draw_string(police, Vector2(x, y), "• " + String(d.texte), HORIZONTAL_ALIGNMENT_LEFT, lw, 19, C_ROUGE if d.grave else C_ACCENT)
+		y += 24

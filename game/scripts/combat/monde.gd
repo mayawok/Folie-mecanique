@@ -33,6 +33,7 @@ class Pieton:
 	var arme := {"cd": 1.0}
 	var morsure := 2.5
 	var dir := -1.0
+	var ecrase_t := 0.0
 
 	func actif() -> bool:
 		return statut == "actif"
@@ -97,7 +98,8 @@ func _generer_carte() -> void:
 
 func niveau_a(x: float) -> int:
 	var R: Dictionary = CombatModele.donnees().rencontres
-	return int(secteurs[secteur].niveau) + int(maxf(0.0, x - x_entree) / R.palier_m)
+	var bonus := 5 if m.bac_a_sable else 0   # bac à sable : les chars arrivent vite (DEC-053)
+	return int(secteurs[secteur].niveau) + bonus + int(maxf(0.0, x - x_entree) / R.palier_m)
 
 
 func en_transit() -> bool:
@@ -346,7 +348,31 @@ func _cible_pieton(p: Pieton):
 	return meilleur
 
 
+# Écrasement (DEC-049) : un véhicule en marche qui passe sur un fantassin ou un animal le blesse ou le tue
+func _ecrasements(dt: float) -> void:
+	var E: Dictionary = m.donnees().ecrasement
+	var vit := absf(m.vitesse_convoi)
+	if vit < float(E.vitesse_min):
+		return
+	for p in pietons:
+		if not p.actif() or p.camp != "ennemi":
+			continue
+		p.ecrase_t = maxf(0.0, p.ecrase_t - dt)
+		if p.ecrase_t > 0.0:
+			continue
+		for v in m.convoi:
+			if v.actif() and v.garage == 0 and CombatModele.ecart(p.x, p.longueur, v.x, v.longueur) <= 0.3:
+				var t := float(v.profil.get("poids_kg", 1500.0)) / 1000.0
+				p.ecrase_t = 1.2
+				m.evt({"t": "ecrase", "x": p.x, "animal": p.animal})
+				toucher_pieton(p, {"degats": t * vit * float(E.k)})
+				if p.actif():
+					p.x += signf(p.x - (v.x + v.longueur * 0.5)) * 1.5   # projeté sur le côté
+				break
+
+
 func _pietons(dt: float) -> void:
+	_ecrasements(dt)
 	for p in pietons:
 		p.x_prev = p.x
 		if not p.actif():
@@ -397,6 +423,8 @@ func _assauts(dt: float) -> void:
 	if _assaut_t > 0.0 or vivants() >= 6:
 		return
 	_assaut_t = 22.0 if a_abri() else 34.0
+	if not a_abri() and m.convoi.any(func(v): return v.actif() and int(v.profil.get("phares", 0)) > 0):
+		_assaut_t /= float(m.donnees().phares.attire)   # les phares se voient de loin (DEC-048)
 	var niv: int = niveau_a(m.x_tete)
 	var devant: bool = m.rng.randf() < 0.6
 	var x0: float = m.x_tete + 80.0 if devant else m.x_tete - 70.0

@@ -93,3 +93,11 @@ Garder **la même voix** pour toutes les répliques du jeu.
 | `voix_pillards.mp3` | Text to Speech | `Contact ! Des pillards sur la route !` |
 
 Les voix du récit (système 8) seront listées une fois les moments narratifs écrits.
+
+## Musique de fin — convoi anéanti (DEC-055)
+
+Fichier : `game/assets/audio/mus_fin.mp3` (outil **Music**, 60 à 90 s, sans boucle). Prompt à coller :
+
+```
+Slow, desolate desert lament for the end of a post-apocalyptic 1940s road journey. Sparse, wide and dusty: a lone oud or fretless guitar with long reverb, low wind-like drones, distant frame drum heartbeat, and a wordless human choir — a solo female voice humming and a few low male voices chanting softly, as if heard from far away across sand dunes. Melancholic, dignified, mysterious, not epic. No modern synths, no lyrics, no percussion build-up. Fades out slowly at the end. 70 BPM, D minor.
+```

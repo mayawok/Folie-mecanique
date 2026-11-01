@@ -14,7 +14,8 @@ extends RefCounted
 
 const C := 0.25          # côté d'une cellule (m)
 const TOLERANCE := 0.5   # débattement de suspension (cellules) : une roue à moins de 12,5 cm du sol porte encore
-const FAMILLES_PIECES := ["moteur", "cabine", "arme"]
+const FAMILLES_PIECES := ["moteur", "cabine", "arme", "equipement"]
+const ROLES := ["tireur", "chargeur", "chef", "mecanicien", "infirmier", "passager"]   # le siège 1 est le conducteur (DEC-050)
 
 
 static func R() -> Dictionary:
@@ -82,6 +83,8 @@ static func y_essieu(a: Dictionary, x: int) -> int:
 static func _essieux(a: Dictionary) -> Array:   # triés par x : [{x, piece, train, y, r, fiche_e, fiche_t}]
 	var res := []
 	for e in a.get("essieux", []):
+		if String(e.get("train", "")) == "":
+			continue   # essieu posé, roue pas encore montée (DEC-051)
 		var x := int(e.x)
 		var ft := Assemblage.piece(String(e.train))
 		res.append({"x": x, "piece": String(e.piece), "train": String(e.train), "y": float(y_essieu(a, x)),
@@ -121,6 +124,22 @@ static func poser_essieu(a: Dictionary, x: int, essieu_id: String, train_id: Str
 	var b := retirer_essieu(a, x)
 	b.essieux.append({"x": x, "piece": essieu_id, "train": train_id})
 	return b
+
+
+# Monte (train_id) ou démonte ("") la roue ou la chenille de l'essieu de la colonne x. {} s'il n'y a pas d'essieu.
+static func monter_train(a: Dictionary, x: int, train_id: String) -> Dictionary:
+	if essieu_en(a, x).is_empty():
+		return {}
+	var b := a.duplicate(true)
+	for e in b.essieux:
+		if int(e.x) == x:
+			e.train = train_id
+	return b
+
+
+# Essieux sans roue (affichage et défaut)
+static func essieux_nus(a: Dictionary) -> Array:
+	return a.get("essieux", []).filter(func(e): return String(e.get("train", "")) == "")
 
 
 static func retirer_essieu(a: Dictionary, x: int) -> Dictionary:
@@ -220,7 +239,9 @@ static func cout_metal(a: Dictionary) -> float:
 		if cases[c] != "origine":
 			t += float(_sorte(a, cases[c]).metal)
 	for e in a.get("essieux", []):
-		t += float(Assemblage.piece(String(e.piece)).get("metal", 0)) + float(Assemblage.piece(String(e.train)).get("metal", 0))
+		t += float(Assemblage.piece(String(e.piece)).get("metal", 0))
+		if String(e.get("train", "")) != "":
+			t += float(Assemblage.piece(String(e.train)).get("metal", 0))
 	return t
 
 
@@ -273,6 +294,10 @@ static func analyser(a: Dictionary) -> Dictionary:
 		pv.suspension += float(e.fiche_e.pv)
 		pv.roulement += float(e.fiche_t.pv)
 		metal += (float(e.fiche_e.metal) + float(e.fiche_t.metal)) * 0.5
+	for e in essieux_nus(a):
+		var fe := Assemblage.piece(String(e.piece))
+		masses.append([float(fe.poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
+		_defaut(defauts, "sans_roue", "Essieu sans roue (colonne %d) : montez une roue ou une chenille" % int(e.x))
 	var plaques := int(a.get("plaques", 0))
 	var PL: Dictionary = Assemblage.catalogue().regles.plaque
 	var x_avant := 0.0
@@ -385,16 +410,33 @@ static func analyser(a: Dictionary) -> Dictionary:
 	var conso := 0.0
 	var sieges := 0
 	var ouvert := false
+	var n_moteurs := 0
+	var phares := 0
+	var ch_phares := 0.0
 	for p in pieces:
 		match p.fiche.get("famille", ""):
 			"moteur":
 				puissance += float(p.fiche.puissance_ch)
 				conso += float(p.fiche.conso)
 				pv.moteur += float(p.fiche.pv)
+				n_moteurs += 1
+			"equipement":
+				if p.id == "phares":
+					phares += 1
+					ch_phares += float(p.fiche.get("puissance_ch", 0))
 			"cabine":
 				sieges += int(p.fiche.sieges)
 				ouvert = ouvert or bool(p.fiche.ouvert)
 				pv.cabine += float(p.fiche.pv)
+	# Plusieurs moteurs couplés (DEC-047) : rendement en baisse, consommation qui explose
+	if n_moteurs > 1:
+		var MM: Dictionary = RL.get("moteurs_multiples", {"rendement": 0.85, "conso_k": 0.6})
+		puissance *= pow(float(MM.rendement), n_moteurs - 1)
+		conso *= 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)
+		_defaut(defauts, "moteurs", "%d moteurs couplés : rendement ×%.2f, consommation ×%.1f" % [n_moteurs,
+			pow(float(MM.rendement), n_moteurs - 1), 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)], n_moteurs > 2)
+	# Phares (DEC-048) : la dynamo prend un peu de puissance au moteur
+	puissance = maxf(0.0, puissance - ch_phares)
 	var tonnes := M / 1000.0
 	var ch_t := puissance / maxf(tonnes, 0.001)
 	if immobile == "":
@@ -427,7 +469,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		if w.masquee:
 			_defaut(defauts, "masquee", "%s : tir masqué par une pièce ou le châssis" % w.fiche.nom, true)
 		elif not w.servie:
-			_defaut(defauts, "servant", "%s : pas de place pour un servant" % w.fiche.nom)
+			_defaut(defauts, "servant", "%s : aucun tireur, elle ne tirera pas" % w.fiche.nom, true)
 		else:
 			armes.append(String(w.fiche.arme))
 			var req := float(RL.recul_t.get(String(w.fiche.arme), 0.0))
@@ -440,10 +482,13 @@ static func analyser(a: Dictionary) -> Dictionary:
 	if immobile != "":
 		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
+	var roles := roles_de(a)
 	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size(), "metal": int(round(metal)),
 		"equipage": sieges, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
-		"precision": precision, "immobile": immobile}
+		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
+		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
+		"infirmiers": roles.count("infirmier")}
 	if a.has("origine"):
 		var ch := Assemblage.piece(String(a.origine.chassis))
 		stats.reservoir = maxf(stats.reservoir, float(ch.get("reservoir", 0)))
@@ -465,7 +510,7 @@ static func armes_ordonnees(a: Dictionary) -> Array:
 	for p in _pieces(a):
 		if p.fiche.get("famille", "") == "cabine":
 			sieges += int(p.fiche.sieges)
-	var places := maxi(1, sieges - 1) if sieges > 0 else 0
+	var tireurs := roles_de(a).count("tireur")
 	var res := []
 	for p in _pieces(a):
 		if p.fiche.get("famille", "") != "arme":
@@ -478,13 +523,110 @@ static func armes_ordonnees(a: Dictionary) -> Array:
 			var y: int = p.pos.y + p.e.y - 1
 			masquee = occ.has(Vector2i(p.pos.x + p.e.x, y))
 		res.append({"place": p, "fiche": p.fiche, "masquee": masquee, "servie": false})
+	# Un tireur sert un canon (ou un mortier) et une mitrailleuse coaxiale, sinon une seule arme (DEC-050)
+	var coax := 0
 	for w in res:
-		if not w.masquee and places > 0:
+		if not w.masquee and _gros_calibre(w) and tireurs > 0:
 			w.servie = true
-			places -= 1
+			tireurs -= 1
+			if String(w.fiche.arme) != "mortier":
+				coax += 1
+	for w in res:
+		if not w.masquee and not _gros_calibre(w):
+			if coax > 0:
+				w.servie = true
+				coax -= 1
+			elif tireurs > 0:
+				w.servie = true
+				tireurs -= 1
 	var servies := res.filter(func(w): return w.servie)
 	servies.append_array(res.filter(func(w): return not w.servie))
 	return servies
+
+
+static func _gros_calibre(w: Dictionary) -> bool:
+	var id := String(w.fiche.arme)
+	return id.begins_with("canon") or id == "mortier"
+
+
+static func sieges_de(a: Dictionary) -> int:
+	var n := 0
+	for p in _pieces(a):
+		if p.fiche.get("famille", "") == "cabine":
+			n += int(p.fiche.sieges)
+	return n
+
+
+# Rôle de chaque siège (DEC-050). Siège 1 : conducteur. Sans choix du joueur (anciens véhicules) : tous tireurs.
+static func roles_de(a: Dictionary) -> Array:
+	var n := sieges_de(a)
+	var choix: Array = a.get("roles", [])
+	var res := []
+	for i in n:
+		if i == 0:
+			res.append("conducteur")
+		elif i < choix.size() and String(choix[i]) in ROLES:
+			res.append(String(choix[i]))
+		else:
+			res.append("tireur")
+	return res
+
+
+# Nombre de tireurs nécessaires pour servir toutes les armes non masquées
+static func tireurs_requis(a: Dictionary) -> int:
+	var canons := 0
+	var mortiers := 0
+	var mg := 0
+	for p in _pieces(a):
+		if p.fiche.get("famille", "") == "arme":
+			if String(p.fiche.arme) == "mortier":
+				mortiers += 1
+			elif _gros_calibre({"fiche": p.fiche}):
+				canons += 1
+			else:
+				mg += 1
+	return canons + mortiers + maxi(0, mg - canons)   # une mitrailleuse coaxiale par canon, pas sur un mortier
+
+
+# Nom proposé d'après la construction (le joueur peut le changer)
+static func nom_propose(a: Dictionary) -> String:
+	var an := analyser(a)
+	if not an.ok:
+		return "Frankenstein"
+	var s: Dictionary = an.stats
+	var t := float(s.poids_kg) / 1000.0
+	var chenilles := false
+	for e in _essieux(a):
+		chenilles = chenilles or e.fiche_t.get("type", "") == "chenilles"
+	var armes: Array = s.armes
+	var canon := armes.any(func(w): return String(w).begins_with("canon"))
+	var base := ""
+	if int(s.moteurs) > 2 or t > 45.0:
+		base = "Mastodonte"
+	elif chenilles and canon:
+		base = "Char lourd" if t > 25.0 else "Char"
+	elif chenilles and armes.has("mortier"):
+		base = "Porte-mortier chenillé"
+	elif chenilles:
+		base = "Chenillette" if t < 8.0 else "Porte-chenilles"
+	elif canon:
+		base = "Auto-canon"
+	elif armes.has("mortier"):
+		base = "Porte-mortier"
+	elif armes.has("lance_flammes"):
+		base = "Brûleur"
+	elif not armes.is_empty():
+		base = "Auto-mitrailleuse" if t < 4.0 else "Camion armé"
+	else:
+		base = "Éclaireur" if t < 2.0 else "Camion"
+	var surnoms := ["la Bricole", "le Rafistolé", "la Ferraille", "le Boiteux", "la Chimère", "le Sanglier", "la Rouille", "le Grognard", "la Teigne", "le Cafard"]
+	return "%s « %s »" % [base, surnoms[absi(hash(signature_forme(a))) % surnoms.size()]]
+
+
+static func signature_forme(a: Dictionary) -> String:
+	var b := a.duplicate(true)
+	b.nom = ""
+	return signature(b)
 
 
 # --- Conversion d'un véhicule historique (pour ouvrir sa grille) ---------------------------------
@@ -649,7 +791,7 @@ static func forme(a: Dictionary) -> Dictionary:
 		if wid == "mortier":
 			formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x - 0.05, r.position.y + 0.08], [r.position.x + 0.05, r.position.y + 0.08]], "c": "metal", "z": 1})
 			armes.append({"type": "mortier", "x": r.get_center().x - 0.1, "y": r.position.y + 0.08, "long": maxf(0.6, r.size.y * 1.1), "ep": 0.1})
-		elif wid.begins_with("mitrailleuse"):
+		elif wid.begins_with("mitrailleuse") or wid == "lance_flammes":
 			armes.append({"type": "mitrailleuse", "x": r.position.x + 0.2, "y": r.position.y, "pied": maxf(0.12, r.size.y - 0.1), "long": maxf(1.0, r.size.x * 1.2), "ep": 0.05})
 		else:
 			var tw := minf(r.size.x * 0.45, 2.0)
@@ -662,7 +804,12 @@ static func forme(a: Dictionary) -> Dictionary:
 		formes.append({"ligne": [[X.call(x1) - 0.05 - 0.07 * k, Y.call(sol + 1.0)], [X.call(x1) - 0.05 - 0.07 * k, Y.call(sol + 4.0)]], "ep": 0.05, "c": "metal", "z": 2})
 	var M: float = an.stats.get("poids_kg", 1000.0) if an.ok else 1000.0
 	var moteur := ("char" if M > 20000.0 else "char_leger") if not chenille.is_empty() else ("voiture" if M < 1800.0 else "camion")
-	var res := {"nom": String(a.get("nom", "Frankenstein")), "longueur": maxf(0.5, (x1 - x0) * C), "hauteur": maxf(0.5, (y1 - sol) * C),
+	for p in _pieces(a):
+		if p.id == "phares":
+			var rp := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
+			formes.append({"pts": _poly_cercle(rp.get_center().x, rp.get_center().y, C * 0.38, 10), "c": "metal", "z": 2})
+			formes.append({"pts": _poly_cercle(rp.get_center().x + C * 0.06, rp.get_center().y, C * 0.24, 8), "c": "vitre", "z": 2})
+	var res := {"x0": x0, "sol": sol, "nom": String(a.get("nom", "Frankenstein")), "longueur": maxf(0.5, (x1 - x0) * C), "hauteur": maxf(0.5, (y1 - sol) * C),
 		"teinte": "joueur", "moteur": moteur, "course": 0.09, "fiche": "Véhicule construit sur la grille.",
 		"roues": roues, "formes": formes, "armes": armes, "equipage": equipage}
 	if not chenille.is_empty():
@@ -677,7 +824,7 @@ static func signature(a: Dictionary) -> String:
 	cs.sort()
 	var es := []
 	for e in a.get("essieux", []):
-		es.append("%d:%s:%s" % [int(e.x), e.piece, e.train])
+		es.append("%d:%s:%s" % [int(e.x), e.piece, e.get("train", "")])
 	es.sort()
 	var ps := []
 	for p in a.get("pieces", []):

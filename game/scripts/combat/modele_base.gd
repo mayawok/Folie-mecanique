@@ -139,6 +139,8 @@ class Veh extends RefCounted:
 			f *= E.suspension_bas_precision
 		if not piece_ok("cabine"):
 			f *= E.cabine_hs_precision
+		if bool(profil.get("chef", false)):
+			f *= float(CombatModele.donnees().equipage_roles.chef_precision)   # chef de char (DEC-050)
 		return f * float(profil.get("precision", 1.0))   # construction libre : recul, instabilité (DEC-043)
 
 	func bord_avant() -> float:

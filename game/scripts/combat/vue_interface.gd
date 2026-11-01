@@ -7,31 +7,67 @@ var _btn_continuer: Button
 
 # --- Construction ----------------------------------------------------------
 func _construire_interface() -> void:
+	var debut := get_child_count()
+	_construire_elements()
+	_ui_noeuds = get_children().slice(debut)
+	_appliquer_marges()
+	resized.connect(_appliquer_marges)
+
+
+# Décale l'interface hors des bords (encoche, Dynamic Island, coins, confort des pouces) : DEC-056.
+# Les offsets d'origine sont gardés en métadonnée : on peut réappliquer à chaque changement de taille.
+func _appliquer_marges() -> void:
+	_mg = ZonesSures.marges(size)
+	for c in _ui_noeuds:
+		_decaler(c)
+
+
+func _decaler(c) -> void:
+	if not (c is Control):
+		return
+	if c is ColorRect and c.anchor_left == 0.0 and c.anchor_right == 1.0 and c.anchor_top == 0.0 and c.anchor_bottom == 1.0:
+		for e in c.get_children():   # voile plein écran : le fond reste, le contenu s'écarte des bords
+			_decaler(e)
+		return
+	if not c.has_meta("o0"):
+		c.set_meta("o0", [c.offset_left, c.offset_top, c.offset_right, c.offset_bottom])
+	var o: Array = c.get_meta("o0")
+	var dx_g: float = _mg.g if c.anchor_left == 0.0 else (-_mg.d if c.anchor_left == 1.0 else 0.0)
+	var dx_d: float = _mg.g if c.anchor_right == 0.0 else (-_mg.d if c.anchor_right == 1.0 else 0.0)
+	var dy_h: float = _mg.h if c.anchor_top == 0.0 else (-_mg.b if c.anchor_top == 1.0 else 0.0)
+	var dy_b: float = _mg.h if c.anchor_bottom == 0.0 else (-_mg.b if c.anchor_bottom == 1.0 else 0.0)
+	c.offset_left = o[0] + dx_g
+	c.offset_top = o[1] + dy_h
+	c.offset_right = o[2] + dx_d
+	c.offset_bottom = o[3] + dy_b
+
+
+func _construire_elements() -> void:
 	# --- Bandeau du haut
 	var haut := _panneau(self)
 	haut.set_anchors_and_offsets_preset(PRESET_TOP_WIDE)
 	var hb := HBoxContainer.new()
-	hb.add_theme_constant_override("separation", 14)
+	hb.add_theme_constant_override("separation", 8)
 	haut.add_child(hb)
 	for k in [["ammo", "Munitions", "#E8C25A"], ["fuel_l", "Carburant", "#E8A33D"], ["metal", "Métal", "#9FB3BD"], ["pieces", "Pièces", "#8CC152"]]:
-		var l := _label("", hb, 24, Color(k[2]))
+		var l := _label("", hb, 21, Color(k[2]))
 		_chips[k[0]] = [l, k[1]]
 	var esp := Control.new()
 	esp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp)
-	_lbl_dist = _label("", hb, 26)
+	_lbl_dist = _label("", hb, 22)
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
 	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), hb, 190)
 	_btn_atelier.visible = false
-	_btn_nouveau = _bouton("Nouveau véhicule", func(): _ouvrir_editeur(0), hb, 250)
+	_btn_nouveau = _bouton("Nouveau véhicule", func(): _ouvrir_editeur(0), hb, 200)
 	_btn_nouveau.visible = false
-	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 170)
+	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 150)
 	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
-	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 130)
+	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
 	for v in [1, 2, 3]:
-		var b := _bouton("x%d" % v, func(): vitesse_sim = v, hb, 68)
+		var b := _bouton("x%d" % v, func(): vitesse_sim = v, hb, 60)
 		b.toggle_mode = true
 		_btns_vitesse.append(b)
 	_lbl_quete = _label("", self, 22, C_ACCENT)
@@ -333,6 +369,8 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> v
 	pause = false
 	_n_journal = -1
 	selection = m.convoi[0].uid if not m.convoi.is_empty() else 0
+	_fin_t = 0.0
+	_fin_son = false
 	_voile_fin.visible = false
 	terrain.camera_x = m.convoi.back().x if not m.convoi.is_empty() else 0.0
 	ppm = 34.0
@@ -609,7 +647,13 @@ func _maj_interface() -> void:
 		_btn_demonter.disabled = m.raison_demontage(sel.uid) != "" and not travaille
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
-	_voile_fin.visible = m.fini
+	if m.fini and not _fin_son:
+		_fin_son = true
+		var so := get_node_or_null("/root/Son")
+		if so:   # musique du désert avec voix (ElevenLabs, à produire : mus_fin) ; en attendant, celle du menu
+			so.moteur("")
+			so.musique("mus_fin" if ResourceLoader.exists("res://assets/audio/mus_fin.mp3") else "mus_menu")
+	_voile_fin.visible = m.fini and _fin_t > 5.0   # d'abord le dézoom, puis le bilan (DEC-055)
 	# Alertes : vague ennemie, camps annoncés, nuit, embuscade
 	var al: Dictionary = m.alerte()
 	var w = m.monde
@@ -716,7 +760,7 @@ func _maj_interface() -> void:
 		var hf: float = 2.0 if cf is CombatModele.Veh else cf.hauteur
 		var cx: float = _rx(cf) + cf.longueur * 0.5
 		_btn_fouille.text = "Fouiller : %s" % cf.nom
-		_btn_fouille.position = Vector2(clampf(terrain.ecran_x(cx) - 130.0, 10.0, size.x - 270.0), maxf(150.0, _sy(cx) - (hf + 1.3) * ppm - 90.0))
+		_btn_fouille.position = Vector2(clampf(terrain.ecran_x(cx) - 130.0, _mg.g, size.x - 260.0 - _mg.d), maxf(150.0, _sy(cx) - (hf + 1.3) * ppm - 90.0))
 	if _voile_surv.visible:
 		_maj_survivants()
 	# Carte

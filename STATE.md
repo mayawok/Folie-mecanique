@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phares, écrasement, lance-flammes). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
@@ -17,9 +17,16 @@ Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fich
 - **Refonte de la grille le 01/11** (DEC-043 à 046) : châssis peint case par case, essieux, roues de trois tailles ou chenilles,
   moteurs, cabines, armes (mitrailleuse, canons, **mortier**) ; tout compatible, mauvais résultats calculés ; grille ouverte
   à tout moment (jeu en pause) ; **menu principal avec Bac à sable**.
+- **Retours iPhone du 01/11 après-midi** (DEC-047 à DEC-061) : interface écartée des bords (iPhone 14 Pro Max+), grille agrandie
+  et centrée, châssis en rectangles, essieu puis roue, onglets par catégorie, vrai dessin pendant le glisser, nom proposé et
+  modifiable, rôles d'équipage avec avertissement, phares, méga-char pénalisé, écrasement, lance-flammes, trajectoires réalistes,
+  épave sans roues, dézoom de fin, brouillon de grille, rendu limité à 2 px/pt contre les rechargements.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
+
+- **iPhone** : boutons atteignables, taille des cases de la grille, rechargements moins fréquents, écran « Tournez le téléphone » (DEC-056, 059).
+- Coller les 3 prompts de `docs/art/prompts/grille_pieces.md` dans ChatGPT ; produire `mus_fin` (`docs/audio/ELEVENLABS.md`).
 
 - **Son iPhone** (DEC-030, renforcé par DEC-041) : non vérifiable hors appareil. Tester en mode normal puis silencieux.
 - Jouer la tempête, les mines et la grange : valeurs à régler dans `combat_proto.json` (`tempete`, `mines_champs`, `demontage`).
@@ -35,9 +42,10 @@ Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fich
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet essaie le **Bac à sable** (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
-3. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
-4. Godot 4.6, puis essai d'export iOS dans le nuage.
+2. Coder le lore des marchands sur châssis de char et des villes traversées (DEC-061) ; intégrer les visuels de la grille.
+3. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
+4. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
+5. Godot 4.6, puis essai d'export iOS dans le nuage.
 
 ## Carte du dépôt
 

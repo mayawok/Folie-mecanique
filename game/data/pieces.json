@@ -78,12 +78,23 @@
     "canon_leger": 2,
     "canon_75": 6,
     "canon_88": 12,
-    "mortier": 1.5
+    "mortier": 1.5,
+    "lance_flammes": 0
    },
    "palette": [
     "moteur",
     "cabine",
-    "arme"
+    "arme",
+    "equipement"
+   ],
+   "moteurs_multiples": {
+    "_note": "DEC-047 : chaque moteur en plus perd du rendement (couplage) et fait exploser la consommation.",
+    "rendement": 0.85,
+    "conso_k": 0.6
+   },
+   "grille_vue_min": [
+    24,
+    10
    ]
   }
  },
@@ -993,6 +1004,29 @@
     2
    ],
    "metal": 2
+  },
+  "arme_lance_flammes": {
+   "famille": "arme",
+   "nom": "Lance-flammes",
+   "arme": "lance_flammes",
+   "poids_kg": 90,
+   "emprise": [
+    3,
+    1
+   ],
+   "metal": 2
+  },
+  "phares": {
+   "famille": "equipement",
+   "nom": "Phares",
+   "poids_kg": 12,
+   "emprise": [
+    1,
+    1
+   ],
+   "metal": 1,
+   "puissance_ch": 1.5,
+   "_note": "Paire de phares avec dynamo : ~1,5 ch prélevés sur le moteur (réaliste : quelques centaines de watts, plus les pertes)."
   }
  }
 }

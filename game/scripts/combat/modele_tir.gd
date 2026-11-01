@@ -26,6 +26,9 @@ func _armes_vehicule(v: Veh, dt: float) -> void:
 			if not v.tir:
 				a.cd = 0.0
 				continue
+			if float(w.get("carburant", 0.0)) > 0.0 and stocks.fuel_l < float(w.carburant):
+				a.cd = 0.0   # lance-flammes : il brûle le carburant du convoi (DEC-052)
+				continue
 			if stocks.ammo < w.munitions:
 				if not _alerte_muni:
 					_alerte_muni = true
@@ -99,7 +102,7 @@ func _choisir_cible(att, w: Dictionary):
 	for e in ennemis:
 		if not e.actif():
 			continue
-		if w.classe == "mitrailleuse" and e.profil.blindage > 25.0:
+		if w.classe in ["mitrailleuse", "flamme"] and e.profil.blindage > 25.0:
 			continue   # la mitrailleuse ne perce pas un blindé : on économise les munitions
 		var g := ecart(att.x, att.longueur, e.x, e.longueur)
 		if g > w.portee or g < float(w.get("portee_min", 0.0)):
@@ -126,8 +129,12 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	var Z: Dictionary = donnees().zones
 	if joueur:
 		stocks.ammo -= w.munitions
+		stocks.fuel_l = maxf(0.0, stocks.fuel_l - float(w.get("carburant", 0.0)))
 		_alerte_muni = false
 	var cd: float = w.cadence * rng.randf_range(0.9, 1.1)
+	if att is Veh and int(att.profil.get("chargeurs", 0)) > 0:   # un chargeur raccourcit le rechargement (DEC-050)
+		var ER: Dictionary = donnees().equipage_roles
+		cd *= float(ER.chargeur_canon) if w.classe in ["canon", "mortier"] else float(ER.chargeur_mitrailleuse)
 	if a.has("fixe"):
 		att.cd_fixe = cd
 	else:
@@ -148,8 +155,8 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 		chance = minf(0.95, chance * 1.2)
 	if cible is MondeJeu.Pieton:
 		chance *= 0.8
-	if monde.nuit() and joueur and not garde:
-		chance *= 0.8   # on y voit mal la nuit
+	if monde.nuit() and joueur and not garde and not (att is Veh and int(att.profil.get("phares", 0)) > 0):
+		chance *= 0.8   # on y voit mal la nuit, sauf avec des phares (DEC-048)
 	chance *= facteur_precision_meteo()   # tempête de sable : précision ×0,5 pour tous (DEC-027)
 	var touche := rng.randf() < chance
 	var origine := _bouche(att, a)
@@ -441,7 +448,7 @@ func _reparer(dt: float) -> void:
 			continue
 		var p: Dictionary = v.pieces[id]
 		if p.pv <= 0.0:
-			v.rep_acc += dt
+			v.rep_acc += dt * (float(donnees().equipage_roles.mecanicien_vitesse) if int(v.profil.get("mecaniciens", 0)) > 0 else 1.0)
 			if v.rep_acc < R.delai_piece_s:
 				continue
 			v.rep_acc = 0.0

@@ -345,6 +345,7 @@ func avancer(dt := DT) -> void:
 	for v in convoi + ennemis:
 		v.x_prev = v.x
 	_marche(dt)
+	_soins(dt)
 	_ia_ennemis(dt)
 	for v in convoi.duplicate():
 		if v.actif():
@@ -379,6 +380,18 @@ func avancer(dt := DT) -> void:
 	if vivants == 0:
 		fini = true
 		log_("Le convoi est anéanti. Distance parcourue : %d m." % int(distance_max), "alerte")
+
+# Infirmier (DEC-050) : soigne lentement les blessés de son véhicule, jamais au-delà de la santé de départ
+func _soins(dt: float) -> void:
+	var k := float(donnees().equipage_roles.infirmier_pv_s) * dt
+	for v in convoi:
+		var n := int(v.profil.get("infirmiers", 0))
+		if n <= 0 or not v.actif():
+			continue
+		for i in v.equipage.size():
+			if v.equipage[i] > 0.0:
+				v.equipage[i] = minf(float(donnees().equipage_pv), v.equipage[i] + k * n)
+
 
 func _marche(dt: float) -> void:
 	var vit := 0.0

@@ -17,6 +17,7 @@ var vitesse := 0.0          # m/s ; le dessin avance vers l'avant du véhicule
 var miroir := false         # regarde vers la gauche
 var ennemi := false         # teinte et équipage de pillards
 var equipage := true
+var sans_roues := false     # épave irréparable : roues arrachées, la caisse repose au sol
 var x_monde := 0.0          # position de l'arrière dans le monde (m), pour lire le relief
 var sol := Callable()       # sol(x_m) -> hauteur du sol (m) ; vide = sol plat
 
@@ -190,6 +191,17 @@ func _coul(nom: String) -> Color:
 
 func _draw() -> void:
 	if D.is_empty():
+		return
+	if sans_roues and not D.has("chenille"):
+		var chute := 0.0
+		for a in _appuis:
+			chute = maxf(chute, a.r)
+		draw_set_transform(Vector2(0, chute * ppm * 0.85))
+		_formes(0)
+		_formes(1)
+		_formes(2)
+		_armes()
+		draw_set_transform(Vector2.ZERO)
 		return
 	for r in D.get("roues_fond", []):
 		_roue(_c(Vector2(r.x, r.r)), r.r, 0.65)
