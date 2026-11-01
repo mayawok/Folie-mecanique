@@ -42,6 +42,7 @@ func _degats(m: CombatModele) -> float:
 func _init() -> void:
 	_tempete()
 	_mines()
+	_abordage()
 	print("\n%s" % ("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs))
 	quit(1 if echecs > 0 else 0)
 
@@ -229,3 +230,50 @@ func _mines() -> void:
 	ss.equip_demin.chien_pv = 2
 	var r := CombatModele.depuis_sauvegarde(ss.sauver())
 	verifier(r.champs_on and r.meteo_on and r.equip_demin.detecteur and r.equip_demin.chien_pv == 2, "sauvegarde : options et moyens de déminage conservés")
+
+
+# Poursuites et abordages (DEC-077)
+func _poursuivant(m: CombatModele, types: Array) -> CombatModele.Veh:
+	var xq := m.x_tete
+	for v in m.convoi:
+		xq = minf(xq, v.x)
+		m.ordre_tir(v.uid, false)   # cessez-le-feu : on laisse l'ennemi aborder
+	var e := m.creer_vehicule("citroen_traction", "ennemi", xq - 60.0)
+	m.preparer_poursuivant(e, {"abordeurs": 1, "types": types})
+	e.armes = []   # désarmé : on teste l'abordage seul
+	m.ennemis.append(e)
+	return e
+
+
+func _abordage() -> void:
+	print("\n— Poursuites et abordages (DEC-077) —")
+	var m := _modele(5, {})
+	var e := _poursuivant(m, ["lame"])
+	var x0: float = e.x
+	m.ordre_marche("avancer")
+	var vu_saut := false
+	var vu_bord := false
+	for i in int(40.0 / CombatModele.DT):
+		m.avancer()
+		for ab in m.abordeurs:
+			vu_saut = vu_saut or ab.etat == "saut"
+			vu_bord = vu_bord or ab.etat == "bord"
+	verifier(e.x > x0 + 40.0, "le poursuivant rattrape le convoi par l'arrière (%.0f m parcourus)" % (e.x - x0))
+	verifier(m.convoi.any(func(v): return absf((v.x + v.longueur * 0.5) - (e.x + e.longueur * 0.5)) < 4.0), "il se cale à hauteur d'un véhicule du convoi")
+	verifier(vu_saut and vu_bord, "un pillard saute et prend pied sur le véhicule")
+	verifier(m.abordeurs.is_empty(), "le combat à la lame se termine (pillard repoussé ou équipage tombé)")
+	var m2 := _modele(6, {})
+	var e2 := _poursuivant(m2, ["bombe"])
+	m2.ordre_marche("avancer")
+	var avant := 0.0
+	for v in m2.convoi:
+		for id in v.pieces:
+			avant += v.pieces[id].pv
+	_avancer(m2, 40.0)
+	var apres := 0.0
+	for v in m2.convoi:
+		for id in v.pieces:
+			apres += v.pieces[id].pv
+	verifier(apres < avant - 10.0, "la lance explosive endommage le véhicule abordé (%.0f PV perdus)" % (avant - apres))
+	verifier(not m2.convoi.any(func(v): return false) and m2.blocage != "La route est barrée par un véhicule ennemi.", "un poursuivant à côté ne barre pas la route")
+

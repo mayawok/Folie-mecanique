@@ -125,7 +125,7 @@ func _synchroniser() -> void:
 			n.type = v.type
 			n.ppm = ppm
 			n.ennemi = v.camp == "ennemi"
-			n.miroir = v.camp == "ennemi"
+			n.miroir = v.camp == "ennemi" and v.mode != "poursuite"   # les poursuivants roulent dans notre sens (DEC-077)
 			n.sol = Terrain.bosses
 			couche.add_child(n)
 			noeuds[v.uid] = n
@@ -150,6 +150,9 @@ func _synchroniser() -> void:
 			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)
 		n.modulate = n.modulate * Color.WHITE.lerp(Color(0.5, 0.55, 0.75), terrain.nuit)
 		n.z_index = 0 if v.actif() else -1   # les épaves passent derrière les véhicules
+		if v.mode == "poursuite" and v.actif():   # poursuivant sur la voie d'à côté : derrière nos véhicules, un peu assombri (DEC-077)
+			n.z_index = -1
+			n.modulate = n.modulate * Color(0.8, 0.8, 0.8)
 		var cxv: float = x + v.longueur * 0.5
 		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
 		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y)

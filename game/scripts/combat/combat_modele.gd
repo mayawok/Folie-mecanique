@@ -357,6 +357,8 @@ func avancer(dt := DT) -> void:
 	_marche(dt)
 	_soins(dt)
 	_ia_ennemis(dt)
+	_ia_poursuite(dt)
+	_abordages(dt)
 	for v in convoi.duplicate():
 		if v.actif():
 			_armes_vehicule(v, dt)
@@ -469,7 +471,7 @@ func _marche(dt: float) -> void:
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax
 			if vit > 0.0:
 				for e in ennemis:
-					if e.actif() and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
+					if e.actif() and e.mode != "poursuite" and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
 						vit = 0.0
 						blocage = "La route est barrée par un véhicule ennemi."
 						break
@@ -528,6 +530,20 @@ func _rencontres() -> void:
 		choix = scripte
 	var x := x_tete + 120.0
 	var debut := x
+	if choix.get("mode", "") == "poursuite":   # poursuivants : ils arrivent par l'arrière, dans notre sens (DEC-077)
+		var xq := x_tete
+		for v in convoi:
+			xq = minf(xq, v.x)
+		var xp: float = xq - float(AB().depart_arriere)
+		for t in choix.get("vehicules", []):
+			var e := creer_vehicule(t, "ennemi", xp)
+			preparer_poursuivant(e, choix)
+			ennemis.append(e)
+			xp -= e.longueur + r.randf_range(6.0, 14.0)
+		log_("Des véhicules vous rattrapent par l'arrière !", "alerte")
+		evt({"t": "contact", "ennemi": true})
+		_prochain_x = x_tete + r.randf_range(R.intervalle[0], R.intervalle[1])
+		return
 	for t in choix.get("vehicules", []):
 		var e := creer_vehicule(t, "ennemi", x)
 		e.mode = choix.get("mode", "approche")

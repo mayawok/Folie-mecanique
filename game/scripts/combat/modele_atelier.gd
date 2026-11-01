@@ -1,7 +1,7 @@
 # Couche 3 du modèle : atelier (assemblage sur grille) et ouverture guidée (DEC-035).
 # Le joueur commence avec une caisse de pièces : il assemble une moto, puis trouve dans l'ordre de quoi
 # en faire un side-car, de l'essence, une arme et des munitions. Les ennemis n'arrivent qu'ensuite.
-extends "res://scripts/combat/modele_meteo.gd"
+extends "res://scripts/combat/modele_abordage.gd"
 
 var _fin_annoncee := false
 

@@ -230,3 +230,11 @@ Voir DECISIONS.md : menu véhicule au toucher, bouton Ordres du convoi + Demi-to
 Bouton « Débarquer les troupes » : le convoi s'arrête, les soldats combattent à moins de 30 m de leur véhicule et remontent
 après 4 s de calme ou sur ordre. En réparation, tout l'équipage descend sauf le chef de char ; il n'est plus visible à bord et les
 armes du véhicule se taisent.
+
+
+## Poursuites et abordages (DEC-077)
+
+Des véhicules ennemis arrivent par l'arrière, dans notre sens, plus vite que nous, et se calent à côté d'un de nos véhicules.
+Des pillards sautent à bord : à la lame (corps à corps avec l'équipage) ou avec une lance explosive (explosion au contact).
+Valeurs : `abordage` dans `combat_proto.json` ; code : `modele_abordage.gd`. À venir : tir sur le pillard en plein saut, abordage de l'ennemi.
+

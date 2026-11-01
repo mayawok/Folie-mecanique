@@ -29,12 +29,13 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 - **Construction en deux plans** (DEC-067, phase 1 codée : DEC-068, à vérifier sur iPhone) : mécanique sur la grille, carrosserie de donneur posée par-dessus ;
   catalogues extensibles sans code (moteurs, roues, châssis, suspensions et leur hauteur, coques, greffes). Détails : `GRILLE.md`.
 - **Ponts rigides, onglet Suspension, plans enregistrés, cabines décor retirées** (DEC-069 à 071). À vérifier sur iPhone.
+- **Poursuites et abordages** (DEC-077), silence hors du jeu (DEC-073), suspension en l'air (DEC-075), retirer en glissant (DEC-076). À vérifier sur iPhone.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
 
 - **iPhone** : boutons atteignables, taille des cases de la grille, rechargements moins fréquents, écran « Tournez le téléphone » (DEC-056, 059).
-- Coller les 3 prompts de `docs/art/prompts/grille_pieces.md` dans ChatGPT ; produire `mus_fin` (`docs/audio/ELEVENLABS.md`).
+- Coller le prompt du fond de grille (`docs/art/prompts/fond_grille.md`) dans ChatGPT ; produire `mus_fin` (`docs/audio/ELEVENLABS.md`).
 
 - **Son iPhone** (DEC-030, renforcé par DEC-041) : non vérifiable hors appareil. Tester en mode normal puis silencieux.
 - Jouer la tempête, les mines et la grange : valeurs à régler dans `combat_proto.json` (`tempete`, `mines_champs`, `demontage`).

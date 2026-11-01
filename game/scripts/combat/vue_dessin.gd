@@ -130,6 +130,19 @@ func _dessiner_monde(c: CanvasItem) -> void:
 		else:
 			var allie: bool = p.camp == "joueur"   # soldat débarqué : tenue du convoi
 			Silhouette.dessiner(c, pied, ppm, "tireur" if allie else "pillard", {"phase": phase if marche else 0.0, "miroir": p.dir < 0.0, "peau": p.uid, "bras": "vise" if not marche else ""})
+	# Pillards qui sautent à l'abordage (DEC-077) : arc entre les deux véhicules, puis debout sur le toit
+	for ab in m.abordeurs:
+		var xa: float = ab.x
+		var haut: float = 1.7 + (sin(PI * float(ab.t)) * 1.6 if ab.etat == "saut" else 0.0)
+		var pa := Vector2(terrain.ecran_x(xa), _sy(xa) - haut * ppm)
+		Silhouette.dessiner(c, pa, ppm, "pillard", {"phase": _temps * 9.0 if ab.etat == "bord" else 0.0, "miroir": false, "peau": int(ab.uid), "bras": "vise"})
+		if ab.type == "bombe":   # lance explosive : hampe et charge, mèche qui crépite
+			var bout := pa + Vector2(0.9 * ppm, -1.5 * ppm)
+			c.draw_line(pa + Vector2(0.1 * ppm, -0.9 * ppm), bout, Color("#5A4632"), maxf(2.0, ppm * 0.06))
+			c.draw_circle(bout, ppm * 0.16, Color("#3A3A36"))
+			c.draw_circle(bout + Vector2(0.1, -0.2) * ppm, ppm * (0.06 + 0.04 * sin(_temps * 30.0)), Color(1.0, 0.75, 0.2))
+		else:   # lame
+			c.draw_line(pa + Vector2(0.35 * ppm, -1.0 * ppm), pa + Vector2(0.9 * ppm, -1.35 * ppm + sin(_temps * 12.0) * 0.2 * ppm), Color("#C9C6BC"), maxf(2.0, ppm * 0.05))
 	# Lueur des feux allumés dans les bâtiments
 	for b in m.batiments:
 		if b.feu:
