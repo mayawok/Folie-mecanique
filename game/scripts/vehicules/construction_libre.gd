@@ -879,16 +879,22 @@ static func forme(a: Dictionary) -> Dictionary:
 	for p in _pieces(a):
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
 		if _habillage(p.fiche):
-			_formes_cabine(formes, String(p.fiche.get("style", "voiture")), r)
+			var st := String(p.fiche.get("style", "voiture"))
+			if STYLE_SPRITE.has(st):
+				_sprite(formes, STYLE_SPRITE[st], r, 2 if st != "ouverte" else -1)   # la carrosserie recouvre les sièges
+			else:
+				_formes_cabine(formes, st, r)
 			continue
 		match p.fiche.get("famille", ""):
 			"moteur":
-				formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x, r.position.y + r.size.y * 0.8],
-					[r.position.x + r.size.x * 0.85, r.end.y], [r.position.x + r.size.x * 0.1, r.end.y], [r.position.x, r.position.y + r.size.y * 0.7]], "c": "caisse", "z": 1})
-				formes.append({"ligne": [[r.position.x + r.size.x * 0.2, r.position.y + r.size.y * 0.5], [r.end.x - r.size.x * 0.2, r.position.y + r.size.y * 0.5]], "ep": 0.04, "c": "metal", "z": 2})
+				var surface: int = int(p.e.x) * int(p.e.y)
+				_sprite(formes, "moteur_leger" if surface <= 8 else ("moteur_moyen" if surface <= 18 else "moteur_lourd"), r, 1)
 			"cabine":
 				var style := String(p.fiche.get("style", "ouverte" if bool(p.fiche.get("ouvert", false)) else "voiture"))
-				_formes_cabine(formes, style, r)
+				if STYLE_SPRITE.has(style):
+					_sprite(formes, STYLE_SPRITE[style], r, -1 if style == "ouverte" else 2)   # jeep : l'équipage s'assoit dans le visuel
+				else:
+					_formes_cabine(formes, style, r)
 				var n := int(p.fiche.get("sieges", 0))
 				for k in n:   # cabine complète d'un véhicule historique : ses sièges sont dedans
 					var fx := 0.5 if n == 1 else 0.2 + 0.6 * float(k) / float(n - 1)
@@ -914,16 +920,19 @@ static func forme(a: Dictionary) -> Dictionary:
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
 		var wid := String(p.fiche.arme)
 		if wid == "mortier":
-			formes.append({"pts": [[r.position.x, r.position.y], [r.end.x, r.position.y], [r.end.x - 0.05, r.position.y + 0.08], [r.position.x + 0.05, r.position.y + 0.08]], "c": "metal", "z": 1})
-			armes.append({"type": "mortier", "x": r.get_center().x - 0.1, "y": r.position.y + 0.08, "long": maxf(0.6, r.size.y * 1.1), "ep": 0.1})
+			var rs := _rect_sprite("arme_mortier", r, false)
+			armes.append({"type": "mortier", "x": rs[0] + rs[2] * 0.5, "y": rs[1], "long": rs[3] * 1.15, "ep": 0.1, "sprite": "arme_mortier", "r": rs,
+				"bout": [rs[0] + rs[2] * 0.3, rs[1] + rs[3]]})
 		elif wid.begins_with("mitrailleuse") or wid == "lance_flammes":
-			armes.append({"type": "mitrailleuse", "x": r.position.x + 0.2, "y": r.position.y, "pied": maxf(0.12, r.size.y - 0.1), "long": maxf(1.0, r.size.x * 1.2), "ep": 0.05})
+			var sid := "arme_lance_flammes" if wid == "lance_flammes" else "arme_mitrailleuse"
+			var rs := _rect_sprite(sid, r, false)
+			armes.append({"type": "mitrailleuse", "x": r.position.x + 0.2, "y": r.position.y, "pied": maxf(0.12, r.size.y - 0.1), "long": maxf(1.0, r.size.x * 1.2), "ep": 0.05,
+				"sprite": sid, "r": rs, "bout": [rs[0] + rs[2], rs[1] + rs[3] * 0.62]})
 		else:
-			var tw := minf(r.size.x * 0.45, 2.0)
-			formes.append({"pts": [[r.position.x, r.position.y], [r.position.x + tw, r.position.y], [r.position.x + tw * 0.9, r.end.y],
-				[r.position.x + tw * 0.2, r.end.y], [r.position.x, r.position.y + r.size.y * 0.6]], "c": "caisse", "z": 1})
-			var ep := 0.07 if wid.contains("leger") else (0.12 if wid.contains("88") else 0.1)
-			armes.append({"type": "canon", "x": r.position.x + tw - 0.05, "y": r.position.y + r.size.y * 0.55, "long": r.size.x - tw + 0.35, "ep": ep})
+			var sid := "arme_canon_37" if wid.contains("leger") else ("arme_canon_88" if wid.contains("88") else "arme_canon_75")
+			var rs := _rect_sprite(sid, r, false)
+			armes.append({"type": "canon", "x": r.position.x, "y": rs[1] + rs[3] * 0.55, "long": rs[2], "ep": 0.1, "frein": false,
+				"sprite": sid, "r": rs, "bout": [rs[0] + rs[2], rs[1] + rs[3] * 0.55]})
 	var plaques := int(a.get("plaques", 0))
 	for k in plaques:
 		formes.append({"ligne": [[X.call(x1) - 0.05 - 0.07 * k, Y.call(sol + 1.0)], [X.call(x1) - 0.05 - 0.07 * k, Y.call(sol + 4.0)]], "ep": 0.05, "c": "metal", "z": 2})
@@ -932,14 +941,35 @@ static func forme(a: Dictionary) -> Dictionary:
 	for p in _pieces(a):
 		if p.id == "phares":
 			var rp := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
-			formes.append({"pts": _poly_cercle(rp.get_center().x, rp.get_center().y, C * 0.38, 10), "c": "metal", "z": 2})
-			formes.append({"pts": _poly_cercle(rp.get_center().x + C * 0.06, rp.get_center().y, C * 0.24, 8), "c": "vitre", "z": 2})
+			_sprite(formes, "phares", rp, 2, false)
 	var res := {"x0": x0, "sol": sol, "nom": String(a.get("nom", "Frankenstein")), "longueur": maxf(0.5, (x1 - x0) * C), "hauteur": maxf(0.5, (y1 - sol) * C),
 		"teinte": "joueur", "moteur": moteur, "course": 0.09, "fiche": "Véhicule construit sur la grille.",
-		"roues": roues, "formes": formes, "armes": armes, "equipage": equipage}
+		"roues": roues, "formes": formes, "armes": armes, "equipage": equipage, "libre": true}
 	if not chenille.is_empty():
 		res.chenille = chenille
 	return res
+
+
+# --- Visuels dessinés (planches ChatGPT, DEC-066) ------------------------------------------------
+const STYLE_SPRITE := {"camion": "cabine_camion", "voiture": "cabine_berline", "blindee": "cabine_blindee", "ouverte": "cabine_jeep"}
+
+
+# Rectangle [x, y_bas, l, h] d'un visuel dans la pièce r : remplit la pièce si les proportions sont proches, sinon contenu (centré, posé en bas)
+static func _rect_sprite(id: String, r: Rect2, remplir: bool) -> Array:
+	var t: Texture2D = load("res://assets/grille/%s.png" % id)
+	var k := t.get_size().x / t.get_size().y
+	var w := r.size.x
+	var h := r.size.y
+	if not remplir or absf(k / (w / h) - 1.0) > 0.35:
+		if w / h > k:
+			w = h * k
+		else:
+			h = w / k
+	return [r.position.x + (r.size.x - w) * 0.5, r.position.y, w, h]
+
+
+static func _sprite(formes: Array, id: String, r: Rect2, z: int, remplir := true) -> void:
+	formes.append({"sprite": id, "r": _rect_sprite(id, r, remplir), "z": z})
 
 
 # --- Formes simples des cabines et des postes (DEC-062) -----------------------------------------

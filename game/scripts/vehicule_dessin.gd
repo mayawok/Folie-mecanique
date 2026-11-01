@@ -20,6 +20,7 @@ var equipage := true
 var sans_roues := false     # épave irréparable : roues arrachées, la caisse repose au sol
 var equipage_dehors := false  # réparation : tout l'équipage est descendu sauf le chef de char (on ne le voit plus à bord)
 var troupes_a_bord := -1    # nombre de soldats encore sur les bancs (-1 = tous)
+var _decal := Vector2.ZERO   # décalage du dessin (épave sans roues)
 var x_monde := 0.0          # position de l'arrière dans le monde (m), pour lire le relief
 var sol := Callable()       # sol(x_m) -> hauteur du sol (m) ; vide = sol plat
 
@@ -198,12 +199,14 @@ func _draw() -> void:
 		var chute := 0.0
 		for a in _appuis:
 			chute = maxf(chute, a.r)
-		draw_set_transform(Vector2(0, chute * ppm * 0.85))
+		_decal = Vector2(0, chute * ppm * 0.85)
+		draw_set_transform(_decal)
 		_formes(0)
 		_formes(1)
 		_formes(2)
 		_armes()
-		draw_set_transform(Vector2.ZERO)
+		_decal = Vector2.ZERO
+		draw_set_transform(_decal)
 		return
 	for r in D.get("roues_fond", []):
 		_roue(_c(Vector2(r.x, r.r)), r.r, 0.65)
@@ -229,6 +232,9 @@ func _formes(z: int) -> void:
 			draw_colored_polygon(pts, c)
 			pts.append(pts[0])
 			draw_polyline(pts, c.darkened(0.45), maxf(1.0, ppm * 0.025), true)
+		elif f.has("sprite"):
+			var q: Array = f.r
+			_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0)
 		elif f.has("cercle"):
 			var k: Array = f.cercle
 			draw_circle(_c(Vector2(k[0], k[1])), k[2] * ppm, c)
@@ -244,6 +250,35 @@ func _formes(z: int) -> void:
 			draw_polyline(pts, c, maxf(1.0, a[5] * ppm), true)
 
 
+# Visuel dessiné (planches de la grille) : quadrilatère texturé qui suit le relief et le sens du véhicule
+func _sprite(id: String, x: float, y: float, w: float, h: float, decal: float, opac := 1.0) -> void:
+	var t: Texture2D = _tex(id)
+	_quad(t, _c(Vector2(x + decal, y + h)), _c(Vector2(x + w + decal, y + h)), _c(Vector2(x + decal, y)), Color(1, 1, 1, opac))
+
+
+# Les visuels restent en mémoire : une texture qu'aucun objet ne retient est libérée puis rechargée à chaque image (blanche entre-temps)
+static var _textures := {}
+
+
+static func _tex(id: String) -> Texture2D:
+	if not _textures.has(id):
+		_textures[id] = load("res://assets/grille/%s.png" % id)
+	return _textures[id]
+
+
+# Texture posée sur un parallélogramme (coin haut-gauche, haut-droit, bas-gauche) : suit l'inclinaison et le sens du véhicule
+func _quad(t: Texture2D, hg: Vector2, hd: Vector2, bg: Vector2, teinte: Color) -> void:
+	draw_set_transform(hg + _decal, (hd - hg).angle(), Vector2(1.0, 1.0))
+	var larg := (hd - hg).length()
+	var haut := (bg - hg).length()
+	var flip := (hd - hg).cross(bg - hg) < 0.0   # véhicule tourné vers la gauche : l'image se retourne
+	if flip:
+		draw_texture_rect(t, Rect2(0, haut, larg, -haut), false, teinte)
+	else:
+		draw_texture_rect(t, Rect2(0, 0, larg, haut), false, teinte)
+	draw_set_transform(_decal)
+
+
 func _sens() -> float:
 	return -1.0 if miroir else 1.0
 
@@ -251,6 +286,11 @@ func _sens() -> float:
 # Roue : pneu, jante, rayons qui tournent avec la distance parcourue
 func _roue(c: Vector2, r: float, clarte := 1.0) -> void:
 	var rp := r * ppm
+	if D.get("libre", false):   # visuel dessiné, qui tourne
+		var t: Texture2D = _tex("roue_petite" if r < 0.3 else ("roue_moyenne" if r < 0.5 else "roue_grande"))
+		var ang0 := dist / r * _sens()
+		_quad(t, c + Vector2(-rp, -rp).rotated(ang0), c + Vector2(rp, -rp).rotated(ang0), c + Vector2(-rp, rp).rotated(ang0), Color(clarte, clarte, clarte))
+		return
 	draw_circle(c, rp, _coul("pneu").lerp(Color.BLACK, 1.0 - clarte))
 	draw_circle(c, rp * 0.62, _teinte.darkened(0.25).lerp(Color.BLACK, 1.0 - clarte))
 	draw_circle(c, rp * 0.2, Color("#2B2A27"))
@@ -359,6 +399,20 @@ func _armes() -> void:
 	for a in D.get("armes", []):
 		var base := Vector2(a.x, a.y)
 		var ep: float = a.ep
+		if a.has("sprite"):   # visuel dessiné : seuls le recul et les flammes restent calculés
+			var q: Array = a.r
+			var rec := _recul * 0.3 if a.type == "canon" else 0.0
+			_sprite(String(a.sprite), q[0], q[1], q[2], q[3], -rec)
+			var bt: Vector2 = Vector2(a.bout[0], a.bout[1]) if a.has("bout") else Vector2(q[0] + q[2], q[1] + q[3] * 0.8)
+			if a.type == "mitrailleuse" and _flash_mg > 0.0:
+				_eclair(_c(bt), 0.22)
+			elif _flash > 0.0:
+				_eclair(_c(bt + Vector2(0.1, 0)), 0.55 if a.type == "canon" else 0.4)
+			if a.type == "canon":
+				for fu in _fumee:
+					var k2: float = fu.age / 1.6
+					draw_circle(_c(bt + Vector2(0.4 + k2 * 1.4, 0.1 + k2 * 0.6)), (0.25 + k2 * 0.7) * ppm, Color(0.75, 0.72, 0.66, 0.45 * (1.0 - k2)))
+			continue
 		if a.type == "mitrailleuse":
 			var haut := base + Vector2(0, a.pied)
 			if a.pied > 0:

@@ -25,6 +25,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
   cabines décor camion/voiture/blindée au-dessus des sièges, troupes débarquables en combat, équipage descendu (sauf le chef) en réparation.
   Tests : 6 suites sans écran vertes ; capture `tests/capture_cabines.gd`. **À vérifier sur iPhone.**
 - **Interface allégée** (DEC-065) : bulles de ressources avec icônes, cadran jour/nuit en coin, plus de bandes noires, cartes compactes. À vérifier sur iPhone.
+- **Visuels de la grille intégrés** (DEC-066) : roues, moteurs, cabines, phares, armes. Restent : tuiles de châssis, essieux, chenilles, benne.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)

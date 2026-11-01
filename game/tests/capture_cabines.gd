@@ -43,6 +43,10 @@ func _initialize() -> void:
 
 func _process(_d: float) -> bool:
 	frame += 1
+	if frame >= 2 and frame < 5:   # les textures arrivent après le premier dessin : on redessine
+		for ch in root.get_children():
+			if ch is VehiculeDessin:
+				ch.queue_redraw()
 	if frame == 5:
 		root.get_texture().get_image().save_png("%s/cabines.png" % dossier)
 		print("capture cabines")
