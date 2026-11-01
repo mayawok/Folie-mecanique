@@ -14,7 +14,8 @@ extends RefCounted
 
 const C := 0.25          # côté d'une cellule (m)
 const TOLERANCE := 0.5   # débattement de suspension (cellules) : une roue à moins de 12,5 cm du sol porte encore
-const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement"]
+const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement", "coque"]
+const OPAC_ECORCHE := 0.3   # vue écorchée : coque transparente pour voir la mécanique (DEC-067)
 const ROLES := ["tireur", "chargeur", "chef", "mecanicien", "infirmier", "passager"]   # le siège 1 est le conducteur (DEC-050)
 
 
@@ -53,13 +54,18 @@ static func _pieces(a: Dictionary) -> Array:   # [{i, id, fiche, pos, e}]
 	var i := 0
 	for p in a.get("pieces", []):
 		res.append({"i": i, "id": String(p.piece), "fiche": Assemblage.piece(String(p.piece)),
-			"pos": Vector2i(int(p.pos[0]), int(p.pos[1])), "e": _emprise(String(p.piece))})
+			"pos": Vector2i(int(p.pos[0]), int(p.pos[1])), "e": _emprise(String(p.piece)), "miroir": bool(p.get("miroir", false))})
 		i += 1
 	return res
 
 
 static func _habillage(fiche: Dictionary) -> bool:   # carrosserie : posée au-dessus des sièges, sans les remplacer (DEC-062)
 	return bool(fiche.get("habillage", false))
+
+
+# Coque de donneur (DEC-067) : plan carrosserie, posée par-dessus tout le reste sans occuper de case mécanique
+static func _coque(fiche: Dictionary) -> bool:
+	return fiche.get("famille", "") == "coque"
 
 
 static func _siege(fiche: Dictionary) -> bool:
@@ -71,7 +77,7 @@ static func _occupation(a: Dictionary, sauf := -1) -> Dictionary:   # cellule ->
 	for c in _cases(a):
 		occ[c] = "case"
 	for p in _pieces(a):
-		if p.i == sauf or _habillage(p.fiche):
+		if p.i == sauf or _habillage(p.fiche) or _coque(p.fiche):
 			continue
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
@@ -83,6 +89,17 @@ static func _occ_hab(a: Dictionary, sauf := -1) -> Dictionary:   # cellule -> in
 	var occ := {}
 	for p in _pieces(a):
 		if p.i == sauf or not _habillage(p.fiche):
+			continue
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				occ[Vector2i(x, y)] = p.i
+	return occ
+
+
+static func _occ_coque(a: Dictionary, sauf := -1) -> Dictionary:   # cellule -> indice de coque
+	var occ := {}
+	for p in _pieces(a):
+		if p.i == sauf or not _coque(p.fiche):
 			continue
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
@@ -103,6 +120,20 @@ static func _occ_totale(a: Dictionary) -> Dictionary:
 static func _valide(a: Dictionary, p: Dictionary) -> bool:
 	var occ := _occupation(a, p.i)
 	var hab := _occ_hab(a, p.i)
+	var coq := _occ_coque(a, p.i)
+	var toits := {}   # une pièce ne repose que sur le toit d'une coque (pas d'appui circulaire)
+	for c in coq:
+		if not coq.has(c + Vector2i(0, 1)):
+			toits[c] = coq[c]
+	if _coque(p.fiche):   # ne chevauche aucune autre coque ; tenue si elle recouvre le châssis ou une pièce, ou repose dessus (empilable)
+		if not _libre(coq, p.pos, p.e):
+			return false
+		var tout := _union(_union(occ, hab), coq)
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				if occ.has(Vector2i(x, y)) and occ[Vector2i(x, y)] is String:   # recouvre le châssis
+					return true
+		return _portee(tout, p.pos, p.e)
 	if _habillage(p.fiche):
 		if not _libre(hab, p.pos, p.e):
 			return false
@@ -113,14 +144,14 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 					return false
 				if occ.has(c) and not _siege(_pieces(a)[int(occ[c])].fiche):
 					return false
-		return _portee(_union(occ, hab), p.pos, p.e)
+		return _portee(_union(_union(occ, hab), toits), p.pos, p.e)
 	var libre := _libre(occ, p.pos, p.e)
 	if libre and not _siege(p.fiche):
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
 				if hab.has(Vector2i(x, y)):
 					libre = false
-	return libre and _portee(_union(occ, hab), p.pos, p.e)
+	return libre and _portee(_union(_union(occ, hab), toits), p.pos, p.e)   # une pièce peut reposer sur une coque (arme sur le toit)
 
 
 static func _union(a: Dictionary, b: Dictionary) -> Dictionary:
@@ -235,7 +266,7 @@ static func _libre(occ: Dictionary, pos: Vector2i, e: Vector2i) -> bool:
 
 # Pose une pièce près d'une cellule (coin bas gauche) : elle glisse vers la place libre et portée la plus proche.
 # Renvoie {} si rien ne convient (la pièce reste dans le bac).
-static func poser(a: Dictionary, piece_id: String, cell: Vector2i) -> Dictionary:
+static func poser(a: Dictionary, piece_id: String, cell: Vector2i, miroir := false) -> Dictionary:
 	var f := Assemblage.piece(piece_id)
 	if f.is_empty() or not f.get("famille", "") in FAMILLES_PIECES:
 		return {}
@@ -249,6 +280,8 @@ static func poser(a: Dictionary, piece_id: String, cell: Vector2i) -> Dictionary
 	for c in cands:
 		var b := a.duplicate(true)
 		b.pieces.append({"piece": piece_id, "pos": [c.x, c.y]})
+		if miroir:
+			b.pieces[n].miroir = true
 		if _valide(b, {"i": n, "fiche": f, "pos": c, "e": e}):
 			return b
 	return {}
@@ -261,12 +294,17 @@ static func retirer(a: Dictionary, index: int) -> Dictionary:
 	return nettoyer(b)
 
 
-static func piece_en(a: Dictionary, cell: Vector2i) -> int:
+static func piece_en(a: Dictionary, cell: Vector2i, coque_dabord := false) -> int:
+	var coq := _occ_coque(a)
+	if coque_dabord and coq.has(cell):
+		return int(coq[cell])
 	var occ := _occupation(a)
 	if occ.has(cell) and not (occ[cell] is String):
 		return int(occ[cell])
 	var hab := _occ_hab(a)   # sinon la carrosserie qui recouvre cette cellule
-	return int(hab[cell]) if hab.has(cell) else -1
+	if hab.has(cell):
+		return int(hab[cell])
+	return int(coq[cell]) if coq.has(cell) else -1
 
 
 # Retire ce qui ne tient plus : essieux sous une colonne vide, pièces qui ne reposent plus sur rien
@@ -347,8 +385,16 @@ static func analyser(a: Dictionary) -> Dictionary:
 		blindage_somme += float(s.blindage)
 		metal += float(s.metal)
 		corps_bas = minf(corps_bas, float(c.y))
+	var blindage_coques := 0.0   # coques : blindage au prorata des cases de châssis recouvertes (DEC-067)
 	for p in pieces:
 		masses.append([float(p.fiche.get("poids_kg", 0)), p.pos.x + p.e.x * 0.5, p.pos.y + p.e.y * 0.5])
+		if _coque(p.fiche):
+			pv.chassis += float(p.fiche.get("pv", 0))
+			var dessous := 0
+			for c in cases:
+				if c.x >= p.pos.x and c.x < p.pos.x + p.e.x and c.y >= p.pos.y and c.y < p.pos.y + p.e.y:
+					dessous += 1
+			blindage_coques += float(p.fiche.get("blindage", 0)) * dessous / maxf(1.0, cases.size())
 		metal += float(p.fiche.get("metal", 0))
 		corps_bas = minf(corps_bas, float(p.pos.y))
 	for e in essieux:
@@ -546,7 +592,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
 	var roles := roles_de(a)
-	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage),
+	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques,
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size(), "metal": int(round(metal)),
 		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
@@ -662,13 +708,13 @@ static func places_troupes(a: Dictionary) -> int:
 static func _sieges_exposes(a: Dictionary) -> bool:
 	var couvert := {}
 	for p in _pieces(a):
-		if _habillage(p.fiche) and not bool(p.fiche.get("ouvert", false)):
+		if (_habillage(p.fiche) and not bool(p.fiche.get("ouvert", false))) or (_coque(p.fiche) and bool(p.fiche.get("couvert", false))):
 			for x in range(p.pos.x, p.pos.x + p.e.x):
 				for y in range(p.pos.y, p.pos.y + p.e.y):
 					couvert[Vector2i(x, y)] = true
 	for p in _pieces(a):
 		var f: Dictionary = p.fiche
-		if _habillage(f) or int(f.get("sieges", 0)) <= 0:
+		if _habillage(f) or _coque(f) or int(f.get("sieges", 0)) <= 0:
 			continue
 		if f.get("famille", "") == "cabine" and not bool(f.get("ouvert", false)):
 			continue   # cabine complète fermée
@@ -816,7 +862,7 @@ static func _poly_cercle(cx: float, cy: float, r: float, n := 14) -> Array:
 	return pts
 
 
-static func forme(a: Dictionary) -> Dictionary:
+static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 	var an := analyser(a)
 	var cases := _cases(a)
 	var essieux: Array = an.detail.get("essieux", _essieux(a))
@@ -878,6 +924,10 @@ static func forme(a: Dictionary) -> Dictionary:
 		roles_par_piece[sg.piece].append(sg.role)
 	for p in _pieces(a):
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
+		if _coque(p.fiche):   # au-dessus de tout, sous les armes ; transparente en vue écorchée
+			formes.append({"sprite": String(p.fiche.image), "r": [r.position.x, r.position.y, r.size.x, r.size.y], "z": 3,
+				"miroir": p.miroir, "opac": OPAC_ECORCHE if ecorche else 1.0})
+			continue
 		if _habillage(p.fiche):
 			var st := String(p.fiche.get("style", "voiture"))
 			if STYLE_SPRITE.has(st):
@@ -956,7 +1006,7 @@ const STYLE_SPRITE := {"camion": "cabine_camion", "voiture": "cabine_berline", "
 
 # Rectangle [x, y_bas, l, h] d'un visuel dans la pièce r : remplit la pièce si les proportions sont proches, sinon contenu (centré, posé en bas)
 static func _rect_sprite(id: String, r: Rect2, remplir: bool) -> Array:
-	var t: Texture2D = load("res://assets/grille/%s.png" % id)
+	var t: Texture2D = VehiculeDessin._tex(id)
 	var k := t.get_size().x / t.get_size().y
 	var w := r.size.x
 	var h := r.size.y

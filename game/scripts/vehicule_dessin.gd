@@ -204,6 +204,7 @@ func _draw() -> void:
 		_formes(0)
 		_formes(1)
 		_formes(2)
+		_formes(3)
 		_armes()
 		_decal = Vector2.ZERO
 		draw_set_transform(_decal)
@@ -217,6 +218,7 @@ func _draw() -> void:
 	_train()
 	_formes(1)
 	_formes(2)
+	_formes(3)   # coques de donneur (DEC-067)
 	_armes()
 
 
@@ -234,7 +236,7 @@ func _formes(z: int) -> void:
 			draw_polyline(pts, c.darkened(0.45), maxf(1.0, ppm * 0.025), true)
 		elif f.has("sprite"):
 			var q: Array = f.r
-			_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0)
+			_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0, float(f.get("opac", 1.0)), bool(f.get("miroir", false)))
 		elif f.has("cercle"):
 			var k: Array = f.cercle
 			draw_circle(_c(Vector2(k[0], k[1])), k[2] * ppm, c)
@@ -251,9 +253,9 @@ func _formes(z: int) -> void:
 
 
 # Visuel dessiné (planches de la grille) : quadrilatère texturé qui suit le relief et le sens du véhicule
-func _sprite(id: String, x: float, y: float, w: float, h: float, decal: float, opac := 1.0) -> void:
+func _sprite(id: String, x: float, y: float, w: float, h: float, decal: float, opac := 1.0, miroir := false) -> void:
 	var t: Texture2D = _tex(id)
-	_quad(t, _c(Vector2(x + decal, y + h)), _c(Vector2(x + w + decal, y + h)), _c(Vector2(x + decal, y)), Color(1, 1, 1, opac))
+	_quad(t, _c(Vector2(x + decal, y + h)), _c(Vector2(x + w + decal, y + h)), _c(Vector2(x + decal, y)), Color(1, 1, 1, opac), miroir)
 
 
 # Les visuels restent en mémoire : une texture qu'aucun objet ne retient est libérée puis rechargée à chaque image (blanche entre-temps)
@@ -262,20 +264,22 @@ static var _textures := {}
 
 static func _tex(id: String) -> Texture2D:
 	if not _textures.has(id):
-		_textures[id] = load("res://assets/grille/%s.png" % id)
+		_textures[id] = load(("res://assets/%s.png" if "/" in id else "res://assets/grille/%s.png") % id)   # "coques/…" : autre dossier
 	return _textures[id]
 
 
 # Texture posée sur un parallélogramme (coin haut-gauche, haut-droit, bas-gauche) : suit l'inclinaison et le sens du véhicule
-func _quad(t: Texture2D, hg: Vector2, hd: Vector2, bg: Vector2, teinte: Color) -> void:
+func _quad(t: Texture2D, hg: Vector2, hd: Vector2, bg: Vector2, teinte: Color, miroir_h := false) -> void:   # miroir_h : image retournée (coque posée à l'envers)
 	draw_set_transform(hg + _decal, (hd - hg).angle(), Vector2(1.0, 1.0))
 	var larg := (hd - hg).length()
 	var haut := (bg - hg).length()
 	var flip := (hd - hg).cross(bg - hg) < 0.0   # véhicule tourné vers la gauche : l'image se retourne
+	var x0 := 0.0   # une largeur négative retourne l'image sans la déplacer
+	var lx := -larg if miroir_h else larg
 	if flip:
-		draw_texture_rect(t, Rect2(0, haut, larg, -haut), false, teinte)
+		draw_texture_rect(t, Rect2(x0, haut, lx, -haut), false, teinte)
 	else:
-		draw_texture_rect(t, Rect2(0, 0, larg, haut), false, teinte)
+		draw_texture_rect(t, Rect2(x0, 0, lx, haut), false, teinte)
 	draw_set_transform(_decal)
 
 

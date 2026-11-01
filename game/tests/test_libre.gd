@@ -264,5 +264,53 @@ func _init() -> void:
 	vt.reparation = false
 	ok(mt.equipage_dehors(vt) == 0, "fin de réparation : plus personne dehors")
 
+	print("— Coques de donneur, plan carrosserie (DEC-067) —")
+	var k_j := jeep()
+	var k_p0: int = k_j.pieces.size()
+	var k_exposes0 := ConstructionLibre._sieges_exposes(k_j)
+	var k_an0 := ConstructionLibre.analyser(k_j)
+	var k_jc := ConstructionLibre.poser(k_j, "coque_berline", Vector2i(1, 2))
+	ok(not k_jc.is_empty() and k_jc.pieces.size() == k_p0 + 1, "une coque se pose par-dessus le moteur et les sièges")
+	var k_an1 := ConstructionLibre.analyser(k_jc)
+	ok(absf(float(k_an1.stats.poids_kg) - float(k_an0.stats.poids_kg) - 450.0) < 1.0, "la coque ajoute son poids (+450 kg)")
+	ok(float(k_an1.stats.blindage) > float(k_an0.stats.blindage), "la coque ajoute du blindage")
+	ok(k_exposes0 and not ConstructionLibre._sieges_exposes(k_jc), "une coque fermée met l'équipage à couvert")
+	var k_i_mot := -1
+	for kk in k_jc.pieces.size():
+		if Assemblage.piece(String(k_jc.pieces[kk].piece)).get("famille", "") == "moteur":
+			k_i_mot = kk
+	var k_pos_mot: Array = k_jc.pieces[k_i_mot].pos
+	var k_sans_mot := ConstructionLibre.retirer(k_jc, k_i_mot)
+	var k_remis := ConstructionLibre.poser(k_sans_mot, String(k_jc.pieces[k_i_mot].piece), Vector2i(int(k_pos_mot[0]), int(k_pos_mot[1])))
+	ok(not k_remis.is_empty() and k_remis.pieces[k_remis.pieces.size() - 1].pos == k_pos_mot, "un moteur se pose sous une coque, à la même place")
+	var k_pile := ConstructionLibre.poser(k_jc, "coque_berline", Vector2i(1, 6))
+	ok(not k_pile.is_empty() and int(k_pile.pieces[k_pile.pieces.size() - 1].pos[1]) >= 7, "deux coques s'empilent sans se chevaucher")
+	ok(ConstructionLibre.piece_en(k_jc, Vector2i(5, 3), true) == k_jc.pieces.size() - 1, "onglet Carrosserie : toucher désigne la coque d'abord")
+	var k_nu := k_jc
+	for x in range(2, 18):
+		k_nu = ConstructionLibre.peindre(k_nu, Vector2i(x, 2), "")
+	ok(k_nu.pieces.filter(func(q): return String(q.piece) == "coque_berline").is_empty(), "sans châssis, la coque tombe")
+	var k_jm := ConstructionLibre.poser(k_j, "coque_berline", Vector2i(1, 2), true)
+	var k_F := ConstructionLibre.forme(k_jm, true)
+	var k_sp: Array = k_F.formes.filter(func(f): return f.get("sprite", "") == "coques/coque_berline")
+	ok(k_sp.size() == 1 and k_sp[0].z == 3 and k_sp[0].miroir and absf(float(k_sp[0].opac) - ConstructionLibre.OPAC_ECORCHE) < 0.01, "coque retournée, dessinée au-dessus, transparente en vue écorchée")
+	# Extensibilité : toute coque du catalogue se charge, se pose et se calcule (une coque ajoutée est testée d'office)
+	var k_grand := jeep()
+	for x in range(18, 38):
+		k_grand = ConstructionLibre.peindre(k_grand, Vector2i(x, 2), "acier")
+	var k_n_coques := 0
+	for id in Assemblage.catalogue().pieces:
+		if Assemblage.piece(id).get("famille", "") != "coque":
+			continue
+		k_n_coques += 1
+		var k_g2 := ConstructionLibre.poser(k_grand, id, Vector2i(3, 2))
+		ok(ResourceLoader.exists("res://assets/%s.png" % Assemblage.piece(id).image) and not k_g2.is_empty()
+			and float(ConstructionLibre.analyser(k_g2).stats.poids_kg) > float(ConstructionLibre.analyser(k_grand).stats.poids_kg), "catalogue : %s se charge, se pose et pèse" % id)
+	ok(k_n_coques >= 5, "%d coques au catalogue" % k_n_coques)
+	ok("coque_berline" in CombatModele.coques_donnees("citroen_traction") and CombatModele.coques_donnees("willys_mb").is_empty(), "une épave de Traction livre sa coque, une Jeep rien")
+	var k_mb := CombatModele.new(3)
+	k_mb.bac_a_sable = true
+	ok(k_mb.palette_grille(0).any(func(q): return q.id == "coque_blindee"), "bac à sable : les coques sont dans la palette")
+
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)

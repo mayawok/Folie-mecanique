@@ -21,9 +21,9 @@ const C_DISCRET := Color("#A8A196")
 const C_VERT := Color("#5FB36B")
 const C_ROUGE := Color("#D9674A")
 const C_SOL := Color(0.55, 0.45, 0.3)
-const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A")}
+const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A"), "coque": Color("#7A6A55")}
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["moteur", "Moteurs"],
-	["poste", "Postes"], ["cabine", "Cabines"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
+	["poste", "Postes"], ["cabine", "Cabines"], ["coque", "Carrosserie"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
 const ESSIEUX := ["essieu_leger", "essieu_lourd", "essieu_char"]
 const TRAINS := ["roue_petite", "roue_moyenne", "roue_grande", "chenille"]
 const NOMS_ROLES := {"conducteur": "Conducteur", "tireur": "Tireur", "chargeur": "Chargeur", "chef": "Chef de char",
@@ -42,6 +42,8 @@ var onglet := "chassis"
 var outil := {"chassis": "acier", "essieux": "essieu_leger", "roues": "roue_moyenne"}
 var _palette: Array = []    # [{id, n}] ; n = -1 : sans limite
 var _glisse := ""           # pièce tenue au doigt
+var _miroir := false        # coque retournée (avant vers l'arrière), DEC-067
+var _ecorche := false       # vue écorchée forcée dans l'onglet Carrosserie
 var _rect0 := Vector2i(-99, -99)   # coin de départ du rectangle de châssis
 var _rect1 := Vector2i(-99, -99)
 var _appui := false
@@ -214,7 +216,7 @@ func _placer_apercu(b := {}) -> void:
 	if source.get("cases", []).is_empty():
 		_apercu.visible = false
 		return
-	var F := ConstructionLibre.forme(source)
+	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage"])   # coques transparentes quand on règle la mécanique
 	_apercu.ppm = _cell / ConstructionLibre.C
 	_apercu.configurer_d(F)
 	_apercu.visible = true
@@ -298,9 +300,10 @@ func _appuyer(cell: Vector2i) -> void:
 		"equipage":
 			pass
 		_:
-			var i := ConstructionLibre.piece_en(a, cell)
+			var i := ConstructionLibre.piece_en(a, cell, onglet == "coque")
 			if i >= 0:   # une pièce posée se reprend au doigt pour la déplacer
 				_glisse = String(a.pieces[i].piece)
+				_miroir = bool(a.pieces[i].get("miroir", false))
 				a = ConstructionLibre.retirer(a, i)
 				_an = ConstructionLibre.analyser(a)
 				_placer_apercu(_candidat())
@@ -327,7 +330,7 @@ func _relacher(pos: Vector2) -> void:
 		_glisse = ""
 		return
 	if _dans_grille(pos):
-		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse))
+		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse), _miroir and _est_coque(_glisse))
 		if b.is_empty():
 			_dire("%s doit reposer sur le châssis ou une autre pièce, sans chevaucher : rendue au bac." % Assemblage.piece(_glisse).nom)
 		else:
@@ -358,7 +361,16 @@ func _cible(pos: Vector2, id: String) -> Vector2i:
 func _candidat() -> Dictionary:
 	if _glisse == "" or onglet == "roues" or not _dans_grille(_doigt):
 		return {}
-	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse))
+	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse))
+
+
+func _basculer_ecorche() -> void:
+	_ecorche = not _ecorche
+	_placer_apercu()
+
+
+func _est_coque(id: String) -> bool:
+	return Assemblage.piece(id).get("famille", "") == "coque"
 
 
 func _son() -> void:
@@ -494,6 +506,13 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 				res.append({"titre": "Bancs : %d soldat%s" % [nt, "s" if nt > 1 else ""], "detail": "embarqués depuis la réserve, débarquables en combat",
 					"actif": false, "couleur": Color("#6E5A3A")})
 		_:
+			if onglet == "coque":   # réglages du plan carrosserie (DEC-067)
+				res.append({"titre": "Retourner : avant vers la %s" % ("gauche" if _miroir else "droite"),
+					"detail": "s'applique à la prochaine coque posée ; reprenez une coque pour la retourner", "actif": true,
+					"action": func(): _miroir = not _miroir, "couleur": Color("#4A4A4A")})
+				res.append({"titre": "Vue écorchée : %s" % ("oui" if _ecorche else "non"),
+					"detail": "coques transparentes pour voir la mécanique dessous", "actif": true,
+					"action": _basculer_ecorche, "couleur": Color("#4A4A4A")})
 			for it in _palette:
 				var f := Assemblage.piece(it.id)
 				if f.get("famille", "") != onglet:
@@ -505,6 +524,7 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 					"cabine": detail = "%d place%s%s" % [int(f.sieges), "s" if int(f.sieges) > 1 else "", ", ouverte" if f.ouvert else ""]
 					"arme": detail = String(CombatModele.donnees().armes[f.arme].nom)
 					"equipement": detail = "prend %.1f ch au moteur" % float(f.get("puissance_ch", 0))
+					"coque": detail = "blindage %d%s" % [int(f.get("blindage", 0)), ", abrite l'équipage" if f.get("couvert", false) else ", ouverte"]
 				var id: String = it.id
 				res.append({"titre": "%s%s" % [f.nom, "" if reste < 0 else "  ×%d" % reste], "id": id,
 					"detail": "%s · %d×%d cases · %d kg · glissez sur la grille" % [detail, int(f.emprise[0]), int(f.emprise[1]), int(f.get("poids_kg", 0))],

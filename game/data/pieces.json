@@ -1201,6 +1201,11 @@
     3
    ],
    "fabrique": true
-  }
+  },
+  "coque_berline": {"famille": "coque", "nom": "Coque de berline", "image": "coques/coque_berline", "emprise": [18, 5], "poids_kg": 450, "pv": 60, "blindage": 2, "metal": 6, "couvert": true, "donneurs": ["citroen_traction"]},
+  "coque_nez_avion": {"famille": "coque", "nom": "Nez d'avion", "image": "coques/coque_nez_avion", "emprise": [12, 5], "poids_kg": 180, "pv": 40, "blindage": 1, "metal": 5, "couvert": true, "donneurs": []},
+  "coque_cabine_camion": {"famille": "coque", "nom": "Cabine de camion", "image": "coques/coque_cabine_camion", "emprise": [10, 8], "poids_kg": 380, "pv": 70, "blindage": 3, "metal": 6, "couvert": true, "donneurs": ["citroen_t23", "diamond_t"]},
+  "coque_caisse_camion": {"famille": "coque", "nom": "Caisse de camion", "image": "coques/coque_caisse_camion", "emprise": [16, 6], "poids_kg": 300, "pv": 50, "blindage": 1, "metal": 4, "couvert": false, "donneurs": ["citroen_t23", "dukw"]},
+  "coque_blindee": {"famille": "coque", "nom": "Coque blindée", "image": "coques/coque_blindee", "emprise": [24, 7], "poids_kg": 2600, "pv": 220, "blindage": 25, "metal": 30, "couvert": true, "donneurs": ["m3_half_track", "m3_stuart", "m4_sherman"]}
  }
 }

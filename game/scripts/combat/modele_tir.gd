@@ -445,7 +445,17 @@ func _butin_vehicule(v: Veh, facteur: float) -> Dictionary:
 			if id.begins_with("a"):
 				classe = donnees().armes[v.profil.armes[int(id.substr(1))]].classe
 			comps.append({"kind": genre_piece(id), "classe": classe, "nom": "%s (%s)" % [p.nom, v.nom], "etat": etat})
-	return {"ressources": res, "composants": comps}
+	return {"ressources": res, "composants": comps, "pieces": coques_donnees(v.type)}
+
+
+# Coques de donneur livrées par une épave de ce type (DEC-067) : lues dans le catalogue, aucune liste dans le code
+static func coques_donnees(type: String) -> Array:
+	var res := []
+	for id in Assemblage.catalogue().pieces:
+		var f: Dictionary = Assemblage.piece(id)
+		if f.get("famille", "") == "coque" and type in f.get("donneurs", []):
+			res.append(id)
+	return res
 
 
 # --- Réparation ------------------------------------------------------------

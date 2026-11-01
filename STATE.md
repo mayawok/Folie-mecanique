@@ -26,7 +26,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
   Tests : 6 suites sans écran vertes ; capture `tests/capture_cabines.gd`. **À vérifier sur iPhone.**
 - **Interface allégée** (DEC-065) : bulles de ressources avec icônes, cadran jour/nuit en coin, plus de bandes noires, cartes compactes. À vérifier sur iPhone.
 - **Visuels de la grille intégrés** (DEC-066) : roues, moteurs, cabines, phares, armes. Restent : tuiles de châssis, essieux, chenilles, benne.
-- **Construction en deux plans décidée** (DEC-067, à coder) : mécanique sur la grille, carrosserie de donneur posée par-dessus ;
+- **Construction en deux plans** (DEC-067, phase 1 codée : DEC-068, à vérifier sur iPhone) : mécanique sur la grille, carrosserie de donneur posée par-dessus ;
   catalogues extensibles sans code (moteurs, roues, châssis, suspensions et leur hauteur, coques, greffes). Détails : `GRILLE.md`.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
@@ -49,7 +49,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet essaie le **Bac à sable** (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. **Coder la phase 1 de DEC-067** (deux plans + 5 coques entières) ; produire les 5 coques (prompt ChatGPT unique).
+2. Essayer l'onglet **Carrosserie** dans le Bac à sable ; puis phase 2 de DEC-067 (la scie).
 3. Coder le lore des marchands sur châssis de char et des villes traversées (DEC-061) ; intégrer les visuels de la grille.
 4. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
 5. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.

@@ -138,7 +138,7 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
 - Tests : `test_libre.gd` (section « Demandes du 01/11 après-midi »), parcours écran `capture_libre.gd`.
 - Ouvert : zoom à deux doigts si les cases restent petites ; visuels des pièces (planches ChatGPT) à intégrer.
 
-## Construction « à la Mad Max » : deux plans (DEC-067, décidé le 01/11, à coder)
+## Construction « à la Mad Max » : deux plans (DEC-067 ; phase 1 codée le 01/11, DEC-068)
 
 Constat : en un seul plan (une case = une pièce), une cabine ne peut pas passer au-dessus d'un moteur et le résultat n'a pas
 l'allure d'un véhicule récupéré. Les véhicules de Fury Road ont été bâtis en deux temps : une **base qui roule**, puis une
@@ -154,6 +154,13 @@ Gigahorse : deux Cadillac 1959 empilées ; FDK : coccinelle découpée soudée s
   2) **scie** : un ou deux traits, on garde un morceau (découpage de polygone sur l'image, sans nouveau dessin) ;
   3) **greffes** sur points d'accroche (tubes, pare-buffle, éperon, piques, bidons, drapeaux ; certaines ont un effet) et
   **base roulante** trouvée (camion, Jeep, char sans tourelle) ; la peinture de cases reste pour rallonger ou renforcer.
+
+### Phase 1 telle que codée (DEC-068)
+
+- Famille `coque` dans `pieces.json` : `image`, `emprise`, `poids_kg`, `pv`, `blindage`, `metal`, `couvert`, `donneurs`.
+- Règles : coque par-dessus tout, sans chevaucher une autre coque, tenue par le châssis ou empilée ; arme ou pièce posable sur
+  le toit d'une coque. Onglet Carrosserie : retourner, vue écorchée ; coques transparentes dans les autres onglets.
+- Restent : scie (phase 2), greffes et base roulante (phase 3), donneur du nez d'avion, réglage des valeurs en essai.
 
 ### Extensibilité (exigence du porteur de projet)
 
