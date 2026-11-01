@@ -3,7 +3,10 @@
 # - barre d'icônes à droite : coche (construire), croix (quitter), une icône par catégorie ;
 # - la catégorie choisie ouvre un tiroir simplifié : vignettes des pièces (miniature du vrai dessin), listes courtes ;
 # - toute pièce posée se reprend au doigt pour la déplacer, ou se lâche hors de la grille pour la retirer ;
-# - tôles tracées d'un coin à l'autre (glisser), à l'angle voulu ; peinture de bande ; remorques ; véhicules du jeu (bac à sable).
+# - tôles tracées d'un coin à l'autre (glisser), à l'angle voulu ; peinture de bande ; remorques ; véhicules du jeu (bac à sable) ;
+# - vue de la grille : pincer pour zoomer ou dézoomer, bouton « déplacer » (flèche à quatre têtes) pour faire glisser la vue, bouton « cadrer » (DEC-081) ;
+# - tiroir : chaque pièce est dessinée à l'échelle réduite dans une vignette à sa proportion, vignettes rangées sans chevauchement (DEC-081) ;
+# - roues et suspensions sont des pièces glissées : elles s'aimantent sur l'essieu ou le pont rigide le plus proche (DEC-081).
 # Aucune règle ici : tout passe par ConstructionLibre et CombatModele (grille_de, palette_grille, construire_grille).
 class_name EditeurGrille
 extends Control
@@ -27,8 +30,8 @@ const ACTIONS := ["valider", "quitter"]
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["suspension", "Suspension"], ["moteur", "Moteurs"],
 	["poste", "Postes"], ["coque", "Carrosserie"], ["toles", "Tôles"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"],
 	["peinture", "Peinture"], ["plans", "Plans"], ["vehicules", "Véhicules"]]
-const AIDES := {"chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Touchez un essieu",
-	"suspension": "Touchez un pont en l'air", "moteur": "Glissez sur la grille", "poste": "Glissez sur la grille",
+const AIDES := {"chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Glissez vers un essieu",
+	"suspension": "Glissez sur un pont rigide", "moteur": "Glissez sur la grille", "poste": "Glissez sur la grille",
 	"coque": "Glissez ; se superposent", "toles": "Glissez d'un point à un autre", "arme": "Glissez sur la grille",
 	"equipement": "Collées à l'extérieur", "equipage": "Touchez un siège", "peinture": "Ton de tout le véhicule",
 	"plans": "Enregistrer ou charger", "vehicules": "Partir d'un véhicule"}
@@ -48,6 +51,11 @@ const AIDE_ROLES := {"conducteur": "obligatoire", "tireur": "sert une arme", "ch
 	"mecanicien": "répare plus vite", "infirmier": "soigne", "passager": "aucun rôle"}
 const BROUILLON := "user://grille_brouillon.json"
 const DECALAGE_DOIGT := 1.6   # la pièce glissée flotte au-dessus du doigt (en cases) pour rester visible
+const ZOOM_MIN := 0.4         # vue de la grille : taille d'une case, de 0,4 à 3,5 fois le cadrage de base
+const ZOOM_MAX := 3.5
+const RAYON_AIMANT := 3.0     # roues et suspensions : distance (en cases) à laquelle une pièce s'aimante sur son essieu ou son pont
+const LABEL_H := 24.0         # tiroir : hauteur du titre sous chaque vignette
+const ECART := 8.0            # tiroir : écart entre vignettes
 
 var m                       # CombatModele
 var uid := 0                # véhicule modifié (0 = véhicule neuf)
@@ -68,9 +76,28 @@ var _tole0 := Vector2i(-99, -99)   # tôle en cours de tracé (coins de cases)
 var _tole1 := Vector2i(-99, -99)
 var _appui := false
 var _doigt := Vector2.ZERO
-var _vue := Rect2i(8, 0, 24, 10)   # fenêtre de la grille affichée (en cases)
-var _grille := Rect2()
-var _cell := 40.0
+var _vue := Rect2i(8, 0, 24, 10)   # fenêtre de cadrage de base (en cases) : le véhicule et une marge
+var _zone := Rect2()        # fenêtre de la grille à l'écran : tout ce qui dépasse est coupé
+var _cell := 40.0           # côté d'une case à l'écran (px), zoom compris
+var _cell0 := 40.0          # côté d'une case au cadrage de base
+var _ox := 0.0              # écran : bord gauche de la colonne 0
+var _oy := 0.0              # écran : ligne du sol (bas de la rangée 0)
+var _cam_manuelle := false  # le joueur a zoomé ou déplacé la vue : on ne la recadre plus tout seul
+var _deplacer := false      # outil « déplacer » : un doigt fait glisser la vue
+var _pan_actif := false
+var _pan_depart := Vector2.ZERO
+var _pan_o := Vector2.ZERO
+var _toques := {}           # doigts posés : index -> position (pincement)
+var _pince := false
+var _pince_d0 := 1.0
+var _pince_cell := 40.0
+var _pince_monde := Vector2.ZERO
+var _bloque := false        # geste annulé par un pincement : la souris émulée est ignorée jusqu'au prochain appui
+var _avant := {}            # grille au début du geste en cours (annulation si un deuxième doigt se pose)
+var _lia_prise := false     # la suspension tenue vient de la grille (hors de la grille, elle est retirée)
+var _rev := 0               # change à chaque modification de la grille
+var _coins: Array = []      # coins où accrocher une tôle (mis en cache)
+var _coins_rev := -1
 var _rail := Rect2()        # barre d'icônes
 var _tiroir := Rect2()      # tiroir de la catégorie
 var _rect_nom := Rect2()
@@ -82,7 +109,9 @@ var _message := ""
 var _msg_t := 0.0
 var _confirmer := false     # armes sans tireur : deuxième appui sur la coche pour confirmer
 var _apercu: VehiculeDessin
-var _dessus: Control
+var _monde: Control         # fenêtre de la grille (coupe ce qui dépasse) : quadrillage, véhicule, repères
+var _surcouche: Control     # repères posés sur le véhicule, dans la fenêtre
+var _dessus: Control        # interface : nom, barre d'icônes, tiroir, bilan, boutons de vue
 static var _minis := {}     # id -> formes de la pièce seule (miniatures du tiroir)
 
 
@@ -97,19 +126,38 @@ func ouvrir(modele, vehicule_uid: int) -> void:
 		_dire("Brouillon repris.")
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:   # un doigt peut se perdre quand la page passe en arrière-plan
+		_toques.clear()
+		_pince = false
+
+
 func _ready() -> void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter = MOUSE_FILTER_STOP
+	# Fenêtre de la grille : elle coupe ce qui dépasse quand on zoome (quadrillage, véhicule, repères)
+	_monde = Control.new()
+	_monde.clip_contents = true
+	_monde.mouse_filter = MOUSE_FILTER_IGNORE
+	_monde.draw.connect(_dessiner_grille)
+	add_child(_monde)
 	_apercu = VehiculeDessin.new()
 	_apercu.equipage = true
 	_apercu.mouse_filter = MOUSE_FILTER_IGNORE
-	add_child(_apercu)
+	_monde.add_child(_apercu)
+	_surcouche = Control.new()
+	_surcouche.mouse_filter = MOUSE_FILTER_IGNORE
+	_surcouche.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_surcouche.draw.connect(_dessiner_surcouche)
+	_monde.add_child(_surcouche)
 	_dessus = Control.new()
 	_dessus.mouse_filter = MOUSE_FILTER_IGNORE
 	_dessus.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_dessus.draw.connect(_dessiner_dessus)
 	add_child(_dessus)
-	resized.connect(_disposer)
+	resized.connect(func():   # écran retourné : on recadre
+		_cam_manuelle = false
+		_disposer())
 	_maj(true)
 
 
@@ -119,6 +167,7 @@ func _choisir_onglet(id: String) -> void:
 	_page = 0
 	_glisse = ""
 	_suppr_plans = false
+	_deplacer = false   # choisir une catégorie, c'est vouloir construire
 	_disposer()
 
 
@@ -138,14 +187,83 @@ func _disposer() -> void:
 	var tw := clampf(size.x * 0.16, 280.0, 330.0)
 	_tiroir = Rect2(Vector2(_rail.position.x - 12.0 - tw, haut), Vector2(tw, bas - haut))
 	_rect_nom = Rect2(Vector2(g, haut), Vector2(minf(560.0, _tiroir.position.x - g - 20.0), 44.0))
-	var zone := Rect2(Vector2(g, haut + 52.0), Vector2(_tiroir.position.x - 16.0 - g, bas - haut - 52.0 - 64.0))
-	var sous_sol := 2.2   # place pour les roues sous la ligne 0
-	_cell = floorf(minf(zone.size.x / float(_vue.size.x), zone.size.y / (float(_vue.size.y) + sous_sol)))
-	var taille := Vector2(_vue.size) * _cell
-	_grille = Rect2(zone.position + Vector2((zone.size.x - taille.x) * 0.5, (zone.size.y - taille.y - sous_sol * _cell) * 0.5), taille)
+	_zone = Rect2(Vector2(g, haut + 52.0), Vector2(_tiroir.position.x - 16.0 - g, bas - haut - 52.0 - 64.0))
+	if _monde == null:
+		return
+	_monde.position = _zone.position
+	_monde.size = _zone.size
+	if _cam_manuelle:
+		_cadrer_base()
+		_borner_camera()
+	else:
+		_cadrer()
 	_placer_apercu()
 	queue_redraw()
+	_monde.queue_redraw()
+	_surcouche.queue_redraw()
 	_dessus.queue_redraw()
+
+
+# Taille d'une case au cadrage de base : la fenêtre `_vue` (le véhicule et une marge) remplit la zone
+func _cadrer_base() -> void:
+	var sous_sol := 2.2   # place pour les roues sous la ligne 0
+	_cell0 = floorf(minf(_zone.size.x / float(_vue.size.x), _zone.size.y / (float(_vue.size.y) + sous_sol)))
+
+
+# Cadrage de base : zoom 1, véhicule centré
+func _cadrer() -> void:
+	_cadrer_base()
+	_cell = _cell0
+	var sous_sol := 2.2
+	var taille := Vector2(_vue.size) * _cell
+	var coin := _zone.position + Vector2((_zone.size.x - taille.x) * 0.5, (_zone.size.y - taille.y - sous_sol * _cell) * 0.5)
+	_ox = coin.x - float(_vue.position.x) * _cell
+	_oy = coin.y + taille.y
+
+
+# La grille reste toujours un peu visible : on ne peut pas la perdre hors de l'écran
+func _borner_camera() -> void:
+	var G := ConstructionLibre.taille()
+	var marge := 90.0
+	_cell = clampf(_cell, _cell0 * ZOOM_MIN, _cell0 * ZOOM_MAX)
+	_ox = clampf(_ox, _zone.position.x + marge - float(G.x) * _cell, _zone.end.x - marge)
+	_oy = clampf(_oy, _zone.position.y + marge, _zone.end.y - marge + float(G.y) * _cell)
+
+
+func _rafraichir_camera() -> void:
+	_zoomer_apercu()
+	_monde.queue_redraw()
+	_surcouche.queue_redraw()
+	_dessus.queue_redraw()
+
+
+func _recadrer() -> void:   # bouton « cadrer » : retour au cadrage de base
+	_cam_manuelle = false
+	_ajuster_vue()
+	_disposer()
+
+
+# Zoom autour d'un point de l'écran : le point reste sous le doigt
+func _zoomer_autour(f: Vector2, k: float) -> void:
+	var w := _mon(f)
+	_cell = clampf(_cell * k, _cell0 * ZOOM_MIN, _cell0 * ZOOM_MAX)
+	_ox = f.x - w.x * _cell
+	_oy = f.y + w.y * _cell
+	_cam_manuelle = true
+	_borner_camera()
+	_rafraichir_camera()
+
+
+# Cases visibles dans la fenêtre (limitées à la grille)
+func _cases_visibles() -> Rect2i:
+	var G := ConstructionLibre.taille()
+	var a0 := _mon(Vector2(_zone.position.x, _zone.end.y))
+	var a1 := _mon(Vector2(_zone.end.x, _zone.position.y))
+	var x0 := clampi(int(floor(a0.x)), 0, G.x)
+	var x1 := clampi(int(ceil(a1.x)), 0, G.x)
+	var y0 := clampi(int(floor(a0.y)), 0, G.y)
+	var y1 := clampi(int(ceil(a1.y)), 0, G.y)
+	return Rect2i(x0, y0, maxi(0, x1 - x0), maxi(0, y1 - y0))
 
 
 # Fenêtre affichée : le véhicule et une marge autour, au moins `grille_vue_min` cases
@@ -184,6 +302,7 @@ func _maj(revoir_vue := false) -> void:
 		a.nom = ConstructionLibre.nom_propose(a)
 	_an = ConstructionLibre.analyser(a)
 	_confirmer = false
+	_rev += 1
 	if revoir_vue:
 		_ajuster_vue()
 	_ecrire_brouillon()
@@ -199,7 +318,18 @@ func _placer_apercu(b := {}) -> void:
 	_apercu.ppm = _cell / ConstructionLibre.C
 	_apercu.configurer_d(F)
 	_apercu.visible = true
-	_apercu.position = _px(float(F.x0), float(F.sol)) - Vector2(0, _apercu.size.y)
+	_apercu.position = _px(float(F.x0), float(F.sol)) - _zone.position - Vector2(0, _apercu.size.y)   # l'aperçu vit dans la fenêtre
+
+
+# Zoom ou déplacement de la vue : le dessin du véhicule suit sans être recalculé
+func _zoomer_apercu() -> void:
+	if _apercu == null or not _apercu.visible or _apercu.D.is_empty():
+		return
+	_apercu.ppm = _cell / ConstructionLibre.C
+	_apercu.custom_minimum_size = Vector2(_apercu.D.longueur, _apercu.D.hauteur) * _apercu.ppm
+	_apercu.size = _apercu.custom_minimum_size
+	_apercu.position = _px(float(_apercu.D.x0), float(_apercu.D.sol)) - _zone.position - Vector2(0, _apercu.size.y)
+	_apercu.queue_redraw()
 
 
 func _process(delta: float) -> void:
@@ -207,6 +337,7 @@ func _process(delta: float) -> void:
 		return
 	_msg_t = maxf(0.0, _msg_t - delta)
 	_dessus.queue_redraw()
+	_surcouche.queue_redraw()
 
 
 func _peut_construire() -> bool:
@@ -219,27 +350,46 @@ func _restant(id: String, n: int) -> int:
 	return n - ConstructionLibre.utilisees(a, id)
 
 
+func _mon(pos: Vector2) -> Vector2:   # écran -> cases (nombres décimaux)
+	return Vector2((pos.x - _ox) / _cell, (_oy - pos.y) / _cell)
+
+
 func _case(pos: Vector2) -> Vector2i:
-	return Vector2i(_vue.position.x + int(floor((pos.x - _grille.position.x) / _cell)), int(floor((_grille.end.y - pos.y) / _cell)))
+	var q := _mon(pos)
+	return Vector2i(int(floor(q.x)), int(floor(q.y)))
 
 
 func _coin(pos: Vector2) -> Vector2i:   # coin de case le plus proche (tôles)
-	return Vector2i(_vue.position.x + int(round((pos.x - _grille.position.x) / _cell)), int(round((_grille.end.y - pos.y) / _cell)))
+	var q := _mon(pos)
+	return Vector2i(int(round(q.x)), int(round(q.y)))
 
 
 func _px(x: float, y: float) -> Vector2:   # cases (absolues) -> écran
-	return Vector2(_grille.position.x + (x - _vue.position.x) * _cell, _grille.end.y - y * _cell)
+	return Vector2(_ox + x * _cell, _oy - y * _cell)
 
 
 func _dans_grille(pos: Vector2) -> bool:
-	return _grille.grow_individual(0, 0, 0, 2.2 * _cell).has_point(pos)
+	return _zone.has_point(pos)
 
 
 # --- Toucher ----------------------------------------------------------------------------------
 func _gui_input(e: InputEvent) -> void:
+	if e is InputEventMagnifyGesture:   # pavé tactile d'un ordinateur
+		_zoomer_autour(e.position, e.factor)
+		accept_event()
+		return
+	if e is InputEventMouseButton and (e.button_index == MOUSE_BUTTON_WHEEL_UP or e.button_index == MOUSE_BUTTON_WHEEL_DOWN):   # molette (ordinateur)
+		if e.pressed and _zone.has_point(e.position):
+			_zoomer_autour(e.position, 1.15 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.15)
+		accept_event()
+		return
 	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
 		_doigt = e.position
 		if e.pressed:
+			if _pince:
+				accept_event()
+				return
+			_bloque = false
 			_appui = true
 			for c in _cartes:
 				if c.rect.has_point(e.position):
@@ -247,14 +397,33 @@ func _gui_input(e: InputEvent) -> void:
 						c.action.call()
 					accept_event()
 					return
-			if _dans_grille(e.position):
+			if _deplacer and _zone.has_point(e.position):
+				_pan_actif = true
+				_pan_depart = e.position
+				_pan_o = Vector2(_ox, _oy)
+			elif _dans_grille(e.position):
+				_avant = a.duplicate(true)
 				_appuyer(_case(e.position))
 		else:
-			_relacher(e.position)
+			if not _bloque and not _pan_actif:
+				_relacher(e.position)
+			_pan_actif = false
 			_appui = false
+			_avant = {}
 		accept_event()
 	elif e is InputEventMouseMotion:
 		_doigt = e.position
+		if _pince or _bloque:
+			accept_event()
+			return
+		if _pan_actif and _appui:
+			_ox = _pan_o.x + (e.position.x - _pan_depart.x)
+			_oy = _pan_o.y + (e.position.y - _pan_depart.y)
+			_cam_manuelle = true
+			_borner_camera()
+			_rafraichir_camera()
+			accept_event()
+			return
 		if _appui and onglet == "chassis" and _rect0.x > -99:
 			var c := _case(e.position)
 			_rect1 = Vector2i(clampi(c.x, 0, ConstructionLibre.taille().x - 1), clampi(c.y, 0, ConstructionLibre.taille().y - 1))
@@ -263,6 +432,74 @@ func _gui_input(e: InputEvent) -> void:
 		if _glisse != "":
 			_placer_apercu(_candidat())
 		accept_event()
+
+
+# --- Pincement ------------------------------------------------------------------------------------
+# Deux doigts zooment et déplacent la vue. Le premier doigt arrive aussi comme souris émulée (c'est lui qui construit) ;
+# les doigts sont suivis ici, par _input, qui voit tous les événements tactiles quoi qu'en fasse l'interface.
+func _input(e: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	if e is InputEventScreenTouch:
+		_toucher(make_input_local(e))
+	elif e is InputEventScreenDrag:
+		_glisser_doigt(make_input_local(e))
+
+
+func _toucher(e: InputEvent) -> void:
+	if e.pressed:
+		_toques[e.index] = e.position
+		if _toques.size() == 2 and not _pince:
+			_debut_pince()
+	else:
+		_toques.erase(e.index)
+		if _toques.size() < 2:
+			_pince = false
+
+
+func _glisser_doigt(e: InputEvent) -> void:
+	if not _toques.has(e.index):
+		return
+	_toques[e.index] = e.position
+	if _pince and _toques.size() >= 2:
+		var ks := _toques.keys()
+		var p0: Vector2 = _toques[ks[0]]
+		var p1: Vector2 = _toques[ks[1]]
+		var milieu := (p0 + p1) * 0.5
+		_cell = clampf(_pince_cell * maxf(p0.distance_to(p1), 1.0) / _pince_d0, _cell0 * ZOOM_MIN, _cell0 * ZOOM_MAX)
+		_ox = milieu.x - _pince_monde.x * _cell   # le point pincé reste sous les doigts : on zoome et on déplace à la fois
+		_oy = milieu.y + _pince_monde.y * _cell
+		_cam_manuelle = true
+		_borner_camera()
+		_rafraichir_camera()
+
+
+func _debut_pince() -> void:
+	_annuler_geste()   # le premier doigt n'était pas un geste de construction
+	var ks := _toques.keys()
+	var p0: Vector2 = _toques[ks[0]]
+	var p1: Vector2 = _toques[ks[1]]
+	_pince = true
+	_bloque = true
+	_pince_d0 = maxf(p0.distance_to(p1), 1.0)
+	_pince_cell = _cell
+	_pince_monde = _mon((p0 + p1) * 0.5)
+
+
+# Ce que faisait le premier doigt est défait (pièce reprise remise, tracé abandonné)
+func _annuler_geste() -> void:
+	_rect0 = Vector2i(-99, -99)
+	_tole0 = Vector2i(-99, -99)
+	_glisse = ""
+	_extra = {}
+	_essieu_tenu = {}
+	_lia_prise = false
+	_pan_actif = false
+	if not _avant.is_empty() and _avant != a:
+		a = _avant
+		_maj()
+	_avant = {}
+	_placer_apercu()
 
 
 func _appuyer(cell: Vector2i) -> void:
@@ -300,27 +537,26 @@ func _appuyer(cell: Vector2i) -> void:
 				_dire("Pont à %d cm sous le châssis : reliez-le (Suspension)." % (ConstructionLibre.ecart_pont(a, ConstructionLibre.essieu_en(a, cell.x)) * 25))
 			_son()
 			_maj()
-		"roues":
-			_monter_roue(cell.x)
-		"suspension":
-			var ex := ConstructionLibre.essieu_en(a, cell.x)
-			if ex.is_empty() or not Assemblage.piece(String(ex.piece)).get("pont", false):
+		"roues":   # un simple toucher monte la roue sur l'essieu le plus proche (DEC-081)
+			_monter_roue(_roue_cible(_doigt, outil.roues), outil.roues)
+		"suspension":   # la liaison posée se reprend au doigt ; sinon on relie le pont touché avec la pièce choisie (DEC-081)
+			var x_pont := _pont_cible(_doigt)
+			if x_pont < 0:
 				_dire("Posez d'abord un pont rigide en l'air (Essieux).")
 				return
-			var lid: String = outil.suspension
-			var b := ConstructionLibre.relier(a, cell.x, lid)
-			if b.is_empty():   # la liaison choisie ne couvre pas l'écart : on prend celle qui convient
-				var h := ConstructionLibre.ecart_pont(a, ex)
-				var ok_ids := ConstructionLibre.liaisons_pour(h)
-				if ok_ids.is_empty():
-					_dire("Pont trop loin du châssis (%d cm)." % (h * 25))
-					return
-				lid = ok_ids[0]
-				b = ConstructionLibre.relier(a, cell.x, lid)
-				_dire("À %d cm : %s." % [h * 25, Assemblage.piece(lid).nom])
-			a = b
-			_son()
-			_maj(true)
+			var lid_actuel := String(ConstructionLibre.essieu_en(a, x_pont).get("liaison", ""))
+			if lid_actuel != "":
+				var bd := ConstructionLibre.relier(a, x_pont, "")
+				if not bd.is_empty():
+					a = bd
+					if outil.suspension != "":   # glissée ailleurs ou hors de la grille ; l'outil « Détacher » la retire simplement
+						_glisse = lid_actuel
+						_lia_prise = true
+					_son()
+					_maj()
+				return
+			if outil.suspension != "":
+				_poser_liaison(_doigt, outil.suspension)
 		"coque":
 			var i := ConstructionLibre.piece_en(a, cell, true)
 			if i >= 0 and _scie != "":
@@ -342,7 +578,7 @@ func _relacher(pos: Vector2) -> void:
 		var q1 := _coin(pos)
 		_tole0 = Vector2i(-99, -99)
 		if q0 == q1:   # simple toucher : retire la tôle touchée
-			var i := ConstructionLibre.tole_en(a, Vector2(_vue.position.x + (pos.x - _grille.position.x) / _cell, (_grille.end.y - pos.y) / _cell))
+			var i := ConstructionLibre.tole_en(a, _mon(pos))
 			if i >= 0:
 				a = ConstructionLibre.retirer_tole(a, i)
 				_son()
@@ -388,10 +624,20 @@ func _relacher(pos: Vector2) -> void:
 		return
 	if _glisse == "":
 		return
-	if not Assemblage.piece(_glisse).get("famille", "") in ConstructionLibre.FAMILLES_PIECES:   # roue tenue au doigt
-		if _dans_grille(pos):
-			_monter_roue(_case(pos).x)
+	var famille := String(Assemblage.piece(_glisse).get("famille", ""))
+	if not famille in ConstructionLibre.FAMILLES_PIECES:   # roue ou suspension tenue au doigt : elle s'aimante sur l'essieu ou le pont le plus proche
+		var tenue := _glisse
+		var reprise := _lia_prise
 		_glisse = ""
+		_lia_prise = false
+		if famille == "liaison":
+			if _dans_grille(pos):
+				_poser_liaison(_visee(pos), tenue)
+			elif reprise:
+				_dire("Suspension retirée.")
+				_maj(true)
+		elif _dans_grille(pos):
+			_monter_roue(_roue_cible(_visee(pos), tenue), tenue)
 		return
 	if not _dans_grille(pos):
 		_dire("%s retiré." % Assemblage.piece(_glisse).get("nom", "Pièce"))
@@ -406,8 +652,12 @@ func _relacher(pos: Vector2) -> void:
 	_maj(true)
 
 
-func _monter_roue(x: int) -> void:
-	var b := ConstructionLibre.monter_train(a, x, outil.roues)
+# Monte (train_id) ou démonte ("") la roue de l'essieu de la colonne x ; x < 0 : aucun essieu à portée
+func _monter_roue(x: int, train_id: String) -> void:
+	if x < 0:
+		_dire("Approchez la roue d'un essieu." if train_id != "" else "Touchez un essieu pour démonter sa roue.")
+		return
+	var b := ConstructionLibre.monter_train(a, x, train_id)
 	if b.is_empty():
 		_dire("Posez d'abord un essieu ici.")
 		return
@@ -416,12 +666,94 @@ func _monter_roue(x: int) -> void:
 	_maj()
 
 
+# « Démonter » (roues) ou « Détacher » (suspension) : on touche ensuite un essieu ou un pont, rien n'est tenu au doigt
+func _vider_outil(cle: String) -> void:
+	outil[cle] = ""
+	_glisse = ""
+
+
+# Suspension prise dans le tiroir : on la glisse ensuite sur un pont rigide
+func _prendre_liaison(id: String) -> void:
+	outil.suspension = id
+	_tenir(id)
+	var ponts := a.get("essieux", []).filter(func(ex): return bool(Assemblage.piece(String(ex.piece)).get("pont", false)))
+	if ponts.is_empty():
+		_dire("Posez d'abord un pont rigide en l'air (Essieux).")
+
+
+# --- Aimantation (DEC-081) ------------------------------------------------------------------------------
+func _visee(pos: Vector2) -> Vector2:   # point visé par une pièce glissée : un peu au-dessus du doigt, comme les autres pièces
+	return pos - Vector2(0, DECALAGE_DOIGT * _cell)
+
+
+# Hauteur du centre d'un essieu (en cases) : un pont rigide est en l'air, les autres contre le châssis
+func _y_axe(ex: Dictionary) -> float:
+	var x := int(ex.x)
+	if bool(Assemblage.piece(String(ex.piece)).get("pont", false)):
+		return float(ex.get("y", ConstructionLibre.y_essieu(a, x)))
+	return float(ConstructionLibre.y_essieu(a, x))
+
+
+# Colonne de l'essieu le plus proche du point visé (l'essieu s'aimante), -1 si aucun n'est à portée
+func _roue_cible(pos: Vector2, train_id: String) -> int:
+	var q := _mon(pos)
+	var d_roue := float(Assemblage.piece(train_id).get("diametre_cases", 2)) if train_id != "" else 2.0
+	var meilleur := -1
+	var dmin := INF
+	for ex in a.get("essieux", []):
+		var d := Vector2(q.x - (float(ex.x) + 0.5), q.y - _y_axe(ex)).length()
+		if d < dmin:
+			dmin = d
+			meilleur = int(ex.x)
+	return meilleur if dmin <= RAYON_AIMANT + d_roue * 0.5 else -1
+
+
+# Colonne du pont rigide le plus proche du point visé (distance au lien entre le pont et le châssis), -1 si aucun
+func _pont_cible(pos: Vector2) -> int:
+	var q := _mon(pos)
+	var meilleur := -1
+	var dmin := INF
+	for ex in a.get("essieux", []):
+		if not bool(Assemblage.piece(String(ex.piece)).get("pont", false)):
+			continue
+		var x := int(ex.x)
+		var yp := _y_axe(ex)
+		var yc := float(ConstructionLibre.y_essieu(a, x))
+		var haut := clampf(q.y, minf(yp, yc), maxf(yp, yc))   # point le plus proche sur le lien vertical
+		var d := Vector2(q.x - (float(x) + 0.5), q.y - haut).length()
+		if d < dmin:
+			dmin = d
+			meilleur = x
+	return meilleur if dmin <= RAYON_AIMANT else -1
+
+
+# Pose la suspension `lid` sur le pont rigide le plus proche du point visé ; si elle ne couvre pas l'écart, celle qui convient est prise et annoncée
+func _poser_liaison(pos: Vector2, lid: String) -> void:
+	var x := _pont_cible(pos)
+	if x < 0:
+		_dire("Approchez la suspension d'un pont rigide (Essieux).")
+		return
+	var ex := ConstructionLibre.essieu_en(a, x)
+	var b := ConstructionLibre.relier(a, x, lid)
+	if b.is_empty():
+		var h := ConstructionLibre.ecart_pont(a, ex)
+		var ok_ids := ConstructionLibre.liaisons_pour(h)
+		if ok_ids.is_empty():
+			_dire("Pont trop loin du châssis (%d cm)." % (h * 25))
+			return
+		lid = ok_ids[0]
+		b = ConstructionLibre.relier(a, x, lid)
+		_dire("À %d cm : %s." % [h * 25, Assemblage.piece(lid).nom])
+	a = b
+	_son()
+	_maj(true)
+
+
 # Case visée par la pièce tenue : centrée sur le doigt, un peu au-dessus pour rester visible
 func _cible(pos: Vector2, id: String) -> Vector2i:
 	var e: Array = _extra.get("emprise", Assemblage.piece(id).emprise)
-	var p := pos - Vector2(0, DECALAGE_DOIGT * _cell)
-	return Vector2i(_vue.position.x + int(floor((p.x - _grille.position.x) / _cell - float(e[0]) * 0.5 + 0.5)),
-		int(floor((_grille.end.y - p.y) / _cell - float(e[1]) * 0.5 + 0.5)))
+	var q := _mon(_visee(pos))
+	return Vector2i(int(floor(q.x - float(e[0]) * 0.5 + 0.5)), int(floor(q.y - float(e[1]) * 0.5 + 0.5)))
 
 
 func _candidat() -> Dictionary:
@@ -590,22 +922,22 @@ func _items() -> Array:
 		"essieux":
 			for id in _famille("essieu"):
 				var f := Assemblage.piece(id)
-				res.append({"titre": _court(f.nom), "detail": "%.1f t" % (float(f.charge_kg) / 1000.0), "choisi": outil.essieux == id,
+				res.append({"titre": _court(f.nom), "detail": "%.1f t" % (float(f.charge_kg) / 1000.0), "choisi": outil.essieux == id, "ar": 1.6,
 					"action": func(): outil.essieux = id, "mini": func(c, r): _mini_essieu(c, r, bool(f.get("pont", false)))})
-		"roues":
+		"roues":   # la roue se glisse vers un essieu : elle s'y aimante (DEC-081)
 			for id in _famille("train"):
 				var f := Assemblage.piece(id)
-				res.append({"titre": _court(f.nom), "choisi": outil.roues == id, "action": func():
+				res.append({"titre": _court(f.nom), "choisi": outil.roues == id, "ar": 2.0 if String(f.get("type", "")) == "chenilles" else 1.0, "action": func():
 					outil.roues = id
 					_tenir(id), "mini": func(c, r): _mini_roue(c, r, id)})
-			res.append({"titre": "Démonter", "choisi": outil.roues == "", "action": func(): outil.roues = "",
+			res.append({"titre": "Démonter", "choisi": outil.roues == "", "action": func(): _vider_outil("roues"),
 				"mini": func(c, r): _mini_icone(c, r, "croix", C_ROUGE)})
-		"suspension":
+		"suspension":   # vraie pièce : on la glisse sur un pont rigide, on la reprend au doigt pour la déplacer ou la retirer (DEC-081)
 			for id in _famille("liaison"):
 				var f := Assemblage.piece(id)
-				res.append({"titre": _court(f.nom), "detail": "%d-%d cm" % [int(f.hauteur_min) * 25, int(f.hauteur_max) * 25], "choisi": outil.suspension == id,
-					"action": func(): outil.suspension = id, "mini": func(c, r): _mini_liaison(c, r, String(f.get("dessin", "lames")))})
-			res.append({"titre": "Détacher", "choisi": outil.suspension == "", "action": func(): outil.suspension = "",
+				res.append({"titre": _court(f.nom), "detail": "%d-%d cm" % [int(f.hauteur_min) * 25, int(f.hauteur_max) * 25], "choisi": outil.suspension == id, "ar": 1.7,
+					"action": func(): _prendre_liaison(id), "mini": func(c, r): _mini_liaison(c, r, String(f.get("dessin", "lames")))})
+			res.append({"titre": "Détacher", "choisi": outil.suspension == "", "action": func(): _vider_outil("suspension"),
 				"mini": func(c, r): _mini_icone(c, r, "croix", C_ROUGE)})
 		"toles":
 			var n_t: int = a.get("toles", []).size()
@@ -690,7 +1022,9 @@ func _items() -> Array:
 				match fam:
 					"moteur": det = "%d ch" % int(f.puissance_ch)
 					"radiateur": det = "%d ch" % int(f.refroidit_ch)
+				var emp: Array = f.get("emprise", [1, 1])
 				res.append({"titre": _court(f.nom), "detail": det, "n": reste, "actif": reste != 0, "choisi": _glisse == id,
+					"ar": float(emp[0]) / maxf(1.0, float(emp[1])),   # la vignette a la proportion de la pièce
 					"action": func(): _tenir(id), "mini": func(c, r): _mini_piece(c, r, id)})
 			if res.is_empty():
 				res.append({"ligne": true, "titre": "Rien en réserve", "detail": "fouillez des épaves", "actif": false})
@@ -721,29 +1055,85 @@ func _draw() -> void:
 		var k: float = maxf(size.x / ts.x, size.y / ts.y)
 		draw_texture_rect(FOND_GRILLE, Rect2((size - ts * k) * 0.5, ts * k), false)
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.25))
-	draw_rect(Rect2(_grille.position - Vector2(8, 8), _grille.size + Vector2(16, 16 + 2.2 * _cell)), Color(C_ZONE, 0.55))
-	for i in _vue.size.x + 1:
-		draw_line(_grille.position + Vector2(i * _cell, 0), _grille.position + Vector2(i * _cell, _grille.size.y), C_GRILLE, 1.0)
-	for j in _vue.size.y + 1:
-		draw_line(_grille.position + Vector2(0, j * _cell), _grille.position + Vector2(_grille.size.x, j * _cell), C_GRILLE, 1.0)
-	draw_rect(_grille, C_CADRE, false, 2.0)
 
 
-# Au-dessus du dessin du véhicule : repères, pièce tenue, tracés en cours, nom, barre d'icônes, tiroir, bilan
-func _dessiner_dessus() -> void:
-	var c := _dessus
+# Quadrillage de toute la grille, dans la fenêtre : ce qui dépasse quand on zoome est coupé
+func _dessiner_grille() -> void:
+	var c := _monde
+	c.draw_set_transform(-_zone.position)   # on dessine en coordonnées d'écran
+	c.draw_rect(_zone, Color(C_ZONE, 0.55))
+	var G := ConstructionLibre.taille()
+	var v := _cases_visibles()
+	if v.size.x > 0 and v.size.y > 0:
+		var gauche := _px(v.position.x, 0).x
+		var droite := _px(v.end.x, 0).x
+		var haut := _px(0, v.end.y).y
+		var bas := _px(0, v.position.y).y
+		for i in range(v.position.x, v.end.x + 1):
+			var x := _ox + float(i) * _cell
+			c.draw_line(Vector2(x, haut), Vector2(x, bas), C_GRILLE, 1.0)
+		for j in range(v.position.y, v.end.y + 1):
+			var y := _oy - float(j) * _cell
+			c.draw_line(Vector2(gauche, y), Vector2(droite, y), C_GRILLE, 1.0)
+	c.draw_rect(Rect2(_px(0, G.y), Vector2(G.x, G.y) * _cell), C_CADRE, false, 2.0)
+	if _deplacer:   # outil « déplacer » actif : la fenêtre est cerclée d'accent
+		c.draw_rect(Rect2(_zone.position + Vector2(2, 2), _zone.size - Vector2(4, 4)), Color(C_ACCENT, 0.8), false, 3.0)
+
+
+# Roue ou suspension tenue au doigt et pont ou essieu sur lequel elle s'aimante (-1 : aucun)
+func _aimant_courant() -> int:
+	if not _appui or _glisse == "" or not _dans_grille(_doigt):
+		return -1
+	var fam := String(Assemblage.piece(_glisse).get("famille", ""))
+	if fam == "train":
+		return _roue_cible(_visee(_doigt), _glisse)
+	if fam == "liaison":
+		return _pont_cible(_visee(_doigt))
+	return -1
+
+
+# Coins où accrocher une tôle (mis en cache : recalculés quand la grille change)
+func _coins_de_toles() -> Array:
+	if _coins_rev != _rev:
+		_coins = []
+		var G := ConstructionLibre.taille()
+		for x in range(0, G.x + 1):
+			for y in range(0, G.y + 1):
+				if ConstructionLibre.coin_accroche(a, Vector2i(x, y)):
+					_coins.append(Vector2i(x, y))
+		_coins_rev = _rev
+	return _coins
+
+
+# Repères posés sur le véhicule, dans la fenêtre : sol, pièces, essieux, tracés en cours, pièce tenue
+func _dessiner_surcouche() -> void:
+	var c := _surcouche
+	c.draw_set_transform(-_zone.position)
 	var police := get_theme_default_font()
-	_cartes.clear()
 	var det: Dictionary = _an.get("detail", {})
 	if det.has("sol"):
-		c.draw_line(_px(_vue.position.x, det.sol), _px(_vue.end.x, det.sol), C_SOL, 3.0)
+		var ys := _px(0, det.sol).y
+		c.draw_line(Vector2(_zone.position.x, ys), Vector2(_zone.end.x, ys), C_SOL, 3.0)
 	for p in a.get("pieces", []):   # contour léger des pièces posées (pour les reprendre au doigt)
 		var e: Array = p.get("emprise", Assemblage.piece(String(p.piece)).emprise)
 		c.draw_rect(Rect2(_px(int(p.pos[0]), int(p.pos[1]) + int(e[1])), Vector2(int(e[0]), int(e[1])) * _cell), Color(1, 1, 1, 0.14), false, 1.5)
 	for e in ConstructionLibre.essieux_nus(a):   # essieux sans roue : un moyeu nu à monter
-		var ctr := _px(int(e.x) + 0.5, ConstructionLibre.y_essieu(a, int(e.x)))
+		var ctr := _px(float(e.x) + 0.5, _y_axe(e))
 		c.draw_circle(ctr, _cell * 0.28, Color("#C9C6BC"))
 		c.draw_arc(ctr, _cell * 0.9, 0, TAU, 24, Color(C_ACCENT, 0.8), 2.0)
+	var x_aimant := _aimant_courant()
+	var fam_tenue := String(Assemblage.piece(_glisse).get("famille", "")) if _glisse != "" else ""
+	if onglet == "roues" or fam_tenue == "train":   # cibles des roues : un cercle autour de chaque essieu, le plus proche s'allume
+		for ex in a.get("essieux", []):
+			var vise := int(ex.x) == x_aimant
+			c.draw_arc(_px(float(ex.x) + 0.5, _y_axe(ex)), _cell * (1.25 if vise else 0.95), 0, TAU, 28, Color(C_VERT if vise else C_ACCENT, 0.95 if vise else 0.5), 3.5 if vise else 2.0)
+	if onglet == "suspension" or fam_tenue == "liaison":   # cibles des suspensions : les ponts rigides (orange tant qu'ils ne sont pas reliés)
+		for ex in a.get("essieux", []):
+			if not bool(Assemblage.piece(String(ex.piece)).get("pont", false)):
+				continue
+			var vise := int(ex.x) == x_aimant
+			var relie := ConstructionLibre.liaison_ok(a, ex)
+			c.draw_arc(_px(float(ex.x) + 0.5, _y_axe(ex)), _cell * (1.4 if vise else 1.1), 0, TAU, 28, Color(C_VERT if (vise or relie) else C_ACCENT, 0.95 if vise else 0.7), 3.5 if vise else 2.0)
 	for d in det.get("essieux", []):   # charge sous chaque essieu
 		var ctr := _px(float(d.x) + 0.5, float(d.y) - float(d.r))
 		if d.has("charge") and float(d.charge) > float(d.capacite):
@@ -762,10 +1152,10 @@ func _dessiner_dessus() -> void:
 		c.draw_rect(r, C_ACCENT, false, 3.0)
 		c.draw_string(police, r.position + Vector2(6, -10), "%.2f × %.2f m" % [r.size.x / _cell * ConstructionLibre.C, r.size.y / _cell * ConstructionLibre.C], HORIZONTAL_ALIGNMENT_LEFT, -1, 20, C_TEXTE)
 	if onglet == "toles":   # coins où accrocher une tôle, et tôle en cours avec son angle
-		for x in range(_vue.position.x, _vue.end.x + 1):
-			for y in range(0, _vue.size.y + 1):
-				if ConstructionLibre.coin_accroche(a, Vector2i(x, y)):
-					c.draw_circle(_px(x, y), 3.5, Color(C_ACCENT, 0.7))
+		var vis := _cases_visibles()
+		for q in _coins_de_toles():
+			if q.x >= vis.position.x and q.x <= vis.end.x and q.y >= vis.position.y and q.y <= vis.end.y:
+				c.draw_circle(_px(q.x, q.y), 3.5, Color(C_ACCENT, 0.7))
 		if _tole0.x > -99:
 			var pa := _px(_tole0.x, _tole0.y)
 			var pb := _px(_tole1.x, _tole1.y)
@@ -775,8 +1165,8 @@ func _dessiner_dessus() -> void:
 				var dd := Vector2(_tole1 - _tole0).abs()
 				var ang := int(round(rad_to_deg(atan2(dd.x, dd.y))))   # 0° : verticale
 				c.draw_string(police, pb + Vector2(12, -12), "%d°" % ang, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, C_TEXTE)
-	# Pièce tenue : cadre vert (posable) ou rouge (non)
-	if _glisse != "" and Assemblage.piece(_glisse).get("famille", "") in ConstructionLibre.FAMILLES_PIECES and _dans_grille(_doigt):
+	# Pièce tenue : cadre vert (posable) ou rouge (non) ; roue ou suspension aimantée sur son essieu
+	if _glisse != "" and fam_tenue in ConstructionLibre.FAMILLES_PIECES and _dans_grille(_doigt):
 		var e: Array = _extra.get("emprise", Assemblage.piece(_glisse).emprise)
 		var q := _cible(_doigt, _glisse)
 		var ok := not _candidat().is_empty()
@@ -784,21 +1174,91 @@ func _dessiner_dessus() -> void:
 		if not ok:
 			c.draw_rect(r, Color(C_ROUGE, 0.35))
 		c.draw_rect(r, C_VERT if ok else C_ROUGE, false, 3.0)
-	elif _glisse != "" and _appui:
-		var r := Rect2(_doigt - Vector2(44, 88), Vector2(88, 88))
-		_mini_piece_ou_roue(c, r, _glisse)
+	elif _appui and fam_tenue == "train" and _dans_grille(_doigt):
+		var centre := _visee(_doigt)
+		if x_aimant >= 0:   # la roue saute sur l'essieu
+			centre = _px(float(x_aimant) + 0.5, _y_axe(ConstructionLibre.essieu_en(a, x_aimant)))
+		_fantome_roue(c, centre, _glisse)
+	elif _appui and fam_tenue == "liaison" and x_aimant >= 0:
+		_fantome_liaison(c, x_aimant, _glisse)
+
+
+# Roue tenue au doigt : à sa vraie taille, translucide
+func _fantome_roue(c: Control, centre: Vector2, id: String) -> void:
+	var f := Assemblage.piece(id)
+	var dc := float(f.get("diametre_cases", 2))
+	var d := dc * _cell
+	if String(f.get("type", "")) == "chenilles":
+		c.draw_circle(centre, d * 0.5, Color(0.12, 0.115, 0.105, 0.8))
+		c.draw_circle(centre, d * 0.26, Color(0.35, 0.34, 0.31, 0.9))
+		return
+	var t := VehiculeDessin._tex("roue_petite" if dc < 2.5 else ("roue_moyenne" if dc < 4.0 else "roue_grande"))
+	c.draw_texture_rect(t, Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false, Color(1, 1, 1, 0.8))
+
+
+# Suspension tenue au doigt : son vrai dessin entre le pont visé et le châssis
+func _fantome_liaison(c: Control, x: int, lid: String) -> void:
+	var ex := ConstructionLibre.essieu_en(a, x)
+	if ex.is_empty():
+		return
+	var K := ConstructionLibre.C
+	var G := ConstructionLibre.taille()
+	var x_min := G.x
+	var x_max := 0
+	for q in a.get("cases", []):
+		x_min = mini(x_min, int(q[0]))
+		x_max = maxi(x_max, int(q[0]) + 1)
+	var formes := []
+	ConstructionLibre._formes_liaison(formes, String(Assemblage.piece(lid).get("dessin", "lames")), (float(x) + 0.5) * K,
+		float(ConstructionLibre.y_essieu(a, x)) * K, _y_axe(ex) * K, float(x) + 0.5 < float(x_min + x_max) * 0.5)
+	_mini_formes(c, Rect2(_px(0, G.y), Vector2(G.x, G.y) * _cell), formes, Rect2(0.0, 0.0, float(G.x) * K, float(G.y) * K))
+
+
+# Interface : nom, message, barre d'icônes, tiroir, bilan, boutons de la vue
+func _dessiner_dessus() -> void:
+	var c := _dessus
+	var police := get_theme_default_font()
+	_cartes.clear()
+	# Pièce tenue hors de la grille (ou sans cible) : une vignette suit le doigt
+	if _glisse != "" and _appui:
+		var fam := String(Assemblage.piece(_glisse).get("famille", ""))
+		if not _dans_grille(_doigt) or (fam == "liaison" and _aimant_courant() < 0):
+			_mini_piece_ou_roue(c, Rect2(_doigt - Vector2(44, 88), Vector2(88, 88)), _glisse)
 	# Nom (touchez pour renommer) et message
 	c.draw_rect(_rect_nom, Color(0, 0, 0, 0.35))
 	c.draw_string(police, _rect_nom.position + Vector2(12, 31), "✎ " + String(a.get("nom", "Véhicule")) + ("   ·   remorque" if ConstructionLibre.remorque(a) else ""),
 		HORIZONTAL_ALIGNMENT_LEFT, _rect_nom.size.x - 20, 22, C_TEXTE)
 	_cartes.append({"rect": _rect_nom, "action": _renommer, "actif": true})
 	if _msg_t > 0.0:
-		var mr := Rect2(Vector2(_grille.position.x, _rect_nom.end.y + 6), Vector2(_tiroir.position.x - _grille.position.x - 16.0, 36))
+		var mr := Rect2(Vector2(_zone.position.x, _rect_nom.end.y + 6), Vector2(_tiroir.position.x - _zone.position.x - 16.0, 36))
 		c.draw_rect(mr, Color(0, 0, 0, 0.6))
 		c.draw_string(police, mr.position + Vector2(12, 26), _message, HORIZONTAL_ALIGNMENT_LEFT, mr.size.x - 20, 20, C_ACCENT)
+	_dessiner_boutons_vue(c, police)
 	_dessiner_rail(c, police)
 	_dessiner_tiroir(c, police)
 	_dessiner_bilan(c, police)
+
+
+# Boutons de la vue, en bas à gauche de la grille : déplacer (flèche à quatre têtes) et cadrer
+func _dessiner_boutons_vue(c: Control, police: Font) -> void:
+	var t := 64.0
+	var x := _zone.position.x + 10.0
+	var y := _zone.end.y - t - 10.0
+	var defs := [["deplacer", _deplacer, _basculer_deplacer], ["cadrer", false, _recadrer]]
+	for i in defs.size():
+		var r := Rect2(Vector2(x + float(i) * (t + 10.0), y), Vector2(t, t))
+		var actif: bool = defs[i][1]
+		c.draw_rect(r, Color(0.2, 0.17, 0.08, 0.92) if actif else C_TUILE)
+		c.draw_rect(r, C_ACCENT if actif else Color(1, 1, 1, 0.3), false, 3.0 if actif else 1.5)
+		_icone(c, r.grow(-t * 0.2), String(defs[i][0]), C_ACCENT if actif else C_TEXTE)
+		_cartes.append({"rect": r, "action": defs[i][2], "actif": true})
+	if _cam_manuelle:   # niveau de zoom
+		c.draw_string(police, Vector2(x + 2.0 * (t + 10.0) + 4.0, y + t - 20.0), "%d %%" % int(round(_cell / _cell0 * 100.0)), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, C_DISCRET)
+
+
+func _basculer_deplacer() -> void:
+	_deplacer = not _deplacer
+	_dire("Glissez un doigt pour déplacer la vue." if _deplacer else "Déplacement terminé : on construit de nouveau.")
 
 
 func _dessiner_rail(c: Control, police: Font) -> void:
@@ -836,34 +1296,7 @@ func _dessiner_tiroir(c: Control, police: Font) -> void:
 			titre = o[1]
 	c.draw_string(police, T.position + Vector2(12, 34), titre, HORIZONTAL_ALIGNMENT_LEFT, T.size.x - 20, 28, C_ACCENT)
 	c.draw_string(police, T.position + Vector2(12, 60), String(AIDES.get(onglet, "")), HORIZONTAL_ALIGNMENT_LEFT, T.size.x - 20, 17, C_DISCRET)
-	var items := _items()
-	var y0 := T.position.y + 76.0
-	var bas := T.end.y - 64.0
-	var cols := 3
-	var tw := (T.size.x - 16.0 - (cols - 1) * 8.0) / cols
-	var th := tw + 30.0
-	# Mise en page de toutes les cartes, puis la page affichée
-	var pages := [[]]
-	var x := 0
-	var y := y0
-	for it in items:
-		var h: float = 70.0 if it.get("ligne", false) else th
-		if it.get("ligne", false) and x > 0:
-			x = 0
-			y += th + 8.0
-		if y + h > bas:
-			pages.append([])
-			x = 0
-			y = y0
-		var w: float = T.size.x - 16.0 if it.get("ligne", false) else tw
-		pages.back().append({"it": it, "r": Rect2(T.position + Vector2(8.0 + x * (tw + 8.0), y - T.position.y), Vector2(w, h))})
-		if it.get("ligne", false):
-			y += h + 8.0
-		else:
-			x += 1
-			if x >= cols:
-				x = 0
-				y += th + 8.0
+	var pages := _pages_tiroir(_items(), T, T.position.y + 76.0, T.end.y - 64.0)
 	_page = clampi(_page, 0, pages.size() - 1)
 	for q in pages[_page]:
 		var it: Dictionary = q.it
@@ -876,14 +1309,17 @@ func _dessiner_tiroir(c: Control, police: Font) -> void:
 			c.draw_string(police, r.position + Vector2(12, 30), String(it.titre), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 20, 21, C_TEXTE if actif else C_DISCRET)
 			c.draw_string(police, r.position + Vector2(12, 56), String(it.get("detail", "")), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 20, 15, C_DISCRET)
 		else:
-			var mr := Rect2(r.position + Vector2(6, 6), Vector2(r.size.x - 12, r.size.x - 12))
+			# La pièce elle-même, à l'échelle réduite, remplit sa vignette ; le titre est dessous
+			var mr := Rect2(r.position + Vector2(5, 5), Vector2(r.size.x - 10.0, r.size.y - LABEL_H - 8.0))
 			if it.has("mini"):
 				it.mini.call(c, mr)
-			c.draw_string(police, Vector2(r.position.x + 4, r.end.y - 8), String(it.titre), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 8, 14, C_TEXTE if actif else C_DISCRET)
+			c.draw_string(police, Vector2(r.position.x + 3.0, r.end.y - 8.0), String(it.titre), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 6.0, 14, C_TEXTE if actif else C_DISCRET)
 			var n: int = it.get("n", -1)
 			if n >= 0:
+				c.draw_string_outline(police, r.position + Vector2(r.size.x - 34, 20), "×%d" % n, HORIZONTAL_ALIGNMENT_RIGHT, 30, 16, 4, Color(0, 0, 0, 0.85))
 				c.draw_string(police, r.position + Vector2(r.size.x - 34, 20), "×%d" % n, HORIZONTAL_ALIGNMENT_RIGHT, 30, 16, C_ACCENT if n > 0 else C_ROUGE)
 			if String(it.get("detail", "")) != "":
+				c.draw_string_outline(police, r.position + Vector2(6, 18), String(it.detail), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 40, 13, 4, Color(0, 0, 0, 0.85))
 				c.draw_string(police, r.position + Vector2(6, 18), String(it.detail), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - 40, 13, C_DISCRET)
 		if it.has("action"):
 			_cartes.append({"rect": r, "action": it.action, "actif": actif})
@@ -897,8 +1333,60 @@ func _dessiner_tiroir(c: Control, police: Font) -> void:
 			_cartes.append({"rect": z[0], "action": z[3], "actif": z[2]})
 
 
+# Range les vignettes en rangées qui remplissent la largeur du tiroir : chaque vignette a la proportion de sa pièce (« ar »),
+# donc la pièce occupe toute sa place ; rangées et vignettes ne se chevauchent jamais. Une page de plus quand le tiroir est plein.
+func _pages_tiroir(items: Array, T: Rect2, y0: float, bas: float) -> Array:
+	var W := T.size.x - 16.0
+	var hmax := clampf((bas - y0 - ECART) * 0.5 - LABEL_H, 70.0, 130.0)   # deux rangées par page au mieux
+	var hmin := 56.0
+	var rangees := []
+	var cur: Array = []
+	var somme := 0.0
+	for it in items:
+		if it.get("ligne", false):
+			if not cur.is_empty():
+				rangees.append(_rangee(cur, somme, W, hmax))
+				cur = []
+				somme = 0.0
+			rangees.append({"ligne": true, "items": [it], "h": 70.0})
+			continue
+		var ar := clampf(float(it.get("ar", 1.0)), 0.4, 6.0)
+		if not cur.is_empty() and (W - ECART * float(cur.size())) / (somme + ar) < hmin:   # la rangée serait trop écrasée : on passe à la suivante
+			rangees.append(_rangee(cur, somme, W, hmax))
+			cur = []
+			somme = 0.0
+		cur.append(it)
+		somme += ar
+		if (W - ECART * float(cur.size() - 1)) / somme <= hmax:   # rangée pleine : les vignettes remplissent la largeur
+			rangees.append(_rangee(cur, somme, W, hmax))
+			cur = []
+			somme = 0.0
+	if not cur.is_empty():
+		rangees.append(_rangee(cur, somme, W, hmax))
+	var pages := [[]]
+	var y := y0
+	for rg in rangees:
+		var h: float = rg.h
+		var hr := h if rg.ligne else h + LABEL_H
+		if y + hr > bas and not pages.back().is_empty():
+			pages.append([])
+			y = y0
+		var x := T.position.x + 8.0
+		for it in rg.items:
+			var w: float = W if rg.ligne else clampf(float(it.get("ar", 1.0)), 0.4, 6.0) * h
+			pages.back().append({"it": it, "r": Rect2(Vector2(x, y), Vector2(w, hr))})
+			x += w + ECART
+		y += hr + ECART
+	return pages
+
+
+func _rangee(its: Array, somme: float, W: float, hmax: float) -> Dictionary:
+	var h := (W - ECART * float(its.size() - 1)) / maxf(somme, 0.1)   # hauteur qui remplit exactement la largeur
+	return {"ligne": false, "items": its.duplicate(), "h": clampf(h, 40.0, hmax)}
+
+
 func _dessiner_bilan(c: Control, police: Font) -> void:
-	var x := _grille.position.x
+	var x := _zone.position.x
 	var lw := _tiroir.position.x - x - 24.0
 	var y := size.y - float(_mg.get("b", 20.0)) - 40.0
 	if not _an.get("ok", false):
@@ -977,6 +1465,21 @@ func _icone(c: Control, r: Rect2, id: String, col: Color) -> void:
 				c.draw_line(o + Vector2(w * 0.25, w * (0.25 + 0.17 * k)), o + Vector2(w * 0.75, w * (0.25 + 0.17 * k)), Color("#C8D8E8"), 2.0)
 		"vehicules":
 			_tex_dans(c, r, VehiculeDessin._tex("vehicules/willys_mb"))
+		"deplacer":   # flèche à quatre têtes
+			var ct := o + Vector2(w * 0.5, w * 0.5)
+			for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
+				var pointe: Vector2 = ct + d * (w * 0.46)
+				var perp := Vector2(-d.y, d.x)
+				c.draw_line(ct, pointe - d * (w * 0.08), col, ep)
+				c.draw_colored_polygon(PackedVector2Array([pointe, pointe - d * (w * 0.2) + perp * (w * 0.14), pointe - d * (w * 0.2) - perp * (w * 0.14)]), col)
+		"cadrer":   # quatre coins : revenir au cadrage de base
+			for sx in [0.0, 1.0]:
+				for sy in [0.0, 1.0]:
+					var coin := o + Vector2(w * (0.08 + 0.84 * sx), w * (0.08 + 0.84 * sy))
+					var dx := 1.0 - 2.0 * sx
+					var dy := 1.0 - 2.0 * sy
+					c.draw_line(coin, coin + Vector2(dx * w * 0.3, 0.0), col, ep)
+					c.draw_line(coin, coin + Vector2(0.0, dy * w * 0.3), col, ep)
 
 
 func _mini_icone(c: Control, r: Rect2, id: String, col: Color) -> void:
@@ -1077,8 +1580,11 @@ func _mini_couleur(c: Control, r: Rect2, hex: String) -> void:
 
 
 func _mini_piece_ou_roue(c: Control, r: Rect2, id: String) -> void:
-	if Assemblage.piece(id).get("famille", "") in ConstructionLibre.FAMILLES_PIECES:
+	var fam := String(Assemblage.piece(id).get("famille", ""))
+	if fam in ConstructionLibre.FAMILLES_PIECES:
 		_mini_piece(c, r, id)
+	elif fam == "liaison":
+		_mini_liaison(c, r, String(Assemblage.piece(id).get("dessin", "lames")))
 	else:
 		_mini_roue(c, r, id)
 

@@ -242,3 +242,10 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 **Bac à sable : véhicules du jeu.** Onglet Véhicules : grille vide, ou n'importe quel véhicule du jeu converti, à modifier ou à transformer en remorque.
 
 **Plus tard** : gazogène, marques des pièces (demandés, notés pour plus tard).
+
+## Vue, vignettes, aimantation (DEC-081)
+- **Vue** : deux doigts zooment (40 % – 350 %) et déplacent ; bouton « déplacer » (flèche à quatre têtes) = un doigt fait glisser la vue ; bouton « cadrer » = retour au cadrage de base. La grille est coupée à la fenêtre ; une vue réglée à la main n'est plus recadrée automatiquement.
+- **Tiroir** : chaque vignette montre la pièce elle-même, à la proportion de son emprise ; rangées justifiées, pagination quand c'est plein, aucun chevauchement.
+- **Roues** : glissées vers un essieu, elles s'aimantent sur le plus proche (cercles repères ; le visé passe au vert).
+- **Suspension** : vraie pièce du tiroir, glissée sur un pont rigide en l'air ; reprise au doigt pour la déplacer ou la retirer (hors grille). Même modèle de données qu'avant (`essieu.liaison`).
+- Test : `game/tests/test_editeur.gd` (écrit, non exécuté lors de la rédaction).
