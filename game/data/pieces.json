@@ -63,6 +63,13 @@
      "pv": 12,
      "blindage": 45,
      "metal": 1
+    },
+    "tube": {
+     "nom": "Tubes soudés",
+     "poids_kg": 12,
+     "pv": 2,
+     "blindage": 0,
+     "metal": 0.15
     }
    },
    "reservoir_base": 10,
@@ -1209,8 +1216,13 @@
   "coque_blindee": {"famille": "coque", "nom": "Coque blindée", "image": "coques/coque_blindee", "emprise": [24, 7], "poids_kg": 2600, "pv": 220, "blindage": 25, "metal": 30, "couvert": true, "donneurs": ["m3_half_track", "m3_stuart", "m4_sherman"]},
   "pont_rigide_leger": {"famille": "essieu", "nom": "Pont rigide léger", "pont": true, "charge_kg": 2200, "poids_kg": 90, "pv": 30, "metal": 2},
   "pont_rigide_lourd": {"famille": "essieu", "nom": "Pont rigide lourd", "pont": true, "charge_kg": 7000, "poids_kg": 260, "pv": 55, "metal": 3},
-  "liaison_lames": {"famille": "liaison", "nom": "Ressorts à lames", "dessin": "lames", "hauteur_cases": 0, "charge_kg": 7000, "debattement": 0.3, "poids_kg": 70, "pv": 30, "metal": 1},
-  "liaison_tirants": {"famille": "liaison", "nom": "Tirants et ressorts", "dessin": "tirants", "hauteur_cases": 2, "charge_kg": 3500, "debattement": 0.65, "poids_kg": 60, "pv": 22, "metal": 1},
-  "liaison_rehausse": {"famille": "liaison", "nom": "Grands tirants (rehausse)", "dessin": "rehausse", "hauteur_cases": 4, "charge_kg": 2800, "debattement": 0.85, "poids_kg": 95, "pv": 18, "metal": 2}
+  "liaison_lames": {"famille": "liaison", "nom": "Ressorts à lames", "dessin": "lames", "hauteur_min": 0, "hauteur_max": 1, "charge_kg": 7000, "debattement": 0.3, "poids_kg": 70, "pv": 30, "metal": 1},
+  "liaison_tirants": {"famille": "liaison", "nom": "Tirants et ressorts", "dessin": "tirants", "hauteur_min": 1, "hauteur_max": 3, "charge_kg": 3500, "debattement": 0.65, "poids_kg": 60, "pv": 22, "metal": 1},
+  "liaison_rehausse": {"famille": "liaison", "nom": "Grands tirants (rehausse)", "dessin": "rehausse", "hauteur_min": 3, "hauteur_max": 6, "charge_kg": 2800, "debattement": 0.85, "poids_kg": 95, "pv": 18, "metal": 2},
+  "roue_course": {"famille": "train", "nom": "Roue fine de course (75 cm)", "type": "roues", "diametre_cases": 3, "vitesse_max": 10.5, "sable": 0.5, "charge_kg": 700, "poids_kg": 18, "pv": 8, "metal": 0.5},
+  "roue_geante": {"famille": "train", "nom": "Roue géante (1,5 m)", "type": "roues", "diametre_cases": 6, "vitesse_max": 7.0, "sable": 0.97, "charge_kg": 6500, "poids_kg": 260, "pv": 50, "metal": 3},
+  "roue_tracteur": {"famille": "train", "nom": "Roue de tracteur (2 m)", "type": "roues", "diametre_cases": 8, "vitesse_max": 5.5, "sable": 1.0, "charge_kg": 9000, "poids_kg": 420, "pv": 70, "metal": 4},
+  "moteur_compresseur": {"famille": "moteur", "nom": "V8 à compresseur", "puissance_ch": 220, "conso": 4.5, "poids_kg": 300, "pv": 45, "emprise": [5, 3], "metal": 5},
+  "moteur_avion": {"famille": "moteur", "nom": "Moteur d'avion en étoile", "puissance_ch": 450, "conso": 6.0, "poids_kg": 420, "pv": 50, "emprise": [5, 4], "metal": 6}
  }
 }

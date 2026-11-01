@@ -42,6 +42,36 @@ func _ready() -> void:
 			volumes[b] = float(cfg.get_value("volumes", b, volumes[b]))
 	for b in BUS:
 		regler(b, volumes[b], false)
+	_ecouter_page()
+
+
+# --- Silence hors du jeu (DEC-073) : appli en arrière-plan, autre onglet, écran verrouillé ---------
+var _cb_page   # rappel JavaScript gardé en mémoire (sinon il est libéré)
+
+
+func _ecouter_page() -> void:
+	if not OS.has_feature("web"):
+		return
+	_cb_page = JavaScriptBridge.create_callback(func(_args): _silence(JavaScriptBridge.eval("document.hidden", true) == true))
+	var w = JavaScriptBridge.get_interface("window")
+	w.godotPage = _cb_page
+	JavaScriptBridge.eval("""
+		document.addEventListener('visibilitychange', function () { window.godotPage(); });
+		window.addEventListener('pagehide', function () { window.godotPage(); });
+		window.addEventListener('pageshow', function () { window.godotPage(); });
+	""", true)
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+			_silence(true)
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_WM_WINDOW_FOCUS_IN:
+			_silence(false)
+
+
+func _silence(oui: bool) -> void:
+	AudioServer.set_bus_mute(0, oui)   # bus principal : coupe musique, effets et voix d'un coup
 
 
 func _lecteur(bus: String) -> AudioStreamPlayer:

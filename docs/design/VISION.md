@@ -26,6 +26,9 @@ Statut : en revue (thème 1). Distingue ce qui est **décidé** de ce qui reste 
   mal de ce qui s'est produit. De courts moments narratifs évoquent cette histoire et celle
   des véhicules, en gardant une part de mystère.
 
+- **Cap (01/11)** : se rapprocher d'un jeu *Mad Max* (poursuites sur la route, véhicules bricolés, abordages), mais avec des
+  véhicules des années 1940, en Europe.
+
 ## Expéditions (décidé)
 
 - **Carte stratégique** : la base, les villes, les points d'intérêt. Le joueur choisit la

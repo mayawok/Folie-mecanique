@@ -47,7 +47,8 @@ var _palette: Array = []    # [{id, n}] ; n = -1 : sans limite
 var _glisse := ""           # pièce tenue au doigt
 var _miroir := false        # coque retournée (avant vers l'arrière), DEC-067
 var _scie := ""             # "" | "v" | "h" : la scie coupe la coque touchée (DEC-072)
-var _extra := {}            # morceau scié tenu au doigt : coupe, emprise, lot
+var _extra := {}
+var _essieu_tenu := {}       # essieu repris au doigt : lâché hors de la grille, il est retiré (DEC-076)            # morceau scié tenu au doigt : coupe, emprise, lot
 var _ecorche := false       # vue écorchée forcée dans l'onglet Carrosserie
 var _rect0 := Vector2i(-99, -99)   # coin de départ du rectangle de châssis
 var _rect1 := Vector2i(-99, -99)
@@ -288,29 +289,49 @@ func _gui_input(e: InputEvent) -> void:
 
 
 func _appuyer(cell: Vector2i) -> void:
+	if onglet in ["essieux", "roues", "suspension", "equipage"]:   # une pièce posée se reprend au doigt depuis n'importe quel onglet (DEC-076)
+		var ip := ConstructionLibre.piece_en(a, cell)
+		if ip >= 0:
+			_prendre(ip)
+			return
 	match onglet:
 		"chassis":
 			_rect0 = cell
 			_rect1 = cell
 		"essieux":
 			var ex := ConstructionLibre.essieu_en(a, cell.x)
-			if not ex.is_empty() and ex.piece == outil.essieux:
+			if not ex.is_empty() and ex.piece == outil.essieux:   # même essieu : on le reprend au doigt (déplacer, ou glisser hors de la grille)
+				_essieu_tenu = ex.duplicate()
 				a = ConstructionLibre.retirer_essieu(a, cell.x)
-			else:
-				var b := ConstructionLibre.poser_essieu(a, cell.x, outil.essieux, String(ex.get("train", "")))
-				if b.is_empty():
-					_dire("Tracez d'abord le châssis au-dessus de cette colonne.")
-					return
-				a = b
-				_son()
+				_maj()
+				return
+			var b := ConstructionLibre.poser_essieu(a, cell.x, outil.essieux, String(ex.get("train", "")), cell.y)
+			if b.is_empty():
+				_dire("Tracez d'abord le châssis au-dessus de cette colonne.")
+				return
+			a = b
+			if Assemblage.piece(outil.essieux).get("pont", false):
+				_dire("Pont placé à %d cm sous le châssis : reliez-le dans l'onglet Suspension." % (ConstructionLibre.ecart_pont(a, ConstructionLibre.essieu_en(a, cell.x)) * 25))
+			_son()
 			_maj()
 		"roues":
 			_monter_roue(cell.x)
 		"suspension":
-			var b := ConstructionLibre.relier(a, cell.x, outil.suspension)
-			if b.is_empty():
-				_dire("Posez d'abord un pont rigide sous cette colonne (onglet Essieux).")
+			var ex := ConstructionLibre.essieu_en(a, cell.x)
+			if ex.is_empty() or not Assemblage.piece(String(ex.piece)).get("pont", false):
+				_dire("Posez d'abord un pont rigide sous cette colonne (onglet Essieux), en l'air sous le châssis.")
 				return
+			var lid: String = outil.suspension
+			var b := ConstructionLibre.relier(a, cell.x, lid)
+			if b.is_empty():   # la liaison choisie ne couvre pas l'écart : on prend celle qui convient
+				var h := ConstructionLibre.ecart_pont(a, ex)
+				var ok_ids := ConstructionLibre.liaisons_pour(h)
+				if ok_ids.is_empty():
+					_dire("Pont trop loin du châssis (%d cm) : remontez-le (onglet Essieux)." % (h * 25))
+					return
+				lid = ok_ids[0]
+				b = ConstructionLibre.relier(a, cell.x, lid)
+				_dire("À %d cm du châssis, il faut : %s." % [h * 25, Assemblage.piece(lid).nom])
 			a = b
 			_son()
 			_maj(true)
@@ -328,15 +349,7 @@ func _appuyer(cell: Vector2i) -> void:
 					_maj()
 				return
 			if i >= 0:   # une pièce posée se reprend au doigt pour la déplacer
-				_glisse = String(a.pieces[i].piece)
-				_miroir = bool(a.pieces[i].get("miroir", false))
-				_extra = {}
-				for k in ["coupe", "emprise", "lot"]:
-					if a.pieces[i].has(k):
-						_extra[k] = a.pieces[i][k]
-				a = ConstructionLibre.retirer(a, i)
-				_an = ConstructionLibre.analyser(a)
-				_placer_apercu(_candidat())
+				_prendre(i)
 
 
 func _relacher(pos: Vector2) -> void:
@@ -352,13 +365,33 @@ func _relacher(pos: Vector2) -> void:
 			_son()
 		_maj(true)
 		return
+	if not _essieu_tenu.is_empty():
+		var et := _essieu_tenu
+		_essieu_tenu = {}
+		if _dans_grille(pos):
+			var c := _case(pos)
+			var b := ConstructionLibre.poser_essieu(a, c.x, String(et.piece), String(et.get("train", "")), c.y)
+			if not b.is_empty():
+				if String(et.get("liaison", "")) != "":
+					var bl := ConstructionLibre.relier(b, c.x, String(et.liaison))
+					b = bl if not bl.is_empty() else b
+				a = b
+				_son()
+			else:
+				_dire("Pas de châssis au-dessus : essieu retiré.")
+		else:
+			_dire("Essieu retiré.")
+		_maj(true)
+		return
 	if _glisse == "":
 		return
-	if onglet == "roues":
+	if onglet == "roues" and not Assemblage.piece(_glisse).get("famille", "") in ConstructionLibre.FAMILLES_PIECES:
 		if _dans_grille(pos):
 			_monter_roue(_case(pos).x)
 		_glisse = ""
 		return
+	if not _dans_grille(pos):
+		_dire("%s retiré de la grille." % Assemblage.piece(_glisse).get("nom", "Pièce"))
 	if _dans_grille(pos):
 		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse), _miroir and _est_coque(_glisse), _extra)
 		if b.is_empty():
@@ -389,9 +422,23 @@ func _cible(pos: Vector2, id: String) -> Vector2i:
 
 
 func _candidat() -> Dictionary:
-	if _glisse == "" or onglet == "roues" or not _dans_grille(_doigt):
+	if _glisse == "" or not _dans_grille(_doigt):
+		return {}
+	if not Assemblage.piece(_glisse).get("famille", "") in ConstructionLibre.FAMILLES_PIECES:
 		return {}
 	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse), _extra)
+
+
+func _prendre(i: int) -> void:   # pièce posée reprise au doigt : la relâcher hors de la grille la retire
+	_glisse = String(a.pieces[i].piece)
+	_miroir = bool(a.pieces[i].get("miroir", false))
+	_extra = {}
+	for k in ["coupe", "emprise", "lot"]:
+		if a.pieces[i].has(k):
+			_extra[k] = a.pieces[i][k]
+	a = ConstructionLibre.retirer(a, i)
+	_an = ConstructionLibre.analyser(a)
+	_placer_apercu(_candidat())
 
 
 func _charger_plan(plan: Dictionary) -> void:
@@ -500,10 +547,10 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 	var res := []
 	match onglet:
 		"chassis":
-			for s in [["acier", "Acier", "léger, peu protégé"], ["blindage", "Blindage", "lourd, blindage 45"], ["", "Gomme", "effacer des cases"]]:
+			for s in [["tube", "Tubes", "très léger et rapide, fragile, sans blindage"], ["acier", "Acier", "léger, peu protégé"], ["blindage", "Blindage", "lourd, blindage 45"], ["", "Gomme", "effacer des cases"]]:
 				var sorte: String = s[0]
 				res.append({"titre": s[1], "detail": "Glisser d'un coin à l'autre : " + s[2], "choisi": outil.chassis == sorte,
-					"action": func(): outil.chassis = sorte, "couleur": Color("#77736A") if sorte == "acier" else (Color("#4C5236") if sorte == "blindage" else Color("#333"))})
+					"action": func(): outil.chassis = sorte, "couleur": Color("#8A8A80") if sorte == "tube" else Color("#77736A") if sorte == "acier" else (Color("#4C5236") if sorte == "blindage" else Color("#333"))})
 			res.append({"titre": "+ plaque de blindage", "detail": "à l'avant (%d posée%s)" % [int(a.get("plaques", 0)), "s" if int(a.get("plaques", 0)) > 1 else ""],
 				"action": func(): _plaque(1), "couleur": Color("#4C5236")})
 			res.append({"titre": "− plaque de blindage", "detail": "retirer une plaque", "action": func(): _plaque(-1), "couleur": Color("#333")})
@@ -538,7 +585,7 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 		"suspension":
 			for id in _famille("liaison"):
 				var f := Assemblage.piece(id)
-				res.append({"titre": f.nom, "detail": "rehausse %d cm · %d kg max · débattement %d %% · touchez un pont" % [int(f.hauteur_cases) * 25, int(f.charge_kg), int(float(f.debattement) * 100)],
+				res.append({"titre": f.nom, "detail": "de %d à %d cm sous le châssis · %d kg max · débattement %d %% · touchez un pont" % [int(f.hauteur_min) * 25, int(f.hauteur_max) * 25, int(f.charge_kg), int(float(f.debattement) * 100)],
 					"choisi": outil.suspension == id, "action": func(): outil.suspension = id, "couleur": Color("#5A5040")})
 			res.append({"titre": "Détacher", "detail": "touchez un pont pour retirer sa liaison", "choisi": outil.suspension == "",
 				"action": func(): outil.suspension = "", "couleur": Color("#333")})
@@ -670,10 +717,10 @@ func _dessiner_dessus() -> void:
 		c.draw_string(police, _doigt + Vector2(-80, -40), String(f.nom), HORIZONTAL_ALIGNMENT_CENTER, 160, 22, C_ACCENT)
 	# Aide ou message, sous la barre du haut
 	var aides := {"chassis": "Glissez d'un coin à l'autre pour tracer un rectangle de châssis.",
-		"essieux": "Touchez une colonne : l'essieu se fixe sous le châssis. Montez ensuite la roue.",
+		"essieux": "Touchez une colonne : un essieu simple se fixe sous le châssis ; un pont rigide se place en l'air, à la hauteur touchée. Reprenez un essieu pour le déplacer, glissez-le hors de la grille pour le retirer.",
 		"roues": "Choisissez une roue ou une chenille, puis touchez (ou glissez sur) un essieu.",
 		"plans": "Enregistrez la grille en cours ou chargez un plan : les pièces absentes de la réserve sont laissées de côté.",
-		"suspension": "Un pont rigide se relie au châssis : lames (bas), tirants (+50 cm) ou grands tirants (+1 m). Touchez un pont.",
+		"suspension": "Touchez un pont placé en l'air : la liaison relie le châssis au pont (lames jusqu'à 25 cm, tirants 25 à 75 cm, grands tirants 75 cm à 1,5 m).",
 		"poste": "Poste de conduite, de commande ou banc de troupes (face avant ou arrière) : fabriqués en métal.",
 		"cabine": "Une cabine se pose par-dessus les sièges : camion, voiture, blindée… (décor).",
 		"equipage": "Les postes de conduite et de commande sont fixes. Touchez un autre siège pour changer son rôle."}

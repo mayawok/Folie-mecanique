@@ -184,10 +184,10 @@ static func _essieux(a: Dictionary) -> Array:   # triés par x : [{x, piece, tra
 		var x := int(e.x)
 		var ft := Assemblage.piece(String(e.train))
 		var fe := Assemblage.piece(String(e.piece))
-		if bool(fe.get("pont", false)) and String(e.get("liaison", "")) == "":
-			continue   # pont rigide non relié : il ne porte rien (DEC-070)
+		if bool(fe.get("pont", false)) and not liaison_ok(a, e):
+			continue   # pont rigide non relié (ou liaison de mauvaise longueur) : il ne porte rien (DEC-070, DEC-075)
 		var fl := Assemblage.piece(String(e.get("liaison", ""))) if bool(fe.get("pont", false)) else {}
-		var h := float(fl.get("hauteur_cases", 0))   # la liaison abaisse la roue sous le châssis (rehausse, DEC-070)
+		var h := float(ecart_pont(a, e)) if bool(fe.get("pont", false)) else 0.0   # le pont est placé en l'air sous le châssis
 		res.append({"x": x, "piece": String(e.piece), "train": String(e.train), "y": float(y_essieu(a, x)) - h, "h": h,
 			"r": float(ft.get("diametre_cases", 2)) * 0.5, "fiche_e": fe, "fiche_t": ft, "fiche_l": fl})
 	res.sort_custom(func(p, q): return p.x < q.x)
@@ -219,14 +219,18 @@ static func peindre(a: Dictionary, cell: Vector2i, sorte: String) -> Dictionary:
 
 
 # Pose (ou remplace) l'essieu d'une colonne. La colonne doit contenir au moins une case.
-static func poser_essieu(a: Dictionary, x: int, essieu_id: String, train_id: String) -> Dictionary:
+# y (ponts rigides seulement) : rangée du centre du pont, placé en l'air sous le châssis ; par défaut contre le châssis
+static func poser_essieu(a: Dictionary, x: int, essieu_id: String, train_id: String, y := -1) -> Dictionary:
 	if y_essieu(a, x) < 0:
 		return {}
 	var avant := essieu_en(a, x)
 	var b := retirer_essieu(a, x)
 	b.essieux.append({"x": x, "piece": essieu_id, "train": train_id})
-	if bool(Assemblage.piece(essieu_id).get("pont", false)) and String(avant.get("liaison", "")) != "":
-		b.essieux[b.essieux.size() - 1].liaison = avant.liaison
+	if bool(Assemblage.piece(essieu_id).get("pont", false)):
+		var yp := y if y >= 0 else int(avant.get("y", y_essieu(a, x)))
+		b.essieux[b.essieux.size() - 1].y = clampi(yp, 0, y_essieu(a, x))
+		if String(avant.get("liaison", "")) != "":
+			b.essieux[b.essieux.size() - 1].liaison = avant.liaison
 	return b
 
 
@@ -246,11 +250,38 @@ static func _famille_ids(fam: String) -> Array:
 	return Assemblage.catalogue().pieces.keys().filter(func(id): return Assemblage.piece(id).get("famille", "") == fam and not Assemblage.piece(id).get("retire", false))
 
 
-# Relie (liaison_id) ou détache ("") le pont rigide de la colonne x. {} s'il n'y a pas de pont (DEC-070).
+# Écart (en cases) entre le dessous du châssis et le pont rigide placé en l'air (DEC-075)
+static func ecart_pont(a: Dictionary, e: Dictionary) -> int:
+	return maxi(0, y_essieu(a, int(e.x)) - int(e.get("y", y_essieu(a, int(e.x)))))
+
+
+# La liaison du pont couvre-t-elle son écart avec le châssis ?
+static func liaison_ok(a: Dictionary, e: Dictionary) -> bool:
+	var fl := Assemblage.piece(String(e.get("liaison", "")))
+	if fl.is_empty():
+		return false
+	var h := ecart_pont(a, e)
+	return h >= int(fl.get("hauteur_min", 0)) and h <= int(fl.get("hauteur_max", 0))
+
+
+# Liaisons qui conviennent à un écart donné (la plus courte d'abord)
+static func liaisons_pour(h: int) -> Array:
+	var res := _famille_ids("liaison").filter(func(id): return h >= int(Assemblage.piece(id).get("hauteur_min", 0)) and h <= int(Assemblage.piece(id).get("hauteur_max", 0)))
+	res.sort_custom(func(p, q): return int(Assemblage.piece(p).hauteur_min) < int(Assemblage.piece(q).hauteur_min))
+	return res
+
+
+# Relie (liaison_id) ou détache ("") le pont rigide de la colonne x. {} s'il n'y a pas de pont,
+# ou si la liaison ne couvre pas l'écart entre le pont et le châssis (DEC-075).
 static func relier(a: Dictionary, x: int, liaison_id: String) -> Dictionary:
 	var ex := essieu_en(a, x)
 	if ex.is_empty() or not bool(Assemblage.piece(String(ex.piece)).get("pont", false)):
 		return {}
+	if liaison_id != "":
+		var t := ex.duplicate()
+		t.liaison = liaison_id
+		if not liaison_ok(a, t):
+			return {}
 	var b := a.duplicate(true)
 	for e in b.essieux:
 		if int(e.x) == x:
@@ -260,7 +291,7 @@ static func relier(a: Dictionary, x: int, liaison_id: String) -> Dictionary:
 
 # Ponts rigides sans liaison (défaut grave : rien ne les tient au châssis)
 static func ponts_libres(a: Dictionary) -> Array:
-	return a.get("essieux", []).filter(func(e): return bool(Assemblage.piece(String(e.piece)).get("pont", false)) and String(e.get("liaison", "")) == "")
+	return a.get("essieux", []).filter(func(e): return bool(Assemblage.piece(String(e.piece)).get("pont", false)) and not liaison_ok(a, e))
 
 
 # Essieux sans roue (affichage et défaut)
@@ -509,8 +540,9 @@ static func analyser(a: Dictionary) -> Dictionary:
 	if not essieux.is_empty():
 		debattement /= essieux.size()
 	for e in ponts_libres(a):
-		masses.append([float(Assemblage.piece(String(e.piece)).poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
-		_defaut(defauts, "pont_libre", "Pont rigide sans liaison (colonne %d) : il ne porte rien, reliez-le au châssis (onglet Suspension)" % int(e.x), true)
+		masses.append([float(Assemblage.piece(String(e.piece)).poids_kg), int(e.x) + 0.5, float(e.get("y", y_essieu(a, int(e.x))))])
+		var txt := "sans liaison" if String(e.get("liaison", "")) == "" else "mal relié (liaison trop courte ou trop longue pour %d cm)" % (ecart_pont(a, e) * 25)
+		_defaut(defauts, "pont_libre", "Pont rigide %s (colonne %d) : il ne porte rien, reliez-le au châssis (onglet Suspension)" % [txt, int(e.x)], true)
 	for e in essieux_nus(a):
 		var fe := Assemblage.piece(String(e.piece))
 		masses.append([float(fe.poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
@@ -1004,6 +1036,14 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 	var Y := func(y: float) -> float: return (y - sol) * C
 	var formes := []
 	for c in cases:
+		if cases[c] == "tube":   # châssis tubulaire : treillis de tubes soudés (DEC-074)
+			var xa: float = X.call(c.x)
+			var xb: float = X.call(c.x + 1.0)
+			var ya: float = Y.call(c.y)
+			var yb: float = Y.call(c.y + 1.0)
+			for l in [[[xa, ya + 0.02], [xb, ya + 0.02]], [[xa, yb - 0.02], [xb, yb - 0.02]], [[xa, ya], [xb, yb]] if (c.x + c.y) % 2 == 0 else [[xa, yb], [xb, ya]]]:
+				formes.append({"ligne": l, "ep": 0.035, "c": "metal", "z": 0})
+			continue
 		var col := "sombre" if cases[c] == "blindage" else "caisse"
 		formes.append({"pts": [[X.call(c.x), Y.call(c.y)], [X.call(c.x + 1.0), Y.call(c.y)], [X.call(c.x + 1.0), Y.call(c.y + 1.0)], [X.call(c.x), Y.call(c.y + 1.0)]], "c": col, "z": 0})
 	var roues := []
@@ -1024,6 +1064,14 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		else:   # roue qui ne repose pas au sol : dessinée à sa vraie hauteur
 			formes.append({"pts": _poly_cercle(cx, Y.call(e.y), r), "c": "sombre", "z": 2})
 			formes.append({"pts": _poly_cercle(cx, Y.call(e.y), r * 0.45, 8), "c": "metal", "z": 2})
+	for e in ponts_libres(a):   # pont pas encore relié : dessiné en l'air, là où il a été placé (DEC-075)
+		var cxl: float = X.call(int(e.x) + 0.5)
+		var yl: float = Y.call(float(e.get("y", y_essieu(a, int(e.x)))))
+		var ftl := Assemblage.piece(String(e.get("train", "")))
+		if not ftl.is_empty():
+			formes.append({"pts": _poly_cercle(cxl, yl, float(ftl.get("diametre_cases", 2)) * 0.5 * C), "c": "pneu", "z": 2})
+			formes.append({"pts": _poly_cercle(cxl, yl, float(ftl.get("diametre_cases", 2)) * 0.22 * C, 10), "c": "metal", "z": 2})
+		formes.append({"pts": _poly_cercle(cxl, yl, 0.11, 8), "c": "sombre", "z": 2})
 	for k in pistes:
 		var gal: Array = pistes[k]
 		var rg := 0.375 - 0.08

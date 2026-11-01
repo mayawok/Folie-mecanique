@@ -170,6 +170,12 @@ Gigahorse : deux Cadillac 1959 empilées ; FDK : coccinelle découpée soudée s
   à l'avant et à l'arrière sont possibles mais une roue trop haute ne touche plus le sol (comme en vrai).
 - Bouton **Plans** : enregistrer, charger, supprimer ; les pièces manquantes en réserve sont laissées de côté.
 
+### Suspension en l'air, glisser pour retirer, nouvelles pièces (DEC-074 à DEC-076)
+
+- Pont rigide placé en l'air sous le châssis, puis relié (lames 0-25 cm, tirants 25-75 cm, grands tirants 75-150 cm).
+- Toute pièce et tout essieu se reprennent au doigt ; hors de la grille, ils sont retirés.
+- Roues géante et de tracteur, roue de course, châssis en tubes, V8 à compresseur, moteur d'avion.
+
 ### Extensibilité (exigence du porteur de projet)
 
 D'autres moteurs, roues, châssis, suspensions, **hauteurs de suspension**, coques et greffes viendront. Règle : **ajouter un modèle
