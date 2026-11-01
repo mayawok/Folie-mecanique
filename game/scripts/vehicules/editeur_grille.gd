@@ -676,7 +676,7 @@ func _vider_outil(cle: String) -> void:
 func _prendre_liaison(id: String) -> void:
 	outil.suspension = id
 	_tenir(id)
-	var ponts := a.get("essieux", []).filter(func(ex): return bool(Assemblage.piece(String(ex.piece)).get("pont", false)))
+	var ponts: Array = a.get("essieux", []).filter(func(ex): return bool(Assemblage.piece(String(ex.piece)).get("pont", false)))
 	if ponts.is_empty():
 		_dire("Posez d'abord un pont rigide en l'air (Essieux).")
 
@@ -1476,8 +1476,8 @@ func _icone(c: Control, r: Rect2, id: String, col: Color) -> void:
 			for sx in [0.0, 1.0]:
 				for sy in [0.0, 1.0]:
 					var coin := o + Vector2(w * (0.08 + 0.84 * sx), w * (0.08 + 0.84 * sy))
-					var dx := 1.0 - 2.0 * sx
-					var dy := 1.0 - 2.0 * sy
+					var dx: float = 1.0 - 2.0 * sx
+					var dy: float = 1.0 - 2.0 * sy
 					c.draw_line(coin, coin + Vector2(dx * w * 0.3, 0.0), col, ep)
 					c.draw_line(coin, coin + Vector2(0.0, dy * w * 0.3), col, ep)
 
