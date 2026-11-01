@@ -8,6 +8,10 @@ func _init(g := 1, options := {}) -> void:
 	graine = g
 	rng.seed = g
 	var D := donnees()
+	meteo_on = bool(options.get("meteo", options.get("ouverture", false)))
+	champs_on = bool(options.get("champs", options.get("ouverture", false)))
+	_init_meteo()
+	_init_mines()
 	if options.get("ouverture", false):
 		# Début guidé (DEC-035) : pas de véhicule, une caisse de pièces et un survivant
 		ouverture = true
@@ -227,7 +231,7 @@ func sauver() -> Dictionary:
 			pcs[pid] = v.pieces[pid].pv
 		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir})
 	var w := monde
-	return {"v": 2, "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
+	return {"v": 2, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs,
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
@@ -247,6 +251,10 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m._lore_dit = bool(d.lore)
 	m.reserve_survivants = int(d.reserve)
 	m.ouverture = bool(d.get("ouverture", false))
+	m.meteo_on = bool(d.get("meteo", m.ouverture))
+	m.champs_on = bool(d.get("champs", m.ouverture))
+	for k in d.get("equip_demin", {}):
+		m.equip_demin[k] = d.equip_demin[k]
 	m.etape_ouverture = int(d.get("etape_ouverture", 0))
 	m.pieces_stock = d.get("pieces_stock", []).duplicate(true)
 	for e in d.convoi:
@@ -342,9 +350,14 @@ func avancer(dt := DT) -> void:
 	_armes_garnison(dt)
 	_projectiles(dt)
 	_mines(dt)
+	_champs_generer()
+	_champs()
+	_demin(dt)
+	_meteo(dt)
 	_transits(dt)
 	monde.avancer(dt)
 	_garage(dt)
+	_travaux(dt)
 	_camouflage(dt)
 	_reparer(dt)
 	_fouiller(dt)
@@ -391,9 +404,14 @@ func _marche(dt: float) -> void:
 			blocage = "Panne sèche : plus de carburant."
 		elif not fouille_en_cours.is_empty():
 			blocage = "Fouille en cours."
+		elif champ_bloque():
+			blocage = "Champ de mines devant : déminez, faites demi-tour ou traversez."
+		elif not demin.is_empty():
+			blocage = "Déminage en cours."
 		else:
 			var pente: float = Terrain.pente(x_tete)
 			vmax *= clampf(1.0 - 2.4 * pente, 0.55, 1.3)   # montée : plus lent ; descente : plus vite
+			vmax *= facteur_vitesse_meteo() * facteur_vitesse_mines()
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax
 			if vit > 0.0:
 				for e in ennemis:
@@ -427,6 +445,8 @@ func _ia_ennemis(dt: float) -> void:
 func _rencontres() -> void:
 	if x_tete + 120.0 < _prochain_x or ennemis.size() >= 5 or monde.en_transit():
 		return
+	if tempete_active():
+		return   # pas de nouvelle vague pendant la tempête (DEC-027)
 	if calme_ouverture() and not ouverture_en_cours():
 		return   # la dernière trouvaille (l'arme) n'est pas encore ramassée
 	var R: Dictionary = donnees().rencontres

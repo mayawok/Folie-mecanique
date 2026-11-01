@@ -55,6 +55,8 @@ func _evenement(e: Dictionary) -> void:
 			_son("sfx_explosion")
 		"mines":
 			_son("sfx_atelier", -4.0)
+		"tempete_annonce", "champ_mines":
+			_son("sfx_radio", -4.0)
 		"poste":
 			_son("sfx_radio", -6.0)
 		"contact":
@@ -180,9 +182,24 @@ func _horloge(c: CanvasItem) -> void:
 	c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(-11, -r - 26), ctr + Vector2(11, -r - 26), ctr + Vector2(0, -r - 6)]), Color("#F2EEE6"))
 	c.draw_polyline(PackedVector2Array([ctr + Vector2(-11, -r - 26), ctr + Vector2(11, -r - 26), ctr + Vector2(0, -r - 6), ctr + Vector2(-11, -r - 26)]), Color(0, 0, 0, 0.8), 2.0)
 
+# Tempête de sable (DEC-027) : mur de sable à l'horizon pendant l'annonce, voile et rafales pendant la tempête
+func _dessiner_tempete(c: CanvasItem) -> void:
+	if m.tempete_annoncee():
+		var k: float = clampf(1.0 - m.tempete.reste / 45.0, 0.0, 1.0)
+		var w := size.x * (0.04 + 0.2 * k)
+		c.draw_rect(Rect2(size.x - w, 0.0, w, size.y), Color(0.78, 0.62, 0.36, 0.25 + 0.25 * k))
+	elif m.tempete_active():
+		var tp: float = minf(minf(1.0, (m.tempete.duree - m.tempete.reste) / 4.0), minf(1.0, m.tempete.reste / 4.0))
+		c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.78, 0.62, 0.36, 0.5 * tp))
+		for i in 46:
+			var y := fposmod(float(i) * 97.3, size.y)
+			var x := fposmod(float(i) * 211.7 - _temps * (700.0 + float(i % 5) * 160.0), size.x + 240.0) - 120.0
+			c.draw_line(Vector2(x, y), Vector2(x + 70.0, y + 9.0), Color(0.95, 0.85, 0.62, 0.4 * tp), 2.0)
+
 func dessiner_fx(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
 	var obs: float = m.monde.obscurite()
+	_dessiner_tempete(c)
 	if obs > 0.01:
 		c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.04, 0.12, 0.2 * obs))
 		for v in m.convoi:   # phares
@@ -509,7 +526,7 @@ func _maj_sons() -> void:
 			lourd = v
 	var nom := ""
 	if lourd != null and m.vitesse_convoi != 0.0 and not pause and not m.fini:
-		nom = MOTEURS.get(lourd.type, "")
+		nom = MOTEURS.get(lourd.type, "sfx_moteur_" + String(VehiculeDessin.donnees().vehicules[lourd.type].get("moteur", "")))
 	so.moteur(nom)
 	if m.ordres.marche != _marche_prec:
 		if m.ordres.marche == "avancer":

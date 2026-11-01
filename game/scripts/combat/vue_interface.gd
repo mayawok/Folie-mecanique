@@ -22,6 +22,8 @@ func _construire_interface() -> void:
 	hb.add_child(esp2)
 	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), hb, 190)
 	_btn_atelier.visible = false
+	_btn_nouveau = _bouton("Nouveau véhicule", func(): _ouvrir_editeur(0), hb, 250)
+	_btn_nouveau.visible = false
 	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 170)
 	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 130)
@@ -111,6 +113,8 @@ func _construire_interface() -> void:
 	_bouton("S'abriter", func(): m.ordre_debarquer(selection), ab, 190)
 	_btn_camo = _bouton("Camoufler", func(): _basculer_camo(), ab, 200)
 	_btn_garage = _bouton("Garer", func(): _basculer_garage(), ab, 170)
+	_btn_modifier = _bouton("Modifier", func(): _ouvrir_editeur(selection), ab, 150)
+	_btn_demonter = _bouton("Démonter", func(): m.ordre_demonter(selection), ab, 170)
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
 	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
@@ -130,6 +134,12 @@ func _construire_interface() -> void:
 	_lbl_nuit.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_nuit.custom_minimum_size = Vector2(500, 0)
 	_btn_nuit = _bouton("Passer la nuit à l'abri", func(): m.monde.ordre_nuit(), av, 0)
+	_lbl_meteo = _label("", av, 24, Color("#FFD27A"))
+	_lbl_meteo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_meteo.custom_minimum_size = Vector2(500, 0)
+	_btn_demin_det = _bouton("Déminer : détecteur de métaux", func(): m.ordre_deminer("detecteur"), av, 0)
+	_btn_demin_chien = _bouton("Déminer : chien", func(): m.ordre_deminer("chien"), av, 0)
+	_btn_traverser = _bouton("Traverser à l'aveugle", func(): m.ordre_traverser(), av, 0)
 	_btn_embuscade = _bouton("Embuscade : s'abriter et se cacher", func(): _embuscade(), av, 0)
 	_btn_mines = _bouton("Poser des mines (12 métal)", func(): m.ordre_mines(3), av, 0)
 	_btn_sortir = _bouton("Reprendre la route", func(): _reprendre_route(), av, 0)
@@ -256,6 +266,9 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := true) -> void:
 	if _atelier != null:
 		_atelier.queue_free()
 		_atelier = null
+	if _editeur != null:
+		_editeur.queue_free()
+		_editeur = null
 	if sauve.is_empty():
 		_effacer_sauvegarde()
 		m = CombatModele.new(g, {"ouverture": ouverture})   # début guidé : moto à assembler (DEC-035)
@@ -301,6 +314,27 @@ func _ouvrir_atelier() -> void:
 		if selection == 0 and not m.convoi.is_empty():
 			selection = m.convoi[0].uid
 			terrain.camera_x = m.convoi.back().x)
+
+# Éditeur libre (G3) : modifier un véhicule garé, ou en construire un neuf sur un châssis de la réserve
+func _ouvrir_editeur(vehicule_uid: int) -> void:
+	if _editeur != null or _atelier != null:
+		return
+	var raison: String = m.raison_atelier_libre()
+	if raison != "":
+		m.log_(raison, "alerte")
+		return
+	if vehicule_uid == 0 and m.chassis_en_reserve().is_empty():
+		m.log_("Aucun châssis en réserve : démontez un véhicule.", "alerte")
+		return
+	_demarrer_audio()
+	var pause_avant := pause
+	pause = true
+	_editeur = EditeurGrille.new()
+	_editeur.ouvrir(m, vehicule_uid)
+	add_child(_editeur)
+	_editeur.ferme.connect(func(_ok: bool):
+		_editeur = null
+		pause = pause_avant and not m.convoi.is_empty())
 
 func _ouvrir_surv() -> void:
 	_pause_surv = pause
@@ -469,6 +503,7 @@ func _maj_interface() -> void:
 		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
 	_chips.pieces[0].text = "Pièces %d" % (m.composants.size() + m.pieces_stock.size())
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
+	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.chassis_en_reserve().is_empty() and m.raison_atelier_libre() == ""
 	_btn_pause.text = "Reprendre" if pause else "Pause"
 	for i in _btns_vitesse.size():
 		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)
@@ -527,6 +562,12 @@ func _maj_interface() -> void:
 		var ab_g = m.abri_garage()
 		_btn_garage.text = "Sortir du garage" if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
 		_btn_garage.disabled = sel.garage == 0 and ab_g == null
+		_btn_modifier.visible = sel.garage != 0
+		_btn_modifier.disabled = m.raison_atelier_libre() != ""
+		_btn_demonter.visible = sel.garage != 0
+		var travaille: bool = not m.travaux.is_empty() and m.travaux.uid == sel.uid
+		_btn_demonter.text = "Démontage %d %%" % int(100.0 * (1.0 - m.travaux.reste / m.travaux.total)) if travaille else "Démonter"
+		_btn_demonter.disabled = m.raison_demontage(sel.uid) != "" and not travaille
 		_btn_feu.text = "Cessez-le-feu" if sel.tir else "Reprendre le feu"
 		_btn_rep.text = "Arrêter" if sel.reparation else "Réparer"
 	_voile_fin.visible = m.fini
@@ -541,10 +582,13 @@ func _maj_interface() -> void:
 		cache = cache or v.camo_voulu
 	var ann: Array = w.annonces()
 	var nuit_alerte: bool = w.alerte_nuit()
+	var tempete: bool = m.tempete_annoncee() or m.tempete_active()
+	var champ: Dictionary = m.champ_devant()
+	var champ_vu: bool = not champ.is_empty() and champ.dist <= float(m.mines_cfg().alerte_m)
 	var vf = w.voyageur_actuel()
 	var camp = w.camp_proche()
 	var dial: bool = vf != null or (camp != null and m.ordres.marche == "halte" and camp.uid != _camp_ferme)
-	_panneau_alerte.visible = (not al.is_empty() or poste or cache or not m.mines.is_empty() or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte) and not dial and not _voile_carte.visible
+	_panneau_alerte.visible = (not al.is_empty() or poste or cache or m.mines.any(func(mn): return not mn.has("champ")) or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte or tempete or champ_vu) and not dial and not _voile_carte.visible
 	if _panneau_alerte.visible:
 		var txt := ""
 		if not al.is_empty():
@@ -567,7 +611,23 @@ func _maj_interface() -> void:
 		var abri: Dictionary = w.abri_proche()
 		_lbl_nuit.text = "LA NUIT TOMBE : les rôdeurs sortent.\n%s" % ("Abri : %s à %d m (%s)." % [abri.nom, int(abri.dist), "devant" if abri.devant else "derrière"] if not abri.is_empty() else "Aucun abri en vue : cherchez une ruine ou une église.")
 		_lbl_nuit.visible = nuit_alerte
-		_btn_nuit.visible = nuit_alerte and not abri.is_empty()
+		_btn_nuit.text = "S'abriter de la tempête" if tempete and not nuit_alerte else "Passer la nuit à l'abri"
+		_btn_nuit.visible = (nuit_alerte or tempete) and not abri.is_empty()
+		var lm := ""
+		if m.tempete_annoncee():
+			lm = "TEMPÊTE DE SABLE dans %d s : précision et vitesse réduites." % int(m.tempete.reste)
+		elif m.tempete_active():
+			lm = "TEMPÊTE DE SABLE (encore %d s) : précision ÷2, vitesse réduite, véhicules ouverts usés." % int(m.tempete.reste)
+		if champ_vu:
+			lm += ("\n" if lm != "" else "") + "CHAMP DE MINES à %d m (%d mines)%s" % [int(champ.dist), champ.n, " : déminage en cours" if not m.demin.is_empty() else ""]
+		_lbl_meteo.text = lm
+		_lbl_meteo.visible = lm != ""
+		var moy: Array = m.moyens_demin()
+		_btn_demin_det.visible = champ_vu and moy.has("detecteur") and m.demin.is_empty()
+		_btn_demin_chien.visible = champ_vu and moy.has("chien") and m.demin.is_empty()
+		_btn_traverser.visible = champ_vu and not m.champ_traverse and m.demin.is_empty()
+		_btn_demin_det.disabled = m.raison_demin("detecteur") != ""
+		_btn_demin_chien.disabled = m.raison_demin("chien") != ""
 		_btn_embuscade.visible = not al.is_empty() or poste or cache
 		_btn_mines.visible = not al.is_empty() or poste or cache
 		_btn_sortir.visible = poste or cache or not m.transits.is_empty()

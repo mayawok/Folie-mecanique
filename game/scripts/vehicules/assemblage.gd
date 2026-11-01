@@ -224,3 +224,81 @@ static func manquantes(plan: Dictionary, dispo: Array) -> Array:
 		else:
 			res.append(id)
 	return res
+
+
+# --- Édition libre sur la grille (G3, DEC-036) ---------------------------------------------
+# Fonctions pures : l'écran d'édition ne contient aucune règle, il appelle ces fonctions.
+const DEFAUTS_POSE := ["hors_grille", "chevauchement", "roulement_haut", "arme_basse", "inconnue"]
+
+
+static func nouvelle(chassis_id: String, nom := "Assemblage libre") -> Dictionary:
+	return {"nom": nom, "chassis": chassis_id, "pieces": [], "plaques": 0}
+
+
+static func taille_grille(a: Dictionary) -> Vector2i:
+	var ch := piece(a.get("chassis", ""))
+	return Vector2i(int(ch.grille[0]), int(ch.grille[1])) if not ch.is_empty() else Vector2i.ZERO
+
+
+# Défauts de pose seulement (hors grille, chevauchement, roues en l'air, arme trop basse), sans les pièces manquantes
+static func defauts_pose(a: Dictionary) -> Array:
+	return valider(a).filter(func(e): return e.code in DEFAUTS_POSE)
+
+
+# Pose une pièce près d'une cellule : la cellule visée est le coin bas gauche. La pièce s'aimante : roues au sol,
+# arme dans la moitié haute, glissement vers la place libre la plus proche. Renvoie le nouvel assemblage,
+# ou {} si aucune place ne convient (la pièce retourne dans le bac).
+static func poser(a: Dictionary, piece_id: String, cell: Vector2i) -> Dictionary:
+	var f := piece(piece_id)
+	var g := taille_grille(a)
+	if f.is_empty() or f.famille == "chassis" or g == Vector2i.ZERO:
+		return {}
+	var e := Vector2i(int(f.emprise[0]), int(f.emprise[1]))
+	var base := Vector2i(clampi(cell.x, 0, maxi(0, g.x - e.x)), clampi(cell.y, 0, maxi(0, g.y - e.y)))
+	if f.famille == "roulement":
+		base.y = 0
+	elif f.famille == "arme":
+		base.y = clampi(base.y, maxi(0, (g.y + 1) / 2 - e.y), maxi(0, g.y - e.y))
+	var candidats := []
+	for dy in range(-3, 4):
+		for dx in range(-6, 7):
+			candidats.append(Vector2i(base.x + dx, base.y + dy))
+	candidats.sort_custom(func(p, q): return (p - base).length_squared() < (q - base).length_squared())
+	for c in candidats:
+		if c.x < 0 or c.y < 0 or c.x + e.x > g.x or c.y + e.y > g.y:
+			continue
+		if f.famille == "roulement" and c.y != 0:
+			continue
+		if f.famille == "arme" and c.y + e.y < (g.y + 1) / 2:
+			continue
+		var b := a.duplicate(true)
+		b.pieces.append({"piece": piece_id, "pos": [c.x, c.y]})
+		if defauts_pose(b).is_empty():
+			return b
+	return {}
+
+
+static func retirer(a: Dictionary, index: int) -> Dictionary:
+	var b := a.duplicate(true)
+	if index >= 0 and index < b.pieces.size():
+		b.pieces.remove_at(index)
+	return b
+
+
+# Indice de la pièce posée sur une cellule (la dernière posée d'abord), -1 si la cellule est libre
+static func piece_en(a: Dictionary, cell: Vector2i) -> int:
+	var places := _places(a)
+	for i in range(places.size() - 1, -1, -1):
+		var p = places[i]
+		if p.fiche.is_empty():
+			continue
+		var e := Vector2i(int(p.fiche.emprise[0]), int(p.fiche.emprise[1]))
+		if cell.x >= p.pos.x and cell.x < p.pos.x + e.x and cell.y >= p.pos.y and cell.y < p.pos.y + e.y:
+			return i
+	return -1
+
+
+# Aperçu pour l'écran : défauts qui empêchent de rouler et, si le véhicule roule, ses statistiques
+static func apercu(a: Dictionary) -> Dictionary:
+	var err := valider(a)
+	return {"erreurs": err, "ok": err.is_empty(), "stats": statistiques(a) if err.is_empty() else {}}

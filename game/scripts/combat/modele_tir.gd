@@ -147,6 +147,7 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 		chance *= 0.8
 	if monde.nuit() and joueur and not garde:
 		chance *= 0.8   # on y voit mal la nuit
+	chance *= facteur_precision_meteo()   # tempête de sable : précision ×0,5 pour tous (DEC-027)
 	var touche := rng.randf() < chance
 	var origine := _bouche(att, a)
 	var zone := ""

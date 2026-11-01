@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-10-31 (ouverture moto → side-car sur la grille). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-11-01 (tempête, mines, grille G2 à G4, son renforcé). Fichier à lire en premier (court, à garder < 60 lignes).
 
 ## Où on en est
 
@@ -12,13 +12,15 @@ Mis à jour : 2026-10-31 (ouverture moto → side-car sur la grille). Fichier à
 - Code découpé en couches (DEC-033, carte des fichiers dans `CONVOI.md`).
 - **Grille G1 faite** (DEC-034) : véhicules = châssis + pièces, statistiques calculées (`GRILLE.md`).
 - **La partie commence par la grille** (DEC-035) : moto assemblée, puis side-car, essence, arme, ennemis.
+- **Codés le 01/11** : tempête de sable (DEC-036), champs de mines (DEC-037), grille G2 démontage (DEC-038), G3 éditeur libre
+  (DEC-039), G4 dessin des assemblages (DEC-040). Tests : 221 vérifications sans écran + parcours écran (`game/tests/`).
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
-## Décidé, pas encore codé
+## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
 
-- Tempête de sable (DEC-027) et champs de mines (DEC-028) : `docs/design/CONVOI.md`.
-- Grille : G2 démontage dans la grange, G3 éditeur au toucher, G4 dessin des assemblages (`GRILLE.md`).
-- Son : correctif iPhone silencieux et bus audio (DEC-030), à confirmer sur iPhone.
+- **Son iPhone** (DEC-030, renforcé par DEC-041) : non vérifiable hors appareil. Tester en mode normal puis silencieux.
+- Jouer la tempête, les mines et la grange : valeurs à régler dans `combat_proto.json` (`tempete`, `mines_champs`, `demontage`).
+- `game/tests/capture_convoi.gd` est un ancien parcours devenu obsolète avec l'ouverture guidée (il n'aboutit pas).
 
 ## Décisions ouvertes (à trancher)
 
@@ -30,8 +32,8 @@ Mis à jour : 2026-10-31 (ouverture moto → side-car sur la grille). Fichier à
 ## Prochaines étapes (ordre recommandé)
 
 1. Le porteur de projet joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Atelier pour les gros véhicules (pièces tirées de leur dessin, plus de liberté), puis G2 (grange la nuit).
-3. Coder tempête (`modele_meteo.gd`) et mines.
+2. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
+3. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
 4. Godot 4.6, puis essai d'export iOS dans le nuage.
 
 ## Carte du dépôt

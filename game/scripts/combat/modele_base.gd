@@ -231,6 +231,59 @@ var pieces_stock: Array = []     # pièces de véhicule en réserve : {piece, et
 var ouverture := false           # début de partie guidé : moto à assembler, trouvailles dans l'ordre
 var etape_ouverture := 0         # indice de la prochaine trouvaille de l'ouverture
 var en_kit := false              # aucun véhicule encore assemblé
+# Événements du monde (DEC-027, DEC-028) : actifs dans la partie jouée, désactivés pour les anciens tests d'équilibrage
+var meteo_on := false
+var champs_on := false
+var tempete := {}                # {} | {phase: "annonce"|"active", reste, duree} (modele_meteo.gd)
+var rng_meteo := RandomNumberGenerator.new()
+var rng_mines := RandomNumberGenerator.new()
+var _tempete_t := 0.0            # délai avant la prochaine tempête
+var _champ_id := 0
+var _prochain_champ_x := 0.0
+var demin := {}                  # déminage en cours : {champ, moyen, t}
+var champ_traverse := false      # le joueur a choisi de traverser le champ à l'aveugle
+var equip_demin := {"detecteur": false, "chien_pv": 0, "fleau_pv": 0.0}
+var travaux := {}                # démontage en cours (grille G2) : {uid, reste}
+
+# --- Ouverture guidée (utilisé par toutes les couches : calme, rencontres, événements) ---
+func ouv() -> Dictionary:
+	return donnees().get("ouverture", {})
+
+
+# Vrai tant que les trouvailles de l'ouverture ne sont pas toutes apparues : pas d'ennemi.
+func ouverture_en_cours() -> bool:
+	return ouverture and etape_ouverture < ouv().get("etapes", []).size()
+
+
+# Calme de l'ouverture : ni rencontre hostile ni rôdeurs tant que le joueur n'a pas trouvé d'arme.
+func calme_ouverture() -> bool:
+	if not ouverture:
+		return false
+	if ouverture_en_cours():
+		return true
+	for v in convoi:
+		if not v.armes.is_empty():
+			return false
+	return not ids_stock().any(func(id): return Assemblage.piece(id).get("famille", "") == "arme")
+
+
+func ids_stock() -> Array:
+	return pieces_stock.map(func(e): return e.piece)
+
+
+func tempete_active() -> bool:
+	return tempete.get("phase", "") == "active"
+
+func tempete_annoncee() -> bool:
+	return tempete.get("phase", "") == "annonce"
+
+# Facteurs de la tempête, lus par le tir (précision) et la marche (vitesse)
+func facteur_precision_meteo() -> float:
+	return float(donnees().tempete.precision) if tempete_active() else 1.0
+
+func facteur_vitesse_meteo() -> float:
+	return float(donnees().tempete.vitesse) if tempete_active() else 1.0
+
 func log_(txt: String, ton := "info") -> void:
 	journal.append({"t": temps, "txt": txt, "ton": ton})
 	if journal.size() > 60:
@@ -274,7 +327,7 @@ func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") 
 	var D := donnees()
 	var p := Assemblage.statistiques(a)
 	v.assemblage = a.duplicate(true)
-	v.type = type if type != "" else Assemblage.apparence(a)
+	v.type = type if type != "" else FormeAssemblage.type_dessin(a)
 	var forme: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
 	v.profil = p
 	v.nom = forme.nom

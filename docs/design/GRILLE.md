@@ -1,7 +1,7 @@
 # Grille de construction — véhicules « Frankenstein »
 
-Statut : **G1 codé** (DEC-029, DEC-034) ; **atelier guidé codé pour la moto et le side-car** (DEC-035). Démontage libre (G2),
-éditeur libre (G3) et dessin générique des assemblages (G4) restent à faire. S'appuie sur DEC-016 (véhicules modulaires) et sur les tables
+Statut : **G1 à G4 codés** (DEC-029, DEC-034, DEC-038 à DEC-040) ; **atelier guidé codé pour la moto et le side-car** (DEC-035).
+À faire : atelier guidé pour les gros véhicules, améliorer le dessin des assemblages, quelques pièces à fabriquer en plus des plaques. S'appuie sur DEC-016 (véhicules modulaires) et sur les tables
 existantes `data/master/echelle_et_grille.csv`, `catalogue_composants.csv` (29 pièces), `grille_et_chevauchements.csv`.
 
 ## Idée du porteur de projet
@@ -52,9 +52,9 @@ technique : aujourd'hui `vehicule_dessin.gd` dessine 10 types fixes depuis `form
 |---|---|---|
 | G0 | Ce document | Fait |
 | G1 | Modèle de données : un véhicule = un châssis + des pièces placées ; les 10 véhicules historiques réécrits ainsi ; statistiques calculées ; tests sans écran | **Fait le 31/10** |
-| G2 | Démonter un véhicule dans la grange ; stock de pièces | Après G1 |
-| G3 | Éditeur de grille au toucher (glisser, aimanter, valider) | Après essais du mode convoi |
-| G4 | Dessin des véhicules assemblés ; combat avec véhicules composés | Avec G3 |
+| G2 | Démonter un véhicule dans la grange ; stock de pièces | **Fait le 01/11** |
+| G3 | Éditeur de grille au toucher (glisser, aimanter, valider) | **Fait le 01/11** |
+| G4 | Dessin des véhicules assemblés ; combat avec véhicules composés | **Fait le 01/11** (première version) |
 
 G1 est le plus urgent : chaque fonction ajoutée sur des types de véhicules figés augmente le travail de reprise plus tard.
 
@@ -99,9 +99,23 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
 **Pour les gros véhicules (prochaine étape)** : même méthode, pièce par pièce depuis leur dessin ; plus de liberté
 (plusieurs emplacements possibles, pièces de rechange d'un autre véhicule), puis la grange la nuit (G2).
 
+## G2, G3 et G4 tels que codés (01/11, DEC-038 à DEC-040)
+
+- **G2 démontage** (`modele_atelier.gd`) : `raison_demontage`, `ordre_demonter`. Conditions : véhicule garé dans une grange ou un hangar,
+  nuit ou tempête (annoncée ou active), convoi arrêté, aucune menace, pas le dernier véhicule. Durée 25 s. Résultat : toutes les pièces,
+  châssis compris, en réserve avec leur état ; + métal du châssis ; survivants valides en réserve. Se reconstruit à l'identique (testé).
+- **G3 éditeur libre** (`editeur_grille.gd`, règles dans `Assemblage` : `poser`, `retirer`, `piece_en`, `apercu`) : mêmes conditions que G2.
+  Aimantation : roues au sol, arme dans la moitié haute, glissement vers la place libre la plus proche (6 cases en largeur, 3 en hauteur) ou
+  retour au bac. Plaques de blindage fabriquées avec 4 métal chacune (non remboursées). Un véhicule neuf va en queue de convoi.
+  Boutons : « Nouveau véhicule » (barre du haut), « Modifier » et « Démonter » (menu d'un véhicule garé).
+- **G4 dessin** (`forme_assemblage.gd`) : historique identique = dessin d'origine ; sinon fiche fabriquée (coque, roues ou chenilles, moteur,
+  cabine, tourelle et tube, mitrailleuse sur son appui, plaques, équipage), clé `asm_…`, reconstruite à la sauvegarde. Les ancrages de tir
+  lisent cette fiche comme les autres. Limite : apparence volontairement simple, sans l'art définitif.
+- Tests : `test_grange.gd` (51 vérifications), parcours écran `capture_grange.gd`, planche `capture_assemblages.gd`.
+
 ## Ouvert
 
 - Sous-ensemble de pièces V0 parmi les 29 du catalogue (proposition : 8 à 10).
-- Fabriquer des pièces simples (plaques, supports) avec du métal à l'atelier : oui ou non.
+- Fabriquer d'autres pièces simples (supports) avec du métal : plaques oui (DEC-039) ; le reste à trancher.
 - Nombre de véhicules maximum dans le convoi, rôle de la capacité de chargement.
 - Les véhicules historiques gardent-ils un bonus (fiabilité) par rapport aux assemblages ?

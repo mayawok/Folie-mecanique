@@ -1,7 +1,7 @@
 # Mode convoi — Folie Mécanique
 
 Statut : prototype jouable (DEC-026). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
-Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json`, véhicules `game/data/pieces.json` ; tests : `game/tests/test_combat.gd`, `test_assemblage.gd`, `test_ouverture.gd`, `capture_atelier.gd`.
+Code : `game/scripts/combat/` ; valeurs : `game/data/combat_proto.json`, véhicules `game/data/pieces.json` ; tests : `game/tests/test_combat.gd`, `test_assemblage.gd`, `test_ouverture.gd`, `test_evenements.gd` (tempête, mines), `test_grange.gd` (G2 à G4), captures `capture_atelier.gd`, `capture_grange.gd`, `capture_assemblages.gd`.
 
 ## Principe
 
@@ -99,7 +99,7 @@ roues et suspension). La garnison tire au fusil antichar ; sa **première salve 
 n'est visible qu'après avoir tiré ; si l'ennemi la repère, il peut la viser. Le convoi ne repart pas tant que
 l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprendre la route »).
 
-## Tempête de sable (décidé, DEC-027, à coder)
+## Tempête de sable (codée, DEC-027 et DEC-036)
 
 - **Surtout le jour** (environ 4 tempêtes sur 5 entre l'aube et le crépuscule). Annoncée **à droite** comme une
   embuscade : « Tempête de sable dans N s » (30 à 45 s), un mur de sable approche à l'horizon. Durée 60 à 120 s.
@@ -111,9 +111,13 @@ l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprend
   jusqu'à la mort pendant la tempête). Les équipages des véhicules fermés (blindés) sont protégés.
 - **S'abriter** : même mécanique que la nuit (l'équipage marche jusqu'au bâtiment, les véhicules se garent).
   « Reprendre la route » une fois la tempête passée.
-- Ouvert : la tempête efface-t-elle les mines posées par le joueur ? Valeurs à régler en essai.
+- **Tel que codé (DEC-036)** : `modele_meteo.gd`, valeurs dans `combat_proto.json` (`tempete`). Délai entre tempêtes 240 à 420 s ;
+  de nuit, une tempête sur cinq seulement. Usure : 1 PV toutes les 5 s sur moteur et suspension des véhicules ouverts (jamais sous 1 PV) ;
+  équipages dehors : 0,15 PV/s, jamais sous 1 PV ; véhicule garé protégé ; pas de rencontre ni de rôdeurs. Interface : mur de sable puis voile
+  et rafales, message à droite, bouton « S'abriter de la tempête ». Option `meteo` du modèle (active dans la partie jouée).
+- Ouvert : la tempête efface-t-elle les mines posées par le joueur (non pour l'instant) ? Valeurs à régler en essai.
 
-## Champs de mines (décidé, DEC-028, à coder)
+## Champs de mines (codés, DEC-028 et DEC-037)
 
 - **Tirés au hasard** (graine) sur la route, plus fréquents avec le niveau du secteur. Toujours **détectés** avant
   d'y entrer : alerte à droite « Champ de mines à N m » et le convoi s'arrête de lui-même s'il avance.
@@ -125,7 +129,12 @@ l'équipage n'a pas rembarqué et que les véhicules sont camouflés (« Reprend
   | Fléau (rouleau à chaînes) | Pièce récupérée sur un **Sherman Crab** ennemi (barrages, niveau ≥ 4) | Monté à l'avant d'un véhicule à chenilles (Sherman, Stuart, half-track). Le convoi avance derrière lui ; chaque mine explose contre le fléau, qui s'use. |
 - **Sans aucun moyen** : faire demi-tour, ou traverser à l'aveugle (chaque mine touchée : gros dégâts roues et suspension,
   comme les mines du joueur).
-- Ouvert : nombre de mines par champ, usure du fléau, statut du chien (survivant à part entière ou objet).
+- **Tel que codé (DEC-037)** : `modele_mines.gd`, valeurs dans `combat_proto.json` (`mines_champs`). Un champ de 6 à 10 mines (4 à 8 m d'écart),
+  un champ toutes les 520 à 900 m avec une chance de 12 % + 7 % par niveau. Alerte à 130 m, arrêt automatique à 14 m. Détecteur : 7 s par
+  mine ; chien : 3 s (objet à 3 PV) ; fléau : chenilles en tête, vitesse ×0,5, usure 12 par mine sur 100. Chaque mine sautée coûte 1 munition ;
+  le détecteur en récupère 30 % (4 métal). Trouvailles : détecteur (bunker, maison, église), chien (ferme, grange), fléau (épave de M4 Sherman,
+  faute de modèle « Crab »). Boutons « Déminer : détecteur / chien » et « Traverser à l'aveugle » (demi-tour : bandeau d'ordres). Option `champs`.
+- Ouvert : fléau à acheter ou fabriquer ? modèle de Sherman Crab dédié ? chien : blessure et soins.
 
 ## Bâtiments
 
@@ -166,7 +175,9 @@ Pour un changement, lire seulement la couche concernée.
 | `modele_base.gd` | Constantes, entités `Veh` et `Bat`, état de la partie, création |
 | `modele_tir.gd` | Tir, projectiles, dégâts, destruction, réparation |
 | `modele_terrain.gd` | Embuscade (garnison, mines, camouflage), garage, fouille |
-| `modele_atelier.gd` | Atelier (assembler, plans possibles) et ouverture guidée (trouvailles dans l'ordre, calme) |
+| `modele_mines.gd` | Champs de mines : génération, détection, arrêt, déminage (détecteur, chien, fléau), trouvailles |
+| `modele_meteo.gd` | Tempête de sable : calendrier, annonce, effets, abri |
+| `modele_atelier.gd` | Atelier (assembler, plans possibles), démontage dans la grange (G2), ouverture guidée (trouvailles dans l'ordre, calme) |
 | `combat_modele.gd` | `CombatModele` : ordres, survivants, pas de simulation, rencontres, demi-tour, sauvegarde |
 | `monde.gd` | Carte, horloge et nuit, fantassins et animaux, camps, voyageurs |
 | `vue_base.gd` | Constantes et état de la vue, petites classes d'interface (cartes, carte du monde), outils |
@@ -176,9 +187,11 @@ Pour un changement, lire seulement la couche concernée.
 | `batiment_dessin.gd` | Bâtiments dessinés par le code |
 | `../vehicules/assemblage.gd` | Véhicules en pièces, statistiques calculées (`GRILLE.md`) |
 | `../vehicules/atelier_grille.gd` | Écran d'atelier : grille, emplacements en pointillés, glisser-déposer |
+| `../vehicules/editeur_grille.gd` | Éditeur libre (G3) : glisser, aimanter, valider, aperçu |
+| `../vehicules/forme_assemblage.gd` | Dessin des véhicules assemblés (G4) : fiche fabriquée depuis les pièces |
 
-Réutilise `VehiculeDessin`, `Silhouette` et `Terrain`. Prochains modules prévus : `modele_meteo.gd` (tempête), mines dans
-`modele_terrain.gd`.
+Réutilise `VehiculeDessin`, `Silhouette` et `Terrain`. Chaîne du modèle : base, tir, terrain, mines, météo, atelier, `CombatModele`.
+Les états et les petites fonctions partagées (`calme_ouverture`, `tempete_active`, facteurs) vivent dans `modele_base.gd`.
 
 ## Constat d'équilibrage (6 graines, ordres naïfs : avancer en continu)
 

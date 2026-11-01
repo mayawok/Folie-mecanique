@@ -13,6 +13,10 @@ var _camp_ferme := 0
 var _lbl_camp: Label
 var _lbl_nuit: Label
 var _btn_nuit: Button
+var _lbl_meteo: Label            # tempête de sable et champs de mines (DEC-027, DEC-028)
+var _btn_demin_det: Button
+var _btn_demin_chien: Button
+var _btn_traverser: Button
 var _btn_mines: Button
 var _btn_carte: Button
 var _lbl_quete: Label
@@ -28,6 +32,10 @@ var _btn_fouille: Button
 var _btn_surv: Button
 var _btn_atelier: Button
 var _atelier: AtelierGrille   # atelier sur grille ouvert (DEC-035)
+var _editeur: EditeurGrille   # éditeur libre ouvert (G3, DEC-036)
+var _btn_nouveau: Button
+var _btn_demonter: Button
+var _btn_modifier: Button
 var _voile_surv: Control
 var _liste_surv: VBoxContainer
 var _pied_surv: VBoxContainer

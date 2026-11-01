@@ -9,7 +9,10 @@ on donne des **ordres** (marche, cible, visée sur roues/armes/châssis, fouille
 cessez-le-feu, réparation, rang, abandon. **Pause** (ou Espace) : les ordres restent possibles.
 Toucher un véhicule dans la scène affiche ses pièces cassées : toucher une icône envoie un mécanicien ;
 un véhicule trouvé et réparé peut rejoindre le convoi. Les cartes en bas sélectionnent un véhicule. Détails : `docs/design/CONVOI.md`.
-Tests sans écran : `godot --headless --path game -s res://tests/test_combat.gd` et `res://tests/test_assemblage.gd`.
+Tests sans écran (`godot --headless --path game -s res://tests/<nom>.gd`) : `test_combat`, `test_assemblage`, `test_ouverture`,
+`test_evenements` (tempête de sable, champs de mines) et `test_grange` (démontage, éditeur libre, dessin des assemblages).
+La nuit ou pendant une tempête, un véhicule garé dans une grange se **démonte** ou se **modifie**, et le bouton **Nouveau véhicule**
+en construit un avec les pièces de la réserve. Devant un champ de mines : déminer (détecteur, chien), faire demi-tour ou traverser.
 
 La gestion de base est archivée dans `archive/prototype_base/` (DEC-031).
 

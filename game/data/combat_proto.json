@@ -703,6 +703,46 @@
  "cycle": {
   "jour_s": 400
  },
+ "tempete": {
+  "_note": "DEC-027. Délais en secondes de jeu. proba_nuit : chance qu'une tempête qui tombe de nuit ait lieu (sinon reportée).",
+  "intervalle": [240, 420],
+  "report_s": 40,
+  "proba_nuit": 0.2,
+  "annonce": [30, 45],
+  "duree": [60, 120],
+  "precision": 0.5,
+  "vitesse": 0.6,
+  "usure_s": 5.0,
+  "usure_pv": 1.0,
+  "sante_s": 0.15,
+  "sante_min": 1.0
+ },
+ "demontage": {
+  "_note": "Grille G2 (DEC-036). Démonter un véhicule garé dans une grange ou un hangar, de nuit ou à l'abri d'une tempête.",
+  "duree_s": 25,
+  "nuit_ou_tempete": true
+ },
+ "mines_champs": {
+  "_note": "DEC-028. Champs tirés à graine fixe, plus fréquents avec le niveau. Distances en mètres, durées en secondes.",
+  "intervalle": [520, 900],
+  "proba_base": 0.12,
+  "proba_par_niveau": 0.07,
+  "mines": [6, 10],
+  "pas": [4.0, 8.0],
+  "alerte_m": 130.0,
+  "arret_m": 14.0,
+  "detecteur_s": 7.0,
+  "chien_s": 3.0,
+  "chien_blesse": 0.08,
+  "chien_pv": 3,
+  "recupere": 0.3,
+  "fleau_usure": 12.0,
+  "fleau_pv": 100.0,
+  "fleau_vitesse": 0.5,
+  "trouvaille_detecteur": 0.22,
+  "trouvaille_chien": 0.25,
+  "trouvaille_fleau": 0.35
+ },
  "garage": {
   "pv_s": 2.5,
   "pv_detruite_s": 1.0,
