@@ -35,7 +35,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
 
 - **iPhone** : boutons atteignables, taille des cases de la grille, rechargements moins fréquents, écran « Tournez le téléphone » (DEC-056, 059).
-- Coller le prompt du fond de grille (`docs/art/prompts/fond_grille.md`) dans ChatGPT ; produire `mus_fin` (`docs/audio/ELEVENLABS.md`).
+- Produire `mus_fin` (`docs/audio/ELEVENLABS.md`). Fond de grille intégré (DEC-078).
 
 - **Son iPhone** (DEC-030, renforcé par DEC-041) : non vérifiable hors appareil. Tester en mode normal puis silencieux.
 - Jouer la tempête, les mines et la grange : valeurs à régler dans `combat_proto.json` (`tempete`, `mines_champs`, `demontage`).

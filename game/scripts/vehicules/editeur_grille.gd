@@ -13,6 +13,7 @@ signal ferme(construit: bool)
 
 const C_FOND := Color(0.06, 0.065, 0.07)
 const C_ZONE := Color(0.09, 0.095, 0.1)
+const FOND_GRILLE: Texture2D = preload("res://assets/decor/fond_grille.png")
 const C_GRILLE := Color(1, 1, 1, 0.07)
 const C_CADRE := Color(1, 1, 1, 0.22)
 const C_ACCENT := Color("#E8A33D")
@@ -657,7 +658,13 @@ func _plaque(d: int) -> void:
 # --- Dessin -----------------------------------------------------------------------------------
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), C_FOND)
-	draw_rect(Rect2(_grille.position - Vector2(8, 8), _grille.size + Vector2(16, 16 + 2.2 * _cell)), C_ZONE)
+	if FOND_GRILLE != null:   # fond d'atelier (grange), recadré pour couvrir l'écran
+		var ts := FOND_GRILLE.get_size()
+		var k: float = maxf(size.x / ts.x, size.y / ts.y)
+		var r := Rect2((size - ts * k) * 0.5, ts * k)
+		draw_texture_rect(FOND_GRILLE, r, false)
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.25))
+	draw_rect(Rect2(_grille.position - Vector2(8, 8), _grille.size + Vector2(16, 16 + 2.2 * _cell)), Color(C_ZONE, 0.55))
 	for i in _vue.size.x + 1:
 		draw_line(_grille.position + Vector2(i * _cell, 0), _grille.position + Vector2(i * _cell, _grille.size.y), C_GRILLE, 1.0)
 	for j in _vue.size.y + 1:
