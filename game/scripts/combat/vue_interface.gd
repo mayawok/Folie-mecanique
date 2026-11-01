@@ -44,18 +44,27 @@ func _decaler(c) -> void:
 
 func _construire_elements() -> void:
 	# --- Bandeau du haut
-	var haut := _panneau(self)
+	var haut := _panneau(self, Color(0, 0, 0, 0))   # pas de bande : les éléments flottent
 	haut.set_anchors_and_offsets_preset(PRESET_TOP_WIDE)
 	var hb := HBoxContainer.new()
-	hb.add_theme_constant_override("separation", 8)
+	hb.add_theme_constant_override("separation", 10)
 	haut.add_child(hb)
+	_horloge_ui = Horloge.new()
+	_horloge_ui.vue = self
+	hb.add_child(_horloge_ui)
 	for k in [["ammo", "Munitions", "#E8C25A"], ["fuel_l", "Carburant", "#E8A33D"], ["metal", "Métal", "#9FB3BD"], ["pieces", "Pièces", "#8CC152"]]:
-		var l := _label("", hb, 21, Color(k[2]))
-		_chips[k[0]] = [l, k[1]]
+		var bulle := _bulle(hb)
+		var bh := HBoxContainer.new()
+		bh.add_theme_constant_override("separation", 8)
+		bulle.add_child(bh)
+		bh.add_child(IconeRes.new(k[0]))
+		var l := _label("", bh, 24, Color.WHITE)
+		_chips[k[0]] = [l, k[1], bulle]
 	var esp := Control.new()
 	esp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp)
-	_lbl_dist = _label("", hb, 22)
+	var bulle_d := _bulle(hb)
+	_lbl_dist = _label("", bulle_d, 22)
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
@@ -99,7 +108,8 @@ func _construire_elements() -> void:
 	_lbl_banniere.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(_lbl_banniere)
 	# --- Barre du bas : cartes des véhicules et ordres
-	var bas := _panneau(self)
+	var bas := _panneau(self, Color(0, 0, 0, 0))   # plus de bande noire
+	bas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bas.set_anchors_and_offsets_preset(PRESET_BOTTOM_WIDE)
 	bas.custom_minimum_size = Vector2(0, BARRE_H)
 	bas.offset_top = -BARRE_H
@@ -114,7 +124,12 @@ func _construire_elements() -> void:
 	ord.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ord.visible = false
 	_ord = ord
-	bb.add_child(ord)
+	var cadre_ord := _panneau(bb)   # les ordres gardent un fond lisible, seulement quand ils sont ouverts
+	cadre_ord.visible = false
+	cadre_ord.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cadre_ord.add_child(ord)
+	ord.visible = true
+	_ord = cadre_ord
 	_rangee(ord, "Marche", [["Reculer", "recul"], ["Halte", "halte"], ["Avancer", "avancer"]],
 		func(): return m.ordres.marche, func(v): m.ordre_marche(v), 200.0)
 	_rangee(ord, "Visée", [["Libre", "libre"], ["Roues", "roulement"], ["Armes", "armement"], ["Châssis", "chassis"]],
@@ -579,12 +594,10 @@ func _maj_interface() -> void:
 	for k in ["ammo", "fuel_l", "metal"]:
 		var l: Label = _chips[k][0]
 		var val: float = m.stocks[k]
-		var txt: String = "%s %d" % [_chips[k][1], int(val)]
-		if k == "fuel_l":
-			txt += " L"
-		l.text = txt
+		l.text = "%d" % int(val) + (" L" if k == "fuel_l" else "")
 		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
-	_chips.pieces[0].text = "Pièces %d" % (m.composants.size() + m.pieces_stock.size())
+	_chips.pieces[0].text = "%d" % (m.composants.size() + m.pieces_stock.size())
+	_horloge_ui.queue_redraw()
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
 	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.fini
 	_btn_pause.text = "Reprendre" if pause else "Pause"
@@ -629,7 +642,7 @@ func _maj_interface() -> void:
 			cte.vue = self
 			cte.uid = v.uid
 			cte.flat = true
-			cte.custom_minimum_size = Vector2(318, 150)
+			cte.custom_minimum_size = Vector2(270, 96)
 			cte.pressed.connect(func(): selectionner(v.uid))
 			_boite_cartes.add_child(cte)
 		if m.trouver(selection) == null or not (m.trouver(selection) in m.convoi):
@@ -757,7 +770,7 @@ func _maj_interface() -> void:
 		_camp_ferme = 0
 	# HUD : secteur, horloge, quête
 	var sct: Dictionary = w.secteurs[w.secteur]
-	_lbl_dist.text = "%s (F%d)  %d m  Jour %d, %s" % [sct.nom, sct.faction, int(m.x_tete), w.jour, w.periode()]
+	_lbl_dist.text = "%s · %d m · Jour %d" % [sct.nom, int(m.x_tete), w.jour]
 	if w.en_transit():
 		_lbl_quete.text = "Cap sur %s : %d m de route calme" % [w.secteurs[w.trajet.dest].nom, int(w.trajet.reste)]
 	elif not w.quete.is_empty():

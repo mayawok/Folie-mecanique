@@ -49,7 +49,7 @@ var _drag := false
 var _press := Vector2.ZERO
 var _poussiere_veh := []        # {p, age} poussière soulevée par les roues
 var _dernier_nuage := 0.0
-const BARRE_H := 270.0
+const BARRE_H := 120.0
 const DT := CombatModele.DT
 const C_TEXTE := Color("#F2EEE6")
 const C_DISCRET := Color("#A8A196")
@@ -95,7 +95,7 @@ var _cartes_sig := ""
 var _boite_cartes: HBoxContainer
 var _bande_actions: PanelContainer
 var _bande_on := false          # menu du véhicule : visible seulement après un toucher sur un véhicule
-var _ord: VBoxContainer
+var _ord: Control
 var _ord_t := 0.0               # temps restant d'affichage du bandeau d'ordres
 var _btn_ordres: Button
 var _btn_marche: Button
@@ -106,6 +106,7 @@ const SAVE_PATH := "user://convoi_save.json"
 var _btn_feu: Button
 var _btn_rep: Button
 var _chips := {}
+var _horloge_ui: Control
 var _lbl_dist: Label
 var _lbl_banniere: Label
 var _lbl_journal: Array = []
@@ -118,6 +119,55 @@ var _ui_noeuds: Array = []       # éléments d'interface (décalés hors des bo
 var _mg := {"g": 0.0, "h": 0.0, "d": 0.0, "b": 0.0}
 var _fin_t := 0.0                 # temps depuis l'anéantissement (dézoom, puis écran de fin)
 var _lbl_fin: Label
+# Icône de ressource dessinée à la main (munitions, carburant, métal, pièces)
+class IconeRes extends Control:
+	var genre := "ammo"
+
+	func _init(g := "ammo") -> void:
+		genre = g
+		custom_minimum_size = Vector2(34, 34)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var o := Color(0, 0, 0, 0.75)
+		match genre:
+			"ammo":   # trois cartouches
+				for i in 3:
+					var x := 6.0 + i * 10.0
+					draw_rect(Rect2(x, 14, 8, 15), Color("#C9A04A"))
+					draw_colored_polygon(PackedVector2Array([Vector2(x, 14), Vector2(x + 8, 14), Vector2(x + 4, 4)]), Color("#E8C25A"))
+					draw_rect(Rect2(x, 26, 8, 3), Color("#8A6A2A"))
+			"fuel_l":   # jerrican
+				draw_rect(Rect2(6, 10, 22, 20), Color("#D07A2A"))
+				draw_rect(Rect2(6, 10, 22, 20), o, false, 2.0)
+				draw_rect(Rect2(8, 5, 8, 6), Color("#9A5A1A"))
+				draw_line(Vector2(10, 16), Vector2(24, 26), Color("#7A4412"), 2.5)
+				draw_line(Vector2(24, 16), Vector2(10, 26), Color("#7A4412"), 2.5)
+			"metal":   # lingot
+				draw_colored_polygon(PackedVector2Array([Vector2(3, 28), Vector2(9, 12), Vector2(25, 12), Vector2(31, 28)]), Color("#9FB3BD"))
+				draw_colored_polygon(PackedVector2Array([Vector2(9, 12), Vector2(25, 12), Vector2(22, 8), Vector2(12, 8)]), Color("#CFDDE4"))
+				draw_polyline(PackedVector2Array([Vector2(3, 28), Vector2(9, 12), Vector2(25, 12), Vector2(31, 28), Vector2(3, 28)]), o, 2.0)
+			_:   # pièces : roue dentée
+				var c := Vector2(17, 18)
+				for k in 8:
+					draw_line(c + Vector2.from_angle(k * TAU / 8.0) * 9.0, c + Vector2.from_angle(k * TAU / 8.0) * 14.0, Color("#8CC152"), 5.0)
+				draw_circle(c, 11.0, Color("#8CC152"))
+				draw_circle(c, 4.5, Color(0.1, 0.12, 0.1, 0.9))
+
+
+# Cadran jour/nuit (coin de l'écran)
+class Horloge extends Control:
+	var vue: ConvoiVue
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(84, 84)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		if vue != null:
+			vue._horloge(self, size * 0.5 + Vector2(0, 6), 32.0)
+
+
 class Carte extends Button:
 	var vue: ConvoiVue
 	var uid := 0
@@ -126,28 +176,33 @@ class Carte extends Button:
 		var v = vue.m.trouver(uid)
 		var f := get_theme_default_font()
 		var sel := vue.selection == uid
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.07, 0.075, 0.08, 0.92))
-		draw_rect(Rect2(Vector2.ZERO, size), ConvoiVue.C_ACCENT if sel else Color(1, 1, 1, 0.12), false, 4.0 if sel else 2.0)
+		var fond := StyleBoxFlat.new()
+		fond.bg_color = Color(0.07, 0.075, 0.08, 0.62)
+		fond.set_corner_radius_all(18)
+		fond.border_color = ConvoiVue.C_ACCENT if sel else Color(1, 1, 1, 0.18)
+		fond.set_border_width_all(4 if sel else 2)
+		draw_style_box(fond, Rect2(Vector2.ZERO, size))
 		if v == null:
 			return
 		var rang := vue.m.convoi.find(v)
-		draw_string(f, Vector2(14, 36), v.nom, HORIZONTAL_ALIGNMENT_LEFT, size.x - 28, 26, ConvoiVue.C_TEXTE)
-		if rang >= 0:
-			draw_string(f, Vector2(size.x - 50, 66), "n°%d" % (rang + 1), HORIZONTAL_ALIGNMENT_RIGHT, 40, 18, ConvoiVue.C_DISCRET)
+		draw_string(f, Vector2(16, 34), v.nom, HORIZONTAL_ALIGNMENT_LEFT, size.x - 32, 24, ConvoiVue.C_TEXTE)
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
-		draw_rect(Rect2(14, 54, size.x - 28, 10), Color(0, 0, 0, 0.6))
-		draw_rect(Rect2(14, 54, (size.x - 28) * q, 10), ConvoiVue.couleur_etat(q))
+		draw_rect(Rect2(16, 46, size.x - 32, 9), Color(0, 0, 0, 0.55))
+		draw_rect(Rect2(16, 46, (size.x - 32) * q, 9), ConvoiVue.couleur_etat(q))
 		for k in v.equipage.size():
-			draw_circle(Vector2(26 + k * 28, 92), 9, ConvoiVue.C_VERT if v.equipage[k] > 0.0 else Color(0.3, 0.3, 0.3))
-		var txt := "Feu libre" if v.tir else "Cessez-le-feu"
-		var col2 := ConvoiVue.C_VERT if v.tir else ConvoiVue.C_ORANGE
+			draw_circle(Vector2(26 + k * 22, 74), 7, ConvoiVue.C_VERT if v.equipage[k] > 0.0 else Color(0.3, 0.3, 0.3))
+		var txt := ""   # l'essentiel seulement : on n'affiche que ce qui cloche
+		var col2 := ConvoiVue.C_ROUGE
 		if not v.mobile():
 			txt = "IMMOBILISÉ"
-			col2 = ConvoiVue.C_ROUGE
 		elif v.reparation:
-			txt = "Réparation..."
+			txt = "Réparation"
 			col2 = Color("#5AA9E6")
-		draw_string(f, Vector2(14, 134), txt, HORIZONTAL_ALIGNMENT_LEFT, size.x - 28, 22, col2)
+		elif not v.tir:
+			txt = "Feu coupé"
+			col2 = ConvoiVue.C_ORANGE
+		if txt != "":
+			draw_string(f, Vector2(size.x - 16 - 150, 80), txt, HORIZONTAL_ALIGNMENT_RIGHT, 150, 18, col2)
 
 static func couleur_etat(q: float) -> Color:
 	if q > 0.66:
@@ -262,6 +317,23 @@ func _panneau(parent: Node, fond := C_FOND) -> PanelContainer:
 	s.set_corner_radius_all(0)
 	s.set_content_margin_all(14)
 	p.add_theme_stylebox_override("panel", s)
+	parent.add_child(p)
+	return p
+
+# Pastille arrondie semi-transparente
+func _bulle(parent: Node) -> PanelContainer:
+	var p := PanelContainer.new()
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.07, 0.075, 0.08, 0.66)
+	s.set_corner_radius_all(30)
+	s.border_color = Color(1, 1, 1, 0.16)
+	s.set_border_width_all(2)
+	s.content_margin_left = 14
+	s.content_margin_right = 18
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
+	p.add_theme_stylebox_override("panel", s)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	return p
 

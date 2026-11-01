@@ -159,15 +159,14 @@ func _secteur(c: CanvasItem, ctr: Vector2, r: float, a0: float, a1: float, col: 
 		pts.append(ctr + Vector2.from_angle(lerpf(a0, a1, i / 24.0)) * r)
 	c.draw_colored_polygon(pts, col)
 
-func _horloge(c: CanvasItem) -> void:
-	var ctr := Vector2(size.x * 0.5, 168.0)
-	var r := 46.0
+func _horloge(c: CanvasItem, ctr: Vector2, r: float) -> void:
 	var w = m.monde
 	var jour_len: float = 1.0 - (MondeJeu.AUBE - MondeJeu.CREPUSCULE)
 	var d: float = fposmod(w.heure - MondeJeu.AUBE, 1.0)
 	var phi: float = d / jour_len * PI if d < jour_len else PI + (d - jour_len) / (1.0 - jour_len) * PI
 	var a0: float = -PI / 2.0 - phi
-	c.draw_circle(ctr, r + 5.0, Color(0, 0, 0, 0.6))
+	c.draw_circle(ctr, r + 7.0, Color("#2A2018"))   # cadre en métal patiné
+	c.draw_arc(ctr, r + 4.0, 0.0, TAU, 40, Color("#B8903A"), 3.0)
 	_secteur(c, ctr, r, a0, a0 + PI, Color("#8FC3E8"))
 	_secteur(c, ctr, r, a0 + PI, a0 + TAU, Color("#12163A"))
 	var ps := ctr + Vector2.from_angle(a0 + PI * 0.5) * r * 0.55
@@ -179,9 +178,9 @@ func _horloge(c: CanvasItem) -> void:
 	c.draw_circle(pl + Vector2(r * 0.09, -r * 0.05), r * 0.18, Color("#12163A"))
 	for k2 in 5:
 		c.draw_circle(ctr + Vector2.from_angle(a0 + PI * (1.15 + 0.17 * k2)) * r * (0.75 if k2 % 2 == 0 else 0.35), 1.6, Color(1, 1, 0.9, 0.9))
-	c.draw_arc(ctr, r, 0.0, TAU, 40, Color(0.95, 0.9, 0.8), 2.5)
-	c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(-11, -r - 26), ctr + Vector2(11, -r - 26), ctr + Vector2(0, -r - 6)]), Color("#F2EEE6"))
-	c.draw_polyline(PackedVector2Array([ctr + Vector2(-11, -r - 26), ctr + Vector2(11, -r - 26), ctr + Vector2(0, -r - 6), ctr + Vector2(-11, -r - 26)]), Color(0, 0, 0, 0.8), 2.0)
+	c.draw_arc(ctr, r, 0.0, TAU, 40, Color(0, 0, 0, 0.55), 2.0)
+	c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(-8, -r - 15), ctr + Vector2(8, -r - 15), ctr + Vector2(0, -r - 2)]), Color("#F2EEE6"))
+	c.draw_polyline(PackedVector2Array([ctr + Vector2(-8, -r - 15), ctr + Vector2(8, -r - 15), ctr + Vector2(0, -r - 2), ctr + Vector2(-8, -r - 15)]), Color(0, 0, 0, 0.8), 1.5)
 
 # Tempête de sable (DEC-027) : mur de sable à l'horizon pendant l'annonce, voile et rafales pendant la tempête
 func _dessiner_tempete(c: CanvasItem) -> void:
@@ -208,7 +207,6 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var av := _px(Vector2(_rx(v) + v.longueur, 0.9))
 				c.draw_colored_polygon(PackedVector2Array([av, av + Vector2(14.0 * ppm, -1.2 * ppm), av + Vector2(14.0 * ppm, 1.8 * ppm)]), Color(1.0, 0.95, 0.7, 0.16 * obs))
 	_dessiner_monde(c)
-	_horloge(c)
 	# Fumée des véhicules endommagés et épaves
 	for v in m.convoi + m.ennemis + m.epaves:
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
