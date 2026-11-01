@@ -138,6 +138,33 @@ lui-même son premier véhicule ; la liberté viendra plus tard avec les gros v�
 - Tests : `test_libre.gd` (section « Demandes du 01/11 après-midi »), parcours écran `capture_libre.gd`.
 - Ouvert : zoom à deux doigts si les cases restent petites ; visuels des pièces (planches ChatGPT) à intégrer.
 
+## Construction « à la Mad Max » : deux plans (DEC-067, décidé le 01/11, à coder)
+
+Constat : en un seul plan (une case = une pièce), une cabine ne peut pas passer au-dessus d'un moteur et le résultat n'a pas
+l'allure d'un véhicule récupéré. Les véhicules de Fury Road ont été bâtis en deux temps : une **base qui roule**, puis une
+**carrosserie de donneur** posée, découpée, soudée par-dessus (Peacemaker : coque de Valiant Charger sur châssis chenillé Ripsaw ;
+Gigahorse : deux Cadillac 1959 empilées ; FDK : coccinelle découpée soudée sur un V8 ; War Rig : Tatra prolongé de l'arrière d'une berline).
+
+- **Plan mécanique** : la grille actuelle, réduite à la mécanique (châssis, essieux, suspensions, roulement, moteurs, postes, armes).
+  Il donne vitesse, puissance, charge, consommation.
+- **Plan carrosserie** : posé librement par-dessus, sans case ; fixé s'il touche le châssis. Il donne poids, blindage par zone
+  (ce qu'il recouvre est protégé), couvert de l'équipage. **Vue écorchée** : coque transparente pour retoucher la mécanique.
+- **Coques de donneur** : chaque épave fouillée livre sa coque ; on la pose, la retourne, l'empile.
+- **Phasage** : 1) deux plans + 5 coques entières (Traction, cabine de T23, caisse de camion, char sans tourelle, carlingue d'avion) ;
+  2) **scie** : un ou deux traits, on garde un morceau (découpage de polygone sur l'image, sans nouveau dessin) ;
+  3) **greffes** sur points d'accroche (tubes, pare-buffle, éperon, piques, bidons, drapeaux ; certaines ont un effet) et
+  **base roulante** trouvée (camion, Jeep, char sans tourelle) ; la peinture de cases reste pour rallonger ou renforcer.
+
+### Extensibilité (exigence du porteur de projet)
+
+D'autres moteurs, roues, châssis, suspensions, **hauteurs de suspension**, coques et greffes viendront. Règle : **ajouter un modèle
+ne demande aucun code**, seulement une entrée de catalogue (`game/data/pieces.json`) et une image.
+- Chaque famille a ses champs de données communs (poids, PV, image, points d'accroche) et ses champs propres : moteur (puissance,
+  conso), roue (diamètre, vitesse maxi, charge), suspension (charge, débattement, **hauteur** qui relève la caisse et la garde au sol),
+  coque (contour, zones de blindage, sièges couverts), greffe (point d'accroche, effet).
+- Le code lit des familles génériques : pas de liste de modèles écrite en dur dans les scripts.
+- Les tests vérifient que toute entrée du catalogue se pose, se dessine et se calcule (un modèle ajouté est testé d'office).
+
 ## Ouvert
 
 - Sous-ensemble de pièces V0 parmi les 29 du catalogue (proposition : 8 à 10).
