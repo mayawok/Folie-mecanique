@@ -200,3 +200,16 @@ Onglet **Postes** : poste de conduite (conducteur obligatoire), poste de command
 troupes de 4 places face à l'avant ou à l'arrière. Pièces fabriquées en métal. Onglet **Cabines** : formes décor (camion, voiture,
 blindée, bricolée, pare-brise) posées au-dessus des sièges ; une cabine fermée met l'équipage à couvert. Onglet Équipage : les
 postes fixes ne se changent pas.
+
+## Greffes (DEC-079)
+
+Famille `greffe` du catalogue (`pieces.json`), onglet Options. Se fixent **à l'extérieur** : la pièce doit être collée (côté, dessus ou dessous) au châssis, à une pièce ou à une carrosserie, sans chevaucher ni une coque ni une autre pièce. Elles ne portent rien : on ne pose pas une arme sur un bidon. Dessin vectoriel au premier plan (couche 3).
+
+| Greffe | Effet |
+|---|---|
+| Pare-buffle | blindage +3, +60 pv |
+| Piques de toit | blessent les abordeurs (`abordage.degats_piques`, 6/s par jeu) |
+| Bidons de réserve | réservoir +14 L, +45 kg |
+| Drapeau de bande | décoratif |
+
+Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et un champ d'effet (`blindage_plus`, `piques`, `reservoir_plus`). Le dessin d'un nouveau modèle demande une entrée dans `_formes_greffe`. **À venir** : éperon, qui attend les collisions entre véhicules.

@@ -347,7 +347,7 @@
    }
   }
  },
- "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
+ "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
  "rencontres": {
   "intervalle": [
    110,

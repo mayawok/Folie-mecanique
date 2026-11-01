@@ -14,7 +14,7 @@ extends RefCounted
 
 const C := 0.25          # côté d'une cellule (m)
 const TOLERANCE := 0.5   # débattement de suspension (cellules) : une roue à moins de 12,5 cm du sol porte encore
-const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement", "coque"]
+const FAMILLES_PIECES := ["moteur", "poste", "cabine", "arme", "equipement", "coque", "greffe"]
 const OPAC_ECORCHE := 0.3   # vue écorchée : coque transparente pour voir la mécanique (DEC-067)
 const ROLES := ["tireur", "chargeur", "chef", "mecanicien", "infirmier", "passager"]   # le siège 1 est le conducteur (DEC-050)
 
@@ -130,10 +130,22 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 	for c in coq:
 		if not coq.has(c + Vector2i(0, 1)):
 			toits[c] = coq[c]
+	var occ_sup := occ.duplicate()   # une greffe ne porte rien : aucune pièce ne repose dessus
+	for c in occ:
+		if occ[c] is int and _greffe(_pieces(a)[int(occ[c])].fiche):
+			occ_sup.erase(c)
+	if _greffe(p.fiche):   # accrochée à l'extérieur : libre, et collée (côté, dessus ou dessous) au châssis ou à une pièce
+		if not _libre(occ, p.pos, p.e) or not _libre(coq, p.pos, p.e):
+			return false
+		for x in range(p.pos.x, p.pos.x + p.e.x):
+			for y in range(p.pos.y, p.pos.y + p.e.y):
+				if hab.has(Vector2i(x, y)):
+					return false
+		return _colle(_union(occ_sup, coq), p.pos, p.e)   # collée au châssis, à une pièce ou à une carrosserie
 	if _coque(p.fiche):   # ne chevauche aucune autre coque ; tenue si elle recouvre le châssis ou une pièce, ou repose dessus (empilable)
 		if not _libre(coq, p.pos, p.e):
 			return false
-		var tout := _union(_union(occ, hab), coq)
+		var tout := _union(_union(occ_sup, hab), coq)
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
 				if occ.has(Vector2i(x, y)) and occ[Vector2i(x, y)] is String:   # recouvre le châssis
@@ -149,14 +161,29 @@ static func _valide(a: Dictionary, p: Dictionary) -> bool:
 					return false
 				if occ.has(c) and not _siege(_pieces(a)[int(occ[c])].fiche):
 					return false
-		return _portee(_union(_union(occ, hab), toits), p.pos, p.e)
+		return _portee(_union(_union(occ_sup, hab), toits), p.pos, p.e)
 	var libre := _libre(occ, p.pos, p.e)
 	if libre and not _siege(p.fiche):
 		for x in range(p.pos.x, p.pos.x + p.e.x):
 			for y in range(p.pos.y, p.pos.y + p.e.y):
 				if hab.has(Vector2i(x, y)):
 					libre = false
-	return libre and _portee(_union(_union(occ, hab), toits), p.pos, p.e)   # une pièce peut reposer sur une coque (arme sur le toit)
+	return libre and _portee(_union(_union(occ_sup, hab), toits), p.pos, p.e)   # une pièce peut reposer sur une coque (arme sur le toit)
+
+
+static func _greffe(fiche: Dictionary) -> bool:
+	return fiche.get("famille", "") == "greffe"
+
+
+# Une cellule voisine (4 côtés) du rectangle est-elle occupée ?
+static func _colle(occ: Dictionary, pos: Vector2i, e: Vector2i) -> bool:
+	for x in range(pos.x, pos.x + e.x):
+		if occ.has(Vector2i(x, pos.y - 1)) or occ.has(Vector2i(x, pos.y + e.y)):
+			return true
+	for y in range(pos.y, pos.y + e.y):
+		if occ.has(Vector2i(pos.x - 1, y)) or occ.has(Vector2i(pos.x + e.x, y)):
+			return true
+	return false
 
 
 static func _union(a: Dictionary, b: Dictionary) -> Dictionary:
@@ -518,6 +545,9 @@ static func analyser(a: Dictionary) -> Dictionary:
 		metal += float(s.metal)
 		corps_bas = minf(corps_bas, float(c.y))
 	var debattement := 0.0   # moyenne des liaisons (essieu simple : 0,2) ; améliore la précision en roulant
+	var blindage_greffes := 0.0   # greffes (DEC-079) : pare-buffle, piques, bidons
+	var piques := 0
+	var reservoir_plus := 0.0
 	var blindage_coques := 0.0   # coques : blindage au prorata des cases de châssis recouvertes (DEC-067)
 	for p in pieces:
 		masses.append([float(p.fiche.get("poids_kg", 0)) * p.k, p.pos.x + p.e.x * 0.5, p.pos.y + p.e.y * 0.5])
@@ -529,6 +559,11 @@ static func analyser(a: Dictionary) -> Dictionary:
 					dessous += 1
 			blindage_coques += float(p.fiche.get("blindage", 0)) * dessous / maxf(1.0, cases.size())
 		metal += float(p.fiche.get("metal", 0)) * p.k
+		if _greffe(p.fiche):
+			pv.chassis += float(p.fiche.get("pv", 0))
+			blindage_greffes += float(p.fiche.get("blindage_plus", 0))
+			piques += int(p.fiche.get("piques", 0))
+			reservoir_plus += float(p.fiche.get("reservoir_plus", 0))
 		corps_bas = minf(corps_bas, float(p.pos.y))
 	for e in essieux:
 		masses.append([float(e.fiche_e.poids_kg) + float(e.fiche_t.poids_kg) + float(e.fiche_l.get("poids_kg", 0)), e.x + 0.5, e.y])
@@ -733,8 +768,8 @@ static func analyser(a: Dictionary) -> Dictionary:
 		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
 	var roles := roles_de(a)
-	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques,
-		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size(), "metal": int(round(metal)),
+	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes,
+		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size() + reservoir_plus, "piques": piques, "metal": int(round(metal)),
 		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
@@ -1103,6 +1138,8 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 				_formes_cabine(formes, st, r)
 			continue
 		match p.fiche.get("famille", ""):
+			"greffe":
+				_formes_greffe(formes, String(p.fiche.get("dessin", "")), r)
 			"moteur":
 				var surface: int = int(p.e.x) * int(p.e.y)
 				_sprite(formes, "moteur_leger" if surface <= 8 else ("moteur_moyen" if surface <= 18 else "moteur_lourd"), r, 1)
@@ -1211,6 +1248,35 @@ static func _formes_liaison(formes: Array, dessin: String, cx: float, y_ch: floa
 				formes.append({"ligne": [[xr - 0.07, ya], [xr + 0.07, yb]], "ep": 0.03, "c": "#8A4A2A", "z": 1})
 			if dessin == "rehausse":
 				formes.append({"ligne": [[cx + s * 0.14, y_p], [cx + s * 0.22, y_ch]], "ep": 0.045, "c": "sombre", "z": 1})
+
+
+# Greffes (DEC-079) : formes dessinées dans le rectangle r de la pièce (mètres, y vers le haut)
+static func _formes_greffe(formes: Array, dessin: String, r: Rect2) -> void:
+	var x0 := r.position.x
+	var y0 := r.position.y
+	var w := r.size.x
+	var h := r.size.y
+	match dessin:
+		"pare_buffle":   # cadre de barres, plus incliné vers l'avant
+			formes.append({"ligne": [[x0 + w * 0.1, y0 + h * 0.05], [x0 + w * 0.9, y0 + h * 0.25]], "ep": 0.07, "c": "#B9B2A0", "z": 3})
+			formes.append({"ligne": [[x0 + w * 0.1, y0 + h * 0.95], [x0 + w * 0.9, y0 + h * 0.75]], "ep": 0.07, "c": "#B9B2A0", "z": 3})
+			formes.append({"ligne": [[x0 + w * 0.9, y0 + h * 0.25], [x0 + w * 0.9, y0 + h * 0.75]], "ep": 0.08, "c": "#B9B2A0", "z": 3})
+			formes.append({"ligne": [[x0 + w * 0.5, y0 + h * 0.15], [x0 + w * 0.5, y0 + h * 0.85]], "ep": 0.04, "c": "sombre", "z": 3})
+		"piques":   # rangée de pointes
+			var n := maxi(2, int(round(w / 0.17)))
+			formes.append({"ligne": [[x0, y0 + 0.03], [x0 + w, y0 + 0.03]], "ep": 0.05, "c": "sombre", "z": 3})
+			for k in n:
+				var cx := x0 + (float(k) + 0.5) * w / n
+				formes.append({"pts": [[cx - 0.05, y0 + 0.05], [cx + 0.05, y0 + 0.05], [cx, y0 + h * 0.95]], "c": "#B9B2A0", "z": 3})
+		"bidons":   # deux jerrycans
+			for k in 2:
+				var bx := x0 + w * (0.06 + 0.46 * k)
+				var bw := w * 0.42
+				formes.append({"pts": [[bx, y0], [bx + bw, y0], [bx + bw, y0 + h * 0.8], [bx + bw * 0.7, y0 + h * 0.95], [bx, y0 + h * 0.95]], "c": "#6E7038" if k == 0 else "#8A4A2A", "z": 3})
+				formes.append({"ligne": [[bx + bw * 0.15, y0 + h * 0.5], [bx + bw * 0.85, y0 + h * 0.5]], "ep": 0.02, "c": "sombre", "z": 3})
+		"drapeau":   # mât et fanion
+			formes.append({"ligne": [[x0 + w * 0.2, y0], [x0 + w * 0.2, y0 + h]], "ep": 0.03, "c": "#B9B2A0", "z": 3})
+			formes.append({"pts": [[x0 + w * 0.2, y0 + h], [x0 + w * 1.0, y0 + h * 0.82], [x0 + w * 0.2, y0 + h * 0.62]], "c": "#9A2F2F", "z": 3})
 
 
 # --- Formes simples des cabines et des postes (DEC-062) -----------------------------------------

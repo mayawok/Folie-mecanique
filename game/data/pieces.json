@@ -1223,6 +1223,10 @@
   "roue_geante": {"famille": "train", "nom": "Roue géante (1,5 m)", "type": "roues", "diametre_cases": 6, "vitesse_max": 7.0, "sable": 0.97, "charge_kg": 6500, "poids_kg": 260, "pv": 50, "metal": 3},
   "roue_tracteur": {"famille": "train", "nom": "Roue de tracteur (2 m)", "type": "roues", "diametre_cases": 8, "vitesse_max": 5.5, "sable": 1.0, "charge_kg": 9000, "poids_kg": 420, "pv": 70, "metal": 4},
   "moteur_compresseur": {"famille": "moteur", "nom": "V8 à compresseur", "puissance_ch": 220, "conso": 4.5, "poids_kg": 300, "pv": 45, "emprise": [5, 3], "metal": 5},
-  "moteur_avion": {"famille": "moteur", "nom": "Moteur d'avion en étoile", "puissance_ch": 450, "conso": 6.0, "poids_kg": 420, "pv": 50, "emprise": [5, 4], "metal": 6}
+  "moteur_avion": {"famille": "moteur", "nom": "Moteur d'avion en étoile", "puissance_ch": 450, "conso": 6.0, "poids_kg": 420, "pv": 50, "emprise": [5, 4], "metal": 6},
+  "greffe_pare_buffle": {"famille": "greffe", "nom": "Pare-buffle", "dessin": "pare_buffle", "poids_kg": 85, "emprise": [1, 2], "metal": 5, "pv": 60, "blindage_plus": 3, "fabrique": true, "_note": "Barres d'acier soudées à l'avant : protège le moteur et la calandre."},
+  "greffe_piques": {"famille": "greffe", "nom": "Piques de toit", "dessin": "piques", "poids_kg": 30, "emprise": [2, 1], "metal": 2, "pv": 20, "piques": 1, "fabrique": true, "_note": "Rangée de piques : blesse les pillards qui sautent à bord."},
+  "greffe_bidons": {"famille": "greffe", "nom": "Bidons de réserve", "dessin": "bidons", "poids_kg": 45, "emprise": [1, 1], "metal": 2, "pv": 15, "reservoir_plus": 14, "fabrique": true, "_note": "Deux jerrycans arrimés : +14 L de réservoir, mais plus de poids."},
+  "greffe_drapeau": {"famille": "greffe", "nom": "Drapeau de bande", "dessin": "drapeau", "poids_kg": 3, "emprise": [1, 2], "metal": 1, "pv": 2, "fabrique": true, "_note": "Décoratif : identifie la bande."}
  }
 }

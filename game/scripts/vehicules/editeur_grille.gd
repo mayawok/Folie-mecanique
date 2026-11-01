@@ -22,7 +22,7 @@ const C_DISCRET := Color("#A8A196")
 const C_VERT := Color("#5FB36B")
 const C_ROUGE := Color("#D9674A")
 const C_SOL := Color(0.55, 0.45, 0.3)
-const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A"), "coque": Color("#7A6A55")}
+const COULEURS := {"moteur": Color("#A8552F"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"), "equipement": Color("#8A7A3A"), "coque": Color("#7A6A55"), "greffe": Color("#6A5A4A")}
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["moteur", "Moteurs"],
 	["poste", "Postes"], ["suspension", "Suspension"], ["coque", "Carrosserie"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"]]
 # Essieux, roues et liaisons : lus dans le catalogue par famille (ajouter un modèle = une entrée dans pieces.json)
@@ -617,7 +617,7 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 					"action": _basculer_ecorche, "couleur": Color("#4A4A4A")})
 			for it in _palette:
 				var f := Assemblage.piece(it.id)
-				if f.get("famille", "") != onglet and not (onglet == "poste" and f.get("famille", "") == "cabine"):   # sièges d'origine (stock) rangés avec les postes
+				if f.get("famille", "") != onglet and not (onglet == "poste" and f.get("famille", "") == "cabine") and not (onglet == "equipement" and f.get("famille", "") == "greffe"):   # sièges d'origine (stock) rangés avec les postes
 					continue
 				var reste := _restant(it.id, int(it.n))
 				var detail := ""
@@ -626,6 +626,7 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 					"cabine": detail = "%d place%s%s" % [int(f.sieges), "s" if int(f.sieges) > 1 else "", ", ouverte" if f.ouvert else ""]
 					"arme": detail = String(CombatModele.donnees().armes[f.arme].nom)
 					"equipement": detail = "prend %.1f ch au moteur" % float(f.get("puissance_ch", 0))
+					"greffe": detail = "se fixe à l'extérieur du véhicule" + ("" if int(f.get("blindage_plus", 0)) == 0 else ", blindage +%d" % int(f.blindage_plus)) + ("" if int(f.get("piques", 0)) == 0 else ", blesse les abordeurs") + ("" if int(f.get("reservoir_plus", 0)) == 0 else ", +%d L" % int(f.reservoir_plus))
 					"coque": detail = "blindage %d%s" % [int(f.get("blindage", 0)), ", abrite l'équipage" if f.get("couvert", false) else ", ouverte"]
 				var id: String = it.id
 				res.append({"titre": "%s%s" % [f.nom, "" if reste < 0 else "  ×%d" % reste], "id": id,

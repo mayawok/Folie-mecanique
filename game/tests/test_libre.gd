@@ -388,5 +388,33 @@ func _init() -> void:
 	var c_f: Array = ConstructionLibre.forme(c_v).formes.filter(func(f): return f.get("sprite", "") == "coques/coque_berline")
 	ok(c_f.size() == 2 and c_f[0].uv.size() == 4, "les morceaux se dessinent avec leur part d'image")
 
+	print("— Les greffes (DEC-079) —")
+	var g_j := jeep()
+	var g_s0: Dictionary = ConstructionLibre.analyser(g_j).stats
+	var g_ids: Array = Assemblage.catalogue().pieces.keys().filter(func(id): return Assemblage.piece(id).get("famille", "") == "greffe")
+	ok(g_ids.size() >= 4, "le catalogue contient au moins 4 greffes (%d)" % g_ids.size())
+	var g_ch: Array = ConstructionLibre._cases(g_j).keys()
+	var g_xmax := 0
+	var g_ymin := 99
+	for c in g_ch:
+		g_xmax = maxi(g_xmax, c.x)
+		g_ymin = mini(g_ymin, c.y)
+	for id in g_ids:
+		ok(not ConstructionLibre.poser(g_j, id, Vector2i(g_xmax + 1, g_ymin)).is_empty(), "%s : se fixe à l'avant du châssis" % id)
+		var g_seule := ConstructionLibre.poser(g_j, id, Vector2i(g_xmax + 1, g_ymin))
+		var g_an: Dictionary = ConstructionLibre.analyser(g_seule)
+		ok(g_an.ok and float(g_an.stats.poids_kg) > float(g_s0.poids_kg), "%s : alourdit le véhicule" % id)
+		var g_fm: Dictionary = ConstructionLibre.forme(g_seule)
+		ok(g_fm.formes.size() > ConstructionLibre.forme(g_j).formes.size(), "%s : se dessine" % id)
+	var g_pb := ConstructionLibre.poser(g_j, "greffe_pare_buffle", Vector2i(g_xmax + 1, g_ymin))
+	ok(float(ConstructionLibre.analyser(g_pb).stats.blindage) > float(g_s0.blindage), "le pare-buffle ajoute du blindage")
+	var g_bi := ConstructionLibre.poser(g_j, "greffe_bidons", Vector2i(g_xmax + 1, g_ymin))
+	ok(float(ConstructionLibre.analyser(g_bi).stats.reservoir) > float(g_s0.reservoir), "les bidons ajoutent du réservoir")
+	var g_pi := ConstructionLibre.poser(g_j, "greffe_piques", Vector2i(g_xmax + 1, g_ymin))
+	ok(int(ConstructionLibre.analyser(g_pi).stats.piques) == 1, "les piques sont comptées")
+	ok(ConstructionLibre.poser(g_j, "greffe_drapeau", Vector2i(g_xmax + 12, g_ymin + 6)).is_empty(), "une greffe loin de tout n'est pas posée sans appui")
+	var g_sup := ConstructionLibre.poser(g_bi, "arme_mitrailleuse", Vector2i(g_xmax + 1, g_ymin + 1))
+	ok(g_sup.is_empty() or int(g_sup.pieces[g_sup.pieces.size() - 1].pos[0]) != g_xmax + 1 or int(g_sup.pieces[g_sup.pieces.size() - 1].pos[1]) != g_ymin + 1, "rien ne repose sur une greffe")
+
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)

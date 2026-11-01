@@ -287,7 +287,7 @@ func palette_grille(uid: int) -> Array:
 			var fi := Assemblage.piece(id)
 			if bool(fi.get("fabrique", false)) and fi.get("famille", "") in fams and fi.has("emprise") and not fi.get("retire", false):
 				res.append({"id": id, "n": -1})
-	var ordre := {"moteur": 0, "poste": 1, "cabine": 2, "coque": 3, "arme": 4, "equipement": 5}
+	var ordre := {"moteur": 0, "poste": 1, "cabine": 2, "coque": 3, "arme": 4, "equipement": 5, "greffe": 6}
 	res.sort_custom(func(p, q):
 		var fp := Assemblage.piece(p.id)
 		var fq := Assemblage.piece(q.id)

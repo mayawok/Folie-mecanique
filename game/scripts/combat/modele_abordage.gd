@@ -84,6 +84,7 @@ func _abordages(dt: float) -> void:
 		ab.x = xc - v.longueur * 0.25   # sur le toit, à l'arrière
 		var defenseurs: int = v.equipage_vivant()
 		ab.pv = float(ab.pv) - float(A.defense_par_membre) * defenseurs * dt
+		ab.pv = float(ab.pv) - float(A.get("degats_piques", 6.0)) * int(v.profil.get("piques", 0)) * dt   # piques de toit (DEC-079)
 		ab.cd = float(ab.cd) - dt
 		if ab.cd <= 0.0:
 			ab.cd = float(A.cadence_lame)
