@@ -53,8 +53,13 @@ static func _pieces(a: Dictionary) -> Array:   # [{i, id, fiche, pos, e}]
 	var res := []
 	var i := 0
 	for p in a.get("pieces", []):
+		var e := _emprise(String(p.piece))
+		var coupe: Array = p.get("coupe", [0.0, 1.0, 0.0, 1.0])   # morceau gardé à la scie : [gauche, droite, bas, haut] de l'image (DEC-072)
+		if p.has("emprise"):
+			e = Vector2i(int(p.emprise[0]), int(p.emprise[1]))
 		res.append({"i": i, "id": String(p.piece), "fiche": Assemblage.piece(String(p.piece)),
-			"pos": Vector2i(int(p.pos[0]), int(p.pos[1])), "e": _emprise(String(p.piece)), "miroir": bool(p.get("miroir", false))})
+			"pos": Vector2i(int(p.pos[0]), int(p.pos[1])), "e": e, "miroir": bool(p.get("miroir", false)),
+			"coupe": coupe, "k": (float(coupe[1]) - float(coupe[0])) * (float(coupe[3]) - float(coupe[2]))})
 		i += 1
 	return res
 
@@ -296,11 +301,14 @@ static func _libre(occ: Dictionary, pos: Vector2i, e: Vector2i) -> bool:
 
 # Pose une pièce près d'une cellule (coin bas gauche) : elle glisse vers la place libre et portée la plus proche.
 # Renvoie {} si rien ne convient (la pièce reste dans le bac).
-static func poser(a: Dictionary, piece_id: String, cell: Vector2i, miroir := false) -> Dictionary:
+# extra : champs d'un morceau scié repris au doigt (coupe, emprise, lot), conservés à la pose
+static func poser(a: Dictionary, piece_id: String, cell: Vector2i, miroir := false, extra := {}) -> Dictionary:
 	var f := Assemblage.piece(piece_id)
 	if f.is_empty() or not f.get("famille", "") in FAMILLES_PIECES:
 		return {}
 	var e := _emprise(piece_id)
+	if extra.has("emprise"):
+		e = Vector2i(int(extra.emprise[0]), int(extra.emprise[1]))
 	var cands := []
 	for dy in range(-4, 5):
 		for dx in range(-6, 7):
@@ -312,9 +320,72 @@ static func poser(a: Dictionary, piece_id: String, cell: Vector2i, miroir := fal
 		b.pieces.append({"piece": piece_id, "pos": [c.x, c.y]})
 		if miroir:
 			b.pieces[n].miroir = true
+		for k in extra:
+			b.pieces[n][k] = extra[k]
 		if _valide(b, {"i": n, "fiche": f, "pos": c, "e": e}):
 			return b
 	return {}
+
+
+# Scie une coque posée (DEC-072) à la cellule touchée : sens "v" (trait vertical) ou "h" (horizontal).
+# Les deux morceaux restent posés côte à côte ; ils forment un même lot (une seule coque de la réserve). {} si impossible.
+static func scier(a: Dictionary, index: int, cell: Vector2i, sens: String) -> Dictionary:
+	var ps := _pieces(a)
+	if index < 0 or index >= ps.size() or not _coque(ps[index].fiche):
+		return {}
+	var p: Dictionary = ps[index]
+	var g := float(p.coupe[0])
+	var d := float(p.coupe[1])
+	var bas := float(p.coupe[2])
+	var h := float(p.coupe[3])
+	var lot := 0
+	for q in a.pieces:
+		lot = maxi(lot, int(q.get("lot", 0)))
+	lot = int(a.pieces[index].get("lot", lot + 1))
+	var base: Dictionary = a.pieces[index].duplicate(true)
+	base.lot = lot
+	var m1 := base.duplicate(true)
+	var m2 := base.duplicate(true)
+	if sens == "v":
+		var k: int = cell.x - int(p.pos.x)
+		if k < 1 or k > p.e.x - 1:
+			return {}
+		var f: float = float(k) / float(p.e.x)
+		var u: float = (d - f * (d - g)) if p.miroir else (g + f * (d - g))   # retournée : la gauche à l'écran est la droite de l'image
+		m1.coupe = [u, d, bas, h] if p.miroir else [g, u, bas, h]
+		m2.coupe = [g, u, bas, h] if p.miroir else [u, d, bas, h]
+		m1.emprise = [k, p.e.y]
+		m2.emprise = [p.e.x - k, p.e.y]
+		m2.pos = [p.pos.x + k, p.pos.y]
+	else:
+		var k: int = cell.y - int(p.pos.y)
+		if k < 1 or k > p.e.y - 1:
+			return {}
+		var v: float = bas + float(k) / float(p.e.y) * (h - bas)
+		m1.coupe = [g, d, bas, v]
+		m2.coupe = [g, d, v, h]
+		m1.emprise = [p.e.x, k]
+		m2.emprise = [p.e.x, p.e.y - k]
+		m2.pos = [p.pos.x, p.pos.y + k]
+	var b := a.duplicate(true)
+	b.pieces[index] = m1
+	b.pieces.append(m2)
+	return nettoyer(b)
+
+
+# Nombre de pièces de la réserve utilisées par la grille pour un modèle : les morceaux d'une même coque sciée comptent une fois
+static func utilisees(a: Dictionary, id: String) -> int:
+	var lots := {}
+	var n := 0
+	for p in a.get("pieces", []):
+		if String(p.piece) != id:
+			continue
+		if p.has("lot"):
+			if lots.has(int(p.lot)):
+				continue
+			lots[int(p.lot)] = true
+		n += 1
+	return n
 
 
 static func retirer(a: Dictionary, index: int) -> Dictionary:
@@ -418,15 +489,15 @@ static func analyser(a: Dictionary) -> Dictionary:
 	var debattement := 0.0   # moyenne des liaisons (essieu simple : 0,2) ; améliore la précision en roulant
 	var blindage_coques := 0.0   # coques : blindage au prorata des cases de châssis recouvertes (DEC-067)
 	for p in pieces:
-		masses.append([float(p.fiche.get("poids_kg", 0)), p.pos.x + p.e.x * 0.5, p.pos.y + p.e.y * 0.5])
+		masses.append([float(p.fiche.get("poids_kg", 0)) * p.k, p.pos.x + p.e.x * 0.5, p.pos.y + p.e.y * 0.5])
 		if _coque(p.fiche):
-			pv.chassis += float(p.fiche.get("pv", 0))
+			pv.chassis += float(p.fiche.get("pv", 0)) * p.k
 			var dessous := 0
 			for c in cases:
 				if c.x >= p.pos.x and c.x < p.pos.x + p.e.x and c.y >= p.pos.y and c.y < p.pos.y + p.e.y:
 					dessous += 1
 			blindage_coques += float(p.fiche.get("blindage", 0)) * dessous / maxf(1.0, cases.size())
-		metal += float(p.fiche.get("metal", 0))
+		metal += float(p.fiche.get("metal", 0)) * p.k
 		corps_bas = minf(corps_bas, float(p.pos.y))
 	for e in essieux:
 		masses.append([float(e.fiche_e.poids_kg) + float(e.fiche_t.poids_kg) + float(e.fiche_l.get("poids_kg", 0)), e.x + 0.5, e.y])
@@ -745,11 +816,18 @@ static func places_troupes(a: Dictionary) -> int:
 # Un siège est à couvert si une carrosserie fermée recouvre toute sa rangée du bas ; sinon l'équipage est exposé
 static func _sieges_exposes(a: Dictionary) -> bool:
 	var couvert := {}
+	var toits := {}   # colonnes coiffées par le toit d'une coque fermée (un morceau scié sans toit n'abrite que sous un toit)
 	for p in _pieces(a):
-		if (_habillage(p.fiche) and not bool(p.fiche.get("ouvert", false))) or (_coque(p.fiche) and bool(p.fiche.get("couvert", false))):
+		if _coque(p.fiche) and bool(p.fiche.get("couvert", false)) and float(p.coupe[3]) >= 0.999:
+			for x in range(p.pos.x, p.pos.x + p.e.x):
+				toits[x] = true
+	for p in _pieces(a):
+		var coque_ok: bool = _coque(p.fiche) and bool(p.fiche.get("couvert", false))
+		if (_habillage(p.fiche) and not bool(p.fiche.get("ouvert", false))) or coque_ok:
 			for x in range(p.pos.x, p.pos.x + p.e.x):
 				for y in range(p.pos.y, p.pos.y + p.e.y):
-					couvert[Vector2i(x, y)] = true
+					if not coque_ok or toits.has(x):
+						couvert[Vector2i(x, y)] = true
 	for p in _pieces(a):
 		var f: Dictionary = p.fiche
 		if _habillage(f) or _coque(f) or int(f.get("sieges", 0)) <= 0:
@@ -966,7 +1044,8 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		var r := Rect2(X.call(p.pos.x), Y.call(p.pos.y), p.e.x * C, p.e.y * C)
 		if _coque(p.fiche):   # au-dessus de tout, sous les armes ; transparente en vue écorchée
 			formes.append({"sprite": String(p.fiche.image), "r": [r.position.x, r.position.y, r.size.x, r.size.y], "z": 3,
-				"miroir": p.miroir, "opac": OPAC_ECORCHE if ecorche else 1.0})
+				"miroir": p.miroir, "opac": OPAC_ECORCHE if ecorche else 1.0,
+				"uv": [p.coupe[0], 1.0 - float(p.coupe[3]), p.coupe[1], 1.0 - float(p.coupe[2])]})   # morceau d'image (v vers le bas)
 			continue
 		if _habillage(p.fiche):
 			var st := String(p.fiche.get("style", "voiture"))

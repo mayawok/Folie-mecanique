@@ -198,7 +198,13 @@ static func demonter(a: Dictionary, etats := {}) -> Dictionary:
 # Liste des identifiants de pièces d'un assemblage, châssis compris (avec répétitions).
 static func ids(a: Dictionary) -> Array:
 	var res := [] if a.get("chassis", "") == "" else [a.chassis]
+	var lots := {}
 	for p in a.get("pieces", []):
+		if p.has("lot"):   # morceaux d'une coque sciée : une seule pièce de la réserve (DEC-072)
+			var cle := "%s#%d" % [p.piece, int(p.lot)]
+			if lots.has(cle):
+				continue
+			lots[cle] = true
 		if not bool(piece(p.piece).get("fabrique", false)):   # postes, bancs, cabines : fabriqués au métal, pas en réserve
 			res.append(p.piece)
 	return res

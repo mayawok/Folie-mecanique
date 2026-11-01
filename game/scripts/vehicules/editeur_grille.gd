@@ -46,6 +46,8 @@ var outil := {"chassis": "acier", "essieux": "essieu_leger", "roues": "roue_moye
 var _palette: Array = []    # [{id, n}] ; n = -1 : sans limite
 var _glisse := ""           # pièce tenue au doigt
 var _miroir := false        # coque retournée (avant vers l'arrière), DEC-067
+var _scie := ""             # "" | "v" | "h" : la scie coupe la coque touchée (DEC-072)
+var _extra := {}            # morceau scié tenu au doigt : coupe, emprise, lot
 var _ecorche := false       # vue écorchée forcée dans l'onglet Carrosserie
 var _rect0 := Vector2i(-99, -99)   # coin de départ du rectangle de châssis
 var _rect1 := Vector2i(-99, -99)
@@ -124,6 +126,7 @@ func _bouton(texte: String, action: Callable) -> Button:
 
 func _choisir_onglet(id: String) -> void:
 	onglet = id
+	_scie = ""
 	_page = 0
 	_glisse = ""
 	_disposer()
@@ -241,7 +244,7 @@ func _process(delta: float) -> void:
 func _restant(id: String, n: int) -> int:
 	if n < 0:
 		return -1
-	return n - a.pieces.filter(func(p): return p.piece == id).size()
+	return n - ConstructionLibre.utilisees(a, id)
 
 
 func _case(pos: Vector2) -> Vector2i:
@@ -315,9 +318,22 @@ func _appuyer(cell: Vector2i) -> void:
 			pass
 		_:
 			var i := ConstructionLibre.piece_en(a, cell, onglet == "coque")
+			if i >= 0 and onglet == "coque" and _scie != "":
+				var bs := ConstructionLibre.scier(a, i, cell, _scie)
+				if bs.is_empty():
+					_dire("Touchez l'intérieur de la coque, pas son bord : le trait passe par la case touchée.")
+				else:
+					a = bs
+					_son()
+					_maj()
+				return
 			if i >= 0:   # une pièce posée se reprend au doigt pour la déplacer
 				_glisse = String(a.pieces[i].piece)
 				_miroir = bool(a.pieces[i].get("miroir", false))
+				_extra = {}
+				for k in ["coupe", "emprise", "lot"]:
+					if a.pieces[i].has(k):
+						_extra[k] = a.pieces[i][k]
 				a = ConstructionLibre.retirer(a, i)
 				_an = ConstructionLibre.analyser(a)
 				_placer_apercu(_candidat())
@@ -344,7 +360,7 @@ func _relacher(pos: Vector2) -> void:
 		_glisse = ""
 		return
 	if _dans_grille(pos):
-		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse), _miroir and _est_coque(_glisse))
+		var b := ConstructionLibre.poser(a, _glisse, _cible(pos, _glisse), _miroir and _est_coque(_glisse), _extra)
 		if b.is_empty():
 			_dire("%s doit reposer sur le châssis ou une autre pièce, sans chevaucher : rendue au bac." % Assemblage.piece(_glisse).nom)
 		else:
@@ -366,7 +382,7 @@ func _monter_roue(x: int) -> void:
 
 # Case visée par la pièce tenue : centrée sur le doigt, un peu au-dessus pour rester visible
 func _cible(pos: Vector2, id: String) -> Vector2i:
-	var e: Array = Assemblage.piece(id).emprise
+	var e: Array = _extra.get("emprise", Assemblage.piece(id).emprise)
 	var p := pos - Vector2(0, DECALAGE_DOIGT * _cell)
 	return Vector2i(_vue.position.x + int(floor((p.x - _grille.position.x) / _cell - float(e[0]) * 0.5 + 0.5)),
 		int(floor((_grille.end.y - p.y) / _cell - float(e[1]) * 0.5 + 0.5)))
@@ -375,7 +391,7 @@ func _cible(pos: Vector2, id: String) -> Vector2i:
 func _candidat() -> Dictionary:
 	if _glisse == "" or onglet == "roues" or not _dans_grille(_doigt):
 		return {}
-	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse))
+	return ConstructionLibre.poser(a, _glisse, _cible(_doigt, _glisse), _miroir and _est_coque(_glisse), _extra)
 
 
 func _charger_plan(plan: Dictionary) -> void:
@@ -545,6 +561,9 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 				res.append({"titre": "Retourner : avant vers la %s" % ("gauche" if _miroir else "droite"),
 					"detail": "s'applique à la prochaine coque posée ; reprenez une coque pour la retourner", "actif": true,
 					"action": func(): _miroir = not _miroir, "couleur": Color("#4A4A4A")})
+				res.append({"titre": "Scie : %s" % {"": "rangée", "v": "trait vertical", "h": "trait horizontal"}[_scie],
+					"detail": "touchez une coque pour la couper en deux à cet endroit ; reprenez un morceau pour l'enlever", "actif": true,
+					"action": func(): _scie = {"": "v", "v": "h", "h": ""}[_scie], "couleur": Color("#6A3A2A")})
 				res.append({"titre": "Vue écorchée : %s" % ("oui" if _ecorche else "non"),
 					"detail": "coques transparentes pour voir la mécanique dessous", "actif": true,
 					"action": _basculer_ecorche, "couleur": Color("#4A4A4A")})
@@ -563,7 +582,9 @@ func _items() -> Array:   # [{titre, detail, id, actif, choisi, action, couleur}
 				var id: String = it.id
 				res.append({"titre": "%s%s" % [f.nom, "" if reste < 0 else "  ×%d" % reste], "id": id,
 					"detail": "%s · %d×%d cases · %d kg · glissez sur la grille" % [detail, int(f.emprise[0]), int(f.emprise[1]), int(f.get("poids_kg", 0))],
-					"actif": reste != 0, "choisi": _glisse == id, "action": func(): _glisse = id, "couleur": COULEURS.get(f.famille, Color("#555"))})
+					"actif": reste != 0, "choisi": _glisse == id, "action": func():
+						_glisse = id
+						_extra = {}, "couleur": COULEURS.get(f.famille, Color("#555"))})
 			if res.is_empty():
 				res.append({"titre": "Rien en réserve", "detail": "fouillez des épaves ou démontez un véhicule", "actif": false, "couleur": Color("#333")})
 	return res

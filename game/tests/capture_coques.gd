@@ -48,6 +48,20 @@ func _vehicules() -> Array:
 	res.append([h, false])
 	var l := ConstructionLibre.relier(ConstructionLibre.relier(ConstructionLibre.poser_essieu(ConstructionLibre.poser_essieu(h, 4, "pont_rigide_lourd", "roue_grande"), 23, "pont_rigide_lourd", "roue_grande"), 4, "liaison_lames"), 23, "liaison_lames")
 	res.append([l, true])
+	var w := _base("Greffe", 30, "roue_grande", "essieu_lourd")   # scie (DEC-072) : cabine de camion + arrière de berline
+	w = _p(w, "poste_conduite", Vector2i(22, 3))
+	w = _p(w, "coque_cabine_camion", Vector2i(19, 2))
+	w = _p(w, "coque_berline", Vector2i(1, 2))
+	w = ConstructionLibre.scier(w, w.pieces.size() - 1, Vector2i(11, 3), "v")
+	w = ConstructionLibre.retirer(w, w.pieces.size() - 1)
+	res.append([w, false])
+	var t := _base("Toit coupe", 24, "roue_moyenne", "essieu_leger")
+	t = _p(t, "poste_conduite", Vector2i(12, 3))
+	t = _p(t, "coque_berline", Vector2i(2, 2))
+	t = ConstructionLibre.scier(t, t.pieces.size() - 1, Vector2i(8, 5), "h")
+	t = ConstructionLibre.retirer(t, t.pieces.size() - 1)
+	t = _p(t, "arme_mitrailleuse", Vector2i(12, 6))
+	res.append([t, false])
 	var c := _base("Bricole", 30, "chenille", "essieu_char")   # cabine de camion + nez d'avion retourné
 	c = _p(c, "poste_conduite", Vector2i(22, 3))
 	c = _p(c, "coque_cabine_camion", Vector2i(18, 2))
@@ -70,7 +84,7 @@ func _initialize() -> void:
 		d.ppm = 42.0
 		d.equipage = true
 		d.configurer(cle)
-		d.position = Vector2(20.0 + (i % 2) * 630.0, 240.0 + (i / 2) * 240.0 - d.size.y)
+		d.position = Vector2(20.0 + (i % 2) * 630.0, 180.0 + (i / 2) * 175.0 - d.size.y)
 		root.add_child(d)
 		i += 1
 

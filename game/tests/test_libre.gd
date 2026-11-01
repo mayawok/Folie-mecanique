@@ -348,5 +348,33 @@ func _init() -> void:
 	PlansGrille.supprimer("Essai plan")
 	ok(PlansGrille.lire().filter(func(q): return q.nom == "Essai plan").is_empty(), "un plan se supprime")
 
+	print("— La scie (DEC-072) —")
+	var c_j := ConstructionLibre.poser(jeep(), "coque_berline", Vector2i(1, 2))
+	var c_i: int = c_j.pieces.size() - 1
+	ok(ConstructionLibre.scier(c_j, c_i, Vector2i(1, 3), "v").is_empty(), "un trait sur le bord de la coque ne coupe rien")
+	var c_v := ConstructionLibre.scier(c_j, c_i, Vector2i(10, 3), "v")
+	var c_m: Array = c_v.pieces.filter(func(q): return String(q.piece) == "coque_berline")
+	ok(c_m.size() == 2 and int(c_m[0].emprise[0]) + int(c_m[1].emprise[0]) == 18 and int(c_m[1].pos[0]) == 10, "trait vertical : deux morceaux côte à côte (9 + 9 cases)")
+	ok(absf(float(c_m[0].coupe[1]) - 0.5) < 0.01 and c_m[0].lot == c_m[1].lot, "chaque morceau garde sa moitié d'image, même lot")
+	ok(ConstructionLibre.utilisees(c_v, "coque_berline") == 1 and Assemblage.ids(c_v).count("coque_berline") == 1, "une coque sciée ne compte qu'une fois en réserve")
+	var c_a0 := ConstructionLibre.analyser(c_j)
+	var c_a1 := ConstructionLibre.analyser(c_v)
+	ok(absf(float(c_a1.stats.poids_kg) - float(c_a0.stats.poids_kg)) < 1.0, "scier ne change pas le poids total")
+	var c_sans := ConstructionLibre.retirer(c_v, c_v.pieces.size() - 1)
+	ok(float(ConstructionLibre.analyser(c_sans).stats.poids_kg) < float(c_a0.stats.poids_kg) - 200.0, "retirer un morceau allège le véhicule")
+	var c_h := ConstructionLibre.scier(c_j, c_i, Vector2i(5, 5), "h")
+	var c_toit: Dictionary = c_h.pieces[c_h.pieces.size() - 1]
+	ok(int(c_toit.pos[1]) == 5 and int(c_toit.emprise[1]) == 2, "trait horizontal : le toit au-dessus, posé sur le bas")
+	ok(not ConstructionLibre._sieges_exposes(c_h) and ConstructionLibre._sieges_exposes(ConstructionLibre.retirer(c_h, c_h.pieces.size() - 1)), "toit enlevé : l'équipage est à découvert")
+	var c_jm := ConstructionLibre.poser(jeep(), "coque_berline", Vector2i(1, 2), true)
+	var c_vm := ConstructionLibre.scier(c_jm, c_jm.pieces.size() - 1, Vector2i(7, 3), "v")
+	var c_g: Dictionary = c_vm.pieces[c_jm.pieces.size() - 1]
+	ok(c_g.miroir and absf(float(c_g.coupe[0]) - (1.0 - 6.0 / 18.0)) < 0.01, "coque retournée : le morceau de gauche est l'arrière de l'image")
+	var c_ex := {"coupe": c_m[1].coupe, "emprise": c_m[1].emprise, "lot": c_m[1].lot}
+	var c_re := ConstructionLibre.poser(c_sans, "coque_berline", Vector2i(20, 3), false, c_ex)
+	ok(not c_re.is_empty() and c_re.pieces[c_re.pieces.size() - 1].emprise == c_m[1].emprise, "un morceau repris au doigt garde sa découpe")
+	var c_f: Array = ConstructionLibre.forme(c_v).formes.filter(func(f): return f.get("sprite", "") == "coques/coque_berline")
+	ok(c_f.size() == 2 and c_f[0].uv.size() == 4, "les morceaux se dessinent avec leur part d'image")
+
 	print("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs)
 	quit(1 if echecs > 0 else 0)
