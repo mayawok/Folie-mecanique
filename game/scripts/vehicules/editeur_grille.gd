@@ -29,12 +29,12 @@ const C_TUILE := Color(0.12, 0.115, 0.11, 0.82)
 const ACTIONS := ["valider", "quitter"]
 const ONGLETS := [["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["suspension", "Suspension"], ["moteur", "Moteurs"],
 	["poste", "Postes"], ["coque", "Carrosserie"], ["toles", "Tôles"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"],
-	["peinture", "Peinture"], ["plans", "Plans"], ["vehicules", "Véhicules"]]
+	["peinture", "Peinture"], ["vehicule", "Véhicule"], ["plans", "Plans"], ["vehicules", "Véhicules"]]
 const AIDES := {"chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Glissez vers un essieu",
 	"suspension": "Glissez sur un pont rigide", "moteur": "Glissez sur la grille", "poste": "Glissez sur la grille",
 	"coque": "Glissez ; se superposent", "toles": "Glissez d'un point à un autre", "arme": "Glissez sur la grille",
 	"equipement": "Collées à l'extérieur", "equipage": "Touchez un siège", "peinture": "Ton de tout le véhicule",
-	"plans": "Enregistrer ou charger", "vehicules": "Partir d'un véhicule"}
+	"vehicule": "Glissez le véhicule entier", "plans": "Enregistrer ou charger", "vehicules": "Partir d'un véhicule"}
 # Peintures de bande (DEC-080) : un ton par faction, à régler
 const PEINTURES := [["", "Sans"], ["#5E6238", "Kaki"], ["#B0623A", "Rouille"], ["#3A3A38", "Suie"], ["#C9A23A", "Jaune"],
 	["#6A86A8", "Bleu horizon"], ["#8A3030", "Sang"], ["#D8D4C8", "Hiver"], ["#4E6E58", "Vert-de-gris"]]
@@ -72,6 +72,9 @@ var _ecorche := false       # vue écorchée forcée dans l'onglet Carrosserie
 var _suppr_plans := false   # onglet Plans : toucher un plan le supprime
 var _rect0 := Vector2i(-99, -99)   # coin de départ du rectangle de châssis
 var _rect1 := Vector2i(-99, -99)
+var _depl := false   # véhicule entier tenu au doigt (DEC-082)
+var _depl0 := Vector2i.ZERO
+var _depl_b := {}
 var _tole0 := Vector2i(-99, -99)   # tôle en cours de tracé (coins de cases)
 var _tole1 := Vector2i(-99, -99)
 var _appui := false
@@ -143,6 +146,7 @@ func _ready() -> void:
 	add_child(_monde)
 	_apercu = VehiculeDessin.new()
 	_apercu.equipage = true
+	_apercu.plat = true   # l'aperçu reste droit même si le véhicule est penché (DEC-082)
 	_apercu.mouse_filter = MOUSE_FILTER_IGNORE
 	_monde.add_child(_apercu)
 	_surcouche = Control.new()
@@ -314,7 +318,7 @@ func _placer_apercu(b := {}) -> void:
 	if source.get("cases", []).is_empty():
 		_apercu.visible = false
 		return
-	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles"])   # coques transparentes quand on règle la mécanique
+	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles", "vehicule"])   # coques transparentes quand on règle la mécanique
 	_apercu.ppm = _cell / ConstructionLibre.C
 	_apercu.configurer_d(F)
 	_apercu.visible = true
@@ -429,6 +433,12 @@ func _gui_input(e: InputEvent) -> void:
 			_rect1 = Vector2i(clampi(c.x, 0, ConstructionLibre.taille().x - 1), clampi(c.y, 0, ConstructionLibre.taille().y - 1))
 		if _appui and _tole0.x > -99:
 			_tole1 = _coin(e.position)
+		if _appui and _depl:
+			var c2 := _case(e.position)
+			var bd := ConstructionLibre.deplacer(_avant, c2.x - _depl0.x, c2.y - _depl0.y)
+			if not bd.is_empty():
+				_depl_b = bd
+				_placer_apercu(bd)
 		if _glisse != "":
 			_placer_apercu(_candidat())
 		accept_event()
@@ -488,6 +498,8 @@ func _debut_pince() -> void:
 
 # Ce que faisait le premier doigt est défait (pièce reprise remise, tracé abandonné)
 func _annuler_geste() -> void:
+	_depl = false
+	_depl_b = {}
 	_rect0 = Vector2i(-99, -99)
 	_tole0 = Vector2i(-99, -99)
 	_glisse = ""
@@ -503,6 +515,11 @@ func _annuler_geste() -> void:
 
 
 func _appuyer(cell: Vector2i) -> void:
+	if onglet == "vehicule":
+		_depl = true
+		_depl0 = cell
+		_depl_b = {}
+		return
 	if onglet == "toles":
 		_tole0 = _coin(_doigt)
 		_tole1 = _tole0
@@ -573,6 +590,16 @@ func _appuyer(cell: Vector2i) -> void:
 
 
 func _relacher(pos: Vector2) -> void:
+	if _depl:
+		_depl = false
+		if not _depl_b.is_empty():
+			a = _depl_b
+			_son()
+		elif _dans_grille(pos) and _case(pos) != _depl0:
+			_dire("Le véhicule sortirait de la grille.")
+		_depl_b = {}
+		_maj(true)
+		return
 	if _tole0.x > -99:
 		var q0 := _tole0
 		var q1 := _coin(pos)
@@ -946,6 +973,8 @@ func _items() -> Array:
 			res.append({"ligne": true, "titre": "Tout retirer", "detail": "enlève toutes les tôles", "actif": n_t > 0, "action": func():
 				a.toles = []
 				_maj()})
+		"vehicule":
+			res.append({"ligne": true, "titre": "Glisser le véhicule", "detail": "le déplace sur la grille", "actif": false})
 		"peinture":
 			for pe in PEINTURES:
 				var hex: String = pe[0]
@@ -1137,7 +1166,7 @@ func _dessiner_surcouche() -> void:
 	for d in det.get("essieux", []):   # charge sous chaque essieu
 		var ctr := _px(float(d.x) + 0.5, float(d.y) - float(d.r))
 		if d.has("charge") and float(d.charge) > float(d.capacite):
-			c.draw_string(police, ctr + Vector2(-60, 26), "%.1f/%.0f t" % [float(d.charge) / 1000.0, float(d.capacite) / 1000.0], HORIZONTAL_ALIGNMENT_CENTER, 120, 16, C_ROUGE)
+			c.draw_string(police, ctr + Vector2(-60, 26), "%.1f/%.1f t" % [float(d.charge) / 1000.0, float(d.capacite) / 1000.0], HORIZONTAL_ALIGNMENT_CENTER, 120, 16, C_ROUGE)
 		elif not d.get("touche", true):
 			c.draw_string(police, ctr + Vector2(-60, 26), "en l'air", HORIZONTAL_ALIGNMENT_CENTER, 120, 18, C_ROUGE)
 	if det.has("cg"):
@@ -1465,6 +1494,12 @@ func _icone(c: Control, r: Rect2, id: String, col: Color) -> void:
 				c.draw_line(o + Vector2(w * 0.25, w * (0.25 + 0.17 * k)), o + Vector2(w * 0.75, w * (0.25 + 0.17 * k)), Color("#C8D8E8"), 2.0)
 		"vehicules":
 			_tex_dans(c, r, VehiculeDessin._tex("vehicules/willys_mb"))
+		"vehicule":   # caisse et flèche : déplacer le véhicule entier
+			c.draw_rect(Rect2(o + Vector2(w * 0.1, w * 0.3), Vector2(w * 0.55, w * 0.3)), col, false, ep)
+			c.draw_circle(o + Vector2(w * 0.22, w * 0.66), w * 0.08, col)
+			c.draw_circle(o + Vector2(w * 0.53, w * 0.66), w * 0.08, col)
+			c.draw_line(o + Vector2(w * 0.6, w * 0.85), o + Vector2(w * 0.85, w * 0.85), col, ep)
+			c.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.92, w * 0.85), o + Vector2(w * 0.78, w * 0.75), o + Vector2(w * 0.78, w * 0.95)]), col)
 		"deplacer":   # flèche à quatre têtes
 			var ct := o + Vector2(w * 0.5, w * 0.5)
 			for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:

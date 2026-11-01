@@ -41,6 +41,9 @@ var _t_rafale := 0.0
 var _fumee := []            # {pos, age}
 var _teinte := Color.OLIVE
 var _voile := Color.WHITE    # peinture de bande (DEC-080) : ton posé sur les visuels dessinés
+var plat := false           # éditeur de grille : le véhicule reste droit, vrai à la case près (DEC-081)
+var _ass := 0.0             # assiette statique d'un véhicule penché (pente de la ligne de sol dans son repère, DEC-081)
+var _piv := Vector2.ZERO    # point de contact autour duquel il pivote (m)
 var roues_perdues: Array = []   # indices des roues arrachées en combat (DEC-080) : on ne les dessine plus
 
 
@@ -78,8 +81,12 @@ func configurer_d(d: Dictionary) -> void:
 	custom_minimum_size = Vector2(D.longueur, D.hauteur) * ppm
 	size = custom_minimum_size
 	_appuis.clear()
+	_ass = 0.0 if plat or D.has("chenille") else float(D.get("assiette", 0.0))
+	_piv = Vector2(float(D.pivot[0]), float(D.pivot[1])) if _ass != 0.0 and D.has("pivot") else Vector2.ZERO
 	for r in D.get("roues", []):
-		_appuis.append({"x": float(r.x), "r": float(r.r), "y0": float(r.r), "y": float(r.r)})
+		var yb := float(r.get("yb", r.r))   # hauteur du centre dans le repère du véhicule (roues de tailles différentes)
+		var y0 := yb if plat else float(r.r)
+		_appuis.append({"x": float(r.x), "r": float(r.r), "y0": y0, "y": y0, "yb": yb})
 	if D.has("chenille"):
 		var c: Dictionary = D.chenille
 		for x in c.galets:
@@ -179,6 +186,8 @@ func _e(m: Vector2) -> Vector2:
 
 # Point de la caisse (suspendue, inclinée) -> pixels
 func _c(m: Vector2) -> Vector2:
+	if _ass != 0.0:   # véhicule penché : posé sur ses deux roues, le corps tourne autour du point de contact arrière
+		m = (m - _piv).rotated(-atan(_ass)) + Vector2(_piv.x, 0.0)
 	var q := (m - Vector2(_xc, 0)).rotated(atan(_p)) + Vector2(_xc, _h)
 	return _e(q)
 
@@ -330,7 +339,7 @@ func _train() -> void:
 	# Suspensions : ressort entre le moyeu et la caisse
 	for a in _appuis:
 		var moyeu := _e(Vector2(a.x, a.y))
-		var attache := _c(Vector2(a.x, a.y0 + (0.28 if a.has("galet") else a.r * 0.9)))
+		var attache := _c(Vector2(a.x, (a.yb if a.has("yb") and _ass != 0.0 else a.y0) + (0.28 if a.has("galet") else a.r * 0.9)))
 		_ressort(moyeu, attache)
 	if D.has("chenille"):
 		_chenille()

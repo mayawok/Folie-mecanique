@@ -244,8 +244,13 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 **Plus tard** : gazogène, marques des pièces (demandés, notés pour plus tard).
 
 ## Vue, vignettes, aimantation (DEC-081)
-- **Vue** : deux doigts zooment (40 % – 350 %) et déplacent ; bouton « déplacer » (flèche à quatre têtes) = un doigt fait glisser la vue ; bouton « cadrer » = retour au cadrage de base. La grille est coupée à la fenêtre ; une vue réglée à la main n'est plus recadrée automatiquement.
+- Vue : pincement/déplacer/cadrer de DEC-081.
 - **Tiroir** : chaque vignette montre la pièce elle-même, à la proportion de son emprise ; rangées justifiées, pagination quand c'est plein, aucun chevauchement.
 - **Roues** : glissées vers un essieu, elles s'aimantent sur le plus proche (cercles repères ; le visé passe au vert).
 - **Suspension** : vraie pièce du tiroir, glissée sur un pont rigide en l'air ; reprise au doigt pour la déplacer ou la retirer (hors grille). Même modèle de données qu'avant (`essieu.liaison`).
 - Test : `game/tests/test_editeur.gd` (écrit, non exécuté lors de la rédaction).
+## Véhicules penchés et déplacement (DEC-082)
+
+**Penché.** L'analyse cherche le segment du bas de coque qui contient le centre de gravité et au-dessus duquel toutes les roues restent ; sa pente est l'`assiette` (positive = nez en bas). Max 30° ; sinon « il se renverse ». Pénalités : vitesse −1,2 %/° (min ×0,4), précision −0,8 %/° (min ×0,5), défaut « penche ». Réglages dans `pieces.json` → `libre.inclinaison`. En jeu le dessin pivote autour du point d'appui ; l'aperçu de l'éditeur reste droit.
+
+**Déplacer.** Onglet « Véhicule » : glisser le véhicule entier (cases, essieux, pièces, tôles) ; refus hors grille. Vue : pincement/déplacer/cadrer de DEC-081.

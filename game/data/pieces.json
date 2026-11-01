@@ -49,6 +49,7 @@
     48,
     18
    ],
+   "inclinaison": {"_note": "DEC-081 : véhicule penché (roues de tailles différentes). Au-delà de max_deg il se renverse ; sinon vitesse et précision baissent par degré.", "max_deg": 30.0, "vitesse_par_deg": 0.012, "precision_par_deg": 0.008},
    "toles": {"_note": "DEC-080 : tôle tracée d'un coin à l'autre, valeurs par case de longueur (0,25 m). Inclinée : blindage x 1/cos(angle), plafonné.", "poids_kg_case": 35, "pv_case": 5, "metal_case": 0.75, "blindage_case": 1.5, "facteur_max": 2.5},
    "cases": {
     "acier": {

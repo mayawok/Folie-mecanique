@@ -157,7 +157,7 @@ func _initialize() -> void:
 	_clic(ctr + Vector2(0.4 * u, 0.3 * u), false)
 	ok(String(ed.a.essieux[0].train) == "roue_petite", "un simple toucher près de l'essieu monte la roue choisie")
 	ed.outil.roues = "roue_moyenne"
-	var n_ess := ed.a.essieux.size()
+	var n_ess: int = ed.a.essieux.size()
 	ed._glisse = "roue_moyenne"
 	var loin := ed._px(15.5, 5.0) + Vector2(0, EditeurGrille.DECALAGE_DOIGT * u)   # dans la grille, à plus de 10 cases de l'essieu
 	_souris(loin)

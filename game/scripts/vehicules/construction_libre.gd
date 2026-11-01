@@ -33,6 +33,36 @@ static func remorque(a: Dictionary) -> bool:   # remorque (DEC-080) : ni moteur 
 	return bool(a.get("remorque", false))
 
 
+# Déplace tout le véhicule de (dx, dy) cases (DEC-081) : cases, essieux, pièces, tôles. {} s'il sortirait de la grille.
+static func deplacer(a: Dictionary, dx: int, dy: int) -> Dictionary:
+	if dx == 0 and dy == 0:
+		return a
+	var G := taille()
+	var b := a.duplicate(true)
+	for c in b.get("cases", []):
+		c[0] = int(c[0]) + dx
+		c[1] = int(c[1]) + dy
+		if c[0] < 0 or c[1] < 0 or c[0] >= G.x or c[1] >= G.y:
+			return {}
+	for e in b.get("essieux", []):
+		e.x = int(e.x) + dx
+		if e.has("y"):
+			e.y = int(e.y) + dy
+	for p in b.get("pieces", []):
+		var em: Array = p.get("emprise", Assemblage.piece(String(p.piece)).get("emprise", [1, 1]))
+		p.pos = [int(p.pos[0]) + dx, int(p.pos[1]) + dy]
+		if p.pos[0] < 0 or p.pos[1] < 0 or p.pos[0] + int(em[0]) > G.x or p.pos[1] + int(em[1]) > G.y:
+			return {}
+	for t in b.get("toles", []):
+		t[0] = int(t[0]) + dx
+		t[2] = int(t[2]) + dx
+		t[1] = int(t[1]) + dy
+		t[3] = int(t[3]) + dy
+		if t[0] < 0 or t[2] < 0 or t[1] < 0 or t[3] < 0 or t[0] > G.x or t[2] > G.x or t[1] > G.y or t[3] > G.y:
+			return {}
+	return b
+
+
 # Fait d'une grille une remorque : moteurs et radiateurs démontés, timon posé à l'avant, contre le bas du châssis
 static func en_remorque(a: Dictionary) -> Dictionary:
 	var b := a.duplicate(true)
@@ -785,8 +815,39 @@ static func analyser(a: Dictionary) -> Dictionary:
 	var sol := corps_bas
 	for e in essieux:
 		sol = minf(sol, e.y - e.r)
+	# Véhicule penché (DEC-081) : il repose sur le segment de roues qui porte son centre de gravité ;
+	# les roues de tailles ou de hauteurs différentes donnent une assiette (pente de la ligne de sol dans le repère du véhicule)
+	var assiette := 0.0
+	var pivot := Vector2(0.0, sol)   # point de contact du côté arrière du segment porteur (cases)
+	var base_sol := func(_x: float) -> float: return sol
+	var pts := []   # [x, bas] de chaque roue
 	for e in essieux:
-		e.touche = e.y - e.r - sol <= TOLERANCE + 0.001
+		pts.append([float(e.x) + 0.5, float(e.y) - float(e.r)])
+	pts.sort_custom(func(p, q): return p[0] < q[0])
+	var meilleur := []
+	for i in pts.size():
+		for j in range(i + 1, pts.size()):
+			if pts[j][0] - pts[i][0] < 0.01:
+				continue
+			var pente_ij: float = (pts[j][1] - pts[i][1]) / (pts[j][0] - pts[i][0])
+			var porte: bool = xg >= float(pts[i][0]) - 0.05 and xg <= float(pts[j][0]) + 0.05
+			var sous: bool = true
+			for q in pts:
+				if q[1] < pts[i][1] + pente_ij * (q[0] - pts[i][0]) - 0.001:
+					sous = false
+					break
+			if sous and porte and (meilleur.is_empty() or absf(pente_ij) < absf(float(meilleur[2]))):
+				meilleur = [i, j, pente_ij]
+	if not meilleur.is_empty() and absf(float(meilleur[2])) > 0.001:
+		var pi: Array = pts[int(meilleur[0])]
+		assiette = float(meilleur[2])
+		pivot = Vector2(pi[0], pi[1])
+		var s0: float = pi[1]
+		var s1: float = assiette
+		var x0p: float = pi[0]
+		base_sol = func(x: float) -> float: return s0 + s1 * (x - x0p)
+	for e in essieux:
+		e.touche = e.y - e.r - float(base_sol.call(float(e.x) + 0.5)) <= TOLERANCE + 0.001
 	# Chenilles : il faut au moins deux galets voisins pour tendre une chenille
 	var i := 0
 	while i < essieux.size():
@@ -833,6 +894,15 @@ static func analyser(a: Dictionary) -> Dictionary:
 	elif garde < float(RL.garde_min_m):
 		f_vit *= 0.85
 		_defaut(defauts, "garde", "Garde au sol faible (%d cm) : on accroche les bosses" % int(round(garde * 100.0)))
+	# Assiette : un peu penché passe, très penché se renverse (DEC-081)
+	var angle_deg := rad_to_deg(atan(assiette))
+	if absf(angle_deg) > 0.5 and immobile == "":
+		var INC: Dictionary = RL.get("inclinaison", {"max_deg": 30.0, "vitesse_par_deg": 0.012, "precision_par_deg": 0.008})
+		if absf(angle_deg) > float(INC.max_deg):
+			immobile = "trop penché (%d°) : il se renverse" % int(round(absf(angle_deg)))
+		else:
+			f_vit *= maxf(0.4, 1.0 - float(INC.vitesse_par_deg) * absf(angle_deg))
+			_defaut(defauts, "penche", "Véhicule penché de %d° (%s) : plus lent, tir moins précis" % [int(round(absf(angle_deg))), "nez en bas" if angle_deg > 0.0 else "nez en haut"])
 	# Répartition du poids : poutre rigide sur appuis élastiques égaux
 	var charges := []
 	var surcharge := 0.0
@@ -960,6 +1030,8 @@ static func analyser(a: Dictionary) -> Dictionary:
 				f_recul = minf(f_recul, clampf(sqrt(tonnes / req), 0.3, 1.0))
 				_defaut(defauts, "recul", "%s : trop lourd pour %.1f t, le recul secoue le véhicule" % [w.fiche.nom, tonnes])
 	precision *= f_recul * (0.92 + 0.16 * debattement)
+	if absf(angle_deg) > 0.5:
+		precision *= maxf(0.5, 1.0 - float(RL.get("inclinaison", {"precision_par_deg": 0.008}).precision_par_deg) * absf(angle_deg))
 	for k in pv:
 		pv[k] = maxf(1.0, pv[k])
 	if immobile != "":
@@ -977,7 +1049,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		stats.reservoir = maxf(stats.reservoir, float(ch.get("reservoir", 0)))
 		if ch.has("standoff"):
 			stats.standoff = ch.standoff
-	var detail := {"poids_kg": M, "puissance": puissance, "ch_t": ch_t, "cg": Vector2(xg, yg), "sol": sol, "garde_m": garde,
+	var detail := {"poids_kg": M, "puissance": puissance, "ch_t": ch_t, "cg": Vector2(xg, yg), "sol": sol, "garde_m": garde, "assiette": assiette, "pivot": pivot,
 		"essieux": essieux, "stabilite": stab, "surcharge": surcharge, "sable": sable}
 	return {"erreurs": [], "ok": true, "stats": stats, "defauts": defauts, "detail": detail}
 
@@ -1314,7 +1386,7 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 				pistes[e.piste] = []
 			pistes[e.piste].append(cx)
 		elif e.get("touche", false):
-			roues.append({"x": cx, "r": r})
+			roues.append({"x": cx, "r": r, "yb": Y.call(e.y)})
 		else:   # roue qui ne repose pas au sol : dessinée à sa vraie hauteur
 			formes.append({"pts": _poly_cercle(cx, Y.call(e.y), r), "c": "sombre", "z": 2})
 			formes.append({"pts": _poly_cercle(cx, Y.call(e.y), r * 0.45, 8), "c": "metal", "z": 2})
@@ -1444,6 +1516,9 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 	var res := {"x0": x0, "sol": sol, "nom": String(a.get("nom", "Frankenstein")), "longueur": maxf(0.5, (x1 - x0) * C), "hauteur": maxf(0.5, (y1 - sol) * C),
 		"teinte": "joueur", "moteur": moteur, "course": 0.09, "fiche": "Véhicule construit sur la grille.",
 		"roues": roues, "formes": formes, "armes": armes, "equipage": equipage, "libre": true}
+	if chenille.is_empty() and absf(float(an.detail.get("assiette", 0.0))) > 0.0005:   # véhicule penché (DEC-081)
+		res.assiette = float(an.detail.assiette)
+		res.pivot = [X.call(an.detail.pivot.x), Y.call(an.detail.pivot.y)]
 	if String(a.get("peinture", "")) != "":   # peinture de bande (DEC-080) : ton de tout le véhicule
 		res.peinture = String(a.peinture)
 	if remorque(a):
