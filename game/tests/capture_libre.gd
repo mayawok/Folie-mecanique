@@ -86,7 +86,8 @@ func _process(_d: float) -> bool:
 		38:
 			_photo("libre_2_chassis")
 			var ed = vue._editeur
-			ed._etape(2)
+			ed._btn_suiv.pressed.emit()
+			_verifier(ed.etape == 2, "le bouton Suivant mène aux essieux")
 			ed.essieu_choisi = "essieu_lourd"
 			ed.train_choisi = "chenille"
 			for x in [8, 11, 14, 17, 20]:

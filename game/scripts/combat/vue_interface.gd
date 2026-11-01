@@ -283,6 +283,16 @@ func _construire_interface() -> void:
 	_bouton("Bac à sable (toutes les pièces)", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vm, 460)
 
 
+# Écran plein (grille, atelier) posé sur son propre calque : au-dessus de toute l'interface, y compris pour le toucher
+func _par_dessus(c: Control) -> void:
+	var calque := CanvasLayer.new()
+	calque.layer = 20
+	add_child(calque)
+	c.theme = theme   # le calque coupe l'héritage du thème
+	calque.add_child(c)
+	c.tree_exited.connect(calque.queue_free)
+
+
 func afficher_menu(continuer: bool) -> void:
 	_btn_continuer.visible = continuer
 	_voile_menu.visible = true
@@ -339,7 +349,7 @@ func _ouvrir_atelier() -> void:
 	pause = true
 	_atelier = AtelierGrille.new()
 	_atelier.ouvrir(m, int(at.uid), String(at.plan))
-	add_child(_atelier)
+	_par_dessus(_atelier)
 	_atelier.ferme.connect(func(_ok: bool):
 		_atelier = null
 		pause = pause_avant and not m.convoi.is_empty()
@@ -360,7 +370,7 @@ func _ouvrir_editeur(vehicule_uid: int) -> void:
 	pause = true
 	_editeur = EditeurGrille.new()
 	_editeur.ouvrir(m, vehicule_uid)
-	add_child(_editeur)
+	_par_dessus(_editeur)
 	_editeur.ferme.connect(func(_ok: bool):
 		_editeur = null
 		pause = pause_avant and not m.convoi.is_empty())

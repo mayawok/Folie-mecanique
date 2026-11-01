@@ -48,6 +48,8 @@ var _btn_ok: Button
 var _btn_annuler: Button
 var _btn_haut: Button
 var _btn_bas: Button
+var _btn_prec: Button
+var _btn_suiv: Button
 var _apercu: VehiculeDessin
 
 
@@ -71,6 +73,8 @@ func _ready() -> void:
 	_btn_annuler = _bouton("Annuler", func():
 		ferme.emit(false)
 		queue_free(), 180)
+	_btn_prec = _bouton("← Précédent", func(): _etape(maxi(1, etape - 1)), 190)
+	_btn_suiv = _bouton("Suivant →", func(): _etape(mini(3, etape + 1)), 230)
 	_btn_haut = _bouton("▲", func(): _page = maxi(0, _page - 1), 80)
 	_btn_bas = _bouton("▼", func(): _page += 1, 80)
 	_etape(1)
@@ -103,7 +107,7 @@ func _etape(n: int) -> void:
 			for id in ESSIEUX:
 				_boutons_outils.append(_bouton(Assemblage.piece(id).nom.replace("Essieu ", "Ess. "), func(): essieu_choisi = id, 150))
 			for id in TRAINS:
-				_boutons_outils.append(_bouton(String(Assemblage.piece(id).nom).get_slice(" (", 0), func(): train_choisi = id, 150))
+				_boutons_outils.append(_bouton({"roue_petite": "Petite roue", "roue_moyenne": "Roue moy.", "roue_grande": "Grande roue", "chenille": "Chenille"}[id], func(): train_choisi = id, 150))
 	_maj()
 
 
@@ -118,20 +122,27 @@ func _disposer() -> void:
 	_cell = floorf(minf(zone.x / g.x, zone.y / g.y))
 	_grille = Rect2(Vector2(size.x * 0.02, size.y * 0.13), Vector2(g) * _cell)
 	for i in _boutons_etape.size():
-		_boutons_etape[i].position = Vector2(size.x * 0.40 + i * 200, 8)
+		_boutons_etape[i].position = Vector2(size.x * 0.40 + i * 200, 24)
 		_boutons_etape[i].modulate = C_ACCENT if etape == i + 1 else Color.WHITE
 	var x_bac := size.x * 0.66
 	for i in _boutons_outils.size():
 		var col := i % 3 if etape == 1 or i < 3 else (i - 3) % 2
 		var lig := i / 3 if etape == 1 or i < 3 else 1 + (i - 3) / 2
-		_boutons_outils[i].position = Vector2(x_bac + col * 158, size.y * 0.15 + lig * 66)
-		_boutons_outils[i].custom_minimum_size.x = 150
+		_boutons_outils[i].position = Vector2(x_bac + col * (158.0 if etape == 1 or i < 3 else 215.0), size.y * 0.15 + lig * 66)
+		_boutons_outils[i].custom_minimum_size.x = 150 if etape == 1 or i < 3 else 205
 	_btn_haut.visible = etape == 3
 	_btn_bas.visible = etape == 3
 	_btn_haut.position = Vector2(x_bac, size.y * 0.15 + PAR_PAGE * 52 + 4)
 	_btn_bas.position = Vector2(x_bac + 90, size.y * 0.15 + PAR_PAGE * 52 + 4)
-	_btn_ok.position = Vector2(size.x - 250, size.y - 72)
-	_btn_annuler.position = Vector2(size.x - 440, size.y - 72)
+	_btn_suiv.text = "Suivant : %s →" % ["", "Essieux", "Pièces", "Pièces"][etape]
+	var x := size.x - 16.0
+	for b in [_btn_ok, _btn_annuler, _btn_suiv, _btn_prec]:   # en bas à droite, de droite à gauche
+		b.reset_size()
+		x -= b.size.x
+		b.position = Vector2(x, size.y - 72)
+		x -= 12.0
+	_btn_prec.disabled = etape <= 1
+	_btn_suiv.disabled = etape >= 3
 	queue_redraw()
 
 
@@ -383,7 +394,7 @@ func _draw_panneau(police: Font) -> void:
 	# Bilan : ça roule ? et tous les défauts
 	if not _an.get("ok", false):
 		for d in _an.get("erreurs", []):
-			draw_string(police, Vector2(x_bac, y), "✕ " + String(d.texte), HORIZONTAL_ALIGNMENT_LEFT, lw, 17, C_ROUGE)
+			draw_string(police, Vector2(x_bac, y), "• " + String(d.texte) + (" (étape 3)" if d.code == "cabine" else (" (étape 1)" if d.code == "chassis" else "")), HORIZONTAL_ALIGNMENT_LEFT, lw, 17, C_ROUGE)
 			y += 22
 		return
 	var s: Dictionary = _an.stats
