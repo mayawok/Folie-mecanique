@@ -108,3 +108,4 @@ Inventaire : tous les fichiers P0 et P1 sont présents dans `game/assets/audio/`
 Règles d'économie : une génération par fichier, durée minimale utile, pas de relance pour un détail, accord préalable sur le coût, effets (radio, distance) par « Audio Effects » (gratuit) plutôt que par régénération.
 
 **02/11 — `mus_fin` générée sous licence Starter** : 20 s, `eleven_music_v2_5`, une seule version, 300 crédits (voix humaines sans paroles, `lyrics_type` auto). Fichier non téléchargeable depuis l'espace de travail de Claude (accès réseau refusé, 403) : à télécharger depuis le projet Music d'ElevenLabs et à déposer dans `game/assets/audio/mus_fin.mp3`. Coûts relevés : musique 20 s = 300 crédits.
+**02/11 (suite)** : `mus_fin.mp3` déposée dans `game/assets/audio/` (20,04 s, 498 Ko, titre ElevenLabs « Last Caravan »). Importée automatiquement par la construction web (`godot --import`). Plus aucun son manquant.
