@@ -1,0 +1,1500 @@
+FOLIE MÉCANIQUE
+
+BIBLE DE LORE — VOLUME I
+
+Fondations historiques, effondrement et naissance du nouveau monde
+
+Version : 0.1
+Statut : Document de travail — canon proposé
+Période : De l’avant-guerre à la deuxième génération après l’effondrement
+Cadre géographique : France et territoires européens voisins
+Esthétique : Europe industrielle et rurale figée dans une esthétique des années 1940
+
+⸻
+
+00 — SYSTÈME DE RÉFÉRENCEMENT DU LORE
+
+00.1 — Principe général
+
+Chaque élément important de l’univers reçoit un identifiant permanent. Cet identifiant est indépendant de son nom, de sa description et de son statut historique.
+
+Un changement de nom ne doit jamais entraîner un changement d’identifiant.
+
+Exemple :
+
+* CHR-001 — Étienne Marceau.
+* Nom alternatif possible : Étienne Morel.
+* L’identifiant reste CHR-001.
+* Toutes les relations, apparitions, événements et mentions continuent de pointer vers CHR-001.
+
+Cette règle permet de modifier l’univers sans perdre les liens entre ses différents documents.
+
+00.2 — Convention des identifiants
+
+Préfixe	Catégorie
+CHR	Personnage
+LOC	Lieu géographique
+FAC	Faction, organisation ou communauté
+EVT	Événement historique
+WAR	Guerre ou conflit
+RES	Ressource
+OBJ	Objet historique ou artefact
+FAM	Famille ou lignée
+CUL	Culture, coutume ou croyance
+DOC	Document historique fictif
+MYS	Mystère ou phénomène inexpliqué
+REL	Relation importante entre plusieurs éléments
+
+Les numéros sont attribués dans l’ordre de création. Ils ne doivent pas être réutilisés.
+
+00.3 — Fiche standard d’un élément
+
+Chaque entrée importante devra suivre autant que possible cette structure :
+
+Identifiant : CHR-001
+Nom : Étienne Marceau
+Type : Personnage
+Statut : Vivant, mort, disparu ou inconnu
+Période : Années concernées
+Origine : Lieu de naissance ou origine connue
+Relations : Identifiants des personnages, familles et organisations liés
+Événements : Identifiants des événements auxquels il a participé
+Mentions : Documents dans lesquels il apparaît
+Vérité historique : Ce qui est réellement établi
+Version populaire : Ce que les habitants racontent
+Secrets : Informations connues de très peu de personnes
+Évolution : Modifications et événements marquants
+
+00.4 — Règles de cohérence
+
+* Un personnage ne peut pas être à deux endroits au même moment.
+* Un déplacement doit être compatible avec les moyens de transport disponibles et l’état des routes.
+* Les personnages vieillissent et les générations se succèdent.
+* Une mort confirmée ne peut pas être annulée sans justification exceptionnelle.
+* Les événements historiques importants doivent avoir des conséquences visibles.
+* Une organisation ne peut pas contrôler durablement un territoire sans ressources, population, logistique et moyens de coercition.
+* Les connaissances techniques sont rares et doivent avoir une origine identifiable.
+* Une ressource ne peut pas apparaître dans une région uniquement parce que le récit en a besoin.
+
+00.5 — Registre initial des identifiants
+
+Personnages
+
+* CHR-001 — Étienne Marceau
+* CHR-002 — Madeleine Vautrin
+* CHR-003 — Jeanne Le Guen
+* CHR-004 — Lucien Vautrin
+* CHR-005 — Gabriel Marceau
+* CHR-006 — Anaïs Le Guen
+* CHR-007 — Père Auguste Delmas
+* CHR-008 — Victor Salvat
+* CHR-009 — Irène Bessières
+* CHR-010 — Paul Kermeur
+* CHR-011 — Margot Sorel
+* CHR-012 — Émile Roussel
+* CHR-013 — Thérèse Valette
+* CHR-014 — Marcel Delaunay
+* CHR-015 — Sofia Benali
+
+Lieux
+
+* LOC-001 — Bassin parisien
+* LOC-002 — Bassin aquitain
+* LOC-003 — Parentis-en-Born
+* LOC-004 — Bassin de Lacq
+* LOC-005 — Bassin de Seine-et-Marne
+* LOC-006 — Bretagne
+* LOC-007 — Paris
+* LOC-008 — Bordeaux
+* LOC-009 — Marseille
+* LOC-010 — Lyon
+* LOC-011 — Strasbourg et plaine d’Alsace
+* LOC-012 — Le Havre et estuaire de la Seine
+
+Organisations
+
+* FAC-001 — Compagnies de l’Est
+* FAC-002 — Raffineurs du Sud
+* FAC-003 — Réseau des Marées
+* FAC-004 — Communautés des Hautes-Terres
+* FAC-005 — Les Récupérateurs
+* FAC-006 — Les Veilleurs
+* FAC-007 — Les Hommes du Péage
+
+Événements
+
+* EVT-001 — La Guerre interminable
+* EVT-002 — Le Programme Atmosphère
+* EVT-003 — Les Années de Rupture
+* EVT-004 — La Grande Panne
+* EVT-005 — Les Migrations de l’Est
+* EVT-006 — La Guerre des Réservoirs
+* EVT-007 — L’Hiver des Enfants
+
+⸻
+
+01 — LE MONDE AVANT L’EFFONDREMENT
+
+01.1 — Une Europe qui n’a jamais retrouvé la paix
+
+Dans cette chronologie, la Seconde Guerre mondiale ne se termine jamais véritablement comme dans notre histoire.
+
+Le conflit européen se prolonge. Les offensives se succèdent, les alliances changent, les territoires sont occupés puis repris. Les populations connaissent une succession de périodes de mobilisation, de rationnement, de bombardements et de déplacements forcés.
+
+Les gouvernements continuent de fonctionner, mais leur autorité se fragilise. Les économies nationales deviennent progressivement des économies de guerre permanentes.
+
+L’industrie civile est sacrifiée au profit de la production militaire.
+
+Les automobiles privées deviennent rares. Les véhicules utilitaires, les tracteurs, les camions militaires et les engins de chantier sont prioritaires. Les usines fabriquent des pièces standardisées pour faciliter les réparations et réduire la consommation de matières premières.
+
+La société se militarise progressivement, jusque dans les campagnes.
+
+Les enfants grandissent avec des uniformes, des convois militaires, des sirènes et des restrictions alimentaires comme éléments ordinaires de leur environnement.
+
+Une génération entière n’aura jamais connu une paix véritable.
+
+01.2 — La France divisée
+
+La France ne forme plus un espace politique homogène.
+
+Certaines régions sont administrées directement par les autorités nationales. D’autres sont placées sous administration militaire, occupées par des puissances étrangères ou confiées à des autorités régionales disposant d’une autonomie exceptionnelle.
+
+Les grandes villes conservent une importance stratégique, mais elles deviennent également des cibles.
+
+Paris est un centre administratif et industriel essentiel. Sa population est progressivement rationnée et surveillée. Les infrastructures ferroviaires, électriques et hydrauliques deviennent des objectifs militaires.
+
+Lyon constitue un nœud industriel et logistique majeur. Son emplacement en fait un passage important entre le nord, le sud et les régions alpines.
+
+Bordeaux et les installations de l’Atlantique jouent un rôle important dans les échanges maritimes et l’industrie militaire.
+
+Marseille conserve une fonction portuaire essentielle, mais devient également un espace de rivalités entre autorités militaires, industriels et réseaux commerciaux.
+
+La Bretagne, enfin, est profondément marquée par sa relation à la mer. Ses ports, ses arsenaux, ses installations militaires, ses conserveries et ses communautés de pêcheurs prennent une importance particulière.
+
+La guerre ne transforme pas seulement les frontières. Elle transforme les habitudes, les mentalités et les relations humaines.
+
+01.3 — Une technologie figée dans les années 1940
+
+L’évolution technologique ne disparaît pas, mais elle suit une trajectoire différente.
+
+Les investissements sont concentrés sur des technologies robustes, réparables et immédiatement utiles à la guerre.
+
+Le moteur thermique reste central. Les moteurs diesel et essence sont largement employés. Les véhicules utilisent des architectures mécaniques simples, souvent dérivées de modèles militaires.
+
+Les radios existent, mais les réseaux de communication sont fragiles. Les appareils électroniques complexes sont coûteux et difficiles à produire.
+
+Les ordinateurs modernes, les téléphones portables et les réseaux numériques n’existent pas.
+
+La recherche scientifique progresse pourtant dans certains domaines :
+
+* métallurgie ;
+* chimie industrielle ;
+* aviation ;
+* armement ;
+* moteurs ;
+* médecine militaire ;
+* météorologie ;
+* énergie atomique ;
+* recherche atmosphérique.
+
+Cette contradiction est importante : le monde possède des connaissances scientifiques avancées dans quelques secteurs, mais son environnement matériel reste celui d’une société industrielle des années 1940.
+
+Après l’effondrement, cette différence devient essentielle. Les populations héritent de machines relativement simples, mais pas nécessairement des connaissances permettant de les fabriquer à nouveau.
+
+⸻
+
+02 — LA CATASTROPHE
+
+02.1 — Le Programme Atmosphère
+
+Identifiant : EVT-002
+Nature : Programme scientifique et militaire
+Période : Dernière phase de la Guerre interminable
+Statut : Existence historique établie ; circonstances exactes partiellement contestées
+
+Alors que la guerre s’enlise, plusieurs gouvernements financent des recherches destinées à modifier les conditions météorologiques.
+
+L’objectif officiel est stratégique : perturber les conditions climatiques au-dessus des territoires ennemis, empêcher certaines opérations aériennes, détruire des récoltes ou rendre des régions temporairement inhabitables.
+
+Le programme rassemble des météorologues, des chimistes, des ingénieurs militaires et des physiciens.
+
+Les travaux sont répartis entre plusieurs installations européennes. Une partie des recherches est menée dans le secret le plus total.
+
+Les résultats initiaux sont suffisamment prometteurs pour convaincre les autorités de poursuivre les expérimentations.
+
+Le programme devient progressivement une arme de guerre.
+
+Personne ne comprend entièrement les conséquences d’une intervention à grande échelle sur un système atmosphérique complexe.
+
+02.2 — L’expérience
+
+L’expérience décisive est menée dans une période où plusieurs puissances cherchent désespérément à obtenir un avantage définitif.
+
+Les installations sont mobilisées simultanément. Les moyens militaires et scientifiques sont engagés dans une opération dont les objectifs précis sont encore inconnus de la majorité des participants.
+
+Les premiers effets sont considérés comme des anomalies météorologiques.
+
+Des phénomènes inhabituels apparaissent :
+
+* perturbations durables des précipitations ;
+* températures anormales ;
+* épisodes de sécheresse prolongés ;
+* hivers extrêmement rigoureux ;
+* modification des régimes de vents ;
+* phénomènes atmosphériques localisés et imprévisibles.
+
+Les autorités tentent d’abord de dissimuler les résultats.
+
+Puis les phénomènes deviennent impossibles à ignorer.
+
+02.3 — Les Années de Rupture
+
+Identifiant : EVT-003
+
+Les années suivant l’expérience sont désignées par les historiens survivants sous le nom des Années de Rupture.
+
+Il ne s’agit pas d’un événement unique, mais d’une succession de crises.
+
+Les récoltes diminuent. Certaines régions deviennent plus difficiles à cultiver. Les réseaux de transport sont perturbés par les intempéries, les inondations, les glissements de terrain et les épisodes de froid extrême.
+
+Les États tentent de maintenir l’ordre.
+
+Les populations se déplacent vers les régions considérées comme plus favorables. Les campagnes accueillent des réfugiés urbains. Les grandes villes, déjà fragilisées par la guerre, commencent à manquer de nourriture.
+
+Les installations industrielles consomment de plus en plus de ressources pour tenter de maintenir leur activité.
+
+Les infrastructures énergétiques sont progressivement abandonnées.
+
+L’électricité devient intermittente, puis disparaît dans de nombreuses régions.
+
+Les réseaux ferroviaires ne fonctionnent plus que sur certains axes.
+
+Les routes se dégradent faute d’entretien.
+
+Les stations-service sont rationnées. Les dépôts sont placés sous surveillance militaire.
+
+Les autorités perdent progressivement le contrôle de leur territoire.
+
+02.4 — La Grande Panne
+
+Identifiant : EVT-004
+
+La Grande Panne désigne la période durant laquelle les réseaux industriels, électriques, logistiques et administratifs cessent de fonctionner de manière coordonnée.
+
+Il n’existe pas une date unique de la Grande Panne.
+
+Dans certaines régions, les infrastructures s’effondrent en quelques semaines. Dans d’autres, elles continuent de fonctionner pendant plusieurs années grâce à des autorités locales et à des équipes techniques.
+
+La disparition des réseaux de distribution entraîne des conséquences en cascade.
+
+Un dépôt de carburant peut encore contenir des milliers de litres, mais ne plus avoir de pompes fonctionnelles.
+
+Une centrale électrique peut être intacte, mais ne plus disposer de personnel qualifié.
+
+Une usine peut posséder des machines opérationnelles, mais manquer d’une seule pièce indispensable.
+
+Un hôpital peut conserver des bâtiments et du matériel, mais ne plus recevoir de médicaments.
+
+La civilisation ne disparaît pas en une nuit.
+
+Elle devient progressivement incapable de réparer ce qui la maintenait en vie.
+
+⸻
+
+03 — LA FRANCE APRÈS L’EFFONDREMENT
+
+03.1 — Une disparition progressive de l’État
+
+L’État français ne disparaît pas instantanément.
+
+Des autorités continuent de fonctionner longtemps après la rupture des communications nationales.
+
+Certaines administrations conservent des archives, des fonctionnaires et des moyens militaires.
+
+D’autres se transforment en pouvoirs locaux.
+
+Les préfectures deviennent parfois des centres de rationnement. Les casernes se transforment en forteresses. Les mairies accueillent des conseils de survie.
+
+Dans certaines régions, des officiers continuent de signer des ordres au nom d’autorités qui n’existent probablement plus.
+
+La légitimité politique devient une question de force, de réputation et de capacité à nourrir les habitants.
+
+Un homme qui peut assurer du pain pendant trois mois possède davantage d’autorité qu’un ancien préfet incapable de fournir de l’eau.
+
+03.2 — La disparition des grandes villes
+
+Les grandes villes ne sont pas toutes détruites.
+
+Beaucoup sont abandonnées progressivement.
+
+Les habitants quittent les quartiers les plus pauvres en premier. Puis les classes moyennes. Enfin, les administrations et les unités militaires.
+
+Certains quartiers restent occupés pendant des décennies.
+
+D’autres sont entièrement désertés.
+
+Paris devient un ensemble de secteurs discontinus. Les quartiers centraux sont parfois occupés par des groupes organisés, tandis que d’autres zones sont envahies par les végétations, les gravats et les installations abandonnées.
+
+Lyon connaît un destin similaire. Les grands axes de circulation et les installations industrielles restent longtemps convoités.
+
+Marseille devient un territoire particulièrement complexe : les installations portuaires, les dépôts, les navires et les infrastructures militaires attirent les groupes organisés.
+
+Bordeaux conserve une importance commerciale et fluviale, mais les ruptures logistiques rendent son fonctionnement extrêmement irrégulier.
+
+Les grandes villes deviennent des lieux de mémoire autant que des lieux de danger.
+
+Pour les populations rurales, elles représentent souvent un monde disparu, rempli de machines, de bâtiments et de ressources dont personne ne sait plus vraiment se servir.
+
+03.3 — La société des survivants
+
+La société post-effondrement est profondément inégalitaire.
+
+Certaines communautés possèdent encore des terres cultivables, des réserves d’eau, des ateliers et des installations énergétiques.
+
+D’autres vivent dans une précarité permanente.
+
+La richesse ne se mesure plus principalement en argent.
+
+Elle se mesure en :
+
+* nourriture ;
+* eau potable ;
+* carburant ;
+* médicaments ;
+* outils ;
+* munitions ;
+* pièces mécaniques ;
+* connaissances techniques ;
+* capacité à protéger une communauté.
+
+Les personnes qui possèdent des compétences rares peuvent devenir aussi importantes que les chefs militaires.
+
+Un mécanicien capable de remettre en route un camion possède une valeur considérable.
+
+Un médecin capable de traiter une infection sans médicaments modernes peut sauver une famille entière.
+
+Un agriculteur qui maîtrise les semences et la conservation alimentaire peut maintenir un village en vie.
+
+La connaissance devient une richesse transmissible.
+
+03.4 — Les enfants sans famille
+
+Une génération entière grandit dans un monde où les familles ont été séparées par les migrations, les maladies, les combats et la famine.
+
+Les orphelins sont extrêmement nombreux.
+
+Certains sont recueillis par des familles. D’autres vivent dans des groupes d’enfants organisés autour d’un adulte protecteur.
+
+Certains villages entretiennent des maisons communes où les enfants sont nourris et surveillés.
+
+Ailleurs, les enfants sont considérés comme une charge supplémentaire.
+
+Les plus âgés travaillent dans les ateliers, les champs ou les convois.
+
+Les plus jeunes sont parfois abandonnés lorsque les ressources manquent.
+
+Il existe des réseaux de trafiquants qui exploitent cette situation : travail forcé, vente de faux contrats de protection, recrutement militaire et servitude pour dettes.
+
+Toutes les communautés ne sont pas cruelles. Certaines consacrent une part importante de leurs maigres ressources à la protection des enfants.
+
+Mais il n’existe plus de système général capable de garantir leur sécurité.
+
+Cette réalité marque profondément les générations suivantes.
+
+⸻
+
+04 — LA GÉOGRAPHIE DES RESSOURCES
+
+04.1 — Principe de réalisme
+
+Les ressources naturelles restent liées à la géologie réelle de la France.
+
+Le récit peut modifier les conditions d’exploitation, les propriétaires, les installations construites, les événements historiques et les quantités encore disponibles.
+
+Il ne doit pas inventer de grands gisements pétroliers dans des régions où la géologie ne les justifie pas.
+
+La rareté des ressources doit être un moteur de l’histoire.
+
+04.2 — Le pétrole du Bassin parisien
+
+Identifiant : LOC-001
+Ressource : RES-001 — Pétrole brut
+Secteur principal : Seine-et-Marne et autres secteurs du Bassin parisien
+
+Le Bassin parisien possède une histoire réelle d’exploitation pétrolière.
+
+Les découvertes et exploitations historiques de Seine-et-Marne constituent une base crédible pour l’univers.
+
+Dans cette chronologie, les autorités militaires ont développé certaines installations afin de réduire leur dépendance aux importations.
+
+Les concessions pétrolières deviennent des installations stratégiques.
+
+Les puits sont protégés par des clôtures, des postes de surveillance et des unités chargées de sécuriser les routes.
+
+Les villages voisins dépendent parfois directement de l’industrie pétrolière.
+
+Après l’effondrement, ces installations deviennent des territoires disputés.
+
+Les puits encore exploitables sont extrêmement précieux. Les pompes, les séparateurs, les conduites et les équipements électriques sont difficiles à remplacer.
+
+Le pétrole brut n’est toutefois pas directement utilisable dans un moteur classique.
+
+Il doit être traité et raffiné.
+
+Cette contrainte crée une dépendance entre les régions productrices et les régions disposant encore d’installations de transformation.
+
+04.3 — Le pétrole du Bassin aquitain
+
+Identifiant : LOC-002
+Ressource : RES-001 — Pétrole brut
+
+Le Bassin aquitain constitue un autre secteur majeur de l’histoire pétrolière française.
+
+Le champ de Parentis-en-Born, dans les Landes, représente un point d’ancrage particulièrement important.
+
+Dans l’univers, les installations de Parentis ont été fortement développées pendant la guerre.
+
+Les autorités ont construit des routes industrielles, des ateliers de maintenance et des dépôts de stockage.
+
+La région a également connu une forte présence de techniciens, d’ouvriers spécialisés et de familles employées dans l’industrie pétrolière.
+
+Après l’effondrement, les installations de Parentis sont devenues un enjeu majeur pour les groupes du Sud-Ouest.
+
+Le pétrole brut y existe toujours, mais les moyens de l’extraire et de le traiter diminuent rapidement.
+
+Les anciens travailleurs deviennent les détenteurs d’un savoir-faire essentiel.
+
+04.4 — Lacq : le gaz et l’industrie chimique
+
+Identifiant : LOC-004
+Ressources : RES-002 — Gaz naturel ; RES-003 — Produits chimiques industriels
+
+Lacq est principalement associé à l’exploitation du gaz naturel.
+
+Il ne faut pas le présenter comme un immense champ pétrolier comparable à Parentis.
+
+Son importance vient de son histoire industrielle, de la production de gaz et des installations chimiques associées.
+
+Dans cette chronologie, le complexe industriel de Lacq a acquis une importance stratégique pendant la guerre.
+
+Il a fourni de l’énergie et des matières premières à plusieurs industries.
+
+Après l’effondrement, les installations chimiques deviennent des lieux dangereux.
+
+Certains réservoirs sont encore sous pression. Des conduites sont endommagées. Des bâtiments contiennent des produits dont les survivants ignorent parfois la nature.
+
+Les habitants des environs racontent que certaines zones sont maudites.
+
+Les anciens ouvriers savent qu’il ne s’agit pas de magie, mais de gaz toxiques, de fuites et de réactions chimiques.
+
+04.5 — La Bretagne : une puissance maritime, pas pétrolière
+
+Identifiant : LOC-006
+
+La Bretagne ne devient pas une région de grands gisements pétroliers terrestres.
+
+Son importance repose sur d’autres ressources.
+
+La mer constitue une source alimentaire essentielle, bien que les conditions climatiques et la raréfaction des moyens de pêche rendent cette activité difficile.
+
+Les ports conservent des infrastructures de stockage et de réparation.
+
+Les anciens arsenaux, dépôts militaires, ateliers navals et installations portuaires représentent des réserves de matériel.
+
+Les navires abandonnés deviennent des sources de métaux, de moteurs, de carburant et d’équipements.
+
+La Bretagne développe ainsi une culture particulière de la récupération maritime.
+
+Ses habitants savent reconnaître les épaves, lire les marées, réparer les coques et récupérer les pièces qui peuvent encore servir.
+
+Le carburant y provient principalement :
+
+* des anciens dépôts portuaires ;
+* des navires abandonnés ;
+* des installations militaires ;
+* des stocks civils ;
+* des échanges avec les régions productrices.
+
+La Bretagne devient un territoire de transit, de récupération et de commerce maritime.
+
+04.6 — Les différentes formes de carburant
+
+Identifiant : RES-001 — Pétrole brut
+Identifiant : RES-004 — Essence
+Identifiant : RES-005 — Gazole
+Identifiant : RES-006 — Kérosène
+Identifiant : RES-007 — Fioul
+
+Les populations ne confondent pas toujours ces produits.
+
+Les techniciens, eux, savent que chaque carburant possède des caractéristiques différentes.
+
+Le pétrole brut doit être transformé.
+
+L’essence est utile aux moteurs à allumage commandé, mais elle se dégrade avec le temps et son stockage exige des précautions.
+
+Le gazole peut être conservé plus longtemps dans de bonnes conditions, mais il peut être contaminé par l’eau et les micro-organismes.
+
+Le kérosène possède des usages particuliers et ne peut pas être considéré comme un substitut universel.
+
+Le fioul sert principalement au chauffage et à certains usages industriels.
+
+Cette distinction crée une hiérarchie des ressources.
+
+Un dépôt contenant des milliers de litres de pétrole brut n’a pas nécessairement la même valeur qu’une petite réserve d’essence propre.
+
+La possession d’une raffinerie fonctionnelle représente un avantage considérable.
+
+04.7 — La chaîne pétrolière
+
+L’industrie pétrolière repose sur plusieurs étapes.
+
+1. Extraction du pétrole brut.
+2. Séparation et traitement initial.
+3. Transport vers une raffinerie.
+4. Raffinage.
+5. Stockage des produits finis.
+6. Distribution par camions, trains, bateaux ou conduites.
+7. Vente ou allocation aux utilisateurs.
+
+Les stations-service ne sont donc pas des lieux d’extraction.
+
+Elles possèdent généralement des cuves enterrées et des pompes permettant de distribuer des carburants déjà raffinés.
+
+Après l’effondrement, les anciennes stations-service deviennent des points de récupération locaux.
+
+Certaines contiennent encore quelques centaines ou milliers de litres. D’autres sont entièrement vides, contaminées ou endommagées.
+
+Les dépôts industriels possèdent des capacités plus importantes, mais leur accès est plus difficile.
+
+Les raffineries sont extrêmement rares à remettre en fonctionnement.
+
+Les survivants peuvent récupérer du carburant pendant des années sans être capables de produire du carburant neuf en quantité suffisante.
+
+Cette situation explique pourquoi le pétrole brut ne garantit pas la survie d’une civilisation motorisée.
+
+⸻
+
+05 — LES PREMIÈRES PUISSANCES DU NOUVEAU MONDE
+
+05.1 — Les Compagnies de l’Est
+
+Identifiant : FAC-001
+Origine : Anciennes concessions et installations pétrolières du Bassin parisien
+Nature : Organisation industrielle et militaire
+Statut : Puissance régionale
+
+Les Compagnies de l’Est ne sont pas nées d’une idéologie.
+
+Elles sont nées d’un problème de logistique.
+
+Lorsque les autorités nationales ont cessé de fonctionner, plusieurs concessions pétrolières ont conservé des équipes techniques, des gardes et des stocks.
+
+Les responsables locaux ont commencé à organiser la distribution.
+
+Les ouvriers étaient nourris en échange de leur travail. Les gardes étaient rémunérés en carburant et en nourriture. Les villages voisins recevaient des quantités limitées de combustible en échange de leur coopération.
+
+Cette organisation a progressivement pris une forme politique.
+
+Les Compagnies de l’Est ont conservé les anciennes méthodes industrielles : registres, quotas, contrats, hiérarchie, comptabilité et contrôle des stocks.
+
+Elles se présentent comme les héritières légitimes des entreprises qui ont maintenu la production pendant les années de rupture.
+
+Leur pouvoir repose sur trois éléments :
+
+* la maîtrise des installations pétrolières ;
+* la possession des stocks et des moyens de transport ;
+* le contrôle des techniciens capables de maintenir les équipements.
+
+Leur société est relativement organisée, mais profondément inégalitaire.
+
+Les employés spécialisés bénéficient d’une protection supérieure à celle des travailleurs ordinaires.
+
+Les familles des ingénieurs vivent parfois dans des quartiers fortifiés.
+
+Les ouvriers non qualifiés habitent des logements précaires et sont soumis à des quotas de travail.
+
+La nourriture est distribuée selon la fonction occupée.
+
+Les Compagnies considèrent que cette hiérarchie est nécessaire à la survie collective.
+
+Leurs opposants y voient une forme d’esclavage industriel.
+
+05.2 — Les Raffineurs du Sud
+
+Identifiant : FAC-002
+Origine : Bassin aquitain et installations industrielles du Sud-Ouest
+Nature : Coalition industrielle et commerciale
+Statut : Puissance régionale
+
+Les Raffineurs du Sud se sont constitués autour des installations de transformation et des réseaux de distribution.
+
+Contrairement aux Compagnies de l’Est, ils ne contrôlent pas uniquement les lieux d’extraction.
+
+Leur puissance repose sur leur capacité à transformer une matière première en carburant utilisable.
+
+Ils entretiennent des relations avec les anciens ouvriers du pétrole, les mécaniciens, les transporteurs et les propriétaires de dépôts.
+
+Leur organisation est moins centralisée.
+
+Plusieurs familles et entreprises locales possèdent une influence importante.
+
+Les accords commerciaux peuvent être renégociés, les alliances changent régulièrement et les rivalités internes sont fréquentes.
+
+Ils vendent du carburant à ceux qui peuvent payer.
+
+Leur discours officiel défend le commerce libre et la coopération entre communautés.
+
+Dans la pratique, ils peuvent imposer des tarifs exorbitants et interrompre les livraisons pour obtenir des concessions politiques.
+
+Leur principal problème est leur dépendance aux installations techniques.
+
+Une raffinerie nécessite des pièces, de l’énergie, de l’eau, des produits chimiques et des techniciens.
+
+La perte de quelques spécialistes peut compromettre plusieurs mois de production.
+
+05.3 — Le Réseau des Marées
+
+Identifiant : FAC-003
+Origine : Ports bretons et communautés maritimes
+Nature : Réseau commercial et familial
+Statut : Organisation décentralisée
+
+Le Réseau des Marées ne possède pas de capitale.
+
+Il n’a pas de chef unique.
+
+Il rassemble des familles de marins, de pêcheurs, de mécaniciens navals et de récupérateurs.
+
+Les membres se reconnaissent par leurs relations familiales, leurs dettes et les services rendus.
+
+Le réseau fonctionne grâce à des accords oraux.
+
+Une famille peut cacher un navire pendant plusieurs mois pour une autre famille. Un mécanicien peut réparer un moteur en échange d’une part sur une cargaison future.
+
+Les membres du réseau connaissent les ports encore accessibles, les épaves intéressantes et les anciennes installations militaires.
+
+Ils ne sont pas nécessairement pacifiques.
+
+Certains équipages sont devenus des pillards maritimes.
+
+D’autres transportent des réfugiés et des marchandises.
+
+Le réseau tolère cette diversité tant que les accords commerciaux sont respectés.
+
+05.4 — Les Communautés des Hautes-Terres
+
+Identifiant : FAC-004
+Origine : Massifs montagneux et régions rurales
+Nature : Communautés agricoles et pastorales
+Statut : Ensemble de communautés indépendantes
+
+Les Communautés des Hautes-Terres ne forment pas une faction unifiée.
+
+Elles partagent certaines habitudes : méfiance envers les grandes organisations, importance des familles, protection des terres cultivables et transmission des connaissances agricoles.
+
+Elles sont souvent plus autonomes que les communautés des plaines.
+
+Elles disposent parfois de troupeaux, de sources d’eau et de terres relativement préservées.
+
+Mais leur isolement a un coût.
+
+Les médicaments manquent. Les pièces mécaniques sont rares. Les hivers peuvent être particulièrement meurtriers.
+
+Certaines communautés accueillent les réfugiés.
+
+D’autres ferment leurs accès et expulsent les étrangers.
+
+05.5 — Les Récupérateurs
+
+Identifiant : FAC-005
+
+Les Récupérateurs constituent une catégorie sociale autant qu’une organisation.
+
+Ils parcourent les routes, les anciennes zones industrielles et les territoires abandonnés à la recherche de matériel.
+
+Certains travaillent pour des communautés.
+
+D’autres sont indépendants.
+
+Les plus organisés possèdent des véhicules blindés et des ateliers mobiles.
+
+Ils connaissent les matériaux, les moteurs, les systèmes électriques et les méthodes de démontage.
+
+Ils sont souvent méprisés par les populations sédentaires, mais indispensables à leur survie.
+
+Leur réputation est ambiguë.
+
+Ils peuvent sauver un village en réparant une pompe à eau.
+
+Ils peuvent également démonter les dernières installations qui permettaient à ce village de fonctionner.
+
+⸻
+
+06 — PERSONNAGES FONDATEURS
+
+06.1 — Étienne Marceau
+
+Identifiant : CHR-001
+Âge de référence : 67 ans
+Origine : Seine-et-Marne
+Profession passée : Ingénieur pétrolier
+Affiliation : Anciennes concessions du Bassin parisien
+Statut : Vivant au début de la période étudiée
+
+Étienne Marceau a consacré une grande partie de sa vie à l’industrie pétrolière.
+
+Il a commencé comme technicien de maintenance avant de devenir ingénieur.
+
+Il connaît les pompes, les conduites, les installations de séparation et les anciens systèmes de distribution.
+
+Il a travaillé sur plusieurs installations du Bassin parisien.
+
+Il n’a jamais été un homme particulièrement politique.
+
+Il croyait que le travail industriel devait être organisé autour de la compétence et de la responsabilité.
+
+La disparition de l’État a bouleversé cette conviction.
+
+Lorsque les Compagnies de l’Est ont commencé à contrôler les anciennes concessions, Étienne a d’abord accepté de travailler pour elles.
+
+Il pensait que la production permettrait de nourrir les familles des ouvriers.
+
+Il a progressivement compris que les dirigeants utilisaient le carburant comme un moyen de contrôle.
+
+Les communautés qui refusaient de se soumettre étaient privées de livraison.
+
+Les ouvriers qui tentaient de partir étaient accusés de sabotage.
+
+Étienne a refusé de participer à plusieurs opérations de réquisition.
+
+Il a ensuite quitté son poste.
+
+Il conserve une connaissance exceptionnelle des anciennes installations.
+
+Il refuse de transmettre certains documents aux groupes armés, car il estime que ces informations pourraient provoquer des massacres.
+
+Il enseigne cependant les bases de la mécanique et de la sécurité industrielle à de jeunes survivants.
+
+Caractère : Méthodique, exigeant, peu bavard. Il supporte mal l’improvisation dangereuse.
+
+Faiblesse : Il se croit responsable de la mort de plusieurs ouvriers, morts lors d’une opération de sécurisation qu’il avait acceptée.
+
+Secret : Étienne possède une copie d’anciens registres indiquant les quantités réellement stockées dans plusieurs dépôts avant la Grande Panne.
+
+Ces documents pourraient bouleverser les rapports de force entre les Compagnies de l’Est et les Raffineurs du Sud.
+
+Relations :
+
+* CHR-005 — Gabriel Marceau : son fils.
+* CHR-008 — Victor Salvat : ancien supérieur hiérarchique.
+* FAC-001 — Compagnies de l’Est : ancienne affiliation.
+* EVT-006 — Guerre des Réservoirs : événement auquel son passé est lié.
+
+06.2 — Madeleine Vautrin
+
+Identifiant : CHR-002
+Âge de référence : 49 ans
+Origine : Sud-Ouest
+Profession : Administratrice et dirigeante communautaire
+Affiliation : Raffineurs du Sud
+Statut : Vivante
+
+Madeleine Vautrin est issue d’une famille qui travaillait dans l’industrie et le transport.
+
+Elle a grandi dans un environnement où les stocks, les contrats et les livraisons déterminaient le quotidien.
+
+Elle a appris très tôt qu’une cargaison de carburant pouvait nourrir une région ou condamner plusieurs villages à la famine.
+
+Après la Grande Panne, elle a participé à la réorganisation d’un dépôt industriel.
+
+Elle a d’abord été chargée de la comptabilité et des distributions.
+
+Elle a ensuite pris le contrôle de l’installation après la mort de plusieurs responsables.
+
+Madeleine n’est pas une dirigeante particulièrement populaire.
+
+Elle impose des règles strictes.
+
+Les vols de carburant sont sévèrement punis. Les employés qui abandonnent leur poste sont considérés comme des déserteurs.
+
+Pourtant, elle organise secrètement des distributions destinées à plusieurs villages qui ne peuvent plus payer les tarifs officiels.
+
+Elle ne le fait pas par bonté désintéressée.
+
+Elle estime qu’une région où les habitants meurent de faim finit toujours par devenir une menace pour les installations industrielles.
+
+Elle préfère donc maintenir un minimum de stabilité.
+
+Caractère : Pragmatique, autoritaire, intelligente, capable d’une grande dureté.
+
+Faiblesse : Elle a progressivement cessé de distinguer la nécessité de gouverner de la nécessité de tout contrôler.
+
+Secret : Madeleine possède des registres indiquant que plusieurs livraisons de carburant ont été détournées par des dirigeants de sa propre organisation.
+
+Elle garde ces preuves pour éviter une guerre interne.
+
+Relations :
+
+* CHR-004 — Lucien Vautrin : son frère.
+* FAC-002 — Raffineurs du Sud : dirigeante influente.
+* CHR-001 — Étienne Marceau : relation professionnelle indirecte.
+* EVT-006 — Guerre des Réservoirs : rôle politique important.
+
+06.3 — Jeanne Le Guen
+
+Identifiant : CHR-003
+Âge de référence : 31 ans
+Origine : Bretagne
+Profession : Récupératrice maritime
+Affiliation : Réseau des Marées
+Statut : Vivante
+
+Jeanne Le Guen est née dans une famille de marins.
+
+Elle a grandi dans un environnement où la mer était à la fois une ressource et une menace.
+
+Son père lui a appris à reconnaître les courants, les ports abandonnés et les dangers des épaves.
+
+Sa mère travaillait dans la réparation de filets et la conservation du poisson.
+
+Jeanne a rapidement appris à travailler sur les moteurs.
+
+Après la disparition de son père, elle a rejoint plusieurs équipages chargés de récupérer du matériel dans les installations portuaires.
+
+Elle a acquis une réputation de mécanicienne compétente et de négociatrice difficile.
+
+Elle n’aime pas les organisations centralisées.
+
+Elle considère que les grandes factions finissent toujours par confisquer les ressources des petites communautés.
+
+Elle accepte néanmoins de travailler avec elles lorsqu’un accord lui semble avantageux.
+
+Caractère : Indépendante, méfiante, ironique, courageuse mais parfois imprudente.
+
+Faiblesse : Elle prend des risques excessifs lorsqu’il s’agit de retrouver des personnes disparues en mer.
+
+Secret : Elle conserve des carnets de navigation appartenant à son père. Certains contiennent des indications sur d’anciens dépôts et des installations militaires dont l’existence est ignorée des autres membres du réseau.
+
+Relations :
+
+* CHR-006 — Anaïs Le Guen : sa sœur cadette.
+* CHR-010 — Paul Kermeur : ancien compagnon d’équipage.
+* FAC-003 — Réseau des Marées : membre reconnue.
+* LOC-006 — Bretagne : territoire d’origine.
+
+06.4 — Lucien Vautrin
+
+Identifiant : CHR-004
+Âge de référence : 44 ans
+Origine : Sud-Ouest
+Profession : Responsable de sécurité industrielle
+Affiliation : Raffineurs du Sud
+
+Lucien est le frère cadet de Madeleine.
+
+Contrairement à sa sœur, il considère que les installations industrielles doivent être défendues par la force.
+
+Il a participé à plusieurs opérations de récupération de dépôts.
+
+Il possède une réputation de chef militaire efficace.
+
+Il n’est cependant pas un idéologue.
+
+Il pense que les communautés sont naturellement violentes et que seules des règles strictes peuvent éviter leur destruction.
+
+Sa relation avec Madeleine est compliquée.
+
+Il respecte ses capacités administratives, mais considère qu’elle accorde trop d’importance aux populations extérieures.
+
+Il estime que les ressources doivent d’abord protéger ceux qui les contrôlent.
+
+Secret : Lucien a participé à une opération qui a provoqué la destruction d’un convoi civil. Il a ensuite falsifié le rapport officiel.
+
+Madeleine connaît une partie de la vérité, mais ignore l’ampleur de sa responsabilité.
+
+06.5 — Gabriel Marceau
+
+Identifiant : CHR-005
+Âge de référence : 28 ans
+Origine : Seine-et-Marne
+Profession : Mécanicien et conducteur
+Affiliation : Indépendant
+
+Gabriel est le fils d’Étienne.
+
+Il a grandi dans les installations pétrolières.
+
+Il connaît les moteurs, mais n’a pas la patience de son père pour les installations complexes.
+
+Il préfère les machines qu’il peut réparer avec les moyens disponibles.
+
+Son père lui a transmis des connaissances techniques, mais aussi une profonde méfiance envers les grandes organisations.
+
+Gabriel a quitté les Compagnies de l’Est après une dispute avec plusieurs responsables.
+
+Il reproche à son père de ne pas avoir agi plus tôt contre les dirigeants qui exploitaient les ouvriers.
+
+Étienne lui reproche de ne pas comprendre les conséquences d’une révolte mal préparée.
+
+Leur relation est marquée par un conflit générationnel.
+
+Gabriel représente une génération qui n’a pas connu la société d’avant l’effondrement et qui ne croit plus aux institutions.
+
+Secret : Gabriel a conservé une partie des documents techniques de son père sans lui dire qu’il les possédait.
+
+06.6 — Anaïs Le Guen
+
+Identifiant : CHR-006
+Âge de référence : 25 ans
+Origine : Bretagne
+Profession : Infirmière et soigneuse
+Affiliation : Réseau des Marées, mais relations avec plusieurs communautés indépendantes
+
+Anaïs est la sœur cadette de Jeanne.
+
+Elle a suivi une formation médicale avant l’effondrement.
+
+Elle a ensuite travaillé dans plusieurs structures de soins improvisées.
+
+Elle connaît les traitements de base, les gestes chirurgicaux simples et les méthodes de prévention des infections.
+
+Elle considère que la récupération de médicaments est moins importante que la prévention des maladies.
+
+Cette position la met parfois en conflit avec les récupérateurs qui préfèrent ramener du matériel spectaculaire plutôt que des fournitures médicales ordinaires.
+
+Anaïs est plus conciliante que sa sœur.
+
+Elle croit encore qu’il est possible de maintenir des relations entre communautés sans recourir systématiquement à la violence.
+
+Secret : Elle a autrefois laissé mourir un homme blessé parce qu’elle avait choisi de soigner un enfant. Elle n’a jamais expliqué cette décision à Jeanne.
+
+⸻
+
+07 — PERSONNAGES SECONDAIRES
+
+07.1 — Père Auguste Delmas
+
+Identifiant : CHR-007
+Âge : 71 ans
+Origine : Ancien diocèse du Sud-Ouest
+Profession : Prêtre
+
+Auguste Delmas a connu la société d’avant la catastrophe.
+
+Il a traversé la guerre, les années de rationnement et les premières migrations.
+
+Il vit désormais dans une ancienne église transformée en refuge.
+
+Il accueille les orphelins et les vieillards.
+
+Il ne possède presque rien, mais il est respecté par plusieurs communautés.
+
+Il a conservé des registres de baptêmes, de mariages et de décès.
+
+Ces documents sont parfois les seuls éléments permettant de reconstituer l’histoire des familles.
+
+Il connaît Madeleine Vautrin depuis plusieurs années.
+
+Il désapprouve ses méthodes, mais reconnaît qu’elle a permis à des villages de survivre.
+
+Secret : Il conserve des documents concernant plusieurs enfants dont l’identité a été volontairement effacée après la disparition de leurs parents.
+
+07.2 — Victor Salvat
+
+Identifiant : CHR-008
+Âge : 58 ans
+Origine : Bassin parisien
+Profession : Ancien directeur d’exploitation
+
+Victor Salvat a travaillé avec Étienne Marceau.
+
+Il est l’un des responsables historiques de la transformation des anciennes concessions en structures de pouvoir.
+
+Il estime que les populations ne peuvent pas être laissées libres de gérer des ressources aussi importantes.
+
+Il considère les Compagnies de l’Est comme la dernière forme d’organisation rationnelle.
+
+Il n’est pas nécessairement cruel dans ses intentions.
+
+Il est cependant prêt à sacrifier des villages entiers pour préserver les installations pétrolières.
+
+Il est l’un des principaux adversaires idéologiques d’Étienne.
+
+07.3 — Irène Bessières
+
+Identifiant : CHR-009
+Âge : 36 ans
+Origine : Région lyonnaise
+Profession : Médecin
+
+Irène a travaillé dans un hôpital avant la disparition des réseaux médicaux.
+
+Elle a ensuite rejoint plusieurs communautés de réfugiés.
+
+Elle a développé une médecine de pénurie, fondée sur la prévention, la réutilisation du matériel et la conservation des médicaments.
+
+Elle refuse de travailler durablement pour une faction.
+
+Elle estime que les médecins ne doivent pas devenir des instruments de pouvoir.
+
+Son refus de choisir un camp lui a valu plusieurs menaces.
+
+07.4 — Paul Kermeur
+
+Identifiant : CHR-010
+Âge : 39 ans
+Origine : Bretagne
+Profession : Marin et récupérateur
+
+Paul est un ancien compagnon d’équipage de Jeanne.
+
+Il possède une connaissance exceptionnelle des ports et des installations maritimes.
+
+Il a participé à plusieurs opérations de récupération de carburant.
+
+Il est également connu pour ses activités de contrebande.
+
+Il considère que les lois ont disparu avec l’État et que les accords entre individus constituent désormais la seule forme de droit valable.
+
+Il a une dette importante envers le Réseau des Marées.
+
+07.5 — Margot Sorel
+
+Identifiant : CHR-011
+Âge : 17 ans
+Origine : Inconnue
+Statut : Orpheline
+
+Margot a grandi dans plusieurs communautés successives.
+
+Elle ne se souvient pas clairement de ses parents.
+
+Elle sait lire, écrire et effectuer des calculs simples, ce qui lui permet de travailler comme aide-comptable dans un dépôt.
+
+Elle possède une mémoire exceptionnelle des visages et des conversations.
+
+Elle a entendu des informations que personne ne pense importantes.
+
+Son rôle historique pourrait devenir considérable, bien qu’elle ne soit pas consciente de la valeur de ce qu’elle sait.
+
+07.6 — Émile Roussel
+
+Identifiant : CHR-012
+Âge : 53 ans
+Origine : Bourgogne
+Profession : Agriculteur
+
+Émile dirige une petite communauté agricole.
+
+Il a compris que les semences étaient devenues une richesse stratégique.
+
+Il conserve plusieurs variétés anciennes et échange des graines contre des outils et des médicaments.
+
+Il est respecté pour sa connaissance des sols.
+
+Il refuse cependant d’accueillir trop de réfugiés.
+
+Il considère que chaque bouche supplémentaire met en danger les familles déjà présentes.
+
+Sa dureté est souvent interprétée comme de l’égoïsme, mais il a déjà connu plusieurs famines.
+
+07.7 — Thérèse Valette
+
+Identifiant : CHR-013
+Âge : 62 ans
+Origine : Paris
+Profession : Ancienne institutrice
+
+Thérèse a quitté Paris lors des premières grandes migrations.
+
+Elle enseigne aux enfants dans une communauté rurale.
+
+Elle a conservé plusieurs livres scolaires, des cartes et des documents historiques.
+
+Elle refuse de laisser les enfants grandir sans connaître le monde qui existait avant eux.
+
+Elle raconte parfois des événements qu’elle a vécus, mais ses souvenirs sont incomplets.
+
+Certains enfants pensent qu’elle invente des histoires.
+
+07.8 — Marcel Delaunay
+
+Identifiant : CHR-014
+Âge : 46 ans
+Origine : Région parisienne
+Profession : Ancien cheminot
+
+Marcel connaît les anciennes lignes ferroviaires.
+
+Il sait où se trouvent les aiguillages, les dépôts, les ateliers et les tunnels.
+
+Il a participé à plusieurs opérations de récupération de locomotives et de wagons.
+
+Il pense que le rail pourrait permettre de reconstruire une économie régionale.
+
+Mais les autres survivants considèrent souvent le chemin de fer comme une infrastructure trop coûteuse à maintenir.
+
+07.9 — Sofia Benali
+
+Identifiant : CHR-015
+Âge : 33 ans
+Origine : Marseille
+Profession : Commerçante et négociatrice
+
+Sofia a grandi dans une famille qui travaillait dans le commerce portuaire.
+
+Elle a survécu grâce à sa capacité à négocier avec des groupes très différents.
+
+Elle possède des contacts dans plusieurs régions.
+
+Elle ne se considère pas comme une personne morale ou immorale.
+
+Elle estime que les jugements moraux sont un luxe que les survivants ne peuvent pas toujours se permettre.
+
+Elle vend des informations autant que des marchandises.
+
+⸻
+
+08 — PREMIERS GRANDS CONFLITS
+
+08.1 — La Guerre des Réservoirs
+
+Identifiant : EVT-006
+Période : Première génération après l’effondrement
+Nature : Conflit industriel et territorial
+
+La Guerre des Réservoirs n’est pas une guerre nationale.
+
+C’est une succession de conflits régionaux autour des stocks de carburant.
+
+Les anciennes installations deviennent des territoires stratégiques.
+
+Les groupes qui contrôlent les dépôts peuvent imposer des taxes, des accords commerciaux et des conditions de passage.
+
+Les Compagnies de l’Est cherchent à sécuriser les installations du Bassin parisien.
+
+Les Raffineurs du Sud cherchent à préserver leur autonomie et à contrôler les infrastructures de transformation.
+
+Des communautés indépendantes tentent de rester neutres.
+
+Les affrontements ne se limitent pas aux combats directs.
+
+Les sabotages, les détournements de cargaisons, les empoisonnements de stocks et les destructions de pompes sont fréquents.
+
+Les techniciens deviennent des cibles.
+
+Certains sont enlevés pour leurs connaissances.
+
+D’autres sont protégés comme des membres de la famille dirigeante.
+
+La guerre provoque plusieurs déplacements de population.
+
+Des villages entiers quittent les zones industrielles.
+
+Des convois de réfugiés traversent les campagnes.
+
+Les communautés agricoles sont contraintes de choisir entre payer les taxes des factions ou risquer des représailles.
+
+La guerre ne se termine pas par une victoire claire.
+
+Elle s’épuise lorsque les installations deviennent trop difficiles à exploiter et que les deux camps manquent de moyens.
+
+Les accords qui suivent sont fragiles.
+
+08.2 — L’Hiver des Enfants
+
+Identifiant : EVT-007
+Période : Quelques années après la Guerre des Réservoirs
+Nature : Famine et crise migratoire
+
+Un hiver particulièrement rigoureux frappe plusieurs régions.
+
+Les récoltes précédentes ont été mauvaises.
+
+Les réserves alimentaires sont insuffisantes.
+
+Les communautés les plus pauvres commencent à se déplacer.
+
+Les enfants sont particulièrement touchés.
+
+Certains villages refusent de partager leurs réserves.
+
+D’autres accueillent des familles entières, mais doivent rapidement rationner la nourriture.
+
+Des groupes d’enfants se retrouvent seuls sur les routes.
+
+Certains sont recueillis par des communautés religieuses.
+
+D’autres rejoignent des convois.
+
+Plusieurs bandes se constituent autour d’adolescents qui tentent de protéger les plus jeunes.
+
+L’Hiver des Enfants devient un traumatisme collectif.
+
+Dans certaines régions, les habitants refusent encore de parler des événements.
+
+Des familles ont perdu tous leurs enfants.
+
+D’autres ont adopté des orphelins sans jamais leur révéler leur origine.
+
+Les registres conservés par le père Delmas pourraient permettre de retrouver une partie de ces histoires.
+
+⸻
+
+09 — CROYANCES ET MÉMOIRE COLLECTIVE
+
+09.1 — La catastrophe selon les survivants
+
+La population ne possède pas une explication commune de l’effondrement.
+
+Certains pensent que les armes atmosphériques ont détruit le climat.
+
+D’autres affirment que les phénomènes météorologiques sont naturels et que les gouvernements ont simplement aggravé une crise déjà existante.
+
+Certains groupes religieux interprètent la catastrophe comme une punition.
+
+D’autres considèrent que l’humanité a détruit son propre monde par orgueil.
+
+Les anciens militaires racontent des histoires différentes selon les unités auxquelles ils appartenaient.
+
+Les scientifiques survivants sont parfois accusés d’avoir provoqué la catastrophe.
+
+D’autres sont considérés comme les seuls capables de comprendre ce qui s’est passé.
+
+Il n’existe pas de vérité populaire unique.
+
+09.2 — Les trois niveaux de vérité
+
+Chaque grand événement de l’univers doit posséder trois versions.
+
+Niveau 1 — Vérité historique
+
+Ce qui s’est réellement passé, selon la chronologie de référence.
+
+Niveau 2 — Mémoire des personnages
+
+Ce que les individus ont vu, compris ou appris.
+
+Niveau 3 — Mémoire collective
+
+Ce que les communautés racontent, déforment, embellissent ou utilisent politiquement.
+
+Une même histoire peut donc avoir plusieurs versions contradictoires.
+
+Cette contradiction ne doit pas être systématiquement résolue.
+
+09.3 — Le principe des disparitions
+
+Identifiant : MYS-001
+Formulation populaire : « On ne revoit jamais ceux qui s’éloignent. »
+
+Cette phrase est devenue une règle non écrite du monde.
+
+Les personnes qui quittent un groupe ne reviennent pas.
+
+Les convois qui disparaissent ne sont jamais retrouvés.
+
+Les voyageurs qui partent vers une autre région cessent d’exister dans les récits de ceux qu’ils ont quittés.
+
+Les communautés connaissent cette réalité, mais ne savent pas l’expliquer.
+
+Certains pensent que les routes sont devenues trop dangereuses.
+
+D’autres parlent de territoires interdits, de bandes nomades ou de phénomènes météorologiques.
+
+Quelques anciens affirment que les disparus ont trouvé un autre monde et qu’ils ne veulent plus revenir.
+
+Aucune explication ne doit être présentée comme certaine.
+
+Cette règle est plus qu’une croyance : elle constitue une rupture fondamentale dans la manière dont les survivants perçoivent le monde.
+
+Un départ est souvent considéré comme une séparation définitive.
+
+⸻
+
+10 — RÉSEAU INITIAL DES RELATIONS
+
+10.1 — Relations familiales
+
+* CHR-001 Étienne Marceau est le père de CHR-005 Gabriel Marceau.
+* CHR-002 Madeleine Vautrin est la sœur de CHR-004 Lucien Vautrin.
+* CHR-003 Jeanne Le Guen est la sœur de CHR-006 Anaïs Le Guen.
+
+10.2 — Relations professionnelles
+
+* Étienne Marceau et Victor Salvat ont travaillé dans les mêmes installations pétrolières.
+* Madeleine Vautrin et Lucien Vautrin ont participé à la réorganisation des dépôts du Sud-Ouest.
+* Jeanne Le Guen et Paul Kermeur ont travaillé sur plusieurs opérations de récupération maritime.
+* Anaïs Le Guen a soigné plusieurs membres du Réseau des Marées.
+* Marcel Delaunay a transporté du matériel pour des communautés agricoles.
+
+10.3 — Relations politiques
+
+* Étienne Marceau est un ancien membre des structures industrielles des Compagnies de l’Est.
+* Victor Salvat défend le modèle autoritaire des Compagnies de l’Est.
+* Madeleine Vautrin dirige une partie de l’organisation des Raffineurs du Sud.
+* Lucien Vautrin défend une ligne sécuritaire au sein des Raffineurs.
+* Jeanne Le Guen entretient des relations commerciales avec le Réseau des Marées.
+* Sofia Benali possède des contacts dans plusieurs organisations.
+
+10.4 — Relations indirectes
+
+* Les documents d’Étienne Marceau pourraient compromettre Victor Salvat.
+* Les registres de Madeleine Vautrin pourraient provoquer une crise interne chez les Raffineurs du Sud.
+* Les carnets de navigation de Jeanne Le Guen pourraient révéler l’existence de dépôts oubliés.
+* Les registres du père Auguste Delmas pourraient permettre de reconstituer l’origine de plusieurs enfants.
+* Margot Sorel pourrait posséder des informations reliant plusieurs de ces affaires sans en comprendre la portée.
+
+⸻
+
+11 — PRINCIPES NARRATIFS DE L’UNIVERS
+
+11.1 — Personne n’est entièrement innocent
+
+La survie oblige les individus à prendre des décisions difficiles.
+
+Un chef qui refuse des réfugiés peut sauver sa communauté.
+
+Un marchand qui vend du carburant à un groupe violent peut empêcher une famine.
+
+Un mécanicien qui répare un véhicule militaire peut condamner des civils.
+
+Les actes doivent être jugés à partir de leur contexte, sans pour autant être automatiquement excusés.
+
+11.2 — Les ressources créent le pouvoir
+
+Le pouvoir ne vient pas uniquement des armes.
+
+Il vient de la capacité à nourrir, soigner, réparer, transporter et protéger.
+
+Un groupe qui possède une source d’eau peut contrôler une vallée.
+
+Un groupe qui possède des semences peut contrôler plusieurs villages.
+
+Un groupe qui possède une raffinerie peut contrôler une région entière.
+
+Un médecin compétent peut avoir plus d’influence qu’un chef armé.
+
+11.3 — Le monde ne se limite pas à ses personnages principaux
+
+Les événements les plus importants ne doivent pas nécessairement être vécus par les personnages centraux.
+
+Des familles peuvent disparaître sans que le protagoniste le sache.
+
+Des communautés peuvent prospérer dans des régions qui ne seront jamais visitées.
+
+Des guerres peuvent se dérouler à plusieurs centaines de kilomètres.
+
+Des personnages peuvent mourir sans que leur histoire soit immédiatement connue.
+
+L’univers doit donner l’impression de continuer à exister en dehors du récit principal.
+
+11.4 — Les histoires doivent laisser des traces
+
+Un événement important doit laisser des conséquences.
+
+Une guerre laisse des ruines, des veuves, des enfants, des dettes et des rancunes.
+
+Une famine laisse des habitudes alimentaires, des traumatismes et des règles de partage.
+
+Une migration laisse des familles dispersées, des langues mélangées et des traditions nouvelles.
+
+Une trahison peut modifier durablement les relations entre deux communautés.
+
+Un personnage ne doit pas exister uniquement pour raconter son histoire : son existence doit avoir modifié quelque chose autour de lui.
+
+⸻
+
+12 — ÉLÉMENTS À DÉVELOPPER DANS LES PROCHAINS VOLUMES
+
+Volume II — Chronologie détaillée
+
+* Déroulement de la Guerre interminable.
+* Développement du Programme Atmosphère.
+* Chronologie précise des premières anomalies climatiques.
+* Effondrement des réseaux électriques et ferroviaires.
+* Migrations régionales.
+* Apparition des premières autorités locales.
+* Formation des premières factions.
+
+Volume III — Atlas historique de la France
+
+* Bretagne.
+* Normandie.
+* Bassin parisien.
+* Nord industriel.
+* Alsace.
+* Bourgogne.
+* Lyon et vallée du Rhône.
+* Massif central.
+* Aquitaine.
+* Provence.
+* Alpes.
+* Pyrénées.
+
+Chaque région devra posséder une histoire, des populations, des ressources, des traditions, des conflits et des rapports particuliers avec les régions voisines.
+
+Volume IV — Les sociétés humaines
+
+* Vie quotidienne.
+* Agriculture.
+* Éducation.
+* Familles.
+* Enfance et orphelins.
+* Médecine.
+* Religion.
+* Justice.
+* Mariages.
+* Funérailles.
+* Commerce.
+* Langues et expressions.
+* Statut des femmes.
+* Hiérarchies sociales.
+* Travail et esclavage.
+* Vieillesse.
+
+Volume V — Les grandes organisations
+
+* Histoire complète des Compagnies de l’Est.
+* Histoire complète des Raffineurs du Sud.
+* Réseau des Marées.
+* Communautés agricoles.
+* Groupes militaires.
+* Trafiquants.
+* Récupérateurs.
+* Autorités religieuses.
+* Réseaux de soins.
+
+Volume VI — Personnages et lignées
+
+* Arbres généalogiques.
+* Enfances.
+* Mariages.
+* Descendants.
+* Rivalités.
+* Secrets de famille.
+* Personnages historiques disparus.
+* Personnages secondaires.
+* Témoignages contradictoires.
+
+Volume VII — Mystères et légendes
+
+* Origine de la folie mécanique.
+* Disparitions.
+* Histoires de convois jamais retrouvés.
+* Rumeurs sur les villes abandonnées.
+* Théories concernant le Programme Atmosphère.
+* Documents contradictoires.
+* Légendes régionales.
+* Vérités volontairement dissimulées.
+
+⸻
+
+FIN DU VOLUME I
+
+Statut général : Fondation narrative proposée.
+
+Règle de continuité : Tous les identifiants de ce document sont permanents. Toute modification ultérieure doit conserver les références croisées et mettre à jour le registre central.
+
+Priorité de développement : Approfondir les événements historiques et les relations humaines avant de définir les lieux qui seront effectivement représentés dans le jeu.
