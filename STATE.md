@@ -30,6 +30,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
   catalogues extensibles sans code (moteurs, roues, châssis, suspensions et leur hauteur, coques, greffes). Détails : `GRILLE.md`.
 - **Ponts rigides, onglet Suspension, plans enregistrés, cabines décor retirées** (DEC-069 à 071). À vérifier sur iPhone.
 - **Poursuites et abordages** (DEC-077), silence hors du jeu (DEC-073), suspension en l'air (DEC-075), retirer en glissant (DEC-076). À vérifier sur iPhone.
+- **Direction artistique** (DEC-085) : brief de référence dans `docs/art/DIRECTION_ARTISTIQUE.md` ; contours A/B/C à comparer.
 - Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
 
 ## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
@@ -47,6 +48,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 2. Gel des fonctions pour un cycle d'essais (`docs/design/ESSAIS.md`).
 3. But d'une partie et progression entre les parties.
 4. Passage à Godot 4.6 ; chemin de compilation iOS sans Mac.
+5. Contours (A, B ou C) et sort des planches déjà produites en style « aplats » (DEC-085).
 
 ## Prochaines étapes (ordre recommandé)
 

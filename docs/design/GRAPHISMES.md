@@ -2,6 +2,7 @@
 
 Statut : validé (thème 6, DEC-020, DEC-021). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
 Complète `docs/art/ART_PIPELINE.md` (règles du registre d'assets).
+**Référence de style : `docs/art/DIRECTION_ARTISTIQUE.md` (brief du porteur de projet, DEC-085). En cas d'écart, ce brief prévaut.**
 
 ## Choix du porteur de projet
 
@@ -26,9 +27,9 @@ une consigne fixe, conservée dans `docs/art/prompts/` avec chaque image produit
 |---|---|
 | Vue | Profil strict, véhicule orienté vers la droite, sans perspective |
 | Lumière | Venant du haut à gauche, ombres douces |
-| Fond | Uni, couleur unique (pour le détourage) |
-| Palette | Ocres, sable, rouille, kaki olive, acier usé |
-| Rendu | Peinture numérique semi-réaliste, contours peu marqués |
+| Fond | Selon le cahier des charges du lot (DEC-085) |
+| Palette | Base commune (kaki, olive, ocre, sable, rouille, acier) + palette régionale (DEC-085) |
+| Rendu | Semi-réaliste peint, détail intermédiaire ; **contours non tranchés** (A marqués, B modérés, C discrets, à comparer) |
 | Format de génération | Paysage, la plus haute résolution disponible |
 | Contenu interdit | Texte, logos, marques visibles, personnages reconnaissables |
 
@@ -93,6 +94,9 @@ produites en SVG pour que le prototype d'atelier n'attende pas l'art final.
   de marque n'apparaît dans les images.
 
 ## Ouvert
+
+- **Contours** : comparer A, B, C sur un même sujet (DEC-085).
+- **Écart avec les planches déjà produites** (`docs/art/prompts/grille_pieces.md`, `coques_donneur.md`, `fond_grille.md` : « style simple et propre, aplats, contour 3 px ») : refaire ou garder jusqu'au choix des contours.
 
 - Outil d'IA retenu et vérification de ses conditions commerciales.
 - Cahiers des charges des 9 autres véhicules (après validation du pilote).
