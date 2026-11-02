@@ -5,7 +5,7 @@
 extends Node
 
 const DOSSIER := "res://assets/audio/"
-const PREFERER_SYNTH := true
+const PREFERER_SYNTH := false   # DEC-090 : les fichiers fournis (ElevenLabs) passent avant les sons synthétisés, gardés en secours
 const OPTIONS := "user://options.cfg"
 const BUS := ["Musique", "Effets", "Voix"]
 const FONDU := 1.5
@@ -107,23 +107,33 @@ func _en_boucle(f: AudioStream) -> AudioStream:
 
 
 # Musique en boucle, avec fondu enchaîné. nom vide = silence.
+# Une seule musique audible à la fois (DEC-090) : un nouveau changement annule le fondu en cours
+# et coupe net tout lecteur qui n'est pas en train de disparaître.
+var _tw_musique: Tween
+
+
 func musique(nom: String) -> void:
 	if nom == _musique_nom:
 		return
 	_musique_nom = nom
+	if _tw_musique != null and _tw_musique.is_valid():
+		_tw_musique.kill()
 	var ancien := _musique[0]
 	var nouveau := _musique[1]
 	_musique.reverse()
-	if ancien.playing:
-		var tw := create_tween()
-		tw.tween_property(ancien, "volume_db", -40.0, FONDU)
-		tw.tween_callback(ancien.stop)
+	nouveau.stop()
+	_tw_musique = create_tween().set_parallel(true)
 	var f := _flux(nom) if nom != "" else null
 	if f:
 		nouveau.stream = _en_boucle(f)
 		nouveau.volume_db = -40.0
 		nouveau.play()
-		create_tween().tween_property(nouveau, "volume_db", 0.0, FONDU)
+		_tw_musique.tween_property(nouveau, "volume_db", 0.0, FONDU)
+	if ancien.playing:
+		_tw_musique.tween_property(ancien, "volume_db", -40.0, FONDU)
+		_tw_musique.chain().tween_callback(ancien.stop)
+	elif not f:
+		_tw_musique.kill()
 
 
 # Fond sonore en boucle (vent, nuit).
