@@ -354,6 +354,7 @@ func _construire_elements() -> void:
 	_voile_menu.add_child(_boite_titre)
 	_btn_continuer = _bouton_titre("Continuer", func():
 		_voile_menu.visible = false
+		_musique_ecran(false)
 		pause = _atelier != null or _editeur != null)
 	_bouton_titre("Recommencer", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1))
 	_bouton_titre("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true))
@@ -426,12 +427,17 @@ func _par_dessus(c: Control) -> void:
 	c.tree_exited.connect(calque.queue_free)
 
 
+func _accueil_visible() -> bool:
+	return _voile_menu != null and _voile_menu.visible
+
+
 func afficher_menu(continuer: bool) -> void:
 	_btn_continuer.visible = continuer
 	_panneau_options.visible = false
 	_boite_titre.modulate.a = 0.0
 	create_tween().tween_property(_boite_titre, "modulate:a", 1.0, 1.4).set_delay(0.5)
 	_voile_menu.visible = true
+	_musique_ecran(true)
 	pause = true
 
 
@@ -439,6 +445,8 @@ func afficher_menu(continuer: bool) -> void:
 func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> void:
 	graine = g
 	if _voile_menu != null:
+		if _voile_menu.visible:
+			_musique_ecran(false)
 		_voile_menu.visible = false
 	if _atelier != null:
 		_atelier.queue_free()

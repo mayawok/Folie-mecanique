@@ -442,5 +442,17 @@ func _demarrer_audio() -> void:
 	_audio_ok = true
 	var so := get_node_or_null("/root/Son")
 	if so:
-		so.musique("mus_combat")
+		so.musique("mus_menu" if _accueil_visible() else "mus_combat")   # accueil : « Rue du Swing » (DEC-089)
 		_son("sfx_ui_clic")
+
+
+# Musique selon l'écran : accueil = mus_menu, partie = mus_combat. Rien avant le premier toucher (règle des navigateurs).
+func _musique_ecran(accueil: bool) -> void:
+	var so := get_node_or_null("/root/Son")
+	if so and _audio_ok:
+		so.musique("mus_menu" if accueil else "mus_combat")
+
+
+# Redéfini par vue_interface.gd (écran d'accueil)
+func _accueil_visible() -> bool:
+	return false
