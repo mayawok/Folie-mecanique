@@ -3,6 +3,9 @@ extends "res://scripts/combat/vue_dessin.gd"
 
 var _voile_menu: ColorRect       # menu principal : continuer, nouvelle expédition, bac à sable (DEC-043)
 var _btn_continuer: Button
+var _fond_titre: TextureRect
+var _boite_titre: VBoxContainer
+var _panneau_options: ColorRect
 
 
 # --- Construction ----------------------------------------------------------
@@ -319,25 +322,90 @@ func _construire_elements() -> void:
 	_lbl_fin.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vb, 420)
 	_bouton("Mode créatif", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
-	# --- Menu principal
+	# --- Écran d'accueil (DEC-086) : image plein cadre, quatre boutons sous le titre. Pas utilisé comme menu de pause.
 	_voile_menu = ColorRect.new()
-	_voile_menu.color = Color(0.03, 0.03, 0.03, 0.86)
+	_voile_menu.color = Color.BLACK
 	_voile_menu.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_voile_menu.visible = false
 	add_child(_voile_menu)
-	var cm := CenterContainer.new()
-	cm.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
-	_voile_menu.add_child(cm)
-	var vm := VBoxContainer.new()
-	vm.add_theme_constant_override("separation", 26)
-	cm.add_child(vm)
-	var titre := _label("FOLIE MÉCANIQUE", vm, 56)
-	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_btn_continuer = _bouton("Continuer", func():
+	if ResourceLoader.exists("res://assets/ui/ecran_titre.jpg"):
+		_fond_titre = TextureRect.new()
+		_fond_titre.texture = load("res://assets/ui/ecran_titre.jpg")
+		_fond_titre.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_fond_titre.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		_fond_titre.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+		_fond_titre.mouse_filter = MOUSE_FILTER_IGNORE
+		_voile_menu.add_child(_fond_titre)
+	_boite_titre = VBoxContainer.new()
+	_boite_titre.add_theme_constant_override("separation", 14)
+	_voile_menu.add_child(_boite_titre)
+	_btn_continuer = _bouton_titre("Continuer", func():
 		_voile_menu.visible = false
-		pause = _atelier != null or _editeur != null, vm, 460)
-	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vm, 460)
-	_bouton("Mode créatif (toutes les pièces)", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vm, 460)
+		pause = _atelier != null or _editeur != null)
+	_bouton_titre("Recommencer", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1))
+	_bouton_titre("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true))
+	_bouton_titre("Options", func(): _panneau_options.visible = true)
+	_voile_menu.resized.connect(_placer_titre)
+	# Options : volumes (Son.regler les mémorise)
+	_panneau_options = ColorRect.new()
+	_panneau_options.color = Color(0.03, 0.03, 0.03, 0.9)
+	_panneau_options.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_panneau_options.visible = false
+	_voile_menu.add_child(_panneau_options)
+	var co := CenterContainer.new()
+	co.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_panneau_options.add_child(co)
+	var vo := VBoxContainer.new()
+	vo.add_theme_constant_override("separation", 22)
+	co.add_child(vo)
+	_label("OPTIONS", vo, 48).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var so := get_node_or_null("/root/Son")
+	for bus in ["Musique", "Effets", "Voix"]:
+		var hb := HBoxContainer.new()
+		hb.add_theme_constant_override("separation", 20)
+		vo.add_child(hb)
+		var l := _label(bus, hb, 30)
+		l.custom_minimum_size = Vector2(160, 0)
+		var sl := HSlider.new()
+		sl.min_value = 0.0
+		sl.max_value = 1.0
+		sl.step = 0.05
+		sl.custom_minimum_size = Vector2(420, 56)
+		sl.value = so.volumes[bus] if so else 0.7
+		var nom: String = bus
+		sl.value_changed.connect(func(v: float): if so: so.regler(nom, v))
+		hb.add_child(sl)
+	_bouton("Retour", func(): _panneau_options.visible = false, vo, 300)
+	_placer_titre()
+
+
+# Bouton de l'écran d'accueil : fond sombre translucide pour rester lisible sur le mur clair
+func _bouton_titre(texte: String, action: Callable) -> Button:
+	var b := _bouton(texte, action, _boite_titre, 0.0)
+	b.custom_minimum_size = Vector2(0, 66)
+	b.add_theme_font_size_override("font_size", 32)
+	for etat in ["normal", "hover", "pressed", "focus"]:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.12, 0.08, 0.05, 0.72 if etat != "pressed" else 0.95)
+		sb.border_color = Color(0.62, 0.27, 0.15, 0.9)
+		sb.set_border_width_all(2)
+		sb.set_corner_radius_all(6)
+		b.add_theme_stylebox_override(etat, sb)
+	b.add_theme_color_override("font_color", Color(0.95, 0.88, 0.74))
+	return b
+
+
+# Les boutons suivent l'image (recadrée « cover ») : zone du mur sous le titre, en coordonnées de l'image 1672×941
+func _placer_titre() -> void:
+	if _boite_titre == null or _voile_menu == null:
+		return
+	var t := _voile_menu.size
+	var ech := maxf(t.x / 1672.0, t.y / 941.0)
+	var dec := (t - Vector2(1672.0, 941.0) * ech) * 0.5
+	var coin := dec + Vector2(250.0, 420.0) * ech
+	var taille := Vector2(520.0, 400.0) * ech
+	_boite_titre.position = coin
+	_boite_titre.size = taille
 
 
 # Écran plein (grille, atelier) posé sur son propre calque : au-dessus de toute l'interface, y compris pour le toucher
@@ -352,6 +420,7 @@ func _par_dessus(c: Control) -> void:
 
 func afficher_menu(continuer: bool) -> void:
 	_btn_continuer.visible = continuer
+	_panneau_options.visible = false
 	_voile_menu.visible = true
 	move_child(_voile_menu, get_child_count() - 1)
 	pause = true
