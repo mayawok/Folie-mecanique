@@ -106,3 +106,5 @@ Slow, desolate desert lament for the end of a post-apocalyptic 1940s road journe
 
 Inventaire : tous les fichiers P0 et P1 sont présents dans `game/assets/audio/`. **Seul manque : `mus_fin.mp3`** (prompt ci-dessus, 60 à 90 s, instrumental avec voix humaines : régler `lyrics_type` sur instrumental ou auto selon l'essai).
 Règles d'économie : une génération par fichier, durée minimale utile, pas de relance pour un détail, accord préalable sur le coût, effets (radio, distance) par « Audio Effects » (gratuit) plutôt que par régénération.
+
+**02/11 — `mus_fin` générée sous licence Starter** : 20 s, `eleven_music_v2_5`, une seule version, 300 crédits (voix humaines sans paroles, `lyrics_type` auto). Fichier non téléchargeable depuis l'espace de travail de Claude (accès réseau refusé, 403) : à télécharger depuis le projet Music d'ElevenLabs et à déposer dans `game/assets/audio/mus_fin.mp3`. Coûts relevés : musique 20 s = 300 crédits.
