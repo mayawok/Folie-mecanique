@@ -101,3 +101,8 @@ Fichier : `game/assets/audio/mus_fin.mp3` (outil **Music**, 60 à 90 s, sans bou
 ```
 Slow, desolate desert lament for the end of a post-apocalyptic 1940s road journey. Sparse, wide and dusty: a lone oud or fretless guitar with long reverb, low wind-like drones, distant frame drum heartbeat, and a wordless human choir — a solo female voice humming and a few low male voices chanting softly, as if heard from far away across sand dunes. Melancholic, dignified, mysterious, not epic. No modern synths, no lyrics, no percussion build-up. Fades out slowly at the end. 70 BPM, D minor.
 ```
+
+## Production par Claude via le plugin (DEC-084, 02/11)
+
+Inventaire : tous les fichiers P0 et P1 sont présents dans `game/assets/audio/`. **Seul manque : `mus_fin.mp3`** (prompt ci-dessus, 60 à 90 s, instrumental avec voix humaines : régler `lyrics_type` sur instrumental ou auto selon l'essai).
+Règles d'économie : une génération par fichier, durée minimale utile, pas de relance pour un détail, accord préalable sur le coût, effets (radio, distance) par « Audio Effects » (gratuit) plutôt que par régénération.
