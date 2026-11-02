@@ -350,7 +350,7 @@ func _construire_elements() -> void:
 			an.mode = mode
 			scene.add_child(an)
 	_boite_titre = VBoxContainer.new()
-	_boite_titre.add_theme_constant_override("separation", 14)
+	_boite_titre.add_theme_constant_override("separation", 20)
 	_voile_menu.add_child(_boite_titre)
 	_btn_continuer = _bouton_titre("Continuer", func():
 		_voile_menu.visible = false
@@ -392,19 +392,14 @@ func _construire_elements() -> void:
 	_placer_titre()
 
 
-# Bouton de l'écran d'accueil : fond sombre translucide pour rester lisible sur le mur clair
+# Bouton de l'écran d'accueil : plaque d'acier dessinée par le code (voir titre_bouton.gd)
 func _bouton_titre(texte: String, action: Callable) -> Button:
-	var b := _bouton(texte, action, _boite_titre, 0.0)
-	b.custom_minimum_size = Vector2(0, 66)
-	b.add_theme_font_size_override("font_size", 32)
-	for etat in ["normal", "hover", "pressed", "focus"]:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0.12, 0.08, 0.05, 0.72 if etat != "pressed" else 0.95)
-		sb.border_color = Color(0.62, 0.27, 0.15, 0.9)
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(6)
-		b.add_theme_stylebox_override(etat, sb)
-	b.add_theme_color_override("font_color", Color(0.95, 0.88, 0.74))
+	var b := TitreBouton.new()
+	b.text = texte
+	b.custom_minimum_size = Vector2(0, 76)
+	b.pressed.connect(action)
+	b.pressed.connect(func(): _demarrer_audio(); _son("sfx_ui_clic", -6.0))
+	_boite_titre.add_child(b)
 	return b
 
 
