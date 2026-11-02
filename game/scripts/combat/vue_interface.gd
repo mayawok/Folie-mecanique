@@ -327,15 +327,28 @@ func _construire_elements() -> void:
 	_voile_menu.color = Color.BLACK
 	_voile_menu.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_voile_menu.visible = false
-	add_child(_voile_menu)
+	var calque_menu := CanvasLayer.new()   # au-dessus des écrans plein cadre (calque 20) : l'accueil passe devant l'assemblage d'ouverture
+	calque_menu.layer = 30
+	add_child(calque_menu)
+	_voile_menu.theme = theme
+	calque_menu.add_child(_voile_menu)
 	if ResourceLoader.exists("res://assets/ui/ecran_titre.jpg"):
+		var scene := Control.new()   # image + calques animés : le lent zoom s'applique à ce parent, pas aux boutons
+		scene.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+		scene.mouse_filter = MOUSE_FILTER_IGNORE
+		scene.clip_contents = true
+		_voile_menu.add_child(scene)
 		_fond_titre = TextureRect.new()
 		_fond_titre.texture = load("res://assets/ui/ecran_titre.jpg")
 		_fond_titre.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		_fond_titre.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		_fond_titre.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 		_fond_titre.mouse_filter = MOUSE_FILTER_IGNORE
-		_voile_menu.add_child(_fond_titre)
+		scene.add_child(_fond_titre)
+		for mode in ["fumee", "lumiere"]:
+			var an := TitreAnim.new()
+			an.mode = mode
+			scene.add_child(an)
 	_boite_titre = VBoxContainer.new()
 	_boite_titre.add_theme_constant_override("separation", 14)
 	_voile_menu.add_child(_boite_titre)
@@ -361,10 +374,10 @@ func _construire_elements() -> void:
 	_label("OPTIONS", vo, 48).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var so := get_node_or_null("/root/Son")
 	for bus in ["Musique", "Effets", "Voix"]:
-		var hb := HBoxContainer.new()
-		hb.add_theme_constant_override("separation", 20)
-		vo.add_child(hb)
-		var l := _label(bus, hb, 30)
+		var hbo := HBoxContainer.new()
+		hbo.add_theme_constant_override("separation", 20)
+		vo.add_child(hbo)
+		var l := _label(bus, hbo, 30)
 		l.custom_minimum_size = Vector2(160, 0)
 		var sl := HSlider.new()
 		sl.min_value = 0.0
@@ -374,7 +387,7 @@ func _construire_elements() -> void:
 		sl.value = so.volumes[bus] if so else 0.7
 		var nom: String = bus
 		sl.value_changed.connect(func(v: float): if so: so.regler(nom, v))
-		hb.add_child(sl)
+		hbo.add_child(sl)
 	_bouton("Retour", func(): _panneau_options.visible = false, vo, 300)
 	_placer_titre()
 
@@ -421,8 +434,9 @@ func _par_dessus(c: Control) -> void:
 func afficher_menu(continuer: bool) -> void:
 	_btn_continuer.visible = continuer
 	_panneau_options.visible = false
+	_boite_titre.modulate.a = 0.0
+	create_tween().tween_property(_boite_titre, "modulate:a", 1.0, 1.4).set_delay(0.5)
 	_voile_menu.visible = true
-	move_child(_voile_menu, get_child_count() - 1)
 	pause = true
 
 
