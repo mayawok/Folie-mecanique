@@ -2,6 +2,25 @@
 
 Statut : en revue (thème 1). Distingue ce qui est **décidé** de ce qui reste **ouvert**.
 
+## Recentrage du 06/11/2026 (prime sur tout ce qui suit)
+
+Référence : la Bible du lore `docs/lore/01_BIBLE_FOUNDATION` (DEC-091). Ce fichier décrit **ce jeu-ci** ; la Bible décrit le monde.
+
+- **Joueur** : chef d'un **convoi indépendant**, qui travaille avec différentes personnes sans être allié à 100 % à une faction
+  (il a pu l'être par le passé ; des cinématiques pourront l'expliquer, ce n'est pas la base). On découvre les gens peu à peu.
+- **Départ** : le convoi existe déjà, avec un camion, et fait des rotations dans le no man's land. Le joueur arrive dans cette
+  histoire, comprend ce qu'ils font ; un événement bouleverse leur activité et les pousse à voyager et découvrir. (Remplace la
+  caisse de pièces et la moto de DEC-035.)
+- **Pas de base** : ni gestion de base, ni gestion de ressources de base, ni grosses défenses. On construit le convoi et les
+  personnages. Au plus un checkpoint ou un garage par chapitre, qui reste.
+- **Factions** : celles de la Bible remplacent les factions 1, 2, 3. Aucune n'est bonne ou mauvaise par principe ; les relations changent.
+- **Carte** : 12 ou 13 secteurs, sur une France reconnaissable mais déformée, sans frontières ni régions. Au début, on ne sait rien.
+- **No man's land** entre les zones : aventure et la plupart des combats ; tempêtes de sable et décor désertique dans certaines parties.
+- **Animaux** : rares ; un oiseau est un événement mis en valeur ; animaux dangereux rares (pas de loups toutes les nuits).
+- **Carburants** : essence et gazole ; chaque moteur est rattaché à l'un des deux ; le brut se transporte, inutilisable.
+- **Immersion** : reprendre certains grands principes de George Miller pour Mad Max (à préciser).
+- Les éléments ci-dessous (base, modèle économique, expéditions depuis la base) sont **périmés** là où ils contredisent ce bloc.
+
 ## Décidé
 
 - **Univers** : le monde s'est figé dans les années 1940. La Seconde Guerre mondiale

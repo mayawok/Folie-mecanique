@@ -6,7 +6,9 @@ Mis à jour : 2026-11-06 (recentrage sur la Bible du lore, DEC-091 à 096). Fich
 
 - **Référence unique : la Bible du lore** `docs/lore/01_BIBLE_FOUNDATION` (DEC-091). On garde la **grille** ; le reste du prototype est à trancher face à la Bible (DEC-092).
 - Tranché : climat pauvre (DEC-093), essence + gazole seulement (DEC-094), zones et no man's land (DEC-095), « Véhicule léger » (DEC-096).
-- **Écarts à trancher** : voir la liste dans la réponse du 06/11 et `docs/DECISIONS.md`.
+- Tranché aussi : terrains et animaux rares (DEC-097), factions de la Bible (DEC-098), convoi seulement (DEC-099), chef de convoi
+  indépendant qui part avec un camion (DEC-100), carte déformée (DEC-101). Vision du jeu : `docs/design/VISION.md` (bloc du 06/11).
+- **À coder** : nouvelle ouverture (DEC-100), factions (DEC-098), meutes rares et oiseaux (DEC-097), essence/gazole par moteur (DEC-094).
 
 ## Où on en est
 

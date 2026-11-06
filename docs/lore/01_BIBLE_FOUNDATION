@@ -7,6 +7,7 @@ Fondations historiques, effondrement et naissance du nouveau monde
 Version : 0.1
 Statut : Document de travail — canon proposé
 Rôle : document universel de référence du projet (décision du 06/11/2026). Tout élément du jeu qui le contredit est signalé et tranché par le porteur de projet.
+Portée : la Bible décrit le monde, pas un jeu en particulier. Elle doit pouvoir servir à écrire d’autres jeux. Elle ne désigne aucune faction comme bonne ou mauvaise : les relations peuvent changer.
 Période : De l’avant-guerre à la deuxième génération après l’effondrement
 Cadre géographique : France et territoires européens voisins
 Esthétique : Europe industrielle et rurale figée dans une esthétique des années 1940
@@ -334,7 +335,7 @@ Certains quartiers restent occupés pendant des décennies.
 
 D’autres sont entièrement désertés.
 
-Paris devient un ensemble de secteurs discontinus. Les quartiers centraux sont parfois occupés par des groupes organisés, tandis que d’autres zones sont envahies par les végétations, les gravats et les installations abandonnées.
+Paris devient un ensemble de secteurs discontinus. Les quartiers centraux sont parfois occupés par des groupes organisés, tandis que d’autres zones sont envahies par les gravats, le sable et les installations abandonnées.
 
 Lyon connaît un destin similaire. Les grands axes de circulation et les installations industrielles restent longtemps convoités.
 
@@ -423,6 +424,26 @@ Le monde est pauvre en ressources, pauvre en végétation et pauvre en animaux :
 Il n’existe pas de grandes forêts exploitables. Des forêts peuvent subsister, mais on n’en tire presque rien.
 
 L’eau peut exister, mais on n’en tire presque rien non plus.
+
+Tout est difficile pour les plantes et pour les animaux. Selon les endroits, le sol n’est que de la terre avec un peu d’herbe et quelques plantes, ou seulement des cailloux, ou seulement du sable, ou seulement de l’eau.
+
+Il existe donc des formes de désert, pas forcément gigantesques, mais qu’il faut traverser : ce sont des endroits plus arides. Certaines parties du no man’s land sont désertiques et connaissent des tempêtes de sable.
+
+Même les villes ne sont pas florissantes.
+
+Les animaux sont rares. Chaque animal vivant est une source de vie remarquable : voir un oiseau est un événement rare, qui doit être mis en valeur. Il reste quelques animaux dangereux, mais ils sont rares eux aussi (pas de loups toutes les nuits).
+
+Quelques terres préservées, avec des troupeaux, existent encore. Elles sont minuscules et ne font vivre que très peu de gens. Elles sont comme des paradis, un rêve presque impossible à atteindre : on en parle, on les évoque dans les récits, mais on ne les visite pas vraiment.
+
+04.1 quater — Une France reconnaissable mais déformée (décision du porteur de projet, 06/11/2026)
+
+Le territoire doit faire penser à la France, pour un joueur français comme pour un joueur du reste du monde, sans être une carte de France.
+
+Il a été déformé par l’érosion, par des mouvements du sol, par la montée des eaux à certains endroits et leur baisse à d’autres, par le sable.
+
+Il n’existe plus de frontières de pays ni de régions administratives : seulement des lieux et des noms nouveaux.
+
+Au départ, on ne sait rien de ce monde : on le découvre.
 
 04.1 ter — Zones et no man’s land (décision du porteur de projet, 06/11/2026)
 
@@ -514,7 +535,7 @@ La Bretagne ne devient pas une région de grands gisements pétroliers terrestre
 
 Son importance repose sur d’autres ressources.
 
-La mer constitue une source alimentaire essentielle, bien que les conditions climatiques et la raréfaction des moyens de pêche rendent cette activité difficile.
+On trouve encore des villages bretons au bord de la mer et l’on part encore en mer, mais la pêche ne rapporte presque rien. Elle reste une activité limitée.
 
 Les ports conservent des infrastructures de stockage et de réparation.
 
@@ -710,7 +731,7 @@ Elles partagent certaines habitudes : méfiance envers les grandes organisations
 
 Elles sont souvent plus autonomes que les communautés des plaines.
 
-Elles disposent parfois de troupeaux, de sources d’eau et de terres relativement préservées.
+Certaines disposent de troupeaux, de sources d’eau et de terres relativement préservées, mais ces terres sont minuscules et ne font vivre que très peu de gens (voir 04.1 bis).
 
 Mais leur isolement a un coût.
 
