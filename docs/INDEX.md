@@ -16,6 +16,8 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 
 ## Source de vérité
 
+-   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION`
+-   **Ce jeu-ci** : vision `docs/design/VISION.md`, scénario `docs/scenario/` (ouverture : `OUVERTURE.md`)
 -   État courant et priorités : `STATE.md` (racine)
 -   Règles structurées : `data/rules/regles_canoniques.json` (v1.7)
 -   Catalogue véhicules et tables de systèmes : `data/master/*.csv`
