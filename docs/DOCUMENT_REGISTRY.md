@@ -99,6 +99,14 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 | [`AGENTS.md`](../AGENTS.md) | Règles | Règles pour développeurs et IA | référence | — | 2026-11-06 | — |
 | [`docs/DATA_CONTRACTS.md`](../docs/DATA_CONTRACTS.md) | Données | Contrats de données et unités | à revoir | `AGENTS.md` | 2026-11-06 | Mentionne un stock de nourriture et des bâtiments (base) ; à vérifier |
 
+## 12. Ajoutés le 06/11/2026 (missions 4 à 6)
+
+| Chemin | Domaine | Description | Statut | Subordonné à | Dernière vérification | Contradiction connue |
+|---|---|---|---|---|---|---|
+| [`docs/DATA_DICTIONARY.md`](../docs/DATA_DICTIONARY.md) | Données | Dictionnaire : identifiants, unités, niveaux A à D | en cours | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Contrats : stock de carburant unique (DEC-094) |
+| [`docs/DATA_WORLD_PROPOSAL.md`](../docs/DATA_WORLD_PROPOSAL.md) | Données | Proposition d'organisation des données du monde | en cours | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | En attente du concepteur |
+| [`docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md`](../docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md) | Audit | Grille de contrôle et premier rapport | en cours | `docs/DATA_DICTIONARY.md` | 2026-11-06 | — |
+
 ## Remarques
 
 - Statut « obsolète » : aucun document n'est classé ainsi tant que le concepteur n'a pas tranché (voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md)).
