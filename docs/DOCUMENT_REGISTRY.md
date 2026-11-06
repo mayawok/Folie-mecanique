@@ -113,3 +113,5 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 - Non inventoriés : fichiers de `archive/`, images de `docs/art/*/`, scripts de `game/` et `tools/`, autres CSV de `data/master/` (voir [`data/master/INDEX.md`](../data/master/INDEX.md)).
 
 - Archive ajoutée le 06/11/2026 : [`archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md`](../archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md) (statut : archivé).
+
+- Suppression du 06/11/2026 (DEC-107) : `archive/prototype_base`, `archive/data`, 8 documents de `archive/docs_design`, 14 tableaux de base de `data/master/`. Les entrées du registre ne les citaient pas.
