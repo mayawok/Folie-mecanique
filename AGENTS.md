@@ -43,7 +43,8 @@
     migration.
 -   Ne jamais affecter le même survivant, véhicule ou équipage à deux
     usages incompatibles.
--   `stocks.fuel` est le stock commun de carburant, mesuré en litres.
+-   Le carburant est mesuré en litres, en deux stocks distincts : essence
+    et gazole (DEC-094).
 
 ## Textures et assets
 
