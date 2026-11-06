@@ -30,8 +30,8 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 |---|---|---|---|---|---|---|
 | [`docs/design/CONVOI.md`](../docs/design/CONVOI.md) | Gameplay | (voir catégorie 1) règles de combat, météo, mines, abordages | à revoir | `docs/design/VISION.md` | 2026-11-06 | Passages périmés archivés le 06/11 (DEC-105) ; ouverture et carte à jour à coder |
 | [`docs/TASKS.md`](../docs/TASKS.md) | Gameplay | Backlog central par identifiant | à revoir | `docs/DECISIONS.md` | 2026-11-06 | Cinq tâches de base archivées (DEC-106) ; tâches dépendantes à réviser (OQ-019) ; ARCH-002 et ARCH-003 à vérifier (DOC-006) |
-| [`docs/ARCHITECTURE_MODULAIRE.md`](../docs/ARCHITECTURE_MODULAIRE.md) | Gameplay | Architecture modulaire proposée | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Écrit avant le prototype ; décrit une architecture théorique (base, expéditions) |
-| [`data/rules/regles_canoniques.json`](../data/rules/regles_canoniques.json) | Gameplay | Règles structurées (v1.7 d'après l'index) | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Règles de base fortifiée probablement périmées (DEC-099) ; à vérifier |
+| [`docs/ARCHITECTURE_MODULAIRE.md`](../docs/ARCHITECTURE_MODULAIRE.md) | Gameplay | Architecture modulaire proposée | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Écrit avant le prototype (Godot, `game/`) ; éléments de base retirés (DEC-108) |
+| [`data/rules/regles_canoniques.json`](../data/rules/regles_canoniques.json) | Gameplay | Règles structurées (v1.7 d'après l'index) | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Sections de base supprimées (DEC-108) ; restent à relire economy, monetization (avant DEC-104), captivity, expeditions, factions |
 
 ## 4. Données historiques
 
@@ -97,7 +97,7 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 | [`docs/audits/REPO_AUDIT.md`](../docs/audits/REPO_AUDIT.md) | Audit | Audit du dépôt ARCH-001 (29/10/2026) | archivé | — | 2026-11-06 | Antérieur au prototype |
 | [`archive/LISEZMOI.md`](../archive/LISEZMOI.md) | Historique | Éléments en sommeil (base, temps réel, simulations) | archivé | `docs/DECISIONS.md` | 2026-11-06 | DEC-031 |
 | [`AGENTS.md`](../AGENTS.md) | Règles | Règles pour développeurs et IA | référence | — | 2026-11-06 | — |
-| [`docs/DATA_CONTRACTS.md`](../docs/DATA_CONTRACTS.md) | Données | Contrats de données et unités | à revoir | `AGENTS.md` | 2026-11-06 | Mentionne un stock de nourriture et des bâtiments (base) ; à vérifier |
+| [`docs/DATA_CONTRACTS.md`](../docs/DATA_CONTRACTS.md) | Données | Contrats de données et unités | à revoir | `AGENTS.md` | 2026-11-06 | Carburant et identifiants de bâtiments corrigés (DEC-108) ; nourriture et eau à relire |
 
 ## 12. Ajoutés le 06/11/2026 (missions 4 à 6)
 

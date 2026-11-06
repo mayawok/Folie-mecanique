@@ -34,7 +34,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 -   Registre des documents : `docs/DOCUMENT_REGISTRY.md` ; questions ouvertes : `docs/OPEN_QUESTIONS.md`
 -   **Ce jeu-ci** : vision `docs/design/VISION.md`, scénario `docs/scenario/` (ouverture : `OUVERTURE.md`)
 -   État courant et priorités : `STATE.md` (racine)
--   Règles structurées : `data/rules/regles_canoniques.json` (v1.7)
+-   Règles structurées : `data/rules/regles_canoniques.json` (v1.9, sans les sections de gestion de base)
 -   Catalogue véhicules et tables de systèmes : `data/master/*.csv`
     (un fichier par onglet, voir `data/master/INDEX.md`). Édition dans
     `sources/base_maitre.xlsx` (v1.9), puis

@@ -5,7 +5,9 @@
 -   Nourriture : unité de stock abstraite, avec définition dans
     l'équilibrage.
 -   Eau : litres.
--   Carburant : litres, un seul stock partagé `stocks.fuel`.
+-   Carburant : litres, deux stocks distincts, essence et gazole (DEC-094,
+    noms de champs à fixer en DEV-001). Le pétrole brut se transporte mais
+    n'est pas utilisable.
 -   Durées de simulation : heures/jours de jeu explicites, jamais
     confondues avec le temps réel.
 -   Santé/condition des composants : pourcentage 0--100.
@@ -16,8 +18,6 @@
 
 -   `vehicle_def_id` : définition du catalogue, stable.
 -   `vehicle_instance_id` : exemplaire possédé, stable.
--   `building_def_id` / `building_instance_id` : définition et instance
-    séparées.
 -   `survivor_id`, `faction_id`, `expedition_id`, `event_id`, `asset_id`
     : IDs stables et uniques.
 -   Les libellés et indices de tableau ne sont jamais des IDs

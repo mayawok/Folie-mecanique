@@ -1,6 +1,8 @@
 # Architecture modulaire du jeu iPhone --- v1.0
 
-Statut : proposition d'architecture de développement. Ce document décrit
+Statut : proposition d'architecture de développement, **antérieure au prototype** (le jeu est en Godot, dans `game/`, voir [`../STATE.md`](../STATE.md)). Les éléments de gestion de base ont été retirés le 06/11/2026 (DEC-107).
+
+Proposition d'architecture de développement. Ce document décrit
 des frontières de modules et des contrats de travail ; il ne constitue
 pas du code jouable.
 
@@ -33,7 +35,6 @@ tant qu'ils n'ont pas été créés et vérifiés.
 │   ├── TASKS.md                   # backlog canonique
 │   ├── systems/
 │   │   ├── economy.md
-│   │   ├── base-building.md
 │   │   ├── vehicles.md
 │   │   ├── expeditions.md
 │   │   ├── combat-defense.md
@@ -49,7 +50,6 @@ tant qu'ils n'ont pas été créés et vérifiés.
 │       └── REGRESSION_MATRIX.md
 ├── data/
 │   ├── vehicles/
-│   ├── buildings/
 │   ├── items/
 │   ├── factions/
 │   └── balance/
@@ -65,7 +65,6 @@ tant qu'ils n'ont pas été créés et vérifiés.
 │   ├── domain/                    # modèles et règles indépendantes de l’interface
 │   ├── systems/
 │   │   ├── economy/
-│   │   ├── base-building/
 │   │   ├── vehicles/
 │   │   ├── expeditions/
 │   │   ├── combat-defense/
@@ -103,10 +102,6 @@ soit le moteur retenu.
                           consommation, coûts,    véhicules, interface
                           transactions            
 
-  base-building           bâtiments, niveaux,     définition globale des
-                          chantiers, réseau de    stocks
-                          base                    
-
   vehicles                instances,              logique de combat
                           compatibilité, état des complète
                           composants, réparations 
@@ -115,9 +110,8 @@ soit le moteur retenu.
                           rencontres, résultats,  bas niveau
                           retour                  
 
-  combat-defense          portes, murs, soldats,  économie globale hors
-                          armes fixes, phases de  demandes de coûts
-                          raid                    
+  combat-defense          soldats, armes,         économie globale hors
+                          phases d'embuscade      demandes de coûts       
 
   factions                réputation, confiance,  UI de dialogue
                           menace, peur, relations 
@@ -142,9 +136,9 @@ soit le moteur retenu.
 -   Les modules métier ne modifient pas directement les structures
     internes d'un autre module. Ils passent par une API ou un événement
     défini.
--   Un stock partagé n'a qu'une seule source de vérité : `stocks.fuel`
-    représente le carburant en litres. Le type de carburant est une
-    propriété de compatibilité du moteur, pas un deuxième stock.
+-   Un stock partagé n'a qu'une seule source de vérité. Le carburant a deux
+    stocks en litres, essence et gazole (DEC-094) ; chaque moteur est
+    rattaché à l'un des deux.
 -   Les IDs persistants sont stables et ne dépendent ni du nom affiché
     ni de la position dans une liste.
 -   Une instance de véhicule, un survivant, une arme ou une équipe ne
