@@ -224,3 +224,42 @@ bloquants résolus ou explicitement acceptés.\
 -   Contrats ou schémas modifiés :
 -   Risques et régressions possibles :
 -   Prochaine tâche recommandée :
+
+
+## Mise à jour du 06/11/2026 — organisation par nature de travail
+
+Cette section s'ajoute au backlog ci-dessus sans le modifier. Les tâches SYS-BASE, SYS-DEF, SYS-ECON, SYS-EXP, CONTENT-001 et les
+statuts d'ARCH-002 et ARCH-003 sont signalés comme à réexaminer (OQ-018), non changés. Statuts initiaux : À faire.
+
+### A. Décisions à prendre par le concepteur
+
+Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche d'exécution ci-dessous ne les tranche.
+
+### B. Tâches documentaires réalisables sans décision
+
+| ID | Intitulé | Priorité | Dépendances | Fichiers | Critère d'achèvement | Statut |
+|---|---|---|---|---|---|---|
+| DOC-001 | Vérifier tous les liens relatifs des documents racine et `docs/` | P1 | — | `README.md`, `STATE.md`, `docs/*.md` | Script ou liste : 0 lien cassé, résultat consigné dans un audit | À faire |
+| DOC-002 | Créer `docs/DATA_DICTIONARY.md` (mission 4) | P1 | — | `docs/DATA_DICTIONARY.md`, `docs/DATA_CONTRACTS.md` | Document couvrant identifiants, unités, valeurs inconnues, niveaux de confiance A à D, relations | À faire |
+| DOC-003 | Proposer l'organisation des données du monde (mission 5), sans modifier les fichiers maîtres | P1 | DOC-002 | `docs/DATA_WORLD_PROPOSAL.md` | Proposition pour 11 catégories avec fichier maître, identifiants, champs, relations | À faire |
+| DOC-004 | Créer `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` (mission 6) | P2 | DOC-001 | `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` | Grille de 10 contrôles et premier rapport avec les contrôles réellement exécutés | À faire |
+| DOC-005 | Lister les passages de VISION, CONVOI, GRILLE et LORE qui contredisent la Bible, ligne par ligne | P2 | OQ-017 | `docs/DOCUMENT_REGISTRY.md` | Tableau passage / décision contredite / document | À faire |
+
+### C. Tâches techniques de développement (code : seulement après décision indiquée)
+
+| ID | Intitulé | Priorité | Dépendances | Fichiers | Critère d'achèvement | Statut |
+|---|---|---|---|---|---|---|
+| DEV-001 | Séparer le stock de carburant en essence et gazole, un type par moteur (DEC-094) | P1 | — | `game/scripts/combat/modele_base.gd`, `game/data/pieces.json` | Tests sans écran : un moteur ne consomme que son carburant ; sauvegarde migrée | À faire |
+| DEV-002 | Remplacer les factions 1, 2, 3 par les factions de la Bible (DEC-098) | P1 | OQ-010 | `game/scripts/combat/monde.gd` | Tests : les secteurs portent une faction de la Bible ; plus de relation codée en dur « 1 alliée » | À faire |
+| DEV-003 | Nouvelle ouverture : convoi existant avec camion, rotation dans le no man's land (DEC-100) | P1 | OQ-006, OQ-007, OQ-008 | `game/scripts/combat/modele_atelier.gd`, `game/data/combat_proto.json` | Partie démarrant sur le camion, sans l'étape caisse et moto ; test d'ouverture mis à jour | À faire |
+| DEV-004 | Rendre les meutes rares et mettre en valeur l'oiseau (DEC-097) | P2 | OQ-013 | `game/scripts/combat/monde.gd` | Fréquence des meutes réglable dans les données ; test : pas de meute chaque nuit | À faire |
+| DEV-005 | Renommer l'identifiant interne `intercepteur` avec migration (DEC-096) | P3 | — | `game/data/pieces.json`, `game/scripts/vehicules/construction_libre.gd` | Migration + test ; anciens plans chargés | À faire |
+
+### D. Problèmes historiques à vérifier
+
+| ID | Intitulé | Priorité | Dépendances | Fichiers | Critère d'achèvement | Statut |
+|---|---|---|---|---|---|---|
+| HIST-001 | Sourcer les 15 armes du catalogue (une source identifiable par arme) | P1 | — | `data/master/armes_historiques.csv` | Colonne « Sources historiques » renseignée, confiance A à D attribuée | À faire |
+| HIST-002 | Vérifier les 14 liaisons arme-véhicule | P1 | HIST-001 | `data/master/armes_vehicules_liaison.csv` | Chaque liaison avec source et certitude confirmée ou corrigée | À faire |
+| HIST-003 | Étendre le catalogue des armes par catégorie (mitrailleuses, puis canons, puis armes individuelles) | P2 | HIST-001 | `data/master/armes_historiques.csv` | Catégorie complète avec sources | À faire |
+| HIST-004 | Intégrer les CSV d'armes au processus d'export de `base_maitre.xlsx` | P2 | — | `sources/base_maitre.xlsx`, `tools/export_xlsx.py` | Les deux CSV sont produits par l'export, pas à la main | À faire |
