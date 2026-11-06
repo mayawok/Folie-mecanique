@@ -56,13 +56,7 @@ Munitions et carburant sont consommés ; à court, le convoi cesse le feu ou s'a
 
 ## Départ, trouvailles et survivants
 
-- **Ouverture guidée (DEC-035)** : une caisse de pièces au bord de la route. L'atelier sur grille s'ouvre :
-  le joueur glisse cadre, roues, fourche, moteur et selle à leur place → **moto BMW R75**, un pilote, 4 L d'essence,
-  pas d'arme. Puis, dans l'ordre, sans aucun ennemi : **grange** (attelage, panier, roue de side-car + un survivant)
-  → le convoi s'arrête, bouton « Assembler » → **side-car** au bord de la route ; **maison** (20 L d'essence) ;
-  **bunker** (mitrailleuse, 80 munitions, métal) → « Assembler » monte l'arme. Les ennemis et les rôdeurs de nuit
-  n'arrivent qu'une fois une arme trouvée. Données : bloc `ouverture` de `combat_proto.json`.
-- Ancien départ (Willys MB, 2 survivants, ruine + BMW) : conservé pour les tests (`CombatModele.new(graine)`).
+*Passage archivé le 06/11/2026 (contradit la Bible) : voir [`archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md`](../../archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md).*
 - Un véhicule ennemi **neutralisé** (équipage hors de combat) est réparable et récupérable ; un véhicule
   dont le châssis est détruit n'est que démontable.
 - Un véhicule récupéré rejoint le convoi avec 1 survivant ; les ruines peuvent livrer des survivants
@@ -157,9 +151,7 @@ ville en ruine au loin, nuages, poussière des roues.
 
 ## Monde : carte, camps, nuit, rencontres à pied (`monde.gd`)
 
-- **Carte** : 12 secteurs aléatoires (nom, faction 1 à 3, niveau 0 à 7) sur l'image de carte. Le joueur touche un secteur puis
-  « Partir » : une **zone calme** sans rencontre (250 m + 900 m par unité de distance) assure la continuité en 2D, puis le niveau
-  des rencontres suit le secteur. Relations (provisoires) : faction 1 alliée, 2 neutre, 3 hostile.
+*Passage archivé le 06/11/2026 (contradit la Bible) : voir [`archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md`](../../archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md).*
 - **Camps** (pillards, fortifiés, alliés) : posés 300 m devant, **annoncés à droite** avec leur faction (drapeau coloré et numéro).
   Camp allié : échanger (munitions, carburant), atelier (pièces à 70 %), se reposer (soigne, la nuit passe plus vite).
 - **Fantassins et animaux** : pillards à pied (fusil), loups et chiens (morsure). La mitrailleuse les abat ; la garnison aussi.

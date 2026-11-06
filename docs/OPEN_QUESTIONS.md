@@ -10,7 +10,7 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : DEC-004, 012, 013 datent d'avant DEC-099 (convoi seulement). Conditionne la production finale et la licence audio (DEC-024).
 - **Documents concernés** : docs/DECISIONS.md, docs/design/VISION.md
 - **Options connues** : Prix unique ; démo + déblocage ; cosmétiques ; statu quo (gratuit + achats)
-- **Statut** : ouverte
+- **Statut** : résolue (DEC-104)
 
 ## OQ-002 — Progression
 
@@ -138,7 +138,7 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : Ils sont signalés dans le registre, non modifiés.
 - **Documents concernés** : docs/DOCUMENT_REGISTRY.md
 - **Options connues** : Mettre à jour ; archiver ; garder avec mention
-- **Statut** : ouverte
+- **Statut** : résolue (DEC-105)
 
 ## OQ-018 — Tâches
 
@@ -146,4 +146,20 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : Leur objet (base, défense, économie de base) contredit « convoi seulement ».
 - **Documents concernés** : docs/TASKS.md
 - **Options connues** : Archiver ; adapter au convoi
+- **Statut** : résolue (DEC-106)
+
+## OQ-019 — Tâches
+
+- **Question** : que deviennent les tâches SYS-SURV-001, SYS-VEH-001, UI-001, QA-002 et QA-003, qui dépendent de tâches archivées (stocks, base, expéditions) ?
+- **Pourquoi la trancher** : leurs dépendances pointent vers des tâches archivées (DEC-106).
+- **Documents concernés** : docs/TASKS.md
+- **Options connues** : les adapter au convoi ; les réécrire en nouvelles tâches
+- **Statut** : ouverte
+
+## OQ-020 — Économie
+
+- **Question** : quels chapitres ou quelle durée la démo contient-elle, et à quel prix le jeu complet est-il débloqué (DEC-104) ?
+- **Pourquoi la trancher** : fixe le périmètre du premier jalon et la structure en chapitres.
+- **Documents concernés** : docs/design/VISION.md
+- **Options connues** : aucune consignée
 - **Statut** : ouverte

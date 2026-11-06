@@ -10,7 +10,7 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 
 | Chemin | Domaine | Description | Statut | Subordonné à | Dernière vérification | Contradiction connue |
 |---|---|---|---|---|---|---|
-| [`docs/design/VISION.md`](../docs/design/VISION.md) | Conception | Vision du jeu ; bloc de recentrage du 06/11 en tête | en cours | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | Sections « Décidé » et « Expéditions » antérieures au recentrage (base, biomes de désert, modèle économique) ; renvoie à ACHATS.md archivé |
+| [`docs/design/VISION.md`](../docs/design/VISION.md) | Conception | Vision du jeu ; bloc de recentrage du 06/11 en tête | en cours | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | Passages périmés archivés (DEC-105) ; reste à relire le reste de « Décidé » |
 | [`docs/design/CONVOI.md`](../docs/design/CONVOI.md) | Conception | Mode convoi : ordres, combat, monde, architecture du code | à revoir | `docs/design/VISION.md` | 2026-11-06 | Décrit l'ouverture caisse de pièces et moto, les factions 1-2-3 et des éléments à réexaminer (DEC-092) |
 | [`docs/design/ESSAIS.md`](../docs/design/ESSAIS.md) | Conception | Fiche des sessions d'essai (à remplir par le porteur de projet) | en cours | `docs/design/VISION.md` | 2026-11-06 | — |
 | [`docs/scenario/OUVERTURE.md`](../docs/scenario/OUVERTURE.md) | Scénario | Idée de cinématique d'ouverture et points à trancher | en cours | `docs/design/VISION.md` | 2026-11-06 | — |
@@ -28,8 +28,8 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 
 | Chemin | Domaine | Description | Statut | Subordonné à | Dernière vérification | Contradiction connue |
 |---|---|---|---|---|---|---|
-| [`docs/design/CONVOI.md`](../docs/design/CONVOI.md) | Gameplay | (voir catégorie 1) règles de combat, météo, mines, abordages | à revoir | `docs/design/VISION.md` | 2026-11-06 | Voir plus haut |
-| [`docs/TASKS.md`](../docs/TASKS.md) | Gameplay | Backlog central par identifiant | à revoir | `docs/DECISIONS.md` | 2026-11-06 | Tâches SYS-BASE, SYS-DEF, SYS-ECON, SYS-EXP, CONTENT-001 antérieures à DEC-099 ; statuts ARCH-002 et ARCH-003 à vérifier (AGENTS.md et INDEX.md existent) |
+| [`docs/design/CONVOI.md`](../docs/design/CONVOI.md) | Gameplay | (voir catégorie 1) règles de combat, météo, mines, abordages | à revoir | `docs/design/VISION.md` | 2026-11-06 | Passages périmés archivés le 06/11 (DEC-105) ; ouverture et carte à jour à coder |
+| [`docs/TASKS.md`](../docs/TASKS.md) | Gameplay | Backlog central par identifiant | à revoir | `docs/DECISIONS.md` | 2026-11-06 | Cinq tâches de base archivées (DEC-106) ; tâches dépendantes à réviser (OQ-019) ; ARCH-002 et ARCH-003 à vérifier (DOC-006) |
 | [`docs/ARCHITECTURE_MODULAIRE.md`](../docs/ARCHITECTURE_MODULAIRE.md) | Gameplay | Architecture modulaire proposée | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Écrit avant le prototype ; décrit une architecture théorique (base, expéditions) |
 | [`data/rules/regles_canoniques.json`](../data/rules/regles_canoniques.json) | Gameplay | Règles structurées (v1.7 d'après l'index) | à revoir | `docs/DATA_CONTRACTS.md` | 2026-11-06 | Règles de base fortifiée probablement périmées (DEC-099) ; à vérifier |
 
@@ -48,7 +48,7 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 | [`data/master/base_maitre_vehicules.csv`](../data/master/base_maitre_vehicules.csv) | Véhicules | 275 véhicules historiques | en cours | `data/master/INDEX.md` | 2026-11-06 | Beaucoup de champs « À documenter » ou « À confirmer » |
 | [`data/master/chars_et_blindes_elargis.csv`](../data/master/chars_et_blindes_elargis.csv) | Véhicules | Chars et blindés élargis | en cours | `data/master/INDEX.md` | 2026-11-06 | — |
 | [`data/master/catalogue_composants.csv`](../data/master/catalogue_composants.csv) | Véhicules | Catalogue de composants | à revoir | `data/master/INDEX.md` | 2026-11-06 | Antérieur à la grille libre (DEC-043) ; à rapprocher de game/data/pieces.json |
-| [`docs/design/GRILLE.md`](../docs/design/GRILLE.md) | Véhicules | Grille de construction (DEC-029 à DEC-083) | en cours | `docs/design/VISION.md` | 2026-11-06 | Mentionne l'ouverture caisse de pièces/moto (DEC-035) remplacée par DEC-100 |
+| [`docs/design/GRILLE.md`](../docs/design/GRILLE.md) | Véhicules | Grille de construction (DEC-029 à DEC-083) | en cours | `docs/design/VISION.md` | 2026-11-06 | Atelier guidé moto/side-car archivé (DEC-105) ; le code correspondant existe encore |
 | [`game/data/pieces.json`](../game/data/pieces.json) | Véhicules | Catalogue de pièces du jeu (source du prototype) | en cours | `docs/design/GRILLE.md` | 2026-11-06 | À rapprocher des tableaux data/master/ |
 
 ## 6. Armes et équipements
@@ -103,3 +103,5 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 
 - Statut « obsolète » : aucun document n'est classé ainsi tant que le concepteur n'a pas tranché (voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md)).
 - Non inventoriés : fichiers de `archive/`, images de `docs/art/*/`, scripts de `game/` et `tools/`, autres CSV de `data/master/` (voir [`data/master/INDEX.md`](../data/master/INDEX.md)).
+
+- Archive ajoutée le 06/11/2026 : [`archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md`](../archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md) (statut : archivé).

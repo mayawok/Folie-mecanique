@@ -40,7 +40,7 @@ adaptée.\
 **Critères :** périmètre de tâche, lecture ciblée, tests obligatoires,
 règles de sauvegarde, interdiction de modifier des contrats partagés
 sans validation, compte rendu standard.\
-**Statut :** À faire.
+**Statut :** À vérifier — AGENTS.md existe ; CONTRIBUTING.md absent. Vérification des critères : tâche DOC-006.
 
 ### ARCH-003 --- Créer l'index et les contrats
 
@@ -50,7 +50,7 @@ sans validation, compte rendu standard.\
 **Critères :** chaque système a un propriétaire, une documentation et
 des liens vers ses tests ; les IDs persistants et unités sont
 explicites.\
-**Statut :** À faire.
+**Statut :** À vérifier — docs/INDEX.md, DATA_CONTRACTS.md, DECISIONS.md existent ; docs/ARCHITECTURE.md absent (ARCHITECTURE_MODULAIRE.md existe). Vérification des critères : tâche DOC-006.
 
 ### DATA-001 --- Définir les schémas de données versionnés
 
@@ -82,24 +82,9 @@ plafonnée à 12 h et l'ordre des événements.\
 idempotents, tests de répétabilité.\
 **Statut :** À faire.
 
-### SYS-ECON-001 --- Stocks et transactions atomiques
+### SYS-ECON-001 --- ARCHIVÉE le 06/11/2026 (voir « Tâches archivées » en fin de fichier)
 
-**Objectif :** centraliser les stocks et toutes les dépenses/gains.\
-**Dépendances :** DATA-001, CORE-001.\
-**Critères :** pas de stock négatif silencieux ; opérations atomiques ;
-carburant commun `stocks.fuel` en litres ; alertes à moins de 2 jours et
-sous 1 jour d'autonomie.\
-**Statut :** À faire.
-
-### SYS-BASE-001 --- Bâtiments et chantiers
-
-**Objectif :** gérer construction, niveaux, coûts, durée, effectifs,
-production, consommation, entretien et énergie.\
-**Dépendances :** SYS-ECON-001, CORE-001.\
-**Critères :** calendrier reproductible, annulation/interruption
-définie, dépenses cohérentes, tests de pénurie et de chantier
-interrompu.\
-**Statut :** À faire.
+### SYS-BASE-001 --- ARCHIVÉE le 06/11/2026 (voir « Tâches archivées » en fin de fichier)
 
 ### SYS-SURV-001 --- Survivants et affectations exclusives
 
@@ -121,26 +106,9 @@ moteur/refroidissement/transmission/roues/suspension/carrosserie/arme ;
 seuils opérationnel ≥70 %, dégradé 30--69 %, neutralisé \<30 %.\
 **Statut :** À faire.
 
-### SYS-EXP-001 --- Préparation et résolution des expéditions
+### SYS-EXP-001 --- ARCHIVÉE le 06/11/2026 (voir « Tâches archivées » en fin de fichier)
 
-**Objectif :** gérer équipage, véhicule, stocks, étapes tactiques,
-objectif, retraite et rapport.\
-**Dépendances :** CORE-001, SYS-ECON-001, SYS-SURV-001, SYS-VEH-001.\
-**Critères :** phases
-préparation/détection/contact/engagement/objectif/retraite-récupération/rapport
-; risques visibles avant confirmation ; résultats reproductibles avec
-graine.\
-**Statut :** À faire.
-
-### SYS-DEF-001 --- Portes, murs et défense de base
-
-**Objectif :** gérer deux portes indépendantes, segments de mur,
-soldats, armes fixes, munitions et véhicules extérieurs.\
-**Dépendances :** SYS-SURV-001, SYS-VEH-001, SYS-ECON-001.\
-**Critères :** dégâts localisés ; affectations exclusives ; angle de tir
-et munitions pris en compte ; brèche locale réparable ; aucune perte
-irréversible cachée.\
-**Statut :** À faire.
+### SYS-DEF-001 --- ARCHIVÉE le 06/11/2026 (voir « Tâches archivées » en fin de fichier)
 
 ### SYS-FAC-001 --- Factions et conséquences persistantes
 
@@ -162,15 +130,7 @@ absence de doublons.\
 
 ## P2 --- Contenu et présentation
 
-### CONTENT-001 --- Progression des 30 premiers jours
-
-**Objectif :** fixer état initial, bâtiments disponibles, plans,
-missions et événements par paliers.\
-**Dépendances :** SYS-ECON-001, SYS-BASE-001, SYS-EXP-001.\
-**Critères :** table jour/période avec objectifs, coûts, récompenses,
-risques et voie de récupération ; pas de blocage irréversible sans
-avertissement.\
-**Statut :** À faire.
+### CONTENT-001 --- ARCHIVÉE le 06/11/2026 (voir « Tâches archivées » en fin de fichier)
 
 ### ART-001 --- Bible graphique et registre d'assets
 
@@ -263,3 +223,64 @@ Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche 
 | HIST-002 | Vérifier les 14 liaisons arme-véhicule | P1 | HIST-001 | `data/master/armes_vehicules_liaison.csv` | Chaque liaison avec source et certitude confirmée ou corrigée | À faire |
 | HIST-003 | Étendre le catalogue des armes par catégorie (mitrailleuses, puis canons, puis armes individuelles) | P2 | HIST-001 | `data/master/armes_historiques.csv` | Catégorie complète avec sources | À faire |
 | HIST-004 | Intégrer les CSV d'armes au processus d'export de `base_maitre.xlsx` | P2 | — | `sources/base_maitre.xlsx`, `tools/export_xlsx.py` | Les deux CSV sont produits par l'export, pas à la main | À faire |
+
+
+### Tâche ajoutée le 06/11/2026
+
+| ID | Intitulé | Priorité | Dépendances | Fichiers | Critère d'achèvement | Statut |
+|---|---|---|---|---|---|---|
+| DOC-006 | Vérifier les critères d'acceptation d'ARCH-002 et ARCH-003 contre les fichiers existants | P1 | — | `docs/TASKS.md`, `AGENTS.md`, `docs/INDEX.md`, `docs/DATA_CONTRACTS.md` | Pour chaque critère : présent ou absent, avec preuve ; statut passé à Terminé ou précisé | À faire |
+
+## Tâches archivées (DEC-099, convoi seulement)
+
+Archivées le 06/11/2026 sur décision du porteur de projet : leur objet (base, défense de base, économie de base, expéditions depuis la base) contredit le jeu de convoi. Texte repris tel quel. **Tâches dépendantes à réviser** (elles citent des tâches archivées) : SYS-SURV-001, SYS-VEH-001, UI-001, QA-002, QA-003 (voir OPEN_QUESTIONS, OQ-019).
+
+### SYS-ECON-001 --- Stocks et transactions atomiques
+
+**Objectif :** centraliser les stocks et toutes les dépenses/gains.\
+**Dépendances :** DATA-001, CORE-001.\
+**Critères :** pas de stock négatif silencieux ; opérations atomiques ;
+carburant commun `stocks.fuel` en litres ; alertes à moins de 2 jours et
+sous 1 jour d'autonomie.\
+**Statut :** À faire.
+
+### SYS-BASE-001 --- Bâtiments et chantiers
+
+**Objectif :** gérer construction, niveaux, coûts, durée, effectifs,
+production, consommation, entretien et énergie.\
+**Dépendances :** SYS-ECON-001, CORE-001.\
+**Critères :** calendrier reproductible, annulation/interruption
+définie, dépenses cohérentes, tests de pénurie et de chantier
+interrompu.\
+**Statut :** À faire.
+
+### SYS-EXP-001 --- Préparation et résolution des expéditions
+
+**Objectif :** gérer équipage, véhicule, stocks, étapes tactiques,
+objectif, retraite et rapport.\
+**Dépendances :** CORE-001, SYS-ECON-001, SYS-SURV-001, SYS-VEH-001.\
+**Critères :** phases
+préparation/détection/contact/engagement/objectif/retraite-récupération/rapport
+; risques visibles avant confirmation ; résultats reproductibles avec
+graine.\
+**Statut :** À faire.
+
+### SYS-DEF-001 --- Portes, murs et défense de base
+
+**Objectif :** gérer deux portes indépendantes, segments de mur,
+soldats, armes fixes, munitions et véhicules extérieurs.\
+**Dépendances :** SYS-SURV-001, SYS-VEH-001, SYS-ECON-001.\
+**Critères :** dégâts localisés ; affectations exclusives ; angle de tir
+et munitions pris en compte ; brèche locale réparable ; aucune perte
+irréversible cachée.\
+**Statut :** À faire.
+
+### CONTENT-001 --- Progression des 30 premiers jours
+
+**Objectif :** fixer état initial, bâtiments disponibles, plans,
+missions et événements par paliers.\
+**Dépendances :** SYS-ECON-001, SYS-BASE-001, SYS-EXP-001.\
+**Critères :** table jour/période avec objectifs, coûts, récompenses,
+risques et voie de récupération ; pas de blocage irréversible sans
+avertissement.\
+**Statut :** À faire.

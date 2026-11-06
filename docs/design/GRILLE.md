@@ -78,26 +78,7 @@ G1 est le plus urgent : chaque fonction ajoutée sur des types de véhicules fig
   T23 armé du canon de 37 ; canon de 88 sur une Jeep refusé (trop long, trop lourd).
 - Régler un véhicule : modifier sa pièce dans `pieces.json` (ex. `vitesse_max` du roulement, `pv`, `blindage` du châssis).
 
-## Atelier guidé : la moto et le side-car (DEC-035, 31/10)
-
-Demande du porteur de projet : **tout commence par la grille**. Le joueur part d'une caisse de pièces et assemble
-lui-même son premier véhicule ; la liberté viendra plus tard avec les gros véhicules.
-
-- **Pièces découpées dans le dessin** de la BMW R75 : cadre (avec réservoir et garde-boue), roue arrière, roue avant,
-  fourche et guidon, moteur, selle ; puis attelage, panier et roue du panier ; mitrailleuse. Une pièce posée à sa place
-  se dessine exactement comme sur la route.
-- **Peu de liberté** : chaque pièce n'a qu'un emplacement, dessiné en pointillés avec un fantôme ; le cadre se pose
-  d'abord ; le panier et sa roue demandent l'attelage (`requiert`). Lâchée ailleurs, la pièce revient dans le bac.
-- **Trois apparences** selon les pièces montées : moto seule (8,5 m/s, 1 place), side-car (7,5 m/s, 2 places),
-  side-car armé (statistiques identiques à l'ancienne BMW R75). Règles `apparences` de `pieces.json`.
-- **Couches** : le panier, sa roue et l'attelage ont leurs propres couches (ils passent derrière la moto en profil).
-- **Au bord de la route** : bouton « Assembler » quand le convoi est arrêté, sans ennemi proche, et qu'une
-  amélioration est possible avec la réserve de pièces (`atelier_possible()`).
-- Code : `scripts/combat/modele_atelier.gd` (logique), `scripts/vehicules/atelier_grille.gd` (écran).
-  Tests : `test_ouverture.gd` (21 vérifications), `capture_atelier.gd` (parcours joué à l'écran, captures).
-
-**Pour les gros véhicules (prochaine étape)** : même méthode, pièce par pièce depuis leur dessin ; plus de liberté
-(plusieurs emplacements possibles, pièces de rechange d'un autre véhicule), puis la grange la nuit (G2).
+*Passage archivé le 06/11/2026 (contradit la Bible) : voir [`archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md`](../../archive/docs_design/PASSAGES_ARCHIVES_2026-11-06.md).*
 
 ## G2, G3 et G4 tels que codés (01/11, DEC-038 à DEC-040)
 

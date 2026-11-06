@@ -33,13 +33,10 @@ postes et bancs (DEC-062 à 064), interface allégée (DEC-065), construction en
 
 Nouvelle ouverture (DEC-100), factions de la Bible (DEC-098), meutes rares et oiseaux (DEC-097), essence et gazole par moteur (DEC-094).
 
-## Contradictions connues (non tranchées, voir [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md))
+## Contradictions traitées le 06/11
 
-- [`docs/design/VISION.md`](docs/design/VISION.md), [`docs/design/CONVOI.md`](docs/design/CONVOI.md) et [`docs/design/GRILLE.md`](docs/design/GRILLE.md)
-  décrivent encore l'ouverture caisse de pièces et moto (DEC-035), des factions 1-2-3 et des biomes de désert pur.
-- [`docs/TASKS.md`](docs/TASKS.md) garde des tâches de base, de défense et d'économie de base (SYS-BASE, SYS-DEF, SYS-ECON, CONTENT-001).
-- [`docs/design/VISION.md`](docs/design/VISION.md) renvoie à `ACHATS.md`, archivé (DEC-031).
-- Le modèle économique (DEC-004, 012, 013) n'a pas été revu après DEC-099.
+- Passages périmés de VISION, CONVOI et GRILLE archivés (DEC-105) ; tâches de base archivées (DEC-106) ; modèle économique : démo + déblocage (DEC-104).
+- Restent : le code du prototype garde l'ancienne ouverture et les factions 1-2-3 (DEV-002, DEV-003) ; tâches dépendantes à réviser (OQ-019).
 
 ## Décisions ouvertes
 
