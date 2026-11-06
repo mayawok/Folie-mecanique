@@ -11,7 +11,9 @@ Créé le 2026-11-06. Complète [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md) (contra
 | Pièces et assemblages du prototype | `game/data/pieces.json`, `assemblages.json` | Valeurs de gameplay, lues par le jeu |
 | Réglages du combat | `game/data/combat_proto.json` | Valeurs de gameplay |
 
-**Écart constaté** : `armes_historiques.csv` et `armes_vehicules_liaison.csv` (DEC-103) ont été écrits directement dans `data/master/` et ajoutés à la main à `INDEX.md`, sans passer par l'export. Ils seront écrasés ou ignorés au prochain export tant qu'ils ne sont pas intégrés à `base_maitre.xlsx` (tâche HIST-004).
+**Écart corrigé le 06/11/2026** : `armes_historiques.csv` et `armes_vehicules_liaison.csv` ont été intégrés à `sources/base_maitre.xlsx` (onglets « Armes historiques » et « Armes vehicules liaison ») ; l'export reproduit ces CSV à l'identique.
+
+**Écart restant** : `contenu_depart_p0.csv` diffère de l'onglet correspondant du classeur (15 lignes dans le classeur, 14 dans le CSV, qui a été édité hors processus). Je n'ai pas tranché laquelle des deux versions fait foi (question au concepteur : OQ-021).
 
 ## 2. Identifiants
 
@@ -97,6 +99,5 @@ Bible : FAC ── LOC ── CHR ── EVT ── RES  (références croisées
 
 ## 9. À vérifier
 
-- Intégration des deux CSV d'armes dans `base_maitre.xlsx` (HIST-004).
 - Colonne d'identifiant absente de 45 tableaux sur 72 (voir [`audits/CONTROLE_QUALITE_DOCUMENTAIRE.md`](audits/CONTROLE_QUALITE_DOCUMENTAIRE.md)).
 - Unités de longueur et de vitesse entre tableaux historiques et jeu.

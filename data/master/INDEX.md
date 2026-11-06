@@ -22,8 +22,6 @@ Fichier généré par `tools/export_xlsx.py`. Ne pas éditer à la main.
 | Familles moteurs blindés | `familles_moteurs_blindes.csv` | 18 | Famille provisoire, Architecture / type, Exemples de véhicules, Carburant / refroidissement, Règle gameplay recommandée, Vérification |
 | Bibliographie | `bibliographie.csv` | 22 | Source / organisme, Sujet / usage, URL |
 | Catalogue armements | `catalogue_armements.csv` | 11 | Famille gameplay, Exemples historiques, Rôle en jeu, Difficulté de récupération, Règle de compatibilité |
-| Armes historiques (ARM-xxx, première passe : 15 armes d'exemple) | `armes_historiques.csv` | 15 | Une arme par ligne ; sources à renseigner, confiance « Moyen » |
-| Liaison armes - véhicules | `armes_vehicules_liaison.csv` | 14 | ID arme, ID véhicule, position, nombre, certitude |
 | Règles épaves | `regles_epaves.csv` | 9 | Étape / règle, Réparer l'épave complète, Démanteler l'épave, Prélèvement pendant l'expédition |
 | Production ressources | `production_ressources.csv` | 6 | Règle, Base généraliste, Base spécialisée, Note de conception |
 | Sources gabarits | `sources_gabarits.csv` | 13 | Véhicule / donnée, Source, URL, Usage / réserve |
@@ -76,3 +74,5 @@ Fichier généré par `tools/export_xlsx.py`. Ne pas éditer à la main.
 | Contrats sauvegarde v2.0 | `contrats_sauvegarde_v2_0.csv` | 8 | Objet, Champs obligatoires, Responsabilité, Invariant |
 | Factions et diplomatie v1.0 | `factions_et_diplomatie_v1_0.csv` | 5 | ID, Archétype, Priorité, Déclencheurs de réaction, Effets systémiques |
 | Base verticale v1.0 | `base_verticale_v1_0.csv` | 8 | ID, Niveau/système, Délai, Coût, Déblocages/fonction, Contraintes |
+| Armes historiques | `armes_historiques.csv` | 15 | ID arme, Désignation canonique, Désignation alternative, Pays d'origine, Constructeur, Année de conception, Année de mise en service, Période d'utilisation, Cat |
+| Armes vehicules liaison | `armes_vehicules_liaison.csv` | 14 | ID liaison, ID arme, ID véhicule, Véhicule, Variante exacte, Position de montage, Nombre, Fixe ou amovible, Certitude historique, Source |

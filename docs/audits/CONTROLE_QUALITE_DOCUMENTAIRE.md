@@ -17,20 +17,19 @@ Créé le 2026-11-06. Procédure répétable + premier rapport. Script de contr�
 | 7 | Références vers des documents absents | Script (liens) + recherche manuelle | **Exécuté** pour les liens : 0. Manuel : `TASKS.md` cite `CONTRIBUTING.md` et `docs/ARCHITECTURE.md`, absents (ARCH-002, ARCH-003) | Moyenne | `docs/TASKS.md` | DOC-006 |
 | 8 | Contradictions décisions / documents | Lecture ciblée | **Partiel** : `DATA_CONTRACTS.md` impose un seul stock `stocks.fuel` alors que DEC-094 sépare essence et gazole ; il parle aussi de bâtiments et de nourriture (base, DEC-099). `docs/art/CHATGPT.md` et les cartes décrivent encore un désert pur (DEC-097) | Moyenne | `docs/DATA_CONTRACTS.md`, `docs/art/CHATGPT.md` | Questions au concepteur ; DEV-001 |
 | 9 | Documents obsolètes présentés comme références | Registre ([`DOCUMENT_REGISTRY.md`](../DOCUMENT_REGISTRY.md)) | **Exécuté** : voir colonne « Contradiction » du registre ; aucun statut « obsolète » tant que le concepteur n'a pas tranché | Moyenne | `docs/DOCUMENT_REGISTRY.md` | OQ-017 résolue pour VISION, CONVOI, GRILLE ; reste le reste des documents |
-| 10 | Tableaux hors source de vérité | Comparaison à [`data/master/INDEX.md`](../../data/master/INDEX.md) | **Exécuté** pour la liste des fichiers : tous les CSV sont dans l'index et inversement. **Écart** : `armes_historiques.csv` et `armes_vehicules_liaison.csv` ne viennent pas de `base_maitre.xlsx` et ont été ajoutés à la main à `INDEX.md` (fichier généré). Réexport non testé | Moyenne | `data/master/INDEX.md` | HIST-004 |
+| 10 | Tableaux hors source de vérité | Réexport de `base_maitre.xlsx` vers un dossier temporaire, puis comparaison aux CSV | **Exécuté** : 71 CSV sur 72 identiques à l'export (après intégration des deux fichiers d'armes dans le classeur). **Écart** : `contenu_depart_p0.csv` (15 lignes dans le classeur, 14 dans le CSV) | Moyenne | `data/master/contenu_depart_p0.csv`, `sources/base_maitre.xlsx` | OQ-021 |
 | 11 | Suite de décisions | Script : DEC-001 à DEC-106 | **Exécuté** : 106 décisions, aucun doublon, aucun trou | — | `docs/DECISIONS.md` | — |
 
 ## Contrôles restant à faire
 
 - Champs obligatoires (4) et unités (5) sur tous les tableaux.
-- Test du réexport `tools/export_xlsx.py` sur une copie, pour vérifier que les CSV générés sont identiques (non lancé : dépendance à `openpyxl` non vérifiée dans cette session).
 - Relecture des 38 documents du registre au-delà de l'existence du fichier.
 
 ## Problèmes détectés (synthèse)
 
 1. Sources absentes pour toutes les armes (15/15) et statut historique « À confirmer » pour 269 véhicules sur 275.
 2. 45 tableaux sans identifiant.
-3. Deux fichiers de données hors du processus d'export, et un index généré modifié à la main.
+3. `contenu_depart_p0.csv` ne correspond plus au classeur (les fichiers d'armes ont été intégrés au classeur le 06/11).
 4. `DATA_CONTRACTS.md` en désaccord avec DEC-094 et DEC-099.
 5. Une clé répétée dans `fortifications_couts.csv` et `CHR-001` déclaré deux fois dans la Bible.
 

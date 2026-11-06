@@ -222,7 +222,7 @@ Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche 
 | HIST-001 | Sourcer les 15 armes du catalogue (une source identifiable par arme) | P1 | — | `data/master/armes_historiques.csv` | Colonne « Sources historiques » renseignée, confiance A à D attribuée | À faire |
 | HIST-002 | Vérifier les 14 liaisons arme-véhicule | P1 | HIST-001 | `data/master/armes_vehicules_liaison.csv` | Chaque liaison avec source et certitude confirmée ou corrigée | À faire |
 | HIST-003 | Étendre le catalogue des armes par catégorie (mitrailleuses, puis canons, puis armes individuelles) | P2 | HIST-001 | `data/master/armes_historiques.csv` | Catégorie complète avec sources | À faire |
-| HIST-004 | Intégrer les CSV d'armes au processus d'export de `base_maitre.xlsx` | P2 | — | `sources/base_maitre.xlsx`, `tools/export_xlsx.py` | Les deux CSV sont produits par l'export, pas à la main | À faire |
+| HIST-004 | Intégrer les CSV d'armes au processus d'export de `base_maitre.xlsx` | P2 | — | `sources/base_maitre.xlsx`, `tools/export_xlsx.py` | Les deux CSV sont produits par l'export, pas à la main | Fait le 06/11 (export reproduit les deux CSV à l'identique) |
 
 
 ### Tâche ajoutée le 06/11/2026
