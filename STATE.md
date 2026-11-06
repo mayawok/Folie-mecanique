@@ -36,6 +36,7 @@ Nouvelle ouverture (DEC-100), factions de la Bible (DEC-098), meutes rares et oi
 ## Contradictions traitées le 06/11
 
 - Passages périmés de VISION, CONVOI et GRILLE archivés (DEC-105) ; tâches de base archivées (DEC-106) ; modèle économique : démo + déblocage (DEC-104).
+- Audit du 07/11 : 7 nouveaux écarts Bible/prototype (tempêtes, meutes, chien, zone calme, camps, décor, carte) à trancher : [`docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md`](docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md) (OQ-022).
 - Restent : le code du prototype garde l'ancienne ouverture et les factions 1-2-3 (DEV-002, DEV-003) ; tâches dépendantes à réviser (OQ-019).
 
 ## Décisions ouvertes
