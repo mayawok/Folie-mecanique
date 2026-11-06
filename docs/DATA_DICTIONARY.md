@@ -38,7 +38,7 @@ Préfixes **déjà en usage** (à ne pas renommer) :
 | Masse | kg (tonnes seulement dans les textes) | Colonnes « Masse … (kg) » |
 | Longueur, hauteur, garde au sol | m dans les tableaux de véhicules ; mm dans `armes_historiques.csv` | **Incohérence entre tableaux** : à unifier ou à indiquer dans l'en-tête |
 | Puissance | ch | |
-| Carburant, eau | litres | `DATA_CONTRACTS.md` impose un seul stock `stocks.fuel` ; **DEC-094 demande essence et gazole séparés** : contrat à mettre à jour (DEV-001) |
+| Carburant, eau | litres | Deux stocks, essence et gazole (DEC-094) : contrat mis à jour (DEC-108), noms de champs et code à faire (DEV-001) |
 | Vitesse | km/h dans les tableaux historiques ; m/s dans le moteur du jeu | Conversion à documenter |
 | Cadence | coups/min | |
 | Condition d'un composant | % de 0 à 100 | |
