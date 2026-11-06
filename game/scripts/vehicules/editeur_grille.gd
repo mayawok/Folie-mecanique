@@ -1479,7 +1479,7 @@ func _dessiner_bilan(c: Control, police: Font) -> void:
 	var s: Dictionary = _an.stats
 	var roule := float(s.vitesse) > 0.0
 	c.draw_string(police, Vector2(x, y), ("▶ %.1f m/s" % s.vitesse) if roule else "■ immobile", HORIZONTAL_ALIGNMENT_LEFT, 170, 22, C_VERT if roule else C_ROUGE)
-	var ligne := ("Intercepteur   ·   " if String(s.get("classe", "")) == "intercepteur" else "") + "%d kg   ·   blindage %d   ·   %d place%s" % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
+	var ligne := ("Véhicule léger   ·   " if String(s.get("classe", "")) == "intercepteur" else "") + "%d kg   ·   blindage %d   ·   %d place%s" % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
 	var cout: float = m.cout_grille(uid, a)
 	if cout > 0.0:
 		ligne += "   ·   %d / %d métal" % [int(ceil(cout)), int(m.stocks.metal)]

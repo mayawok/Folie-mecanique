@@ -1,6 +1,12 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phares, écrasement, lance-flammes). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-11-06 (recentrage sur la Bible du lore, DEC-091 à 096). Fichier à lire en premier (court, à garder < 60 lignes).
+
+## Recentrage du 06/11 (prioritaire)
+
+- **Référence unique : la Bible du lore** `docs/lore/01_BIBLE_FOUNDATION` (DEC-091). On garde la **grille** ; le reste du prototype est à trancher face à la Bible (DEC-092).
+- Tranché : climat pauvre (DEC-093), essence + gazole seulement (DEC-094), zones et no man's land (DEC-095), « Véhicule léger » (DEC-096).
+- **Écarts à trancher** : voir la liste dans la réponse du 06/11 et `docs/DECISIONS.md`.
 
 ## Où on en est
 
@@ -54,7 +60,7 @@ Mis à jour : 2026-11-01 soir (retours iPhone : grille refaite, équipage, phare
 
 1. Le porteur de projet essaie le **Mode créatif** (ex-Bac à sable) (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
 2. Essayer dans le Mode créatif la nouvelle grille en icônes (DEC-080) et les véhicules penchés + outil Déplacer + vue à deux doigts (DEC-082) : tôles, poutres, radiateurs, peinture, remorques, véhicules du jeu ; Carrosserie, Suspension, Plans, Greffes. Reste de la phase 3 de DEC-067 : éperon (avec collisions), base roulante trouvée. Plus tard : gazogène, marques des pièces.
-3. Voitures sur plateforme (DEC-083) : essayer l'onglet Voitures, les carrosseries rouillées, le moteur à nu et la classe Intercepteur. **À définir** : quelles voitures (modèles) pour chaque longueur de châssis (plusieurs par longueur), et comment on les trouve en jeu (hors mode créatif, la plateforme ne change pas).
+3. Voitures sur plateforme (DEC-083) : essayer l'onglet Voitures, les carrosseries rouillées, le moteur à nu et la classe Véhicule léger (ex-Intercepteur). **À définir** : quelles voitures (modèles) pour chaque longueur de châssis (plusieurs par longueur), et comment on les trouve en jeu (hors mode créatif, la plateforme ne change pas).
 4. Coder le lore des marchands sur châssis de char et des villes traversées (DEC-061) ; intégrer les visuels de la grille.
 5. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
 6. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.

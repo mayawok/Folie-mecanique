@@ -255,7 +255,7 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 
 **Déplacer.** Onglet « Véhicule » : glisser le véhicule entier (cases, essieux, pièces, tôles) ; refus hors grille. Vue : pincement/déplacer/cadrer de DEC-081.
 
-## Voitures sur plateforme et Intercepteurs (DEC-083)
+## Voitures sur plateforme et Véhicules légers (DEC-083, renommé DEC-096)
 
 **Plateformes.** Onglet *Voitures* (première icône). Châssis court (15 cases), moyen (18), long (21) : poutres, deux ponts rigides, roues moyennes. Une nouvelle voiture arrive avec carrosserie, radiateur, petit moteur et poste de conduite. Données : `pieces.json` → `libre.plateformes`.
 
@@ -267,6 +267,6 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 
 **Garde au sol.** Ponts sous le châssis : d'origine (roue dans l'aile), +25 cm par défaut, jusqu'à +75 cm ; la suspension qui convient est montée seule.
 
-**Intercepteur.** Classe reconnue et affichée sous la grille. Conditions et bonus dans `libre.plateformes.intercepteur`. Tests : `test_voiture.gd` ; capture : `capture_voiture.gd`.
+**Véhicule léger** (ex-Intercepteur, DEC-096 ; identifiant interne `intercepteur`). Classe reconnue et affichée sous la grille. Conditions et bonus dans `libre.plateformes.intercepteur`. Tests : `test_voiture.gd` ; capture : `capture_voiture.gd`.
 
 **À faire.** Définir les modèles de voitures pour chaque longueur (plusieurs par longueur) et comment on les trouve en jeu.

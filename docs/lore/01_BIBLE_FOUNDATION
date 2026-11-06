@@ -6,6 +6,7 @@ Fondations historiques, effondrement et naissance du nouveau monde
 
 Version : 0.1
 Statut : Document de travail — canon proposé
+Rôle : document universel de référence du projet (décision du 06/11/2026). Tout élément du jeu qui le contredit est signalé et tranché par le porteur de projet.
 Période : De l’avant-guerre à la deuxième génération après l’effondrement
 Cadre géographique : France et territoires européens voisins
 Esthétique : Europe industrielle et rurale figée dans une esthétique des années 1940
@@ -415,6 +416,24 @@ Il ne doit pas inventer de grands gisements pétroliers dans des régions où la
 
 La rareté des ressources doit être un moteur de l’histoire.
 
+04.1 bis — Climat et biodiversité (décision du porteur de projet, 06/11/2026)
+
+Le monde est pauvre en ressources, pauvre en végétation et pauvre en animaux : la biodiversité est faible.
+
+Il n’existe pas de grandes forêts exploitables. Des forêts peuvent subsister, mais on n’en tire presque rien.
+
+L’eau peut exister, mais on n’en tire presque rien non plus.
+
+04.1 ter — Zones et no man’s land (décision du porteur de projet, 06/11/2026)
+
+Le territoire se compose de zones habitées ou intéressantes (villes, lieux remarquables) séparées par un no man’s land dangereux.
+
+C’est dans le no man’s land que se trouve la vraie aventure : c’est l’espace le plus dangereux et celui où se déroule la plupart des combats.
+
+On peut y croiser des convois alliés, des marchands, des gens qui se déplacent, et d’autres rencontres à inventer.
+
+On y croise surtout des pillards, des convois armés, des bandes de guerre (war parties) et toutes sortes de groupes hostiles.
+
 04.2 — Le pétrole du Bassin parisien
 
 Identifiant : LOC-001
@@ -522,22 +541,18 @@ La Bretagne devient un territoire de transit, de récupération et de commerce m
 Identifiant : RES-001 — Pétrole brut
 Identifiant : RES-004 — Essence
 Identifiant : RES-005 — Gazole
-Identifiant : RES-006 — Kérosène
-Identifiant : RES-007 — Fioul
+Identifiant : RES-006 — Kérosène (retiré le 06/11/2026, identifiant non réutilisable)
+Identifiant : RES-007 — Fioul (retiré le 06/11/2026, identifiant non réutilisable)
 
-Les populations ne confondent pas toujours ces produits.
+Décision du porteur de projet (06/11/2026) : seuls deux carburants sont utilisables, l’essence et le gazole. Le pétrole brut peut être transporté, mais il n’est pas utilisable.
 
-Les techniciens, eux, savent que chaque carburant possède des caractéristiques différentes.
+Les techniciens savent que chaque carburant possède des caractéristiques différentes.
 
 Le pétrole brut doit être transformé.
 
 L’essence est utile aux moteurs à allumage commandé, mais elle se dégrade avec le temps et son stockage exige des précautions.
 
 Le gazole peut être conservé plus longtemps dans de bonnes conditions, mais il peut être contaminé par l’eau et les micro-organismes.
-
-Le kérosène possède des usages particuliers et ne peut pas être considéré comme un substitut universel.
-
-Le fioul sert principalement au chauffage et à certains usages industriels.
 
 Cette distinction crée une hiérarchie des ressources.
 
