@@ -199,10 +199,10 @@ Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche 
 
 | ID | Intitulé | Priorité | Dépendances | Fichiers | Critère d'achèvement | Statut |
 |---|---|---|---|---|---|---|
-| DOC-001 | Vérifier tous les liens relatifs des documents racine et `docs/` | P1 | — | `README.md`, `STATE.md`, `docs/*.md` | Script ou liste : 0 lien cassé, résultat consigné dans un audit | À faire |
-| DOC-002 | Créer `docs/DATA_DICTIONARY.md` (mission 4) | P1 | — | `docs/DATA_DICTIONARY.md`, `docs/DATA_CONTRACTS.md` | Document couvrant identifiants, unités, valeurs inconnues, niveaux de confiance A à D, relations | À faire |
-| DOC-003 | Proposer l'organisation des données du monde (mission 5), sans modifier les fichiers maîtres | P1 | DOC-002 | `docs/DATA_WORLD_PROPOSAL.md` | Proposition pour 11 catégories avec fichier maître, identifiants, champs, relations | À faire |
-| DOC-004 | Créer `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` (mission 6) | P2 | DOC-001 | `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` | Grille de 10 contrôles et premier rapport avec les contrôles réellement exécutés | À faire |
+| DOC-001 | Vérifier tous les liens relatifs des documents racine et `docs/` | P1 | — | `README.md`, `STATE.md`, `docs/*.md` | Script ou liste : 0 lien cassé, résultat consigné dans un audit | Fait le 06/11 (98 liens, 0 cassé ; `tools/controle_documentaire.py`) |
+| DOC-002 | Créer `docs/DATA_DICTIONARY.md` (mission 4) | P1 | — | `docs/DATA_DICTIONARY.md`, `docs/DATA_CONTRACTS.md` | Document couvrant identifiants, unités, valeurs inconnues, niveaux de confiance A à D, relations | Fait le 06/11 (reste : champs obligatoires par tableau) |
+| DOC-003 | Proposer l'organisation des données du monde (mission 5), sans modifier les fichiers maîtres | P1 | DOC-002 | `docs/DATA_WORLD_PROPOSAL.md` | Proposition pour 11 catégories avec fichier maître, identifiants, champs, relations | Fait le 06/11 (attend la validation du concepteur) |
+| DOC-004 | Créer `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` (mission 6) | P2 | DOC-001 | `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` | Grille de 10 contrôles et premier rapport avec les contrôles réellement exécutés | Fait le 06/11 (contrôles 4 et 5 restent partiels) |
 | DOC-005 | Lister les passages de VISION, CONVOI, GRILLE et LORE qui contredisent la Bible, ligne par ligne | P2 | OQ-017 | `docs/DOCUMENT_REGISTRY.md` | Tableau passage / décision contredite / document | À faire |
 
 ### C. Tâches techniques de développement (code : seulement après décision indiquée)
