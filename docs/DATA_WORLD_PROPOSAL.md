@@ -25,10 +25,9 @@ Le texte de la Bible décide ; un tableau par catégorie le rend exploitable par
 ## Doublons à éviter
 
 - `evenements_et_incidents.csv`, `evenements_expedition.csv`, `scenario_test_30_jours.csv` concernent le prototype de base et d'expédition ; ils ne sont pas des événements du monde.
-- `catalogue_batiments.csv`, `niveaux_de_base.csv`, `elevage_et_nourriture.csv`, `production_ressources.csv` : base (DEC-099, jeu de convoi). Leur sort est une question ouverte (OQ-018 résolue pour les tâches, pas pour les tableaux).
+- Les tableaux de base (bâtiments, niveaux de base, élevage, production) ont été supprimés (DEC-107).
 
 ## Décisions à prendre par le concepteur
 
 1. Valide-t-on les 7 fichiers à créer (équipements, personnages, secteurs, lieux, faune, événements du monde, factions) ?
 2. Qui du joueur peut voir les personnages (mystère) : un champ « révélation » est-il voulu ?
-3. Que devient-on des tableaux de base (bâtiments, élevage, production) : archivés comme les tâches ?

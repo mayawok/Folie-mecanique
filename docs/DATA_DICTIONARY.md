@@ -13,7 +13,7 @@ Créé le 2026-11-06. Complète [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md) (contra
 
 **Écart corrigé le 06/11/2026** : `armes_historiques.csv` et `armes_vehicules_liaison.csv` ont été intégrés à `sources/base_maitre.xlsx` (onglets « Armes historiques » et « Armes vehicules liaison ») ; l'export reproduit ces CSV à l'identique.
 
-**Écart restant** : `contenu_depart_p0.csv` diffère de l'onglet correspondant du classeur (15 lignes dans le classeur, 14 dans le CSV, qui a été édité hors processus). Je n'ai pas tranché laquelle des deux versions fait foi (question au concepteur : OQ-021).
+**Écart restant** : aucun connu au 06/11/2026 (`contenu_depart_p0.csv` a été supprimé avec la base, DEC-107).
 
 ## 2. Identifiants
 
@@ -99,5 +99,5 @@ Bible : FAC ── LOC ── CHR ── EVT ── RES  (références croisées
 
 ## 9. À vérifier
 
-- Colonne d'identifiant absente de 45 tableaux sur 72 (voir [`audits/CONTROLE_QUALITE_DOCUMENTAIRE.md`](audits/CONTROLE_QUALITE_DOCUMENTAIRE.md)).
+- Colonne d'identifiant absente de tableaux sans colonne d'identifiant (voir le contrôle qualité) (voir [`audits/CONTROLE_QUALITE_DOCUMENTAIRE.md`](audits/CONTROLE_QUALITE_DOCUMENTAIRE.md)).
 - Unités de longueur et de vitesse entre tableaux historiques et jeu.

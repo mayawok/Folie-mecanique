@@ -170,4 +170,4 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : le CSV a été modifié hors du processus d'export ; un prochain export écraserait ces changements. Le contenu décrit en outre un départ de base (eau, nourriture, bâtiments) qui contredit DEC-099 et DEC-100.
 - **Documents concernés** : data/master/contenu_depart_p0.csv, sources/base_maitre.xlsx
 - **Options connues** : garder le classeur ; reporter les changements du CSV dans le classeur ; archiver l'onglet (départ de base)
-- **Statut** : ouverte
+- **Statut** : résolue (DEC-107, tableau supprimé)

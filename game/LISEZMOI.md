@@ -15,7 +15,7 @@ Parcours écran de la grille : `capture_libre.gd` ; grille en icônes, tôles, r
 La nuit ou pendant une tempête, un véhicule garé dans une grange se **démonte** ou se **modifie**, et le bouton **Nouveau véhicule**
 en construit un avec les pièces de la réserve. Devant un champ de mines : déminer (détecteur, chien), faire demi-tour ou traverser.
 
-La gestion de base est archivée dans `archive/prototype_base/` (DEC-031).
+La gestion de base a été supprimée (DEC-099, DEC-107) ; elle reste dans l'historique Git.
 
 ## Jouer
 
