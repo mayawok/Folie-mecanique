@@ -1,82 +1,57 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-06 (recentrage sur la Bible du lore, DEC-091 à 096). Fichier à lire en premier (court, à garder < 60 lignes).
+Mis à jour : 2026-11-06. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
 
-## Recentrage du 06/11 (prioritaire)
+## Cap (recentrage du 06/11, DEC-091 à DEC-102)
 
-- **Référence unique : la Bible du lore** `docs/lore/01_BIBLE_FOUNDATION` (DEC-091). On garde la **grille** ; le reste du prototype est à trancher face à la Bible (DEC-092).
-- Tranché : climat pauvre (DEC-093), essence + gazole seulement (DEC-094), zones et no man's land (DEC-095), « Véhicule léger » (DEC-096).
-- Tranché aussi : terrains et animaux rares (DEC-097), factions de la Bible (DEC-098), convoi seulement (DEC-099), chef de convoi
-  indépendant qui part avec un camion (DEC-100), carte déformée (DEC-101). Vision du jeu : `docs/design/VISION.md` (bloc du 06/11).
-- **À coder** : nouvelle ouverture (DEC-100), factions (DEC-098), meutes rares et oiseaux (DEC-097), essence/gazole par moteur (DEC-094).
+- **Référence unique : la Bible du lore** ([`docs/lore/01_BIBLE_FOUNDATION`](docs/lore/01_BIBLE_FOUNDATION)). Les documents du jeu s'y conforment.
+- **Convoi seulement** (DEC-099) : plus de gestion de base ni de ressources de base ; au plus un checkpoint ou un garage par chapitre.
+- **Joueur** : chef d'un convoi indépendant, qui a déjà un camion et fait des rotations dans le no man's land (DEC-100).
+- **Monde** : climat pauvre, faune rare (DEC-093, 097) ; zones séparées par un no man's land (DEC-095) ; carte de 12 ou 13 secteurs,
+  France reconnaissable mais déformée (DEC-101) ; factions de la Bible (DEC-098) ; essence et gazole seulement (DEC-094).
+- **Du prototype, on garde la grille** ; le reste est réexaminé face à la Bible (DEC-092).
+- **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
-## Où on en est
+## Ce qui existe
 
-- **Mode convoi jouable** (DEC-026) dans `game/`, publié sur GitHub Pages (`game/LISEZMOI.md`).
-  Contenu : embuscade, relief, carte 12 secteurs, camps et factions, nuit et abri, fantassins, voyageurs, fouille,
-  survivants, garage (hangar/grange), demi-tour, sauvegarde auto, sons.
-- Moteur : Godot 4.3 / GDScript (DEC-001). Passage à la 4.6 proposé.
-- **Identité : roguelite de convoi** (DEC-032). Gestion de base, temps réel et achats : archivés (DEC-031).
-- Code découpé en couches (DEC-033, carte des fichiers dans `CONVOI.md`).
-- **Grille G1 faite** (DEC-034) : véhicules = châssis + pièces, statistiques calculées (`GRILLE.md`).
-- **La partie commence par la grille** (DEC-035) : moto assemblée, puis side-car, essence, arme, ennemis.
-- **Codés le 01/11** : tempête de sable (DEC-036), champs de mines (DEC-037), grille G2 démontage (DEC-038), G3 éditeur libre
-  (DEC-039), G4 dessin des assemblages (DEC-040). Tests : 221 vérifications sans écran + parcours écran (`game/tests/`).
-- **Refonte de la grille le 01/11** (DEC-043 à 046) : châssis peint case par case, essieux, roues de trois tailles ou chenilles,
-  moteurs, cabines, armes (mitrailleuse, canons, **mortier**) ; tout compatible, mauvais résultats calculés ; grille ouverte
-  à tout moment (jeu en pause) ; **menu principal avec Bac à sable**.
-- **Retours iPhone du 01/11 après-midi** (DEC-047 à DEC-061) : interface écartée des bords (iPhone 14 Pro Max+), grille agrandie
-  et centrée, châssis en rectangles, essieu puis roue, onglets par catégorie, vrai dessin pendant le glisser, nom proposé et
-  modifiable, rôles d'équipage avec avertissement, phares, méga-char pénalisé, écrasement, lance-flammes, trajectoires réalistes,
-  épave sans roues, dézoom de fin, brouillon de grille, rendu limité à 2 px/pt contre les rechargements.
-- **Postes, bancs, cabines, troupes** (DEC-062 à 064) : postes de conduite et de commande, bancs de troupes dans les deux sens,
-  cabines décor camion/voiture/blindée au-dessus des sièges, troupes débarquables en combat, équipage descendu (sauf le chef) en réparation.
-  Tests : 6 suites sans écran vertes ; capture `tests/capture_cabines.gd`. **À vérifier sur iPhone.**
-- **Interface allégée** (DEC-065) : bulles de ressources avec icônes, cadran jour/nuit en coin, plus de bandes noires, cartes compactes. À vérifier sur iPhone.
-- **Visuels de la grille intégrés** (DEC-066) : roues, moteurs, cabines, phares, armes. Restent : tuiles de châssis, essieux, chenilles, benne.
-- **Construction en deux plans** (DEC-067, phase 1 codée : DEC-068, à vérifier sur iPhone) : mécanique sur la grille, carrosserie de donneur posée par-dessus ;
-  catalogues extensibles sans code (moteurs, roues, châssis, suspensions et leur hauteur, coques, greffes). Détails : `GRILLE.md`.
-- **Ponts rigides, onglet Suspension, plans enregistrés, cabines décor retirées** (DEC-069 à 071). À vérifier sur iPhone.
-- **Poursuites et abordages** (DEC-077), silence hors du jeu (DEC-073), suspension en l'air (DEC-075), retirer en glissant (DEC-076). À vérifier sur iPhone.
-- **Direction artistique** (DEC-085) : brief de référence dans `docs/art/DIRECTION_ARTISTIQUE.md` ; contours A/B/C à comparer.
-- Audit du 31/10 : `docs/audits/AUDIT_2026-10-31.md`.
+- Prototype Godot 4.3 / GDScript dans `game/`, publié sur GitHub Pages ([`game/LISEZMOI.md`](game/LISEZMOI.md)). Tests sans écran dans `game/tests/`.
+- Mode convoi : combat, embuscades, poursuites et abordages, relief, carte, nuit et abri, fouille, garage, sauvegarde, sons
+  ([`docs/design/CONVOI.md`](docs/design/CONVOI.md)). Une partie de ce contenu est à réexaminer (DEC-092).
+- **Grille de construction** (DEC-034 à DEC-083) : châssis, essieux, roues, suspensions, moteurs, coques, tôles, greffes,
+  radiateurs, remorques, plans enregistrés ([`docs/design/GRILLE.md`](docs/design/GRILLE.md)). Classe « Véhicule léger » (DEC-096).
+- Données : véhicules (275 lignes), armes et composants dans [`data/master/`](data/master/INDEX.md) ; catalogue historique des armes,
+  première passe de 15 armes (DEC-103, sources à renseigner).
+- Direction artistique : [`docs/art/DIRECTION_ARTISTIQUE.md`](docs/art/DIRECTION_ARTISTIQUE.md) (DEC-085). Audio : ElevenLabs (DEC-084, 090).
+- Dernier audit : [`docs/audits/AUDIT_2026-10-31.md`](docs/audits/AUDIT_2026-10-31.md).
 
-## À confirmer par le porteur de projet (rien d'autre n'est en attente de code)
+## À vérifier sur iPhone (non vérifiable hors appareil)
 
-- **iPhone** : boutons atteignables, taille des cases de la grille, rechargements moins fréquents, écran « Tournez le téléphone » (DEC-056, 059).
-- `mus_fin` déposée le 02/11 (20 s, licence Starter) : à écouter à la fin d'une partie (convoi anéanti). Fond de grille intégré (DEC-078).
+Boutons atteignables, taille des cases de la grille, rechargements (DEC-056, 059), son en mode normal et silencieux (DEC-030, 041),
+postes et bancs (DEC-062 à 064), interface allégée (DEC-065), construction en deux plans (DEC-067, 068), poursuites (DEC-077).
 
-- **Son iPhone** (DEC-030, renforcé par DEC-041) : non vérifiable hors appareil. Tester en mode normal puis silencieux.
-- Jouer la tempête, les mines et la grange : valeurs à régler dans `combat_proto.json` (`tempete`, `mines_champs`, `demontage`).
-- `game/tests/capture_convoi.gd` est un ancien parcours devenu obsolète avec l'ouverture guidée (il n'aboutit pas).
+## À coder (décidé, pas encore fait)
 
-## Décisions ouvertes (à trancher)
+Nouvelle ouverture (DEC-100), factions de la Bible (DEC-098), meutes rares et oiseaux (DEC-097), essence et gazole par moteur (DEC-094).
 
-1. Modèle économique adapté au roguelite (prix unique, démo + déblocage, cosmétiques).
-2. Gel des fonctions pour un cycle d'essais (`docs/design/ESSAIS.md`).
-3. But d'une partie et progression entre les parties.
-4. Passage à Godot 4.6 ; chemin de compilation iOS sans Mac.
-5. Contours (A, B ou C) et sort des planches déjà produites en style « aplats » (DEC-085).
+## Contradictions traitées le 06/11
 
-## Prochaines étapes (ordre recommandé)
+- Passages périmés de VISION, CONVOI et GRILLE archivés (DEC-105) ; tâches de base archivées (DEC-106) ; modèle économique : démo + déblocage (DEC-104).
+- Restent : le code du prototype garde l'ancienne ouverture et les factions 1-2-3 (DEV-002, DEV-003) ; tâches dépendantes à réviser (OQ-019).
 
-1. Le porteur de projet essaie le **Mode créatif** (ex-Bac à sable) (construire, rater, corriger) ; puis joue 3 sessions et remplit `ESSAIS.md` ; confirme le son (iPhone non silencieux et silencieux).
-2. Essayer dans le Mode créatif la nouvelle grille en icônes (DEC-080) et les véhicules penchés + outil Déplacer + vue à deux doigts (DEC-082) : tôles, poutres, radiateurs, peinture, remorques, véhicules du jeu ; Carrosserie, Suspension, Plans, Greffes. Reste de la phase 3 de DEC-067 : éperon (avec collisions), base roulante trouvée. Plus tard : gazogène, marques des pièces.
-3. Voitures sur plateforme (DEC-083) : essayer l'onglet Voitures, les carrosseries rouillées, le moteur à nu et la classe Véhicule léger (ex-Intercepteur). **À définir** : quelles voitures (modèles) pour chaque longueur de châssis (plusieurs par longueur), et comment on les trouve en jeu (hors mode créatif, la plateforme ne change pas).
-4. Coder le lore des marchands sur châssis de char et des villes traversées (DEC-061) ; intégrer les visuels de la grille.
-5. Atelier guidé pour les gros véhicules (pièces tirées de leur dessin), art définitif des assemblages.
-6. Régler tempête, mines et grange d'après les essais ; trancher la nature du fléau (Sherman Crab) et le chien.
-7. Godot 4.6, puis essai d'export iOS dans le nuage.
+## Décisions ouvertes
+
+Toutes les questions, avec identifiant, sont dans [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md).
 
 ## Carte du dépôt
 
 | Chemin | Contenu |
 |---|---|
 | `AGENTS.md` | Règles pour développeurs et IA |
-| `docs/INDEX.md` | Ordre de lecture, sources de vérité |
-| `docs/DECISIONS.md` | Journal des décisions |
-| `docs/design/` | VISION, CONVOI, GRILLE, LORE, GRAPHISMES, ESSAIS |
-| `game/` | Prototype Godot (`scripts/combat/` = convoi, `scripts/vehicules/` = pièces), tests dans `game/tests/` |
-| `data/master/` | Tables (catalogue de composants, grille) |
-| `archive/` | Éléments en sommeil (base, temps réel, simulations) |
-| `tools/` | Scripts (export Excel → CSV, sons synthétisés, gabarits) |
+| `docs/INDEX.md` | Navigation et sources de vérité |
+| `docs/DOCUMENT_REGISTRY.md` | Registre de tous les documents importants |
+| `docs/lore/` | Bible du monde (réutilisable) |
+| `docs/design/`, `docs/scenario/` | Choix propres à ce jeu |
+| `game/` | Prototype Godot |
+| `data/master/`, `data/rules/` | Tableaux et règles |
+| `archive/` | Éléments en sommeil |
+| `tools/` | Scripts |

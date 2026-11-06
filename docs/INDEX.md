@@ -14,9 +14,24 @@
 Ne pas demander à chaque intervenant de relire tout le projet. L'index
 et les tâches doivent diriger vers les seuls documents nécessaires.
 
+## Navigation
+
+| Je cherche… | Document |
+|---|---|
+| Où en est le projet | [`STATE.md`](../STATE.md) |
+| Tous les documents, leur statut | [`DOCUMENT_REGISTRY.md`](DOCUMENT_REGISTRY.md) |
+| Ce qui est décidé | [`DECISIONS.md`](DECISIONS.md) |
+| Ce qui reste à trancher | [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) |
+| Ce qu'il y a à faire | [`TASKS.md`](TASKS.md) |
+| Le monde (référence universelle) | [`lore/01_BIBLE_FOUNDATION`](lore/01_BIBLE_FOUNDATION) |
+| Les choix de ce jeu | [`design/VISION.md`](design/VISION.md), [`scenario/OUVERTURE.md`](scenario/OUVERTURE.md) |
+| Les contrats de données | [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md) |
+| La direction artistique | [`art/DIRECTION_ARTISTIQUE.md`](art/DIRECTION_ARTISTIQUE.md) |
+
 ## Source de vérité
 
 -   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION`
+-   Registre des documents : `docs/DOCUMENT_REGISTRY.md` ; questions ouvertes : `docs/OPEN_QUESTIONS.md`
 -   **Ce jeu-ci** : vision `docs/design/VISION.md`, scénario `docs/scenario/` (ouverture : `OUVERTURE.md`)
 -   État courant et priorités : `STATE.md` (racine)
 -   Règles structurées : `data/rules/regles_canoniques.json` (v1.7)
