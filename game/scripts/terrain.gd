@@ -17,6 +17,12 @@ const PALETTES := {
 		"decor": [["poteau", 0.20], ["roseau", 0.60], ["carcasse", 0.68]]},
 }
 
+# Images du décor « terre et herbe » (DEV-011) ; sans les fichiers, on retombe sur le dessin vectoriel.
+# genre -> [fichier, hauteur réelle en m]
+const ELEMENTS := {"poteau": ["poteau", 5.0], "herbe": ["buissons", 1.0], "arbre": ["arbre", 6.0], "rocher": ["rocher", 1.3],
+	"cloture": ["cloture", 1.2], "muret": ["muret", 1.0], "ruine": ["ruine", 7.0], "clocher": ["clocher", 14.0], "chateau_eau": ["chateau_eau", 12.0]}
+static var _tex := {}
+
 var camera_x := 0.0     # position du monde (m) au point d'ancrage
 var ppm := 55.0
 var sol_y := 900.0      # ligne du sol (px) pour une hauteur nulle
@@ -53,7 +59,30 @@ static func alea(k: float, graine: float) -> float:
 	return fposmod(sin(k * 127.1 + graine * 311.7) * 43758.5453, 1.0)
 
 
+static func texture(nom: String) -> Texture2D:
+	if not _tex.has(nom):
+		var chemin := "res://assets/decor/%s.png" % nom
+		_tex[nom] = load(chemin) if ResourceLoader.exists(chemin) else null
+	return _tex[nom]
+
+
+func _avec_images() -> bool:
+	return zone == "terre" and texture("terre_ciel") != null and texture("terre_sol") != null
+
+
+func _bande(nom: String, vit: float, bas: float) -> void:
+	var t := texture(nom)
+	var k := size.y / t.get_height()
+	var lw := t.get_width() * k
+	var x0 := -fposmod(camera_x * ppm * vit, lw)
+	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit)
+	while x0 < size.x:
+		draw_texture_rect(t, Rect2(x0, bas - size.y, lw + 1.0, size.y), false, teinte)
+		x0 += lw
+
+
 func _ready() -> void:
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	mouse_filter = MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 
@@ -69,20 +98,28 @@ func ecran_x(xm: float) -> float:
 func _draw() -> void:
 	var w := size.x
 	var hgt := size.y
+	var img := _avec_images()
+	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit)
+	if img:
+		draw_texture_rect(texture("terre_ciel"), Rect2(0, 0, w, sol_y + 40.0), false, teinte)
+		_bande("terre_lointain", 0.08, sol_y * 0.93)
+		_bande("terre_moyen", 0.2, sol_y * 1.0)
 	# Ciel en dégradé
 	var haut := Color("#7FA6BF").lerp(Color("#070D1C"), nuit)
 	var horizon := Color("#E9CFA0").lerp(Color("#2B2B48"), nuit)
-	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, sol_y), Vector2(0, sol_y)]),
-		PackedColorArray([haut, haut, horizon, horizon]))
+	if not img:
+		draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, sol_y), Vector2(0, sol_y)]),
+			PackedColorArray([haut, haut, horizon, horizon]))
 	if nuit > 0.2:
 		for i in 70:
 			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
-	draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70 if nuit < 0.5 else 46, Color(1.0, 0.95, 0.82, 0.85).lerp(Color(0.85, 0.9, 1.0, 0.95), nuit))
+	if not img:
+		draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70 if nuit < 0.5 else 46, Color(1.0, 0.95, 0.82, 0.85).lerp(Color(0.85, 0.9, 1.0, 0.95), nuit))
 	# Dunes en parallaxe (lointain -> proche)
 	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
 	var cl: Array = pal.couches
 	var couches := [[0.08, 0.62, 70.0, Color(cl[0])], [0.2, 0.74, 55.0, Color(cl[1])], [0.45, 0.86, 40.0, Color(cl[2])]]
-	for c in couches:
+	for c in (couches if not img else []):
 		var pts := PackedVector2Array([Vector2(0, hgt)])
 		var x := 0.0
 		while x <= w + 20:
@@ -95,7 +132,7 @@ func _draw() -> void:
 	# Silhouette d'une ville en ruine, très loin
 	var ville := PackedVector2Array([Vector2(0, hgt)])
 	var xv := 0.0
-	while xv <= w + 24:
+	while xv <= w + 24 and not img:
 		var uu: float = floorf((camera_x * ppm * 0.12 + xv) / 24.0)
 		var hh: float = 18.0 + 70.0 * alea(uu, 1.0) * (1.0 if alea(uu, 2.0) > 0.35 else 0.25)
 		var yb: float = sol_y * 0.80 - 14.0
@@ -103,9 +140,10 @@ func _draw() -> void:
 		ville.append(Vector2(xv + 24, yb - hh * (0.5 + 0.5 * alea(uu, 3.0))))
 		xv += 24
 	ville.append(Vector2(w, hgt))
-	draw_colored_polygon(ville, Color(cl[0]).darkened(0.12))
+	if not img:
+		draw_colored_polygon(ville, Color(cl[0]).darkened(0.12))
 	# Nuages lents
-	for i in 5:
+	for i in (5 if not img else 0):
 		var cx := fposmod(i * 460.0 + 120.0 - camera_x * ppm * 0.03 - Time.get_ticks_msec() * 0.006 * (1 + i % 2), w + 400.0) - 200.0
 		var cy := 60.0 + 38.0 * alea(i, 4.0) + i * 14.0
 		for j in 4:
@@ -122,7 +160,21 @@ func _draw() -> void:
 		x2 += 8
 	sol_pts.append(Vector2(w, hgt))
 	draw_colored_polygon(sol_pts, Color(pal.sol))
-	draw_polyline(crete, Color(pal.crete), 3.0, true)
+	if img:
+		var ts := texture("terre_sol")
+		var th := float(ts.get_height())
+		var v0 := 0.74
+		var prof := th * (1.0 - v0)
+		for i in range(crete.size() - 1):
+			var a: Vector2 = crete[i]
+			var b: Vector2 = crete[i + 1]
+			var ua := (a.x + camera_x * ppm) / ts.get_width()
+			var ub := (b.x + camera_x * ppm) / ts.get_width()
+			draw_polygon(PackedVector2Array([a + Vector2(0, -8), b + Vector2(0, -8), b + Vector2(0, prof - 8), a + Vector2(0, prof - 8)]),
+				PackedColorArray([teinte, teinte, teinte, teinte]),
+				PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, 1.0), Vector2(ua, 1.0)]), ts)
+	else:
+		draw_polyline(crete, Color(pal.crete), 3.0, true)
 	# Traces et cailloux de premier plan
 	var m0 := floorf((camera_x - ancre_x / ppm) / 3.0)
 	for i in int(w / ppm / 3.0) + 2:
@@ -147,7 +199,17 @@ func _draw() -> void:
 			if r < float(dk[1]):
 				genre = dk[0]
 				break
-		if genre == "poteau":   # poteau télégraphique penché
+		if img and ELEMENTS.has(genre):
+			var te := texture("elem_" + String(ELEMENTS[genre][0]))
+			var nom_e: String = ELEMENTS[genre][0]
+			if genre == "arbre" and alea(kk, 16.0) > 0.5:
+				te = texture("elem_arbre_mort")
+				nom_e = "arbre_mort"
+			if te != null:
+				var hm: float = 5.0 if nom_e == "arbre_mort" else float(ELEMENTS[genre][1])
+				var sc := hm * ppm / te.get_height()
+				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc + 4.0), te.get_size() * sc), false, teinte)
+		elif genre == "poteau":   # poteau télégraphique penché
 			var hp := 4.6 * ppm
 			draw_line(pied, pied + Vector2(0.15 * ppm, -hp), Color("#4A3828"), maxf(3.0, ppm * 0.12))
 			draw_line(pied + Vector2(-0.7 * ppm, -hp * 0.93), pied + Vector2(0.9 * ppm, -hp * 0.95), Color("#4A3828"), maxf(2.0, ppm * 0.08))
