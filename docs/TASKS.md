@@ -289,3 +289,7 @@ missions et événements par paliers.\
 risques et voie de récupération ; pas de blocage irréversible sans
 avertissement.\
 **Statut :** À faire.
+| DEV-011 | Décor en couches : charger `terre_ciel/lointain/moyen/sol` et `elem_*` (parallaxe, teinte nuit et tempête), repli sur le décor dessiné si les images manquent (DEC-114) | P1 | lots 3b et 3c livrés | `game/scripts/terrain.gd` | Capture d'écran de la zone terre ; le jeu démarre sans les images | À faire |
+| DEV-012 | Habillage de l'interface, étape 1 : cadre, barre du haut (progression du trajet, secteur, heure, menace), onglets (DEC-114) | P1 | lot 20 | `game/scripts/combat/vue_interface.gd` | Capture d'écran iPhone large ; boutons atteignables | À faire |
+| DEV-013 | Habillage de l'interface, étape 2 : panneaux du bas repliables (équipage, convoi, état, ressources, mini-carte), sans rations ni gestion (DEC-114) | P1 | DEV-012, lot 21 | `game/scripts/combat/vue_interface.gd` | Panneaux repliés par défaut sauf état et ressources ; captures | À faire |
+| DEV-014 | Rôle « Éclaireur » : s'ajoute aux rôles d'équipage ; effet proposé : les rencontres sont annoncées plus tôt (distance d'alerte × 1,5), valeur dans `equipage_roles` (DEC-114) | P2 | — | `game/data/combat_proto.json`, `game/scripts/vehicules/construction_libre.gd` | Test : un éclaireur à bord allonge la distance d'alerte | À faire |
