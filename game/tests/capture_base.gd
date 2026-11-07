@@ -11,7 +11,7 @@ func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		dossier = args[0]
-	var ppm := 26.0
+	var ppm := 24.0
 	if args.size() > 1:
 		ppm = float(args[1])
 	var fond := ColorRect.new()
@@ -24,24 +24,19 @@ func _initialize() -> void:
 	sol.size = Vector2(1280, 380)
 	root.add_child(sol)
 	var base := BaseVehicule.creer("citroen_t23")
-	var v1 := BaseVehicule.rallonger(base, "milieu", 2).a
-	var v2 := BaseVehicule.rallonger(BaseVehicule.rallonger(BaseVehicule.rallonger(v1, "arriere", 1).a, "avant", 1).a, "milieu", 2).a
-	var y := 330.0
+	var v1: Dictionary = BaseVehicule.rallonger(base, "milieu", 2).a
+	var v2: Dictionary = BaseVehicule.rallonger(v1, "arriere", 1).a
+	v2 = BaseVehicule.rallonger(v2, "avant", 1).a
+	v2 = BaseVehicule.rallonger(v2, "milieu", 2).a
+	var bas := [200.0, 410.0, 640.0]   # ligne de sol de chaque véhicule
+	var k := 0
 	for a in [base, v1, v2]:
 		var d := VehiculeDessin.new()
 		d.ppm = ppm
 		d.configurer(FormeAssemblage.enregistrer(a))
-		d.position = Vector2(20.0, y - d.size.y)
+		d.position = Vector2(20.0, float(bas[k]) - d.size.y)
 		root.add_child(d)
-		y += 0.0
-		if a == base:
-			d.position.y = 150.0 - d.size.y + 160.0
-		elif a == v1:
-			d.position.y = 330.0 - d.size.y + 0.0
-			d.position.x = 20.0
-		else:
-			d.position.y = 520.0 - d.size.y + 0.0
-			d.position.x = 20.0
+		k += 1
 	print("capture base")
 
 
