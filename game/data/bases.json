@@ -2,87 +2,497 @@
   "_lisez_moi": "Grille V2 (proposition du 07/11, décisions DEC-121 et suivantes). Une BASE est un véhicule trouvé dont on garde la silhouette ; on la transforme par opérations limitées (rallonge par crans, essieux, moteur, boîte, module de plateau, blindage par zone) au lieu de redessiner le châssis. Ajouter une base ou un module = une entrée ici, aucun code. Les ids de pièces renvoient à pieces.json ; 'historique' renvoie à assemblages.json. Valeurs à régler en essai sur iPhone.",
   "regles": {
     "cran_cases": 2,
-    "renfort": {"max": 3, "metal": 10, "poids_kg": 90, "souplesse_par_renfort": 0.55, "etat_gain": 0.15, "usure_chassis": 0.9},
-    "rigidite": {"souplesse_par_cran_milieu": 0.12, "souplesse_par_cran_porte_a_faux": 0.05, "chassis_par_souplesse": 1.5, "essieu_par_souplesse": 0.5},
+    "renfort": {
+      "max": 3,
+      "metal": 10,
+      "poids_kg": 90,
+      "souplesse_par_renfort": 0.55,
+      "etat_gain": 0.15,
+      "usure_chassis": 0.9
+    },
+    "rigidite": {
+      "souplesse_par_cran_milieu": 0.12,
+      "souplesse_par_cran_porte_a_faux": 0.05,
+      "chassis_par_souplesse": 1.5,
+      "essieu_par_souplesse": 0.5
+    },
     "usure": {
-      "moteur_sous_dimensionne": 2.0, "moteur_inadapte_en_plus": 4.0, "moteur_surpuissant_gain": 0.15, "moteur_plancher": 0.7,
-      "boite_plancher": 0.6, "boite_surcharge": 3.0, "essieu_plancher": 0.5, "essieu_surcharge": 3.0,
-      "plafond": 6.0, "etat_mauvais_facteur": 0.8
+      "moteur_sous_dimensionne": 2.0,
+      "moteur_inadapte_en_plus": 4.0,
+      "moteur_surpuissant_gain": 0.15,
+      "moteur_plancher": 0.7,
+      "boite_plancher": 0.6,
+      "boite_surcharge": 3.0,
+      "essieu_plancher": 0.5,
+      "essieu_surcharge": 3.0,
+      "plafond": 6.0,
+      "etat_mauvais_facteur": 0.8
     },
-    "pannes": {"taux_base_par_km": 0.004},
-    "verdicts": [[0.7, "costaud"], [1.1, "correct"], [1.6, "fatigué"], [2.5, "fragile"], [999.0, "à bout"]],
+    "pannes": {
+      "taux_base_par_km": 0.004
+    },
+    "verdicts": [
+      [
+        0.7,
+        "costaud"
+      ],
+      [
+        1.1,
+        "correct"
+      ],
+      [
+        1.6,
+        "fatigué"
+      ],
+      [
+        2.5,
+        "fragile"
+      ],
+      [
+        999.0,
+        "à bout"
+      ]
+    ],
     "boites": {
-      "boite_legere": {"nom": "Boîte légère", "puissance_ch": 90, "poids_kg": 60, "metal": 2},
-      "boite_moyenne": {"nom": "Boîte moyenne", "puissance_ch": 150, "poids_kg": 110, "metal": 3},
-      "boite_lourde": {"nom": "Boîte lourde", "puissance_ch": 260, "poids_kg": 220, "metal": 4},
-      "boite_char": {"nom": "Boîte de char", "puissance_ch": 500, "poids_kg": 480, "metal": 6}
+      "boite_legere": {
+        "nom": "Boîte légère",
+        "puissance_ch": 90,
+        "poids_kg": 60,
+        "metal": 2
+      },
+      "boite_moyenne": {
+        "nom": "Boîte moyenne",
+        "puissance_ch": 150,
+        "poids_kg": 110,
+        "metal": 3
+      },
+      "boite_lourde": {
+        "nom": "Boîte lourde",
+        "puissance_ch": 260,
+        "poids_kg": 220,
+        "metal": 4
+      },
+      "boite_char": {
+        "nom": "Boîte de char",
+        "puissance_ch": 500,
+        "poids_kg": 480,
+        "metal": 6
+      }
     },
-    "niveaux_lieu": {"0": "camp sur la route", "1": "garage de fortune ou atelier mobile", "2": "atelier de checkpoint", "3": "forge"},
+    "niveaux_lieu": {
+      "0": "camp sur la route",
+      "1": "garage de fortune ou atelier mobile",
+      "2": "atelier de checkpoint",
+      "3": "forge"
+    },
     "operations": {
-      "changer_roue":    {"niveau": 0, "duree_s": 60,  "pieces": true,  "nom": "Changer une roue"},
-      "changer_essieu":  {"niveau": 0, "duree_s": 240, "pieces": true,  "nom": "Changer un essieu"},
-      "changer_moteur":  {"niveau": 0, "duree_s": 420, "pieces": true,  "nom": "Changer le moteur"},
-      "changer_boite":   {"niveau": 0, "duree_s": 360, "pieces": false, "nom": "Changer la boîte"},
-      "poser_module":    {"niveau": 1, "duree_s": 300, "pieces": false, "nom": "Poser un module de plateau"},
-      "blinder_zone":    {"niveau": 1, "duree_s": 180, "pieces": false, "nom": "Blinder une zone"},
-      "rallonger":       {"niveau": 2, "duree_s": 600, "pieces": false, "metal_par_cran": 8, "nom": "Rallonger le châssis"},
-      "ajouter_essieu":  {"niveau": 2, "duree_s": 600, "pieces": true,  "nom": "Ajouter un essieu"},
-      "renforcer":       {"niveau": 2, "duree_s": 300, "pieces": false, "nom": "Renforcer le châssis"},
-      "fabriquer":       {"niveau": 3, "duree_s": 300, "pieces": false, "nom": "Fabriquer (tôles, superstructure)"}
+      "changer_roue": {
+        "niveau": 0,
+        "duree_s": 60,
+        "pieces": true,
+        "nom": "Changer une roue"
+      },
+      "changer_essieu": {
+        "niveau": 0,
+        "duree_s": 240,
+        "pieces": true,
+        "nom": "Changer un essieu"
+      },
+      "changer_moteur": {
+        "niveau": 0,
+        "duree_s": 420,
+        "pieces": true,
+        "nom": "Changer le moteur"
+      },
+      "changer_boite": {
+        "niveau": 0,
+        "duree_s": 360,
+        "pieces": false,
+        "nom": "Changer la boîte"
+      },
+      "poser_module": {
+        "niveau": 1,
+        "duree_s": 300,
+        "pieces": false,
+        "nom": "Poser un module de plateau"
+      },
+      "blinder_zone": {
+        "niveau": 1,
+        "duree_s": 180,
+        "pieces": false,
+        "nom": "Blinder une zone"
+      },
+      "rallonger": {
+        "niveau": 2,
+        "duree_s": 600,
+        "pieces": false,
+        "metal_par_cran": 8,
+        "nom": "Rallonger le châssis"
+      },
+      "ajouter_essieu": {
+        "niveau": 2,
+        "duree_s": 600,
+        "pieces": true,
+        "nom": "Ajouter un essieu"
+      },
+      "renforcer": {
+        "niveau": 2,
+        "duree_s": 300,
+        "pieces": false,
+        "nom": "Renforcer le châssis"
+      },
+      "fabriquer": {
+        "niveau": 3,
+        "duree_s": 300,
+        "pieces": false,
+        "nom": "Fabriquer (tôles, superstructure)"
+      }
     },
-    "duree": {"lieu_2_ou_plus": 0.5, "mecanicien_supplementaire": 0.5, "plancher_mecaniciens": 0.4},
-    "camp": {"attaque_intervalle_s": 150, "attaque_alea_s": 60, "force_base": 1.0, "force_par_niveau_secteur": 0.5, "force_alea": 1.0, "attaque_duree_s": 25},
+    "duree": {
+      "lieu_2_ou_plus": 0.5,
+      "mecanicien_supplementaire": 0.5,
+      "plancher_mecaniciens": 0.4
+    },
+    "camp": {
+      "attaque_intervalle_s": 150,
+      "attaque_alea_s": 60,
+      "force_base": 1.0,
+      "force_par_niveau_secteur": 0.5,
+      "force_alea": 1.0,
+      "attaque_duree_s": 25
+    },
     "blindage": {
-      "zones": ["cabine", "flancs", "calandre", "plancher", "plateau"],
+      "zones": [
+        "cabine",
+        "flancs",
+        "calandre",
+        "plancher",
+        "plateau"
+      ],
       "niveaux": {
-        "aucun": {"nom": "Aucun", "poids_kg": 0, "blindage": 0.0, "metal": 0},
-        "tole_legere": {"nom": "Tôle légère", "poids_kg": 120, "blindage": 1.0, "metal": 4},
-        "plaque": {"nom": "Plaque", "poids_kg": 320, "blindage": 2.5, "metal": 10},
-        "lourd": {"nom": "Blindage lourd", "poids_kg": 700, "blindage": 4.0, "metal": 20}
+        "aucun": {
+          "nom": "Aucun",
+          "poids_kg": 0,
+          "blindage": 0.0,
+          "metal": 0
+        },
+        "tole_legere": {
+          "nom": "Tôle légère",
+          "poids_kg": 120,
+          "blindage": 1.0,
+          "metal": 4
+        },
+        "plaque": {
+          "nom": "Plaque",
+          "poids_kg": 320,
+          "blindage": 2.5,
+          "metal": 10
+        },
+        "lourd": {
+          "nom": "Blindage lourd",
+          "poids_kg": 700,
+          "blindage": 4.0,
+          "metal": 20
+        }
       }
     },
     "modules": {
-      "plateau_nu":      {"nom": "Plateau nu", "poids_kg": 0, "cases_min": 0, "role": "", "cargo_kg": 600},
-      "bache":           {"nom": "Plateau bâché", "poids_kg": 60, "cases_min": 8, "role": "transport", "couvert": true, "places_troupes": 6, "cargo_kg": 900},
-      "benne":           {"nom": "Benne", "poids_kg": 400, "cases_min": 10, "role": "cargo", "cargo_kg": 2500},
-      "fourgon":         {"nom": "Fourgon fermé", "poids_kg": 500, "cases_min": 10, "role": "cargo", "couvert": true, "places_troupes": 4, "cargo_kg": 1500},
-      "citerne":         {"nom": "Citerne", "poids_kg": 450, "cases_min": 10, "role": "ravitailleur", "reservoir_plus": 400.0},
-      "cage":            {"nom": "Cage", "poids_kg": 300, "cases_min": 8, "role": "prison", "places_captifs": 4},
-      "atelier_mobile":  {"nom": "Atelier mobile", "poids_kg": 700, "cases_min": 14, "role": "atelier", "couvert": true, "atelier_niveau": 1, "duree_camp_mult": 0.6},
-      "infirmerie":      {"nom": "Infirmerie / dortoir", "poids_kg": 500, "cases_min": 12, "role": "infirmerie", "couvert": true, "soin": true, "places_troupes": 4},
-      "plateforme_tir":  {"nom": "Plateforme de tir", "poids_kg": 350, "cases_min": 8, "role": "canon", "affuts": 2}
+      "plateau_nu": {
+        "nom": "Plateau nu",
+        "poids_kg": 0,
+        "cases_min": 0,
+        "role": "",
+        "cargo_kg": 600
+      },
+      "bache": {
+        "nom": "Plateau bâché",
+        "poids_kg": 60,
+        "cases_min": 8,
+        "role": "transport",
+        "couvert": true,
+        "places_troupes": 6,
+        "cargo_kg": 900
+      },
+      "benne": {
+        "nom": "Benne",
+        "poids_kg": 400,
+        "cases_min": 10,
+        "role": "cargo",
+        "cargo_kg": 2500
+      },
+      "fourgon": {
+        "nom": "Fourgon fermé",
+        "poids_kg": 500,
+        "cases_min": 10,
+        "role": "cargo",
+        "couvert": true,
+        "places_troupes": 4,
+        "cargo_kg": 1500
+      },
+      "citerne": {
+        "nom": "Citerne",
+        "poids_kg": 450,
+        "cases_min": 10,
+        "role": "ravitailleur",
+        "reservoir_plus": 400.0
+      },
+      "cage": {
+        "nom": "Cage",
+        "poids_kg": 300,
+        "cases_min": 8,
+        "role": "prison",
+        "places_captifs": 4
+      },
+      "atelier_mobile": {
+        "nom": "Atelier mobile",
+        "poids_kg": 700,
+        "cases_min": 14,
+        "role": "atelier",
+        "couvert": true,
+        "atelier_niveau": 1,
+        "duree_camp_mult": 0.6
+      },
+      "infirmerie": {
+        "nom": "Infirmerie / dortoir",
+        "poids_kg": 500,
+        "cases_min": 12,
+        "role": "infirmerie",
+        "couvert": true,
+        "soin": true,
+        "places_troupes": 4
+      },
+      "plateforme_tir": {
+        "nom": "Plateforme de tir",
+        "poids_kg": 350,
+        "cases_min": 8,
+        "role": "canon",
+        "affuts": 2
+      }
     }
   },
   "bases": {
     "willys_mb": {
-      "nom": "Willys MB (base)", "historique": "willys_mb", "famille": "utilitaire", "boite": "boite_legere",
-      "rallonge_max": {"avant": 1, "milieu": 2, "arriere": 2}, "essieux_max": 3, "plateau_cases": 6,
-      "modules": ["plateau_nu", "bache", "plateforme_tir"],
-      "etat_origine": {"moteur": 0.7, "boite": 0.7, "chassis": 0.75, "essieux": 0.7}
+      "nom": "Willys MB (base)",
+      "historique": "willys_mb",
+      "famille": "utilitaire",
+      "boite": "boite_legere",
+      "rallonge_max": {
+        "avant": 1,
+        "milieu": 2,
+        "arriere": 2
+      },
+      "essieux_max": 3,
+      "plateau_cases": 6,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.7,
+        "boite": 0.7,
+        "chassis": 0.75,
+        "essieux": 0.7
+      }
     },
     "citroen_traction": {
-      "nom": "Citroën Traction (base)", "historique": "citroen_traction", "famille": "voiture", "boite": "boite_legere",
-      "rallonge_max": {"avant": 1, "milieu": 2, "arriere": 2}, "essieux_max": 2, "plateau_cases": 0,
+      "nom": "Citroën Traction (base)",
+      "historique": "citroen_traction",
+      "famille": "voiture",
+      "boite": "boite_legere",
+      "rallonge_max": {
+        "avant": 1,
+        "milieu": 2,
+        "arriere": 2
+      },
+      "essieux_max": 2,
+      "plateau_cases": 0,
       "modules": [],
-      "etat_origine": {"moteur": 0.6, "boite": 0.6, "chassis": 0.7, "essieux": 0.65}
+      "etat_origine": {
+        "moteur": 0.6,
+        "boite": 0.6,
+        "chassis": 0.7,
+        "essieux": 0.65
+      }
     },
     "citroen_t23": {
-      "nom": "Citroën T23 (base)", "historique": "citroen_t23", "famille": "camion_moyen", "boite": "boite_moyenne",
-      "rallonge_max": {"avant": 2, "milieu": 4, "arriere": 3}, "essieux_max": 3, "plateau_cases": 14,
-      "modules": ["plateau_nu", "bache", "benne", "fourgon", "citerne", "cage", "atelier_mobile", "infirmerie", "plateforme_tir"],
-      "etat_origine": {"moteur": 0.6, "boite": 0.55, "chassis": 0.65, "essieux": 0.6}
+      "nom": "Citroën T23 (base)",
+      "historique": "citroen_t23",
+      "famille": "camion_moyen",
+      "boite": "boite_moyenne",
+      "rallonge_max": {
+        "avant": 2,
+        "milieu": 4,
+        "arriere": 3
+      },
+      "essieux_max": 3,
+      "plateau_cases": 14,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "benne",
+        "fourgon",
+        "citerne",
+        "cage",
+        "atelier_mobile",
+        "infirmerie",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.6,
+        "boite": 0.55,
+        "chassis": 0.65,
+        "essieux": 0.6
+      },
+      "dessin": {
+        "_note": "Visuels de la base (docs/art/vehicules/citroen_t23/art, copiés dans game/assets/vehicules/t23). Cases = cellules de 25 cm, repère de l'image (x vers l'avant, y vers le haut depuis le sol). 'coupes' : positions où la rallonge s'insère ; 'bandes' : tranche [u0, u1] de l'image qui absorbe la rallonge de la zone ; 'mode' : etirer (défaut) ou repeter ; 'rigide' : aucune bande, la pièce suit seulement son côté.",
+        "ancrage": 5.0,
+        "coupes": {
+          "arriere": 3.0,
+          "milieu": 12.0,
+          "avant": 21.0
+        },
+        "parties": [
+          {
+            "image": "vehicules/t23/chassis",
+            "box": [
+              1.8,
+              1.84,
+              20.56,
+              2.267
+            ],
+            "z": 0,
+            "bandes": {
+              "arriere": [
+                0.02,
+                0.12
+              ],
+              "milieu": [
+                0.3,
+                0.65
+              ],
+              "avant": [
+                0.9,
+                0.96
+              ]
+            }
+          },
+          {
+            "image": "vehicules/t23/transmission",
+            "box": [
+              8.8,
+              2.2,
+              9.2,
+              2.518
+            ],
+            "z": 0,
+            "rigide": true
+          },
+          {
+            "image": "vehicules/t23/moteur",
+            "box": [
+              17.2,
+              3.6,
+              3.6,
+              2.611
+            ],
+            "z": 1,
+            "rigide": true
+          },
+          {
+            "image": "vehicules/t23/plateau",
+            "box": [
+              0.0,
+              3.88,
+              13.2,
+              5.788
+            ],
+            "z": 1,
+            "mode": "repeter",
+            "bandes": {
+              "arriere": [
+                0.15,
+                0.3
+              ],
+              "milieu": [
+                0.85,
+                0.95
+              ]
+            }
+          },
+          {
+            "image": "vehicules/t23/cabine",
+            "box": [
+              13.04,
+              2.52,
+              9.2,
+              6.021
+            ],
+            "z": 2,
+            "bandes": {
+              "avant": [
+                0.9,
+                0.95
+              ]
+            }
+          }
+        ]
+      }
     },
     "diamond_t": {
-      "nom": "Diamond T (base)", "historique": "diamond_t", "famille": "camion_lourd", "boite": "boite_lourde",
-      "rallonge_max": {"avant": 2, "milieu": 5, "arriere": 4}, "essieux_max": 4, "plateau_cases": 16,
-      "modules": ["plateau_nu", "bache", "benne", "fourgon", "citerne", "cage", "atelier_mobile", "infirmerie", "plateforme_tir"],
-      "etat_origine": {"moteur": 0.55, "boite": 0.55, "chassis": 0.7, "essieux": 0.6}
+      "nom": "Diamond T (base)",
+      "historique": "diamond_t",
+      "famille": "camion_lourd",
+      "boite": "boite_lourde",
+      "rallonge_max": {
+        "avant": 2,
+        "milieu": 5,
+        "arriere": 4
+      },
+      "essieux_max": 4,
+      "plateau_cases": 16,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "benne",
+        "fourgon",
+        "citerne",
+        "cage",
+        "atelier_mobile",
+        "infirmerie",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.55,
+        "boite": 0.55,
+        "chassis": 0.7,
+        "essieux": 0.6
+      }
     },
     "m3_half_track": {
-      "nom": "M3 Half-track (base)", "historique": "m3_half_track", "famille": "semi_chenille", "boite": "boite_moyenne",
-      "rallonge_max": {"avant": 1, "milieu": 3, "arriere": 2}, "essieux_max": 2, "plateau_cases": 8,
-      "modules": ["plateau_nu", "bache", "infirmerie", "plateforme_tir"],
-      "etat_origine": {"moteur": 0.6, "boite": 0.6, "chassis": 0.7, "essieux": 0.65}
+      "nom": "M3 Half-track (base)",
+      "historique": "m3_half_track",
+      "famille": "semi_chenille",
+      "boite": "boite_moyenne",
+      "rallonge_max": {
+        "avant": 1,
+        "milieu": 3,
+        "arriere": 2
+      },
+      "essieux_max": 2,
+      "plateau_cases": 8,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "infirmerie",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.6,
+        "boite": 0.6,
+        "chassis": 0.7,
+        "essieux": 0.65
+      }
     }
   }
 }

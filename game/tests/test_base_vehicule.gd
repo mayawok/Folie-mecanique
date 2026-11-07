@@ -59,6 +59,14 @@ func _init() -> void:
 		ok(bxv.x == bx0.x and bxv.y == bx0.y + 2 and _xs_essieux(rv.a) == xs0, "avant : les essieux ne bougent pas")
 	ok(not bool(BaseVehicule.rallonger(ConstructionLibre.nouvelle(), "milieu", 1).ok), "une grille libre n'est pas une base")
 	ok(not bool(BaseVehicule.rallonger(t23, "diagonale", 1).ok), "zone inconnue refusée")
+	# --- DEV-017 : dessin des bases ---
+	var fo0 := ConstructionLibre.forme(t23)
+	ok(bool(fo0.get("art_base", false)) and fo0.formes.filter(func(q): return q.has("sprite")).size() >= 5, "T23 : dessiné avec ses visuels")
+	if bool(r.ok):
+		var fo1 := ConstructionLibre.forme(r.a)
+		ok(float(fo1.longueur) > float(fo0.longueur) + 0.9, "T23 rallongé de 2 crans : plus long à l'écran (%.2f → %.2f m)" % [float(fo0.longueur), float(fo1.longueur)])
+		ok(fo1.formes.filter(func(q): return q.has("sprite")).size() > fo0.formes.filter(func(q): return q.has("sprite")).size(), "rallonge : tranches et répétitions en plus")
+	ok(not bool(ConstructionLibre.forme(BaseVehicule.creer("willys_mb")).get("art_base", false)), "base sans visuels : dessin vectoriel conservé")
 	# --- Renforts ---
 	var long := BaseVehicule.rallonger(t23, "milieu", 4)
 	if bool(long.ok):
