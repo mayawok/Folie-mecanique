@@ -211,17 +211,17 @@ func _init() -> void:
 	var l0 := TransformationBase.entrees(tb_a, ctx_camp)
 	var l2 := TransformationBase.entrees(tb_a, ctx_atel)
 	ok(l0.size() == l2.size() and l0.size() > 10, "catalogue : mêmes entrées quel que soit le lieu (%d)" % l0.size())
-	var r0 := TransformationBase.de_onglet(l0, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
-	var r2 := TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
+	var r0: Dictionary = TransformationBase.de_onglet(l0, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
+	var r2: Dictionary = TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
 	ok(not bool(r0.ok) and String(r0.raison) != "", "rallonge grisée sur la route avec la raison : %s" % r0.raison)
 	ok(bool(r2.ok) and float(r2.metal) > 0.0 and float(r2.duree_s) > 0.0, "rallonge possible à l'atelier, coût et durée annoncés")
 	var ap := TransformationBase.appliquer(tb_a, r2)
 	ok(bool(ap.ok) and int(ap.a.base.crans.milieu) == 1, "appliquer l'entrée rallonge d'un cran")
-	var pauvre := TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 1.0, "reserve": res_tb}).filter(func(e): return e.id == "rallonge_milieu")[0]
+	var pauvre: Dictionary = TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 1.0, "reserve": res_tb}).filter(func(e): return e.id == "rallonge_milieu")[0]
 	ok(not bool(pauvre.ok) and "métal" in String(pauvre.raison), "pas assez de métal : grisé")
-	var es := TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
+	var es: Dictionary = TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
 	ok(bool(es.ok) and int(es.args.x) > 0, "essieu ajouté : colonne trouvée (%s)" % es.raison)
-	var es0 := TransformationBase.de_onglet(TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 100.0, "reserve": []}), "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
+	var es0: Dictionary = TransformationBase.de_onglet(TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 100.0, "reserve": []}), "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
 	ok(not bool(es0.ok), "essieu ajouté grisé sans pièce en réserve")
 	var bl_tb := TransformationBase.de_onglet(l0, "blindage")
 	ok(bl_tb.size() == 5 * 4 and bl_tb.any(func(e): return e.actif), "blindage : 5 zones x 4 niveaux, niveau en place repéré")
