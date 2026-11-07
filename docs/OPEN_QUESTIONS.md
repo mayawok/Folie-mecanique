@@ -179,3 +179,11 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Documents concernés** : docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md, docs/design/CONVOI.md
 - **Options connues** : garder / adapter / supprimer, avec une recommandation par écart dans l'audit
 - **Statut** : résolue (DEC-109)
+
+## OQ-023 — Grille V2 : réglages à trancher
+
+- **Question** : taille maximale du convoi et rôle de la capacité de chargement ; bases de la V0 (une par faction ?) ; véhicules historiques à garder ou archiver face à la Bible (Tiger I, Sherman, etc.) ; l'atelier mobile peut-il aussi rallonger ?
+- **Pourquoi la trancher** : borne le nombre de bases à dessiner et l'équilibrage des modules (DEC-121 à 124).
+- **Documents concernés** : docs/design/GRILLE.md, game/data/bases.json, docs/lore/01_BIBLE_FOUNDATION
+- **Options connues** : une base par faction ; atelier mobile limité au niveau 1 (proposition actuelle)
+- **Statut** : ouverte

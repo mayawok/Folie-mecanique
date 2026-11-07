@@ -1,0 +1,28 @@
+# Tests sans écran du prototype (Godot 4.3, mode headless). Se lance sur les branches de travail et à la main.
+# Un test échoue si sa sortie contient « ÉCHEC » ou si Godot signale une erreur de script.
+name: Tests
+on:
+  push:
+    branches: ["grille-v2"]
+    paths: ["game/**", ".github/workflows/tests.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Importer le projet (enregistre les class_name)
+        run: godot --headless --path game --import || true
+      - name: Lancer les tests
+        run: |
+          fin=0
+          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_editeur; do
+            echo "=== $t ==="
+            godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
+            tail -n 60 /tmp/$t.log
+            if grep -q "ÉCHEC\|SCRIPT ERROR\|Parse Error" /tmp/$t.log; then echo ">>> $t : ÉCHEC"; fin=1; fi
+          done
+          exit $fin
