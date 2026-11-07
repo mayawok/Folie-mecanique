@@ -187,3 +187,11 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Documents concernés** : docs/design/GRILLE.md, game/data/bases.json, docs/lore/01_BIBLE_FOUNDATION
 - **Options connues** : une base par faction ; atelier mobile limité au niveau 1 (proposition actuelle)
 - **Statut** : ouverte
+
+## OQ-024 — Communautés ferroviaires et mission du camp : validation
+
+- **Question** : valider (ou non) les deux propositions du 07/11 ; créer ou non `FAC-008 — Communautés ferroviaires` comme entrée descriptive (non centralisée) dans la Bible ; choisir lieu et noms du camp ; vérifier les modèles de véhicules allemands avant tout catalogue.
+- **Pourquoi la trancher** : sans validation, ces documents ne sont pas canon et ne doivent pas alimenter les données ni le code (DEC-130).
+- **Documents concernés** : docs/lore/communautes-ferroviaires.md, docs/scenario/mission-liberation-camp-travailleurs.md, docs/lore/01_BIBLE_FOUNDATION
+- **Options connues** : FAC-008 descriptive ; ou aucune entrée collective
+- **Statut** : ouverte
