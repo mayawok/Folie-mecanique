@@ -969,6 +969,12 @@ static func analyser(a: Dictionary) -> Dictionary:
 		pv.chassis += float(TL.pv_case) * t.long
 		metal += float(TL.metal_case) * t.long
 		blindage_toles += float(TL.blindage_case) * t.long * t.facteur
+	var blindage_base := 0.0
+	if a.has("base"):   # Grille V2 : renforts, module de plateau et blindage par zones (BaseVehicule) comptent dans la masse et les stats
+		var bb := BaseVehicule.bornes_x(a)
+		masses.append([BaseVehicule.poids_supplementaire(a), (float(bb.x) + float(bb.y) + 1.0) * 0.5, corps_bas + 1.5])
+		blindage_base = float(BaseVehicule.effets_blindage(a).moyenne)
+		reservoir_plus += float(BaseVehicule.effets_module(a).reservoir_plus)
 	var M := 0.0
 	var xg := 0.0
 	var yg := 0.0
@@ -1131,7 +1137,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 			"cabine", "poste":
 				pv.cabine += float(p.fiche.pv)
 	sieges = sieges_de(a)
-	var troupes := places_troupes(a)
+	var troupes := places_troupes(a) + (int(BaseVehicule.effets_module(a).places_troupes) if a.has("base") else 0)
 	ouvert = _sieges_exposes(a)
 	# Plusieurs moteurs couplés (DEC-047) : rendement en baisse, consommation qui explose
 	if n_moteurs > 1:
@@ -1217,7 +1223,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 			f_vit *= float(IC.bonus_vitesse) + minf(float(IC.bonus_puissance_max), exces * float(IC.bonus_par_exces))
 	var v := 0.0 if immobile != "" else vitesse * sable * f_vit
 	var roles := roles_de(a)
-	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes + blindage_toles, "remorque": remorque(a),
+	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes + blindage_toles + blindage_base, "remorque": remorque(a),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size() + reservoir_plus, "piques": piques, "metal": int(round(metal)),
 		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "classe": classe, "moteurs": n_moteurs, "roles": roles,

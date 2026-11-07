@@ -69,7 +69,7 @@ static func evaluer(a: Dictionary) -> Dictionary:
 	var plafond := float(U.plafond)
 	var det: Dictionary = an.detail
 	var bs: Dictionary = a.get("base", {})
-	var masse := float(det.poids_kg) + BaseVehicule.poids_supplementaire(a)
+	var masse := float(det.poids_kg)   # inclut déjà renforts, module et blindage (ConstructionLibre.analyser)
 	var tonnes := maxf(0.1, masse / 1000.0)
 	var puissance := float(det.puissance)
 	var defauts := []

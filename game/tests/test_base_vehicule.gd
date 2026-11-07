@@ -111,6 +111,16 @@ func _init() -> void:
 		ok(BaseVehicule.poids_supplementaire(am.a) >= 700.0, "module : poids ajouté")
 		var comp := BaseVehicule.composition([am.a, BaseVehicule.creer("willys_mb")])
 		ok(bool(comp.atelier_mobile) and comp.manques.has("ravitailleur") and not comp.manques.has("atelier"), "convoi : atelier mobile présent, ravitailleur manquant")
+	# DEV-019 : module, blindage et renforts comptent dans les statistiques de combat
+	var s_base := ConstructionLibre.analyser(t23).stats
+	if bool(am.ok):
+		ok(float(ConstructionLibre.analyser(am.a).stats.poids_kg) >= float(s_base.poids_kg) + 650.0, "atelier mobile : +700 kg dans le profil de combat")
+	var ci := BaseVehicule.poser_module(t23, "citerne")
+	ok(bool(ci.ok) and float(ConstructionLibre.analyser(ci.a).stats.reservoir) >= float(s_base.reservoir) + 399.0, "citerne : réservoir +400 L dans le profil")
+	var tr := BaseVehicule.poser_module(t23, "bache")
+	ok(bool(tr.ok) and int(ConstructionLibre.analyser(tr.a).stats.places_troupes) >= int(s_base.places_troupes) + 6, "bâche : +6 places de troupes")
+	var blz := BaseVehicule.blinder_zone(t23, "cabine", "plaque")
+	ok(bool(blz.ok) and float(ConstructionLibre.analyser(blz.a).stats.blindage) > float(s_base.blindage), "blindage de cabine : blindage du profil en hausse")
 	var w := BaseVehicule.creer("willys_mb")
 	ok(not bool(BaseVehicule.poser_module(w, "atelier_mobile").ok), "Willys : atelier mobile refusé (module non prévu)")
 	ok(not bool(BaseVehicule.poser_module(w, "bache").ok), "Willys court : bâche refusée (plateau trop court)")
