@@ -223,7 +223,7 @@ func _init() -> void:
 	ok(bool(es.ok) and int(es.args.x) > 0, "essieu ajouté : colonne trouvée (%s)" % es.raison)
 	var es0 := TransformationBase.de_onglet(TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 100.0, "reserve": []}), "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
 	ok(not bool(es0.ok), "essieu ajouté grisé sans pièce en réserve")
-	var bl := TransformationBase.de_onglet(l0, "blindage")
-	ok(bl.size() == 5 * 4 and bl.any(func(e): return e.actif), "blindage : 5 zones x 4 niveaux, niveau en place repéré")
+	var bl_tb := TransformationBase.de_onglet(l0, "blindage")
+	ok(bl_tb.size() == 5 * 4 and bl_tb.any(func(e): return e.actif), "blindage : 5 zones x 4 niveaux, niveau en place repéré")
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)
