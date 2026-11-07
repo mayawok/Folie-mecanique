@@ -13,9 +13,12 @@ func _init() -> void:
 	m.pieces_stock.append({"piece": "essieu_lourd", "etat": 0.9})
 	m.pieces_stock.append({"piece": "roue_grande", "etat": 0.8})
 	vue.selection = v.uid
+	vue._bande_on = true
 	for i in 15: await process_frame
 	var o: Dictionary = vue._option_camp(v)
 	print("option camp : ", o.get("op", ""), " ok=", o.get("ok", false))
+	for i in 5: await process_frame
+	root.get_viewport().get_texture().get_image().save_jpg(OS.get_cmdline_user_args()[0].replace("camp.jpg", "camp_avant.jpg"), 0.8)
 	vue._action_camp()
 	for i in 200: m.avancer()
 	for i in 20: await process_frame
