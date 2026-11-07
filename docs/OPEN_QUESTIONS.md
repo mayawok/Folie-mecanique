@@ -171,3 +171,11 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Documents concernés** : data/master/contenu_depart_p0.csv, sources/base_maitre.xlsx
 - **Options connues** : garder le classeur ; reporter les changements du CSV dans le classeur ; archiver l'onglet (départ de base)
 - **Statut** : résolue (DEC-107, tableau supprimé)
+
+## OQ-022 — Écarts Bible et prototype
+
+- **Question** : pour chacun des écarts E4 à E10 (tempêtes, meutes, chien, zone calme, camps, décor, carte), garde-t-on, adapte-t-on ou supprime-t-on ?
+- **Pourquoi la trancher** : DEC-092 impose un réexamen élément par élément avant tout nouveau code ; débloque DEV-004 et la nouvelle carte.
+- **Documents concernés** : docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md, docs/design/CONVOI.md
+- **Options connues** : garder / adapter / supprimer, avec une recommandation par écart dans l'audit
+- **Statut** : résolue (DEC-109)

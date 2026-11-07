@@ -31,11 +31,13 @@ postes et bancs (DEC-062 à 064), interface allégée (DEC-065), construction en
 
 ## À coder (décidé, pas encore fait)
 
-Nouvelle ouverture (DEC-100), factions de la Bible (DEC-098), meutes rares et oiseaux (DEC-097), essence et gazole par moteur (DEC-094).
+Nouvelle ouverture (DEC-100), factions de la Bible (DEC-098), meutes rares et oiseaux (DEC-097), essence et gazole par moteur (DEC-094),
+tempêtes en zones désertiques, zones calmes inversées, checkpoint de chapitre, décor par zone, carte fixe (DEC-109, DEV-006 à 009).
 
 ## Contradictions traitées le 06/11
 
 - Passages périmés de VISION, CONVOI et GRILLE archivés (DEC-105) ; tâches de base archivées (DEC-106) ; modèle économique : démo + déblocage (DEC-104).
+- Audit du 07/11 : 7 écarts Bible/prototype **tranchés comme recommandé** (DEC-109, OQ-022 résolue ; tâches DEV-006 à DEV-009) : [`docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md`](docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md) (OQ-022).
 - Restent : le code du prototype garde l'ancienne ouverture et les factions 1-2-3 (DEV-002, DEV-003) ; tâches dépendantes à réviser (OQ-019).
 
 ## Décisions ouvertes
