@@ -20,6 +20,7 @@ var _pile: Array = []        # états précédents de la grille, pour annuler
 var _metal := 0.0
 var _duree := 0.0
 var _apercu: VehiculeDessin
+var _zone: Control
 var _liste: VBoxContainer
 var _rangee: HBoxContainer
 var _bilan: Label
@@ -49,6 +50,8 @@ func _ready() -> void:
 	var zone := Control.new()
 	zone.size_flags_vertical = SIZE_EXPAND_FILL
 	zone.clip_contents = true
+	zone.resized.connect(_ajuster)
+	_zone = zone
 	gauche.add_child(zone)
 	_apercu = VehiculeDessin.new()
 	_apercu.ppm = 30.0
@@ -128,6 +131,18 @@ func _faire(e: Dictionary) -> void:
 	_maj()
 
 
+# Aperçu : agrandi pour remplir la zone, centré
+func _ajuster() -> void:
+	if _zone == null or _zone.size.x < 50.0:
+		return
+	_apercu.ppm = 30.0
+	_apercu.configurer(FormeAssemblage.enregistrer(a))
+	var k := minf(_zone.size.x * 0.92 / maxf(_apercu.size.x, 1.0), _zone.size.y * 0.8 / maxf(_apercu.size.y, 1.0))
+	_apercu.ppm = 30.0 * k
+	_apercu.configurer(FormeAssemblage.enregistrer(a))
+	_apercu.position = (_zone.size - _apercu.size) * 0.5
+
+
 func _duree_txt(s: float) -> String:
 	return "%d min %02d s" % [int(s) / 60, int(s) % 60]
 
@@ -136,7 +151,7 @@ func _maj() -> void:
 	var ctx2 := ctx.duplicate()
 	ctx2.metal = float(ctx.get("metal", 0.0)) - _metal   # le métal déjà engagé n'est plus disponible
 	_apercu.configurer(FormeAssemblage.enregistrer(a))
-	_apercu.position = Vector2(8.0, 40.0)
+	_ajuster()
 	_bilan.text = "Coût cumulé : %d métal · durée : %s · lieu : %s" % [int(_metal), _duree_txt(_duree), String(BaseVehicule.regles().niveaux_lieu[str(BaseVehicule.niveau_effectif(ctx))])]
 	for ch in _rangee.get_children():
 		ch.queue_free()
