@@ -178,4 +178,4 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : DEC-092 impose un réexamen élément par élément avant tout nouveau code ; débloque DEV-004 et la nouvelle carte.
 - **Documents concernés** : docs/audits/ECARTS_BIBLE_PROTOTYPE_2026-11-07.md, docs/design/CONVOI.md
 - **Options connues** : garder / adapter / supprimer, avec une recommandation par écart dans l'audit
-- **Statut** : ouverte
+- **Statut** : résolue (DEC-109)

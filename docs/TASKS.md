@@ -214,6 +214,10 @@ Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche 
 | DEV-003 | Nouvelle ouverture : convoi existant avec camion, rotation dans le no man's land (DEC-100) | P1 | OQ-006, OQ-007, OQ-008 | `game/scripts/combat/modele_atelier.gd`, `game/data/combat_proto.json` | Partie démarrant sur le camion, sans l'étape caisse et moto ; test d'ouverture mis à jour | À faire |
 | DEV-004 | Rendre les meutes rares et mettre en valeur l'oiseau (DEC-097) | P2 | OQ-013 | `game/scripts/combat/monde.gd` | Fréquence des meutes réglable dans les données ; test : pas de meute chaque nuit | À faire |
 | DEV-005 | Renommer l'identifiant interne `intercepteur` avec migration (DEC-096) | P3 | — | `game/data/pieces.json`, `game/scripts/vehicules/construction_libre.gd` | Migration + test ; anciens plans chargés | À faire |
+| DEV-006 | Limiter les tempêtes de sable aux zones désertiques du no man's land et les rarifier ; chien démineur très rare (DEC-109, E4, E6) | P2 | OQ-013 | `game/scripts/combat/modele_meteo.gd`, `game/scripts/combat/modele_mines.gd`, `game/data/combat_proto.json` | Tests : pas de tempête hors zone désert ; fréquences réglables dans les données | À faire |
+| DEV-007 | Inverser la zone calme : zones habitées calmes, trajet entre zones = no man's land ; services des camps regroupés en checkpoint de chapitre (DEC-109, E7, E8) | P2 | OQ-010, OQ-011 | `game/scripts/combat/monde.gd`, `game/scripts/combat/combat_modele.gd` | Tests : aucune rencontre en zone ; rencontres entre zones ; un checkpoint par chapitre | À faire |
+| DEV-008 | Décor par type de zone, y compris l'eau (DEC-109, E9) | P3 | OQ-011 | `game/scripts/combat/vue_dessin.gd`, `game/scripts/combat/modele_terrain.gd` | Capture d'écran par type de zone ; décor cohérent avec la zone | À faire |
+| DEV-009 | Carte fixe de 12 ou 13 secteurs sur une France déformée, remplaçant les secteurs aléatoires de niveau 0 à 7 (DEC-109, E10) | P2 | OQ-010, OQ-011 | `game/scripts/combat/monde.gd` | Tests : carte identique à chaque partie ; chaque secteur porte une faction de la Bible | À faire |
 
 ### D. Problèmes historiques à vérifier
 

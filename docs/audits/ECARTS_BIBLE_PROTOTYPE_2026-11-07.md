@@ -1,6 +1,6 @@
 # Écarts entre la Bible et le prototype — 2026-11-07
 
-Statut : **liste à trancher** (OQ-022). Aucune décision n'est prise ici. Référence : Bible (`docs/lore/01_BIBLE_FOUNDATION`, DEC-091).
+Statut : **tranché le 07/11, toutes les recommandations retenues (DEC-109, OQ-022 résolue)**. Les tâches de code sont DEV-006 à DEV-009. Référence : Bible (`docs/lore/01_BIBLE_FOUNDATION`, DEC-091).
 Méthode : Bible relue (01.3, 03.3, 04.1 bis/ter/quater, 04.6, 05, 09.3) puis comparée au contenu de `docs/design/CONVOI.md` et de `docs/design/GRILLE.md`.
 Seule la grille est conservée d'office (DEC-092) ; tout le reste est à garder, adapter ou supprimer, élément par élément.
 
