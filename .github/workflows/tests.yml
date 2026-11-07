@@ -21,7 +21,7 @@ jobs:
           fin=0
           for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_camp; do
             echo "=== $t ==="
-            godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
+            timeout 150 godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
             tail -n 60 /tmp/$t.log
             if grep -q "ÉCHEC\|SCRIPT ERROR\|Parse Error" /tmp/$t.log; then echo ">>> $t : ÉCHEC"; fin=1; fi
           done
