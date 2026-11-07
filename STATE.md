@@ -12,6 +12,8 @@ Mis à jour : 2026-11-07. Résumé volontairement court (≈ 60 lignes). Détail
 - **Du prototype, on garde la grille** ; le reste est réexaminé face à la Bible (DEC-092).
 - **Priorité du prototype (07/11, DEC-110)** : le Mode créatif sert de kit de développement (toutes les pièces) pour bâtir monde, décors
   et rencontres avant tout chapitre. Jeu final : Mode créatif séparé, avec les seules pièces trouvées (DEC-111). **Kit codé le 07/11 (DEC-112, DEV-010)** : à essayer sur iPhone. Prochaine tâche : DEV-008 (affiner le décor par zone).
+- **Équilibrage (07/11, DEC-113)** : ennemis en groupes, plus fragiles et moins meurtriers que le convoi, rôdeurs plus rares ; à régler en essai avec le Kit.
+- **Méthode de travail** : Claude fusionne lui-même dans `main` (autorisation du 07/11) ; la page web se reconstruit ensuite toute seule.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
 ## Ce qui existe
