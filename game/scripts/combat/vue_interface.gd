@@ -351,6 +351,22 @@ func _construire_elements() -> void:
 			var an := TitreAnim.new()
 			an.mode = mode
 			scene.add_child(an)
+	var ver := Label.new()   # numéro de version et date de la dernière mise en ligne (écrit par le workflow web)
+	var txt := "version de développement"
+	if FileAccess.file_exists("res://data/version.json"):
+		var vj = JSON.parse_string(FileAccess.get_file_as_string("res://data/version.json"))
+		if vj is Dictionary and vj.has("version"):
+			txt = "Version " + str(vj.version)
+	ver.text = txt
+	ver.add_theme_font_size_override("font_size", 22)
+	ver.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
+	ver.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	ver.add_theme_constant_override("outline_size", 6)
+	ver.mouse_filter = MOUSE_FILTER_IGNORE
+	ver.set_anchors_and_offsets_preset(PRESET_CENTER_BOTTOM)
+	ver.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	ver.offset_top = -50
+	_voile_menu.add_child(ver)
 	_boite_titre = VBoxContainer.new()
 	_boite_titre.add_theme_constant_override("separation", 20)
 	_voile_menu.add_child(_boite_titre)

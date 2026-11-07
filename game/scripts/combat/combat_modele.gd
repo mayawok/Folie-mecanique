@@ -9,7 +9,7 @@ func _init(g := 1, options := {}) -> void:
 	rng.seed = g
 	var D := donnees()
 	bac_a_sable = bool(options.get("bac_a_sable", false))
-	Terrain.zone = "sable"
+	Terrain.zone = "terre"
 	meteo_on = bool(options.get("meteo", options.get("ouverture", bac_a_sable)))
 	champs_on = bool(options.get("champs", options.get("ouverture", bac_a_sable)))
 	_init_meteo()

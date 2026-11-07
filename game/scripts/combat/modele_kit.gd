@@ -10,7 +10,7 @@ const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux"
 const KIT_VEHICULES := {"bmw_r75": "Moto side-car", "moto_bmw": "Moto", "willys_mb": "Jeep", "citroen_traction": "Voiture",
 	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman"}
 
-var kit_zone := "sable"
+var kit_zone := "terre"
 var kit_distance := 90.0       # distance d'apparition devant (ou derrière) le convoi, en mètres
 var _kit_convois := {}         # uid d'un véhicule de convoi ennemi -> vitesse imposée (m/s)
 
