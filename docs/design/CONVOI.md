@@ -246,3 +246,9 @@ Bouton **Kit** en haut (Mode créatif seulement) : panneau à droite. Code : `mo
 - **Poursuite par l'arrière** : 3 présets (2 motos, 2 voitures, moto + voiture + camion) ; ils se calent à côté du convoi et lancent des abordeurs (DEC-077).
 - **Convoi à rattraper** (nouveau, mode `convoi`) : véhicules ennemis qui roulent dans notre sens, devant nous, à vitesse choisie (3, 4,5 ou 7 m/s, plafonnée par leur propre vitesse). Il faut les rattraper (par exemple avec un camion armé construit sur la grille) pour les attaquer. Ils tirent comme les autres ennemis.
 - Pas encore : convois ennemis à ordres (formation, fuite, riposte), vrai pillage d'un convoi capturé, sauvegarde du Kit.
+
+## Équilibrage des ennemis (DEC-113)
+
+Bloc `equilibrage` de `combat_proto.json`, testé par `test_equilibrage.gd` : `ennemi_degats_subis` 1,5 (véhicules ennemis), `ennemi_degats_infliges` 0,7 (tout tir ennemi),
+`ennemi_precision` 0,85, `rodeurs_delai` 95 s et `rodeurs_delai_abri` 60 s. Les rencontres de véhicules sont des groupes (Tiger I seul excepté). Objectif : on gagne un combat sans tout
+risquer, mais le danger vient du nombre et de l'enchaînement. À régler en essai ; l'étape suivante est de tester le Kit contre des groupes pour trouver les bons chiffres.

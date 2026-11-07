@@ -530,7 +530,8 @@ func _assauts(dt: float) -> void:
 	_assaut_t -= dt
 	if _assaut_t > 0.0 or vivants() >= 6:
 		return
-	_assaut_t = 22.0 if a_abri() else 34.0
+	var EQ: Dictionary = m.donnees().equilibrage   # meutes rares (DEC-097, DEC-113)
+	_assaut_t = float(EQ.rodeurs_delai_abri) if a_abri() else float(EQ.rodeurs_delai)
 	if not a_abri() and m.convoi.any(func(v): return v.actif() and int(v.profil.get("phares", 0)) > 0):
 		_assaut_t /= float(m.donnees().phares.attire)   # les phares se voient de loin (DEC-048)
 	var niv: int = niveau_a(m.x_tete)

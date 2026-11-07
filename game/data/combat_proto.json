@@ -347,6 +347,7 @@
    }
   }
  },
+ "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
  "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
  "rencontres": {
   "intervalle": [
@@ -355,16 +356,14 @@
   ],
   "palier_m": 400,
   "liste": [
-   {"niveau_min": 1, "niveau_max": 4, "poids": 2, "vehicules": ["bmw_r75"], "mode": "poursuite", "abordeurs": 1, "types": ["lame"]},
+   {"niveau_min": 1, "niveau_max": 4, "poids": 2, "vehicules": ["bmw_r75", "moto_bmw"], "mode": "poursuite", "abordeurs": 1, "types": ["lame"]},
    {"niveau_min": 2, "niveau_max": 7, "poids": 3, "vehicules": ["citroen_traction", "bmw_r75"], "mode": "poursuite", "abordeurs": 2, "types": ["lame", "bombe"]},
    {"niveau_min": 4, "niveau_max": 7, "poids": 2, "vehicules": ["willys_mb", "citroen_traction"], "mode": "poursuite", "abordeurs": 3, "types": ["bombe", "lame"]},
    {
     "niveau_min": 0,
     "niveau_max": 1,
     "poids": 3,
-    "vehicules": [
-     "bmw_r75"
-    ],
+    "vehicules": ["bmw_r75", "moto_bmw"],
     "mode": "approche"
    },
    {
@@ -386,9 +385,7 @@
     "niveau_min": 1,
     "niveau_max": 4,
     "poids": 3,
-    "vehicules": [
-     "citroen_traction"
-    ],
+    "vehicules": ["citroen_traction", "bmw_r75"],
     "mode": "approche"
    },
    {
@@ -411,9 +408,7 @@
     "niveau_min": 2,
     "niveau_max": 6,
     "poids": 2,
-    "vehicules": [
-     "citroen_t23"
-    ],
+    "vehicules": ["citroen_t23", "willys_mb"],
     "mode": "barrage"
    },
    {
@@ -450,9 +445,7 @@
     "batiments": [
      "grange"
     ],
-    "vehicules": [
-     "bmw_r75"
-    ],
+    "vehicules": ["bmw_r75", "moto_bmw"],
     "mode": "approche"
    },
    {

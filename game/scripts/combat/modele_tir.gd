@@ -148,6 +148,8 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	var g := ecart(att.x, att.longueur, cible.x, cible.longueur)
 	var visee: String = ordres.visee if (joueur and not garde) else "libre"
 	var chance: float = w.precision * clampf(1.25 - 0.6 * g / w.portee, 0.45, 1.0)
+	if att is Veh and att.camp == "ennemi":
+		chance *= float(donnees().equilibrage.ennemi_precision)
 	if att is Veh:
 		chance *= att.facteur_precision()
 	if visee != "libre":
@@ -185,6 +187,8 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	else:
 		var sens := 1.0 if centre_x >= origine.x else -1.0
 		point = Vector2(centre_x + sens * rng.randf_range(1.0, 7.0), rng.randf_range(0.0, 1.6))
+	if not joueur:
+		bonus *= float(donnees().equilibrage.ennemi_degats_infliges)   # tout ce qui tire contre le convoi frappe moins fort (DEC-113)
 	projectiles.append({"att": att.uid, "cible": cible.uid, "w": w, "classe": w.classe, "a": origine, "b": point,
 		"t": 0.0, "T": maxf(0.12, origine.distance_to(point) / w.vitesse), "touche": touche, "zone": zone,
 		"ricoche": ricoche, "visee": visee, "bonus": bonus})
@@ -279,6 +283,9 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 	if genre == "cabine" and v.profil.ouvert:
 		arm *= 0.1
 	var d: float = w.degats * w.penetration / (w.penetration + arm)
+	var EQ: Dictionary = D.equilibrage   # ennemis plus fragiles, convoi du joueur favorisé (DEC-113)
+	if v.camp == "ennemi":
+		d *= float(EQ.ennemi_degats_subis)
 	var p: Dictionary = v.pieces[zone]
 	var avant: float = p.pv
 	p.pv = maxf(0.0, p.pv - d)
