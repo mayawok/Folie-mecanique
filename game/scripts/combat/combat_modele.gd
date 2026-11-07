@@ -1,6 +1,6 @@
 # Modèle du mode convoi : un convoi contrôlable avance de profil, affronte des ennemis
 class_name CombatModele
-extends "res://scripts/combat/modele_atelier.gd"
+extends "res://scripts/combat/modele_camp.gd"
 
 
 # --- État de la partie -----------------------------------------------------
@@ -356,6 +356,7 @@ func avancer(dt := DT) -> void:
 	for v in convoi + ennemis:
 		v.x_prev = v.x
 	_marche(dt)
+	_camp(dt)
 	_soins(dt)
 	_ia_ennemis(dt)
 	_ia_poursuite(dt)
@@ -442,7 +443,9 @@ func _marche(dt: float) -> void:
 			sans_tracteur = sans_tracteur or (v.remorque() and tracteur_de(v) == null)
 			cache = cache or v.camo_voulu
 			au_garage = au_garage or v.garage != 0
-		if sans_tracteur:
+		if camp_actif():
+			blocage = "Camp de réparation en cours."
+		elif sans_tracteur:
 			blocage = "Une remorque est en tête : mettez un véhicule à moteur devant elle."
 		elif not transits.is_empty():
 			blocage = "Équipages en déplacement."

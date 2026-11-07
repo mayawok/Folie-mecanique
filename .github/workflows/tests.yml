@@ -3,7 +3,7 @@
 name: Tests
 on:
   push:
-    branches: ["grille-v2", "grille-v2-suite", "grille-v2-dessin", "grille-v2-ecran"]
+    branches: ["grille-v2", "grille-v2-suite", "grille-v2-dessin", "grille-v2-ecran", "grille-v2-camp"]
     paths: ["game/**", ".github/workflows/tests.yml"]
   workflow_dispatch:
 permissions:
@@ -19,9 +19,9 @@ jobs:
       - name: Lancer les tests
         run: |
           fin=0
-          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange; do
+          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_camp; do
             echo "=== $t ==="
-            godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
+            timeout 150 godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
             tail -n 60 /tmp/$t.log
             if grep -q "ÉCHEC\|SCRIPT ERROR\|Parse Error" /tmp/$t.log; then echo ">>> $t : ÉCHEC"; fin=1; fi
           done
