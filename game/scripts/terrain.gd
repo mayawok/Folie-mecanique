@@ -78,6 +78,8 @@ func _bande(nom: String, vit: float, bas: float) -> void:
 	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit)
 	while x0 < size.x:
 		draw_texture_rect(t, Rect2(x0, bas - size.y, lw + 1.0, size.y), false, teinte)
+		if bas < size.y:   # vallée : on prolonge la dernière ligne de l'image vers le bas, plus de trou
+			draw_texture_rect_region(t, Rect2(x0, bas, lw + 1.0, size.y - bas), Rect2(0, t.get_height() - 1, t.get_width(), 1), teinte)
 		x0 += lw
 
 
@@ -101,9 +103,10 @@ func _draw() -> void:
 	var img := _avec_images()
 	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit)
 	if img:
-		draw_texture_rect(texture("terre_ciel"), Rect2(0, 0, w, sol_y + 40.0), false, teinte)
-		_bande("terre_lointain", 0.08, sol_y * 0.93)
-		_bande("terre_moyen", 0.2, sol_y * 1.0)
+		var g := relief(camera_x - ancre_x / ppm + w * 0.5 / ppm) * ppm   # les collines lointaines suivent un peu la vallée
+		draw_texture_rect(texture("terre_ciel"), Rect2(0, 0, w, hgt), false, teinte)
+		_bande("terre_lointain", 0.08, sol_y * 0.93 - g * 0.25)
+		_bande("terre_moyen", 0.2, sol_y * 1.0 - g * 0.5)
 	# Ciel en dégradé
 	var haut := Color("#7FA6BF").lerp(Color("#070D1C"), nuit)
 	var horizon := Color("#E9CFA0").lerp(Color("#2B2B48"), nuit)
@@ -159,18 +162,19 @@ func _draw() -> void:
 		crete.append(p)
 		x2 += 8
 	sol_pts.append(Vector2(w, hgt))
-	draw_colored_polygon(sol_pts, Color(pal.sol))
+	draw_colored_polygon(sol_pts, Color("#302510") if img else Color(pal.sol))
 	if img:
 		var ts := texture("terre_sol")
 		var th := float(ts.get_height())
 		var v0 := 0.74
-		var prof := th * (1.0 - v0)
+		var recul := 0.9 * ppm   # la route commence derrière les roues : les véhicules roulent au milieu de la bande
+		var prof := th * (1.0 - v0) + recul
 		for i in range(crete.size() - 1):
 			var a: Vector2 = crete[i]
 			var b: Vector2 = crete[i + 1]
 			var ua := (a.x + camera_x * ppm) / ts.get_width()
 			var ub := (b.x + camera_x * ppm) / ts.get_width()
-			draw_polygon(PackedVector2Array([a + Vector2(0, -8), b + Vector2(0, -8), b + Vector2(0, prof - 8), a + Vector2(0, prof - 8)]),
+			draw_polygon(PackedVector2Array([a + Vector2(0, -recul), b + Vector2(0, -recul), b + Vector2(0, prof - recul), a + Vector2(0, prof - recul)]),
 				PackedColorArray([teinte, teinte, teinte, teinte]),
 				PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, 1.0), Vector2(ua, 1.0)]), ts)
 	else:
@@ -208,7 +212,7 @@ func _draw() -> void:
 			if te != null:
 				var hm: float = 5.0 if nom_e == "arbre_mort" else float(ELEMENTS[genre][1])
 				var sc := hm * ppm / te.get_height()
-				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc + 4.0), te.get_size() * sc), false, teinte)
+				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc - 0.7 * ppm), te.get_size() * sc), false, teinte)
 		elif genre == "poteau":   # poteau télégraphique penché
 			var hp := 4.6 * ppm
 			draw_line(pied, pied + Vector2(0.15 * ppm, -hp), Color("#4A3828"), maxf(3.0, ppm * 0.12))
