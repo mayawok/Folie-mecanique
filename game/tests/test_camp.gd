@@ -72,7 +72,8 @@ func _init() -> void:
 	ok(m2.camp_etablir(v2.uid, "changer_moteur", o_mot.params), "camp moteur établi")
 	var vu := false
 	var s2 := 0.0
-	while s2 < float(m2.camp_rep.camp.duree_s) * 3.0 and m2.camp_actif():
+	var d2 := float(m2.camp_rep.camp.duree_s)
+	while s2 < d2 * 3.0 and m2.camp_actif():
 		m2.avancer()
 		s2 += CombatModele.DT
 		if not m2.ennemis.is_empty():
@@ -81,6 +82,7 @@ func _init() -> void:
 				e.statut = "detruit"
 			m2.ennemis = m2.ennemis.filter(func(e): return e.actif())
 	ok(vu, "une attaque est tombée sur le camp")
+	ok(s2 > d2, "les attaques ont allongé le camp (%d s pour %d s)" % [int(s2), int(d2)])
 	ok(not m2.camp_actif() and v2.mobile(), "moteur remplacé après les attaques")
 	# Pas de camp avec un ennemi en vue
 	var t3 := _neuf(3)
