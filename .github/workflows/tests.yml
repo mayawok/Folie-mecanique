@@ -43,7 +43,7 @@ jobs:
           xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_base.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -20
           ls -la /tmp/captures
           test -f /tmp/captures/base_t23.png
-          echo "B64DEBUT"; base64 -w0 /tmp/captures/base_t23.png; echo; echo "B64FIN"
+          echo "B64DEBUT"; base64 -w0 /tmp/captures/base_t23.jpg | fold -w 3000; echo; echo "B64FIN"
       - uses: actions/upload-artifact@v4
         with:
           name: captures

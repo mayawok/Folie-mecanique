@@ -44,6 +44,7 @@ func _process(_d: float) -> bool:
 	frame += 1
 	if frame == 6:
 		root.get_texture().get_image().save_png("%s/base_t23.png" % dossier)
+		root.get_texture().get_image().save_jpg("%s/base_t23.jpg" % dossier, 0.9)
 		print("capture base_t23")
 		quit()
 	return false
