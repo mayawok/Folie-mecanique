@@ -180,6 +180,7 @@ func _construire_elements() -> void:
 	_btn_demonter = _bouton("Démonter", func(): m.ordre_demonter(selection), ab, 170)
 	_btn_troupes = _bouton("Débarquer les troupes", func(): m.ordre_troupes(selection), ab, 300)
 	_btn_troupes.visible = false
+	_btn_camp = _bouton("Camp", func(): _action_camp(), ab, 330)
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
 	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
@@ -581,6 +582,67 @@ func _ouvrir_editeur(vehicule_uid: int) -> void:
 		_editeur = null
 		pause = pause_avant and not m.convoi.is_empty())
 
+# --- Camp de réparation (DEV-018) -----------------------------------------------------------------
+# Option à proposer : la réparation qui correspond à la panne (essieu ou roues cassés, moteur HS), sinon la première possible
+func _option_camp(v) -> Dictionary:
+	var opts: Array = m.camp_options(v.uid)
+	var voulu := ""
+	if not v.piece_ok("roulement"):
+		voulu = "changer_essieu"
+	elif not v.piece_ok("moteur"):
+		voulu = "changer_moteur"
+	for o in opts:
+		if String(o.op) == voulu:
+			return o
+	return opts[0] if not opts.is_empty() else {}
+
+
+func _maj_bouton_camp(sel) -> void:
+	if m.camp_actif():
+		var pause_camp: bool = String(m.camp_rep.camp.etat) == "interrompue"
+		_btn_camp.text = "Reprendre le camp" if pause_camp else "Interrompre le camp"
+		_btn_camp.disabled = false
+		return
+	var o := _option_camp(sel)
+	if o.is_empty():
+		_btn_camp.text = "Camp : rien à réparer"
+		_btn_camp.disabled = true
+		return
+	var en_vue: bool = not m.ennemis.filter(func(e): return e.actif()).is_empty()
+	_btn_camp.text = "Camp : %s (%d min)" % [String(o.nom).to_lower(), int(ceil(float(o.duree_s) / 60.0))]
+	_btn_camp.disabled = not bool(o.ok) or en_vue
+	if not bool(o.ok):
+		_btn_camp.text += " — " + String(o.raison)
+	elif en_vue:
+		_btn_camp.text += " — ennemis en vue"
+
+
+func _action_camp() -> void:
+	_demarrer_audio()
+	if m.camp_actif():
+		if String(m.camp_rep.camp.etat) == "interrompue":
+			m.camp_reprendre()
+		else:
+			m.camp_interrompre()
+		return
+	var sel = m.trouver(selection)
+	if not (sel is CombatModele.Veh):
+		return
+	var o := _option_camp(sel)
+	if not o.is_empty():
+		m.camp_etablir(sel.uid, String(o.op), o.params)
+
+
+func _texte_camp() -> String:
+	var C: Dictionary = m.camp_rep.camp
+	var fait := 1.0 - float(C.restant_s) / maxf(1.0, float(C.duree_s))
+	var etat := "TRAVAUX INTERROMPUS" if String(C.etat) == "interrompue" else "CAMP DE RÉPARATION"
+	var l := "%s : %d %%, encore %d s" % [etat, int(fait * 100.0), int(ceil(float(C.restant_s)))]
+	if not m.ennemis.filter(func(e): return e.actif()).is_empty():
+		l += "\nATTAQUE : défendez le camp, les travaux sont suspendus."
+	return l
+
+
 func _ouvrir_surv() -> void:
 	_pause_surv = pause
 	pause = true
@@ -815,6 +877,7 @@ func _maj_interface() -> void:
 		_btn_modifier.visible = true
 		_btn_modifier.disabled = m.raison_grille(sel.uid) != ""
 		_btn_demonter.visible = sel.garage != 0
+		_maj_bouton_camp(sel)
 		var travaille: bool = not m.travaux.is_empty() and m.travaux.uid == sel.uid
 		_btn_demonter.text = "Démontage %d %%" % int(100.0 * (1.0 - m.travaux.reste / m.travaux.total)) if travaille else "Démonter"
 		_btn_demonter.disabled = m.raison_demontage(sel.uid) != "" and not travaille
@@ -850,7 +913,7 @@ func _maj_interface() -> void:
 	var vf = w.voyageur_actuel()
 	var camp = w.camp_proche()
 	var dial: bool = vf != null or (camp != null and m.ordres.marche == "halte" and camp.uid != _camp_ferme)
-	_panneau_alerte.visible = (not al.is_empty() or poste or cache or m.mines.any(func(mn): return not mn.has("champ")) or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte or tempete or champ_vu) and not dial and not _voile_carte.visible
+	_panneau_alerte.visible = (m.camp_actif() or not al.is_empty() or poste or cache or m.mines.any(func(mn): return not mn.has("champ")) or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte or tempete or champ_vu) and not dial and not _voile_carte.visible
 	if _panneau_alerte.visible:
 		var txt := ""
 		if not al.is_empty():
@@ -859,6 +922,8 @@ func _maj_interface() -> void:
 				txt += ", contact dans %d s" % int(al.eta)
 		elif poste or cache:
 			txt = "Embuscade en place : l'ennemi ne vous voit pas. La première salve surprend."
+		if m.camp_actif():
+			txt = _texte_camp() + ("\n\n" + txt if txt != "" else "")
 		_lbl_alerte.text = txt
 		_lbl_alerte.visible = txt != ""
 		var lignes := ""

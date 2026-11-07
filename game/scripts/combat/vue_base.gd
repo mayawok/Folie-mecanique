@@ -18,6 +18,7 @@ var _btn_demin_det: Button
 var _btn_demin_chien: Button
 var _btn_traverser: Button
 var _btn_mines: Button
+var _btn_camp: Button   # établir, interrompre ou reprendre un camp de réparation (DEC-129)
 var _btn_carte: Button
 var _lbl_quete: Label
 var _voile_carte: Control
