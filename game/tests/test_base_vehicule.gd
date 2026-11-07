@@ -203,5 +203,27 @@ func _init() -> void:
 			ok(String(neuf2.piece) == "essieu_lourd" and is_equal_approx(float(neuf2.etat), 0.9), "essieu de rechange monté avec son état")
 			ok(CampReparation._compter(fin.reserve, "roue_grande") == 1, "roues de la réserve intactes")
 			ok(reserve.size() == 2, "réserve d'origine non modifiée")
+	# --- DEV-016 : catalogue de l'écran de transformation ---
+	var tb_a := BaseVehicule.creer("citroen_t23")
+	var res_tb := [{"piece": "essieu_lourd", "etat": 0.9}, {"piece": "roue_grande", "etat": 0.8}, {"piece": "roue_grande", "etat": 0.8}]
+	var ctx_camp := {"niveau": 0, "metal": 100.0, "reserve": res_tb}
+	var ctx_atel := {"niveau": 2, "metal": 100.0, "reserve": res_tb}
+	var l0 := TransformationBase.entrees(tb_a, ctx_camp)
+	var l2 := TransformationBase.entrees(tb_a, ctx_atel)
+	ok(l0.size() == l2.size() and l0.size() > 10, "catalogue : mêmes entrées quel que soit le lieu (%d)" % l0.size())
+	var r0 := TransformationBase.de_onglet(l0, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
+	var r2 := TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "rallonge_milieu")[0]
+	ok(not bool(r0.ok) and String(r0.raison) != "", "rallonge grisée sur la route avec la raison : %s" % r0.raison)
+	ok(bool(r2.ok) and float(r2.metal) > 0.0 and float(r2.duree_s) > 0.0, "rallonge possible à l'atelier, coût et durée annoncés")
+	var ap := TransformationBase.appliquer(tb_a, r2)
+	ok(bool(ap.ok) and int(ap.a.base.crans.milieu) == 1, "appliquer l'entrée rallonge d'un cran")
+	var pauvre := TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 1.0, "reserve": res_tb}).filter(func(e): return e.id == "rallonge_milieu")[0]
+	ok(not bool(pauvre.ok) and "métal" in String(pauvre.raison), "pas assez de métal : grisé")
+	var es := TransformationBase.de_onglet(l2, "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
+	ok(bool(es.ok) and int(es.args.x) > 0, "essieu ajouté : colonne trouvée (%s)" % es.raison)
+	var es0 := TransformationBase.de_onglet(TransformationBase.entrees(tb_a, {"niveau": 2, "metal": 100.0, "reserve": []}), "structure").filter(func(e): return e.id == "essieu_ajoute")[0]
+	ok(not bool(es0.ok), "essieu ajouté grisé sans pièce en réserve")
+	var bl := TransformationBase.de_onglet(l0, "blindage")
+	ok(bl.size() == 5 * 4 and bl.any(func(e): return e.actif), "blindage : 5 zones x 4 niveaux, niveau en place repéré")
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)
