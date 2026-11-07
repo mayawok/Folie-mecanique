@@ -433,3 +433,84 @@ static func composition(convoi: Array) -> Dictionary:
 		if not compte.has(r):
 			manques.append(r)
 	return {"roles": compte, "atelier_mobile": atelier, "manques": manques}
+
+
+# --- Dessin (DEV-017) : la base garde ses visuels, la rallonge les étire ou les répète ---------------------------
+# Une base dont la fiche porte un bloc "dessin" remplace le dessin vectoriel de sa grille par ses images. Chaque image est découpée
+# en tranches ; les bandes d'une zone (avant, milieu, arriere) absorbent la rallonge de cette zone, les pièces à droite d'une coupe
+# avancent. Les roues, armes et équipage restent ceux de la grille. Pur et déterministe.
+static func _tranches(p: Dictionary, n: Dictionary) -> Array:   # [{u0, u1, larg (cases), bande}]
+	var w0 := float(p.box[2])
+	var bandes := []
+	var bd: Dictionary = p.get("bandes", {})
+	for z in bd:
+		bandes.append([float(bd[z][0]), float(bd[z][1]), float(n.get(z, 0.0))])
+	bandes.sort_custom(func(s, t): return s[0] < t[0])
+	var res := []
+	var u := 0.0
+	for b in bandes:
+		if float(b[0]) > u:
+			res.append({"u0": u, "u1": float(b[0]), "larg": (float(b[0]) - u) * w0, "bande": false})
+		res.append({"u0": float(b[0]), "u1": float(b[1]), "larg": (float(b[1]) - float(b[0])) * w0 + float(b[2]), "bande": true, "nat": (float(b[1]) - float(b[0])) * w0})
+		u = float(b[1])
+	if u < 1.0:
+		res.append({"u0": u, "u1": 1.0, "larg": (1.0 - u) * w0, "bande": false})
+	return res
+
+
+static func habiller(a: Dictionary, res: Dictionary) -> Dictionary:
+	var f := fiche(id_de(a))
+	if f.is_empty() or not f.has("dessin"):
+		return res
+	var ess := ConstructionLibre._essieux(a)
+	if ess.is_empty():
+		return res
+	var D: Dictionary = f.dessin
+	var C := ConstructionLibre.C
+	var cr: Dictionary = a.base.crans
+	var cran := float(regles().cran_cases)
+	var n := {"arriere": float(cr.arriere) * cran, "milieu": float(cr.milieu) * cran, "avant": float(cr.avant) * cran}
+	var cuts: Dictionary = D.coupes
+	var e_de := func(p: float) -> float:   # position étendue : chaque coupe située avant p la décale de sa rallonge
+		var s := p
+		for z in n:
+			if float(cuts[z]) < p:
+				s += float(n[z])
+		return s
+	var ancre := (float(ess[0].x) + 0.5 - float(res.x0)) * C
+	var origine := ancre - float(e_de.call(float(D.ancrage))) * C
+	var formes := []
+	var gauche_min := INF
+	var droite_max := -INF
+	var haut_max := 0.0
+	for p in D.parties:
+		var box: Array = p.box
+		var xm := origine + float(e_de.call(float(box[0]))) * C
+		var y_m := float(box[1]) * C
+		var h_m := float(box[3]) * C
+		haut_max = maxf(haut_max, y_m + h_m)
+		gauche_min = minf(gauche_min, xm)
+		var tr: Array = [{"u0": 0.0, "u1": 1.0, "larg": float(box[2]), "bande": false}] if bool(p.get("rigide", false)) else _tranches(p, n)
+		for s in tr:
+			var w_m := float(s.larg) * C
+			if bool(s.bande) and String(p.get("mode", "etirer")) == "repeter" and float(s.nat) > 0.01:
+				var pas := float(s.nat) * C
+				var fait := 0.0
+				while fait < w_m - 0.0001:
+					var seg := minf(pas, w_m - fait)
+					var u1 := float(s.u0) + (float(s.u1) - float(s.u0)) * seg / pas
+					formes.append({"sprite": String(p.image), "r": [xm + fait, y_m, seg, h_m], "z": int(p.z), "uv": [float(s.u0), 0.0, u1, 1.0]})
+					fait += seg
+			else:
+				formes.append({"sprite": String(p.image), "r": [xm, y_m, w_m, h_m], "z": int(p.z), "uv": [float(s.u0), 0.0, float(s.u1), 1.0]})
+			xm += w_m
+		droite_max = maxf(droite_max, xm)
+	var gardees := []
+	for fm in res.formes:   # on garde les formes du premier plan (coques, tôles) ; le corps vectoriel est remplacé par les visuels
+		if int(fm.get("z", 1)) >= 3:
+			gardees.append(fm)
+	res.formes = formes + gardees
+	res.longueur = maxf(float(res.longueur), droite_max - minf(0.0, gauche_min))
+	res.hauteur = maxf(float(res.hauteur), haut_max)
+	res.art_base = true
+	return res

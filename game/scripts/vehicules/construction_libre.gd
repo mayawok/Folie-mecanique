@@ -1726,6 +1726,8 @@ static func forme(a: Dictionary, ecorche := false) -> Dictionary:
 		res.remorque = true
 	if not chenille.is_empty():
 		res.chenille = chenille
+	if a.has("base"):   # base véhicule (Grille V2) : visuels étirés par la rallonge
+		res = BaseVehicule.habiller(a, res)
 	return res
 
 

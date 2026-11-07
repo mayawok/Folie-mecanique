@@ -3,7 +3,7 @@
 name: Tests
 on:
   push:
-    branches: ["grille-v2", "grille-v2-suite"]
+    branches: ["grille-v2", "grille-v2-suite", "grille-v2-dessin"]
     paths: ["game/**", ".github/workflows/tests.yml"]
   workflow_dispatch:
 permissions:
@@ -26,3 +26,23 @@ jobs:
             if grep -q "ÉCHEC\|SCRIPT ERROR\|Parse Error" /tmp/$t.log; then echo ">>> $t : ÉCHEC"; fin=1; fi
           done
           exit $fin
+  captures:
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Écran virtuel et rendu logiciel
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl1 > /dev/null
+      - name: Importer le projet
+        run: godot --headless --path game --import || true
+      - name: Captures d'écran
+        run: |
+          mkdir -p /tmp/captures
+          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_base.gd -- /tmp/captures 2>&1 | tail -20
+          ls -la /tmp/captures
+      - uses: actions/upload-artifact@v4
+        with:
+          name: captures
+          path: /tmp/captures
