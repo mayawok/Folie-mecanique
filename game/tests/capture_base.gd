@@ -11,7 +11,7 @@ func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		dossier = args[0]
-	var ppm := 24.0
+	var ppm := 56.0
 	if args.size() > 1:
 		ppm = float(args[1])
 	var fond := ColorRect.new()
@@ -28,7 +28,7 @@ func _initialize() -> void:
 	var v2: Dictionary = BaseVehicule.rallonger(v1, "arriere", 1).a
 	v2 = BaseVehicule.rallonger(v2, "avant", 1).a
 	v2 = BaseVehicule.rallonger(v2, "milieu", 2).a
-	var bas := [200.0, 410.0, 640.0]   # ligne de sol de chaque véhicule
+	var bas := [165.0, 322.0, 472.0]   # ligne de sol de chaque véhicule
 	var k := 0
 	for a in [base, v1, v2]:
 		var d := VehiculeDessin.new()
