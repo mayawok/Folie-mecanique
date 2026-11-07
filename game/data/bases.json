@@ -439,6 +439,36 @@
         ]
       }
     },
+    "berliet_gdr": {
+      "nom": "Berliet GDR (base)",
+      "historique": "berliet_gdr",
+      "famille": "camion_moyen",
+      "boite": "boite_moyenne",
+      "rallonge_max": {
+        "avant": 2,
+        "milieu": 4,
+        "arriere": 3
+      },
+      "essieux_max": 3,
+      "plateau_cases": 14,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "benne",
+        "fourgon",
+        "citerne",
+        "cage",
+        "atelier_mobile",
+        "infirmerie",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.6,
+        "boite": 0.55,
+        "chassis": 0.65,
+        "essieux": 0.6
+      }
+    },
     "diamond_t": {
       "nom": "Diamond T (base)",
       "historique": "diamond_t",

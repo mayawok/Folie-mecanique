@@ -283,6 +283,20 @@
    "metal": 8,
    "standoff": 27
   },
+  "chassis_berliet_gdr": {
+   "famille": "chassis",
+   "nom": "Châssis Berliet GDR",
+   "grille": [
+    25,
+    10
+   ],
+   "poids_kg": 1900,
+   "pv": 90,
+   "blindage": 5,
+   "reservoir": 40,
+   "metal": 8,
+   "standoff": 27
+  },
   "roulement_citroen_t23": {
    "famille": "roulement",
    "nom": "Roues Citroën T23",
@@ -297,6 +311,20 @@
    ],
    "metal": 2
   },
+  "roulement_berliet_gdr": {
+   "famille": "roulement",
+   "nom": "Roues Berliet GDR",
+   "type": "roues",
+   "vitesse_max": 5.0,
+   "charge_kg": 3200,
+   "poids_kg": 220,
+   "pv": 50,
+   "emprise": [
+    24,
+    3
+   ],
+   "metal": 2
+  },
   "suspension_citroen_t23": {
    "famille": "suspension",
    "nom": "Suspension Citroën T23",
@@ -304,6 +332,17 @@
    "pv": 35,
    "emprise": [
     11,
+    1
+   ],
+   "metal": 1
+  },
+  "suspension_berliet_gdr": {
+   "famille": "suspension",
+   "nom": "Suspension Berliet GDR",
+   "poids_kg": 140,
+   "pv": 35,
+   "emprise": [
+    12,
     1
    ],
    "metal": 1
@@ -321,9 +360,36 @@
    ],
    "metal": 2
   },
+  "moteur_berliet_gdr": {
+   "famille": "moteur",
+   "nom": "Berliet GDR 4 cyl.",
+   "puissance_ch": 85,
+   "conso": 2.8,
+   "poids_kg": 300,
+   "pv": 45,
+   "emprise": [
+    6,
+    3
+   ],
+   "metal": 2
+  },
   "cabine_citroen_t23": {
    "famille": "cabine",
    "nom": "Cabine Citroën T23",
+   "sieges": 2,
+   "ouvert": false,
+   "poids_kg": 250,
+   "pv": 35,
+   "emprise": [
+    8,
+    4
+   ],
+   "metal": 2,
+   "style": "camion"
+  },
+  "cabine_berliet_gdr": {
+   "famille": "cabine",
+   "nom": "Cabine Berliet GDR",
    "sieges": 2,
    "ouvert": false,
    "poids_kg": 250,

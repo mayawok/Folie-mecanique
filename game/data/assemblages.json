@@ -197,6 +197,48 @@
     }
    ]
   },
+  "berliet_gdr": {
+   "nom": "Berliet GDR",
+   "chassis": "chassis_berliet_gdr",
+   "plaques": 0,
+   "pieces": [
+    {
+     "piece": "roulement_berliet_gdr",
+     "pos": [
+      0,
+      0
+     ]
+    },
+    {
+     "piece": "suspension_berliet_gdr",
+     "pos": [
+      6,
+      2
+     ]
+    },
+    {
+     "piece": "moteur_berliet_gdr",
+     "pos": [
+      19,
+      4
+     ]
+    },
+    {
+     "piece": "cabine_berliet_gdr",
+     "pos": [
+      11,
+      4
+     ]
+    },
+    {
+     "piece": "arme_mitrailleuse",
+     "pos": [
+      12,
+      9
+     ]
+    }
+   ]
+  },
   "diamond_t": {
    "nom": "Diamond T 969 dépanneuse",
    "chassis": "chassis_diamond_t",
