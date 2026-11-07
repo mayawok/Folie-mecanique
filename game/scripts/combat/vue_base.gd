@@ -293,6 +293,21 @@ class FxVue extends Control:
 	func _process(_d: float) -> void:
 		queue_redraw()
 
+# Habillage métal rouillé (DEC-114) ; repli sur les aplats si les images manquent
+func _boite_metal(nom: String, marge: float, contenu: Vector4, teinte := Color.WHITE) -> StyleBox:
+	var chemin := "res://assets/ui/%s_s.png" % nom
+	if not ResourceLoader.exists(chemin):
+		return null
+	var b := StyleBoxTexture.new()
+	b.texture = load(chemin)
+	b.set_texture_margin_all(marge)
+	b.content_margin_left = contenu.x
+	b.content_margin_top = contenu.y
+	b.content_margin_right = contenu.z
+	b.content_margin_bottom = contenu.w
+	b.modulate_color = teinte
+	return b
+
 func _theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = load("res://assets/fonts/Inter-Medium.otf")
@@ -305,11 +320,16 @@ func _theme() -> Theme:
 		if etat == "focus":
 			s.draw_center = false
 		t.set_stylebox(etat, "Button", s)
+	var metal := {"normal": ["ui_onglet", Color.WHITE], "hover": ["ui_onglet", Color(1.25, 1.2, 1.1)], "pressed": ["ui_onglet_actif", Color.WHITE], "disabled": ["ui_onglet", Color(0.55, 0.55, 0.55)]}
+	for etat in metal:
+		var bm := _boite_metal(metal[etat][0], 20.0, Vector4(16, 8, 16, 8), metal[etat][1])
+		if bm != null:
+			t.set_stylebox(etat, "Button", bm)
 	t.set_color("font_color", "Button", C_TEXTE)
 	t.set_color("font_hover_color", "Button", C_TEXTE)
-	t.set_color("font_pressed_color", "Button", Color("#1A1A18"))
+	t.set_color("font_pressed_color", "Button", Color("#FFD9A0") if _boite_metal("ui_onglet_actif", 1, Vector4()) != null else Color("#1A1A18"))
 	t.set_color("font_disabled_color", "Button", C_DISCRET)
-	t.set_font_size("font_size", "Button", 26)
+	t.set_font_size("font_size", "Button", 24)
 	t.set_font_size("font_size", "Label", 26)
 	return t
 
@@ -335,7 +355,8 @@ func _bulle(parent: Node) -> PanelContainer:
 	s.content_margin_right = 18
 	s.content_margin_top = 8
 	s.content_margin_bottom = 8
-	p.add_theme_stylebox_override("panel", s)
+	var bm := _boite_metal("ui_onglet", 20.0, Vector4(14, 6, 14, 6))
+	p.add_theme_stylebox_override("panel", bm if bm != null else s)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	return p
