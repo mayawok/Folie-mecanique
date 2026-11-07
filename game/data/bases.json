@@ -25,7 +25,7 @@
       "changer_boite":   {"niveau": 0, "duree_s": 360, "pieces": false, "nom": "Changer la boîte"},
       "poser_module":    {"niveau": 1, "duree_s": 300, "pieces": false, "nom": "Poser un module de plateau"},
       "blinder_zone":    {"niveau": 1, "duree_s": 180, "pieces": false, "nom": "Blinder une zone"},
-      "rallonger":       {"niveau": 2, "duree_s": 600, "pieces": false, "nom": "Rallonger le châssis"},
+      "rallonger":       {"niveau": 2, "duree_s": 600, "pieces": false, "metal_par_cran": 8, "nom": "Rallonger le châssis"},
       "ajouter_essieu":  {"niveau": 2, "duree_s": 600, "pieces": true,  "nom": "Ajouter un essieu"},
       "renforcer":       {"niveau": 2, "duree_s": 300, "pieces": false, "nom": "Renforcer le châssis"},
       "fabriquer":       {"niveau": 3, "duree_s": 300, "pieces": false, "nom": "Fabriquer (tôles, superstructure)"}

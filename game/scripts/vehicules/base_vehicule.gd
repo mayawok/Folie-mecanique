@@ -237,7 +237,7 @@ static func rallonger(a: Dictionary, zone: String, crans: int, ecart := -1) -> D
 		return _non(a, "une pièce est à cheval sur la coupe")
 	var b := _inserer(a, cut, n, source)
 	b.base.crans[zone] = deja + crans
-	var metal := maxf(0.0, ConstructionLibre.cout_metal(b) - ConstructionLibre.cout_metal(a))
+	var metal := float(crans) * float(operation("rallonger").metal_par_cran)
 	return {"ok": true, "a": b, "raison": "", "cout": {"metal": metal}}
 
 
