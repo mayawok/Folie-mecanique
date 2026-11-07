@@ -254,7 +254,7 @@ Ajouter une greffe = une entrée `famille: "greffe"` avec `dessin`, `emprise` et
 
 ## Grille V2 : bases véhicule et transformations (DEC-121 à DEC-125, 07/11)
 
-Statut : **données et logique codées, non testées dans Godot** (DEC-125) ; interface et dessin à faire (DEV-016, DEV-017).
+Statut : **données et logique codées, test passé dans Godot 4.3 (GitHub Actions)** (DEC-125) ; interface et dessin à faire (DEV-016, DEV-017).
 
 - **Principe** : on ne redessine plus le châssis d'un véhicule trouvé. Une **base** (`game/data/bases.json` : Willys, Traction, T23, Diamond T, half-track M3) est un véhicule converti en grille (`ConstructionLibre.convertir`) avec ses limites. Le dessin libre reste au Mode créatif et au Kit.
 - **Trois niveaux** : réglage (niveau 0 en camp, 1 garage de fortune ou atelier mobile), transformation (niveau 2, atelier de checkpoint), fabrication (niveau 3, forge).
@@ -263,4 +263,4 @@ Statut : **données et logique codées, non testées dans Godot** (DEC-125) ; in
 - **Modules de plateau** et **blindage par zone** : `poser_module`, `blinder_zone`, `effets_module`, `effets_blindage`, `roles`, `composition` (convoi). Poids ajouté : `poids_supplementaire` (à lire par le combat, DEV-019).
 - **Fiabilité** (`fiabilite_vehicule.gd`) : usure par organe (moteur, boîte, essieux, châssis) ; l'origine ne protège pas ; sous-dimensionné ou surchargé = usure forte ; bien dimensionné et renforcé = usure faible ; pannes tirées avec graine.
 - **Camp de réparation** (`camp_reparation.gd`) : durée longue, véhicule immobilisé, attaques planifiées qui suspendent le travail, interruption sans perte, résultat atomique.
-- **Tests** : `game/tests/test_base_vehicule.gd` (écrit, non exécuté) ; validateur de données `tools/valider_bases.py` (exécuté, cohérent).
+- **Tests** : `game/tests/test_base_vehicule.gd` (exécuté par `.github/workflows/tests.yml`, tout passe) ; validateur de données `tools/valider_bases.py` (exécuté, cohérent).
