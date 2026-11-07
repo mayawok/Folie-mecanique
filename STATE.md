@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-06. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
+Mis à jour : 2026-11-07. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
 
 ## Cap (recentrage du 06/11, DEC-091 à DEC-102)
 
@@ -10,6 +10,8 @@ Mis à jour : 2026-11-06. Résumé volontairement court (≈ 60 lignes). Détail
 - **Monde** : climat pauvre, faune rare (DEC-093, 097) ; zones séparées par un no man's land (DEC-095) ; carte de 12 ou 13 secteurs,
   France reconnaissable mais déformée (DEC-101) ; factions de la Bible (DEC-098) ; essence et gazole seulement (DEC-094).
 - **Du prototype, on garde la grille** ; le reste est réexaminé face à la Bible (DEC-092).
+- **Priorité du prototype (07/11, DEC-110)** : le Mode créatif sert de kit de développement (toutes les pièces) pour bâtir monde, décors
+  et rencontres avant tout chapitre. Jeu final : Mode créatif séparé, avec les seules pièces trouvées (DEC-111). Prochaines tâches : DEV-010 puis DEV-008.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
 ## Ce qui existe
