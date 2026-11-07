@@ -2,7 +2,7 @@
 
 **Projet :** Folie Mécanique  
 **Catégorie :** Lore — sociétés humaines et mobilité  
-**Statut :** Proposition développée à intégrer au canon après validation  
+**Statut :** Texte validé par le porteur du projet le 07/11/2026 (DEC-132) ; FAC-008 reste à trancher (OQ-024)  
 **Version :** 0.1  
 **Références existantes :** Bible du lore, sections 00, 01, 03, 09 et 11 ; personnage CHR-014 — Marcel Delaunay.
 
