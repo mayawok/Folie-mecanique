@@ -112,7 +112,7 @@ func _init() -> void:
 		var comp := BaseVehicule.composition([am.a, BaseVehicule.creer("willys_mb")])
 		ok(bool(comp.atelier_mobile) and comp.manques.has("ravitailleur") and not comp.manques.has("atelier"), "convoi : atelier mobile présent, ravitailleur manquant")
 	# DEV-019 : module, blindage et renforts comptent dans les statistiques de combat
-	var s_base := ConstructionLibre.analyser(t23).stats
+	var s_base: Dictionary = ConstructionLibre.analyser(t23).stats
 	if bool(am.ok):
 		ok(float(ConstructionLibre.analyser(am.a).stats.poids_kg) >= float(s_base.poids_kg) + 650.0, "atelier mobile : +700 kg dans le profil de combat")
 	var ci := BaseVehicule.poser_module(t23, "citerne")
