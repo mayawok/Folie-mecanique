@@ -3,7 +3,7 @@
 name: Tests
 on:
   push:
-    branches: ["grille-v2"]
+    branches: ["grille-v2", "grille-v2-suite"]
     paths: ["game/**", ".github/workflows/tests.yml"]
   workflow_dispatch:
 permissions:
