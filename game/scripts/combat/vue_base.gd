@@ -65,6 +65,7 @@ const C_FOND := Color(0.07, 0.075, 0.08, 0.86)
 const CODES := {"chassis": "CHA", "roulement": "ROU", "suspension": "SUS", "moteur": "MOT", "cabine": "CAB"}
 var m: CombatModele
 var terrain: Terrain
+var terrain_avant: Terrain
 var couche: Control
 var fx: Control
 var noeuds := {}                # uid -> VehiculeDessin ou BatimentDessin

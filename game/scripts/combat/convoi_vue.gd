@@ -22,6 +22,12 @@ func _ready() -> void:
 	fx.mouse_filter = MOUSE_FILTER_IGNORE
 	fx.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	add_child(fx)
+	terrain_avant = Terrain.new()   # premier plan : plantes et débris devant les véhicules, derrière l'interface
+	terrain_avant.avant = true
+	terrain_avant.ppm = ppm
+	terrain_avant.sol_y = SOL_Y
+	terrain_avant.ancre_x = 150.0
+	add_child(terrain_avant)
 	_construire_interface()
 	var sv := _charger_sauvegarde()
 	if sv.is_empty():
@@ -74,7 +80,16 @@ func _process(delta: float) -> void:
 		_evenement(e)
 	_vieillir(delta)
 	terrain.nuit = m.monde.obscurite()
+	var h: float = m.monde.heure
+	terrain.soir = smoothstep(0.50, 0.60, h) if h > 0.4 else 0.0
+	var cible := 1.0 if (m.tempete_active() or m.tempete_annoncee()) else 0.0
+	terrain.orage = move_toward(terrain.orage, cible, delta * 0.25)
 	_camera(delta)
+	terrain_avant.nuit = terrain.nuit
+	terrain_avant.camera_x = terrain.camera_x
+	terrain_avant.ppm = terrain.ppm
+	terrain_avant.sol_y = terrain.sol_y
+	terrain_avant.ancre_x = terrain.ancre_x
 	_synchroniser()
 	_maj_persos(0.0 if pause else delta * vitesse_sim)
 	_maj_sons()

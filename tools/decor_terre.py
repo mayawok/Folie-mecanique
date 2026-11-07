@@ -14,15 +14,22 @@ UI = os.path.join(RACINE, "game/assets/ui")
 
 
 def cle_magenta(im):
-    """RGB -> RGBA : le magenta devient transparent, la frange est débarrassée de sa teinte rose."""
+    """RGB -> RGBA : le magenta devient transparent ; la frange (3 px autour du vide) est débarrassée de toute teinte rose,
+    l'intérieur des objets (plantes rosées, rouille) n'est pas touché."""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
     d = np.sqrt((r - 255) ** 2 + g ** 2 + (b - 255) ** 2)
-    alpha = np.clip((d - 60.0) / 110.0, 0.0, 1.0)
+    m = np.minimum(r, b) - g
+    alpha = np.clip((d - 80.0) / 100.0, 0.0, 1.0)
+    vide = alpha < 0.5
+    bord = nd.binary_dilation(vide, iterations=4) & ~vide
     exces = np.maximum(0.0, np.minimum(r, b) - g)
-    frange = (alpha < 1.0) | (exces > 40)
-    r2 = np.where(frange, r - exces * 0.9, r)
-    b2 = np.where(frange, b - exces * 0.9, b)
+    r2 = np.where(bord | (alpha < 1.0), r - exces, r)
+    b2 = np.where(bord | (alpha < 1.0), b - exces, b)
+    # reflet magenta resté à l'intérieur (r et b proches, g plus bas) : on le ramène vers le gris
+    cast = np.clip(1.0 - np.abs(r2 - b2) / 60.0, 0.0, 1.0) * np.clip((np.minimum(r2, b2) - g - 18.0) / 40.0, 0.0, 1.0)
+    sp = np.maximum(0.0, np.minimum(r2, b2) - g) * cast * 0.85
+    r2, b2 = r2 - sp, b2 - sp
     out = np.stack([r2, g, b2, alpha * 255.0], axis=-1)
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGBA")
 
@@ -41,23 +48,26 @@ def boucler(im, n=170):
 
 
 def composants(rgba, dil, attendus, ordre):
-    """Découpe les éléments séparés d'une planche. ordre : (nb de lignes, nb par ligne)."""
+    """Découpe les éléments séparés d'une planche (on essaie plusieurs finesses de fusion). ordre : (lignes, par ligne)."""
     al = np.asarray(rgba)[..., 3] > 40
-    lab, n = nd.label(nd.binary_dilation(al, iterations=dil))
     boites = []
-    for i, sl in enumerate(nd.find_objects(lab), 1):
-        masque = (lab[sl] == i) & al[sl]
-        if masque.sum() < 800:
-            continue
-        ys, xs = np.where(masque)
-        boites.append((sl[0].start + ys.min(), sl[0].start + ys.max() + 1, sl[1].start + xs.min(), sl[1].start + xs.max() + 1))
+    for dl in [dil, 6, 10, 14, 20, 3]:
+        lab, n = nd.label(nd.binary_dilation(al, iterations=dl))
+        boites = []
+        for i, sl in enumerate(nd.find_objects(lab), 1):
+            masque = (lab[sl] == i) & al[sl]
+            if masque.sum() < 800:
+                continue
+            ys, xs = np.where(masque)
+            boites.append((sl[0].start + ys.min(), sl[0].start + ys.max() + 1, sl[1].start + xs.min(), sl[1].start + xs.max() + 1))
+        if len(boites) == attendus:
+            break
     assert len(boites) == attendus, (len(boites), attendus)
     lignes, par = ordre
     boites.sort(key=lambda b: (b[0] + b[1]) / 2)
     res = []
     for k in range(lignes):
-        row = sorted(boites[k * par:(k + 1) * par], key=lambda b: b[2])
-        res += row
+        res += sorted(boites[k * par:(k + 1) * par], key=lambda b: b[2])
     return [rgba.crop((b[2], b[0], b[3], b[1])) for b in res]
 
 
@@ -87,6 +97,16 @@ def main():
         e.thumbnail((256, 256), Image.LANCZOS)
         e.save(f"{UI}/ic_{n}.png", optimize=True)
     print("icônes:", len(icones))
+    lots = [("lot3d_epaves", ["panzer", "b1", "chasseur", "bombardier", "traction", "camion", "autocar", "canon"], "epave", (2, 4)),
+            ("lot3e_batiments", ["ferme", "grange", "silo", "moulin", "pylone", "pont", "gare", "bunker"], "bat", (2, 4)),
+            ("lot3f_objets", ["meule", "charrette", "tracteur", "citerne", "panneau", "borne", "bidons", "wagon", "reverbere", "sacs"], "obj", (2, 5)),
+            ("lot3g_premier_plan", ["herbes", "ronce", "fougeres", "branche", "roseaux", "pierres", "pneu", "planches", "flaque", "squelette"], "av", (2, 5))]
+    for fic, noms2, pre, ordre in lots:
+        for n, e in zip(noms2, composants(cle_magenta(Image.open(f"{BRUT}/{fic}.png")), 6, len(noms2), ordre)):
+            e.save(f"{DECOR}/{pre}_{n}.png", optimize=True)
+            print(f"{pre}_{n}: {e.size}")
+    for n in ["soir", "orage"]:
+        boucler(Image.open(f"{BRUT}/lot3h_ciel_{n}.png").convert("RGBA")).convert("RGB").save(f"{DECOR}/terre_ciel_{n}.png", optimize=True)
 
 
 main()

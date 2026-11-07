@@ -10,8 +10,9 @@ const PALETTES := {
 	"sable": {"sol": "#A87A4A", "crete": "#8C6238", "trace": "#7E5A34", "couches": ["#C9A57A", "#BC925F", "#B08452"],
 		"decor": [["poteau", 0.18], ["cactus", 0.38], ["arbre", 0.55], ["rocher", 0.78], ["carcasse", 0.86]]},
 	"terre": {"sol": "#6E5A3C", "crete": "#4F5B2E", "trace": "#54452C", "couches": ["#8E8A66", "#7B7C55", "#69703F"],
-		"decor": [["poteau", 0.10], ["herbe", 0.50], ["arbre", 0.62], ["rocher", 0.72], ["carcasse", 0.78]]},
-	"cailloux": {"sol": "#7A7570", "crete": "#5C5853", "trace": "#5A5651", "couches": ["#A7A29A", "#928D86", "#7E7973"],
+			"decor": [["poteau", 0.08], ["herbe", 0.30], ["arbre", 0.40], ["rocher", 0.47], ["epave", 0.53], ["cloture", 0.57], ["muret", 0.61],
+				["objet", 0.70], ["bat", 0.76], ["ruine", 0.79], ["clocher", 0.81], ["chateau_eau", 0.83]]},
+		"cailloux": {"sol": "#7A7570", "crete": "#5C5853", "trace": "#5A5651", "couches": ["#A7A29A", "#928D86", "#7E7973"],
 		"decor": [["poteau", 0.08], ["rocher", 0.80], ["carcasse", 0.88]]},
 	"eau": {"sol": "#4F6B73", "crete": "#9BBBC2", "trace": "#86A9B1", "couches": ["#9DB4BA", "#8AA3AA", "#738E96"],
 		"decor": [["poteau", 0.20], ["roseau", 0.60], ["carcasse", 0.68]]},
@@ -21,8 +22,18 @@ const PALETTES := {
 # genre -> [fichier, hauteur réelle en m]
 const ELEMENTS := {"poteau": ["poteau", 5.0], "herbe": ["buissons", 1.0], "arbre": ["arbre", 6.0], "rocher": ["rocher", 1.3],
 	"cloture": ["cloture", 1.2], "muret": ["muret", 1.0], "ruine": ["ruine", 7.0], "clocher": ["clocher", 14.0], "chateau_eau": ["chateau_eau", 12.0]}
+# groupes tirés au hasard : [fichier, hauteur réelle en m]
+const GROUPES := {
+	"epave": [["epave_panzer", 2.7], ["epave_b1", 2.8], ["epave_chasseur", 3.0], ["epave_bombardier", 4.0], ["epave_traction", 1.6], ["epave_camion", 2.8], ["epave_autocar", 3.0], ["epave_canon", 1.6]],
+	"objet": [["obj_meule", 3.0], ["obj_charrette", 1.6], ["obj_tracteur", 2.2], ["obj_citerne", 2.5], ["obj_panneau", 3.0], ["obj_borne", 1.1], ["obj_bidons", 1.2], ["obj_wagon", 3.4], ["obj_reverbere", 4.0], ["obj_sacs", 1.2]],
+	"bat": [["bat_ferme", 8.0], ["bat_grange", 8.0], ["bat_silo", 12.0], ["bat_moulin", 11.0], ["bat_pylone", 14.0], ["bat_pont", 7.0], ["bat_gare", 6.0], ["bat_bunker", 3.0]]}
+# premier plan (passe devant les véhicules) : [fichier, hauteur réelle en m]
+const AVANT := [["av_herbes", 1.4], ["av_ronce", 1.2], ["av_fougeres", 1.0], ["av_roseaux", 2.0], ["av_pierres", 0.5], ["av_pneu", 0.7], ["av_planches", 0.8], ["av_flaque", 0.25], ["av_squelette", 1.0]]
 static var _tex := {}
 
+var avant := false      # vrai : ce calque ne dessine que le premier plan, posé devant les véhicules
+var soir := 0.0         # 0..1 : ciel de fin de journée
+var orage := 0.0        # 0..1 : ciel d'orage
 var camera_x := 0.0     # position du monde (m) au point d'ancrage
 var ppm := 55.0
 var sol_y := 900.0      # ligne du sol (px) pour une hauteur nulle
@@ -97,7 +108,27 @@ func ecran_x(xm: float) -> float:
 	return ancre_x + (xm - camera_x) * ppm
 
 
+func _dessiner_avant() -> void:
+	if not _avec_images():
+		return
+	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit) * Color(0.82, 0.8, 0.78)
+	var kk := floorf((camera_x - ancre_x / ppm - 6.0) / 13.0)
+	while kk * 13.0 <= camera_x + (size.x - ancre_x) / ppm + 6.0:
+		var xm := kk * 13.0 + alea(kk, 20.0) * 13.0
+		if alea(kk, 21.0) < 0.6:
+			var it: Array = AVANT[int(alea(kk, 22.0) * AVANT.size()) % AVANT.size()]
+			var te := texture(String(it[0]))
+			if te != null:
+				var sc := float(it[1]) * 1.25 * ppm / te.get_height()
+				var pied := Vector2(ecran_x(xm), sol_y - sol(xm) * ppm + 1.3 * ppm)
+				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc), te.get_size() * sc), false, teinte)
+		kk += 1.0
+
+
 func _draw() -> void:
+	if avant:
+		_dessiner_avant()
+		return
 	var w := size.x
 	var hgt := size.y
 	var img := _avec_images()
@@ -105,6 +136,10 @@ func _draw() -> void:
 	if img:
 		var g := relief(camera_x - ancre_x / ppm + w * 0.5 / ppm) * ppm   # les collines lointaines suivent un peu la vallée
 		draw_texture_rect(texture("terre_ciel"), Rect2(0, 0, w, hgt), false, teinte)
+		for var_ciel in [["terre_ciel_soir", soir], ["terre_ciel_orage", orage]]:
+			var tc := texture(var_ciel[0])
+			if tc != null and float(var_ciel[1]) > 0.01:
+				draw_texture_rect(tc, Rect2(0, 0, w, hgt), false, Color(teinte.r, teinte.g, teinte.b, float(var_ciel[1])))
 		_bande("terre_lointain", 0.08, sol_y * 0.93 - g * 0.25)
 		_bande("terre_moyen", 0.2, sol_y * 1.0 - g * 0.5)
 	# Ciel en dégradé
@@ -203,14 +238,21 @@ func _draw() -> void:
 			if r < float(dk[1]):
 				genre = dk[0]
 				break
-		if img and ELEMENTS.has(genre):
-			var te := texture("elem_" + String(ELEMENTS[genre][0]))
-			var nom_e: String = ELEMENTS[genre][0]
-			if genre == "arbre" and alea(kk, 16.0) > 0.5:
-				te = texture("elem_arbre_mort")
-				nom_e = "arbre_mort"
+		if img and (ELEMENTS.has(genre) or GROUPES.has(genre)):
+			var te: Texture2D = null
+			var hm := 1.0
+			if GROUPES.has(genre):
+				var gr: Array = GROUPES[genre]
+				var it: Array = gr[int(alea(kk, 17.0) * gr.size()) % gr.size()]
+				te = texture(String(it[0]))
+				hm = float(it[1])
+			else:
+				te = texture("elem_" + String(ELEMENTS[genre][0]))
+				hm = float(ELEMENTS[genre][1])
+				if genre == "arbre" and alea(kk, 16.0) > 0.5:
+					te = texture("elem_arbre_mort")
+					hm = 5.0
 			if te != null:
-				var hm: float = 5.0 if nom_e == "arbre_mort" else float(ELEMENTS[genre][1])
 				var sc := hm * ppm / te.get_height()
 				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc - 0.7 * ppm), te.get_size() * sc), false, teinte)
 		elif genre == "poteau":   # poteau télégraphique penché
