@@ -31,6 +31,8 @@ var _t_nuit := 10.0
 var _btn_fouille: Button
 var _btn_surv: Button
 var _btn_atelier: Button
+var _btn_kit: Button
+var _kit: PanneauKit
 var _atelier: AtelierGrille   # atelier sur grille ouvert (DEC-035)
 var _editeur: EditeurGrille   # éditeur libre ouvert (G3, DEC-036)
 var _btn_nouveau: Button

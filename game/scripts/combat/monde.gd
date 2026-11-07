@@ -515,6 +515,8 @@ func _pietons(dt: float) -> void:
 
 
 func _assauts(dt: float) -> void:
+	if m.kit_calme and m.bac_a_sable:
+		return   # Mode créatif : pas de rôdeurs sans le Kit
 	if m.calme_ouverture():
 		return   # début de partie : pas encore d'arme, pas de rôdeurs
 	if m.tempete_active():

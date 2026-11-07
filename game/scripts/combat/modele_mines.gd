@@ -22,7 +22,7 @@ func _init_mines() -> void:
 
 # --- Génération ---------------------------------------------------------------
 func _champs_generer() -> void:
-	if not champs_on or en_kit or calme_ouverture():
+	if not champs_on or en_kit or calme_ouverture() or (kit_calme and bac_a_sable):
 		return
 	var C := mines_cfg()
 	while x_tete + 220.0 >= _prochain_champ_x:

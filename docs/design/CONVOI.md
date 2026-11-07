@@ -235,3 +235,14 @@ Valeurs : `abordage` dans `combat_proto.json` ; code : `modele_abordage.gd`. À 
 
 - Une remorque (construite sur la grille) suit le véhicule à moteur devant elle, à 0,6 m (`ecart_remorque`), reliée par un timon dessiné. Ce tracteur roule à × √(M / (M + M remorques)) et consomme +50 % × M remorques / M. Une remorque sans équipage ne bloque pas la marche ; une remorque en tête du convoi, si.
 - Roues arrachées : quand les roues d'un véhicule sont touchées, il perd floor((1 − état) × n × 0,6) roues, jamais toutes (`effets.roues_tombent`). Chaque roue perdue : vitesse × 0,75 (`effets.roue_perdue`). La roue tombe, rebondit et reste sur la route. Réparer les roues les remonte. Pas pour les chenilles.
+
+
+## Kit de développement du Mode créatif (DEC-110 à DEC-112, DEV-010)
+
+Bouton **Kit** en haut (Mode créatif seulement) : panneau à droite. Code : `modele_kit.gd` (règles), `panneau_kit.gd` (écran) ; test `test_kit.gd`, parcours écran `capture_kit.gd`.
+- **Route calme** (par défaut en Mode créatif) : aucune rencontre, tempête, rôdeur ni champ de mines automatique. Le bouton la désactive (rencontres normales).
+- **Zone** : sable, terre et herbe, cailloux, eau (palette du sol et des couches lointaines, décor propre à chaque zone : `Terrain.PALETTES`). **Heure** : aube, matin, après-midi, soir, nuit. **Météo** : tempête à la demande.
+- **Apparitions** à 90 m devant : ennemi seul (moto, voiture, camion, char), bâtiments (maison, ferme, grange, église, bunker, camp), pillards et loups à pied, champ de mines, voyageur, épave.
+- **Poursuite par l'arrière** : 3 présets (2 motos, 2 voitures, moto + voiture + camion) ; ils se calent à côté du convoi et lancent des abordeurs (DEC-077).
+- **Convoi à rattraper** (nouveau, mode `convoi`) : véhicules ennemis qui roulent dans notre sens, devant nous, à vitesse choisie (3, 4,5 ou 7 m/s, plafonnée par leur propre vitesse). Il faut les rattraper (par exemple avec un camion armé construit sur la grille) pour les attaquer. Ils tirent comme les autres ennemis.
+- Pas encore : convois ennemis à ordres (formation, fuite, riposte), vrai pillage d'un convoi capturé, sauvegarde du Kit.

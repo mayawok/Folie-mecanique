@@ -250,6 +250,7 @@ var pieces_stock: Array = []     # pièces de véhicule en réserve : {piece, et
 var ouverture := false           # début de partie guidé : moto à assembler, trouvailles dans l'ordre
 var etape_ouverture := 0         # indice de la prochaine trouvaille de l'ouverture
 var bac_a_sable := false         # mode de développement : toutes les pièces, sans limite, métal infini (DEC-043)
+var kit_calme := true             # Mode créatif : aucune rencontre, tempête, rôdeur ni champ de mines automatique (DEC-110)
 var en_kit := false              # aucun véhicule encore assemblé
 # Événements du monde (DEC-027, DEC-028) : actifs dans la partie jouée, désactivés pour les anciens tests d'équilibrage
 var meteo_on := false

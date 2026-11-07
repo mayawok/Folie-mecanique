@@ -9,6 +9,7 @@ func _init(g := 1, options := {}) -> void:
 	rng.seed = g
 	var D := donnees()
 	bac_a_sable = bool(options.get("bac_a_sable", false))
+	Terrain.zone = "sable"
 	meteo_on = bool(options.get("meteo", options.get("ouverture", bac_a_sable)))
 	champs_on = bool(options.get("champs", options.get("ouverture", bac_a_sable)))
 	_init_meteo()
@@ -206,7 +207,7 @@ func ordre_demi_tour() -> bool:
 	x_tete_prev = x_tete
 	for v in convoi:
 		v.x_prev = v.x
-	ennemis = ennemis.filter(func(e): return e.x > x_tete - 30.0)   # ceux qu'on laisse derrière ne reviennent pas
+	ennemis = ennemis.filter(func(e): return e.x > x_tete - 30.0 and e.x < x_tete + 900.0)   # ceux qu'on laisse derrière ne reviennent pas
 	projectiles.clear()
 	fouille_demandee = 0
 	fouille_en_cours = {}
@@ -502,12 +503,18 @@ func _ia_ennemis(dt: float) -> void:
 			if e.x - x_tete > stand:
 				e.x -= e.vitesse() * dt
 				e.vitesse_act = e.vitesse()
+		elif e.actif() and e.mode == "convoi" and e.mobile():
+			var vc := kit_vitesse_convoi(e)   # roule dans notre sens (Kit) : à nous de le rattraper
+			e.x += vc * dt
+			e.vitesse_act = vc
 
 
 # --- Rencontres ------------------------------------------------------------
 func _rencontres() -> void:
 	if x_tete + 120.0 < _prochain_x or ennemis.size() >= 5 or monde.en_transit():
 		return
+	if kit_calme and bac_a_sable:
+		return   # Mode créatif : rien n'arrive sans le Kit (DEC-110)
 	if tempete_active():
 		return   # pas de nouvelle vague pendant la tempête (DEC-027)
 	if calme_ouverture() and not ouverture_en_cours():

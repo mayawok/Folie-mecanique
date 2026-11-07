@@ -75,6 +75,8 @@ func _construire_elements() -> void:
 	_btn_atelier.visible = false
 	_btn_nouveau = _bouton("Nouveau véhicule", func(): _ouvrir_editeur(0), hb, 200)
 	_btn_nouveau.visible = false
+	_btn_kit = _bouton("Kit", _basculer_kit, hb, 90)
+	_btn_kit.visible = false
 	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 150)
 	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
@@ -460,6 +462,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> v
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
 	_rng.seed = g
+	_installer_kit()
 	for n in noeuds.values():
 		n.queue_free()
 	noeuds.clear()
@@ -888,3 +891,26 @@ func _maj_interface() -> void:
 		_btn_camo.text = "Découvrir" if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:
 		_lbl_fin.text = "Convoi anéanti\nDistance : %d m   Ennemis détruits : %d\n\nOn ne revoit jamais ceux qui s'éloignent." % [int(m.distance_max), m.ennemis_detruits]
+
+
+# Panneau Kit du Mode créatif (DEC-110) : créé à chaque nouvelle partie, seulement en Mode créatif
+func _installer_kit() -> void:
+	if _kit != null:
+		_kit.queue_free()
+		_kit = null
+	_btn_kit.visible = m.bac_a_sable
+	if not m.bac_a_sable:
+		return
+	_kit = PanneauKit.new(m, func(): _demarrer_audio())
+	_kit.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE)
+	_kit.offset_left = -470
+	_kit.offset_right = -20
+	_kit.offset_top = 114
+	_kit.offset_bottom = -(BARRE_H + 10)
+	_kit.visible = false
+	add_child(_kit)
+
+
+func _basculer_kit() -> void:
+	if _kit != null:
+		_kit.visible = not _kit.visible

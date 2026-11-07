@@ -24,7 +24,7 @@ func _meteo(dt: float) -> void:
 		return
 	var C := meteo_cfg()
 	if tempete.is_empty():
-		if calme_ouverture() or en_kit:
+		if calme_ouverture() or en_kit or (kit_calme and bac_a_sable):
 			return
 		_tempete_t -= dt
 		if _tempete_t > 0.0:

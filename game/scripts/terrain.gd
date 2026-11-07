@@ -4,6 +4,19 @@
 class_name Terrain
 extends Control
 
+# Type de sol (Kit, DEC-110) : sable, terre, cailloux ou eau. sol, crête, cailloux de premier plan, trois couches lointaines
+static var zone := "sable"
+const PALETTES := {
+	"sable": {"sol": "#A87A4A", "crete": "#8C6238", "trace": "#7E5A34", "couches": ["#C9A57A", "#BC925F", "#B08452"],
+		"decor": [["poteau", 0.18], ["cactus", 0.38], ["arbre", 0.55], ["rocher", 0.78], ["carcasse", 0.86]]},
+	"terre": {"sol": "#6E5A3C", "crete": "#4F5B2E", "trace": "#54452C", "couches": ["#8E8A66", "#7B7C55", "#69703F"],
+		"decor": [["poteau", 0.10], ["herbe", 0.50], ["arbre", 0.62], ["rocher", 0.72], ["carcasse", 0.78]]},
+	"cailloux": {"sol": "#7A7570", "crete": "#5C5853", "trace": "#5A5651", "couches": ["#A7A29A", "#928D86", "#7E7973"],
+		"decor": [["poteau", 0.08], ["rocher", 0.80], ["carcasse", 0.88]]},
+	"eau": {"sol": "#4F6B73", "crete": "#9BBBC2", "trace": "#86A9B1", "couches": ["#9DB4BA", "#8AA3AA", "#738E96"],
+		"decor": [["poteau", 0.20], ["roseau", 0.60], ["carcasse", 0.68]]},
+}
+
 var camera_x := 0.0     # position du monde (m) au point d'ancrage
 var ppm := 55.0
 var sol_y := 900.0      # ligne du sol (px) pour une hauteur nulle
@@ -66,7 +79,9 @@ func _draw() -> void:
 			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
 	draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70 if nuit < 0.5 else 46, Color(1.0, 0.95, 0.82, 0.85).lerp(Color(0.85, 0.9, 1.0, 0.95), nuit))
 	# Dunes en parallaxe (lointain -> proche)
-	var couches := [[0.08, 0.62, 70.0, Color("#C9A57A")], [0.2, 0.74, 55.0, Color("#BC925F")], [0.45, 0.86, 40.0, Color("#B08452")]]
+	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
+	var cl: Array = pal.couches
+	var couches := [[0.08, 0.62, 70.0, Color(cl[0])], [0.2, 0.74, 55.0, Color(cl[1])], [0.45, 0.86, 40.0, Color(cl[2])]]
 	for c in couches:
 		var pts := PackedVector2Array([Vector2(0, hgt)])
 		var x := 0.0
@@ -88,7 +103,7 @@ func _draw() -> void:
 		ville.append(Vector2(xv + 24, yb - hh * (0.5 + 0.5 * alea(uu, 3.0))))
 		xv += 24
 	ville.append(Vector2(w, hgt))
-	draw_colored_polygon(ville, Color("#A88B6C"))
+	draw_colored_polygon(ville, Color(cl[0]).darkened(0.12))
 	# Nuages lents
 	for i in 5:
 		var cx := fposmod(i * 460.0 + 120.0 - camera_x * ppm * 0.03 - Time.get_ticks_msec() * 0.006 * (1 + i % 2), w + 400.0) - 200.0
@@ -106,8 +121,8 @@ func _draw() -> void:
 		crete.append(p)
 		x2 += 8
 	sol_pts.append(Vector2(w, hgt))
-	draw_colored_polygon(sol_pts, Color("#A87A4A"))
-	draw_polyline(crete, Color("#8C6238"), 3.0, true)
+	draw_colored_polygon(sol_pts, Color(pal.sol))
+	draw_polyline(crete, Color(pal.crete), 3.0, true)
 	# Traces et cailloux de premier plan
 	var m0 := floorf((camera_x - ancre_x / ppm) / 3.0)
 	for i in int(w / ppm / 3.0) + 2:
@@ -115,7 +130,7 @@ func _draw() -> void:
 		var xm2 := k * 3.0 + 1.5 * sin(k * 3.7)
 		var px := ecran_x(xm2)
 		var py := sol_y - sol(xm2) * ppm + 18 + 30 * absf(sin(k * 5.3))
-		draw_circle(Vector2(px, py), 3 + 4 * absf(sin(k * 9.1)), Color("#7E5A34"))
+		draw_circle(Vector2(px, py), 3 + 4 * absf(sin(k * 9.1)), Color(pal.trace))
 
 
 	# Décor semé sur la route : poteaux, cactus, arbres morts, rochers, carcasses
@@ -127,26 +142,42 @@ func _draw() -> void:
 		var xm3 := kk * pas + alea(kk, 6.0) * pas
 		var r := alea(kk, 7.0)
 		var pied := Vector2(ecran_x(xm3), sol_y - sol(xm3) * ppm)
-		if r < 0.18:   # poteau télégraphique penché
+		var genre := ""
+		for dk in pal.decor:
+			if r < float(dk[1]):
+				genre = dk[0]
+				break
+		if genre == "poteau":   # poteau télégraphique penché
 			var hp := 4.6 * ppm
 			draw_line(pied, pied + Vector2(0.15 * ppm, -hp), Color("#4A3828"), maxf(3.0, ppm * 0.12))
 			draw_line(pied + Vector2(-0.7 * ppm, -hp * 0.93), pied + Vector2(0.9 * ppm, -hp * 0.95), Color("#4A3828"), maxf(2.0, ppm * 0.08))
-		elif r < 0.38:   # cactus
+		elif genre == "cactus":
 			var hc := (1.2 + 1.2 * alea(kk, 8.0)) * ppm
 			var cc := Color("#5F7A4A")
 			draw_line(pied, pied + Vector2(0, -hc), cc, maxf(4.0, ppm * 0.28))
 			draw_line(pied + Vector2(0, -hc * 0.45), pied + Vector2(-0.5 * ppm, -hc * 0.45), cc, maxf(3.0, ppm * 0.18))
 			draw_line(pied + Vector2(-0.5 * ppm, -hc * 0.45), pied + Vector2(-0.5 * ppm, -hc * 0.8), cc, maxf(3.0, ppm * 0.18))
-		elif r < 0.55:   # arbre mort
+		elif genre == "arbre":   # arbre mort
 			var ha := (2.0 + 1.5 * alea(kk, 9.0)) * ppm
 			var cb := Color("#3E2E22")
 			draw_line(pied, pied + Vector2(0.1 * ppm, -ha), cb, maxf(3.0, ppm * 0.16))
 			draw_line(pied + Vector2(0.1 * ppm, -ha * 0.6), pied + Vector2(0.9 * ppm, -ha * 0.95), cb, maxf(2.0, ppm * 0.08))
 			draw_line(pied + Vector2(0.1 * ppm, -ha * 0.7), pied + Vector2(-0.8 * ppm, -ha * 1.0), cb, maxf(2.0, ppm * 0.08))
-		elif r < 0.78:   # rochers
+		elif genre == "rocher":
 			for j in 3:
 				draw_circle(pied + Vector2((j - 1) * 0.5 * ppm, 0.1 * ppm), (0.35 + 0.3 * alea(kk + j, 10.0)) * ppm, Color("#8A7358").darkened(0.1 * j))
-		elif r < 0.86:   # carcasse de voiture rouillée
+		elif genre == "herbe":   # touffes d'herbe
+			var cg := Color("#6C8A3C").darkened(0.2 * alea(kk, 13.0))
+			for j in 6:
+				var dx := (j - 2.5) * 0.18 * ppm
+				draw_line(pied + Vector2(dx, 0), pied + Vector2(dx + (j - 2.5) * 0.06 * ppm, -(0.35 + 0.4 * alea(kk + j, 14.0)) * ppm), cg, maxf(2.0, ppm * 0.05))
+		elif genre == "roseau":   # roseaux dans l'eau
+			var cro := Color("#6F7F4A")
+			for j in 4:
+				var dx2 := (j - 1.5) * 0.2 * ppm
+				draw_line(pied + Vector2(dx2, 0), pied + Vector2(dx2 + 0.1 * ppm, -(0.8 + 0.7 * alea(kk + j, 15.0)) * ppm), cro, maxf(2.0, ppm * 0.06))
+			draw_line(pied + Vector2(-0.9 * ppm, 0.15 * ppm), pied + Vector2(0.9 * ppm, 0.15 * ppm), Color(1, 1, 1, 0.25), 2.0)
+		elif genre == "carcasse":   # carcasse de voiture rouillée
 			var cr := Color("#6B4A3A")
 			draw_rect(Rect2(pied + Vector2(-1.6 * ppm, -0.9 * ppm), Vector2(3.2 * ppm, 0.7 * ppm)), cr)
 			draw_rect(Rect2(pied + Vector2(-0.8 * ppm, -1.5 * ppm), Vector2(1.7 * ppm, 0.6 * ppm)), cr.darkened(0.15))
