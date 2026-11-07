@@ -31,6 +31,8 @@ var _t_nuit := 10.0
 var _btn_fouille: Button
 var _btn_surv: Button
 var _btn_atelier: Button
+var _calque_pause: CanvasLayer
+var _pause_avant_menu := false
 var _btn_kit: Button
 var _kit: PanneauKit
 var _atelier: AtelierGrille   # atelier sur grille ouvert (DEC-035)

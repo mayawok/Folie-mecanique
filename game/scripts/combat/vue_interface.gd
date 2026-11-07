@@ -391,6 +391,13 @@ func _construire_elements() -> void:
 	vo.add_theme_constant_override("separation", 22)
 	co.add_child(vo)
 	_label("OPTIONS", vo, 48).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_curseurs_son(vo)
+	_bouton("Retour", func(): _panneau_options.visible = false, vo, 300)
+	_placer_titre()
+
+
+# Curseurs de volume (accueil et menu de pause)
+func _curseurs_son(vo: Control) -> void:
 	var so := get_node_or_null("/root/Son")
 	for bus in ["Musique", "Effets", "Voix"]:
 		var hbo := HBoxContainer.new()
@@ -407,8 +414,43 @@ func _construire_elements() -> void:
 		var nom: String = bus
 		sl.value_changed.connect(func(v: float): if so: so.regler(nom, v))
 		hbo.add_child(sl)
-	_bouton("Retour", func(): _panneau_options.visible = false, vo, 300)
-	_placer_titre()
+
+
+# Menu de pause : Reprendre, Son, Menu principal (calque sous l'accueil)
+func _construire_menu_pause() -> void:
+	_calque_pause = CanvasLayer.new()
+	_calque_pause.layer = 25
+	_calque_pause.visible = false
+	add_child(_calque_pause)
+	var fond := ColorRect.new()
+	fond.color = Color(0, 0, 0, 0.6)
+	fond.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	_calque_pause.add_child(fond)
+	var co := CenterContainer.new()
+	co.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	fond.add_child(co)
+	var pc := PanelContainer.new()
+	var bm := _boite_metal("ui_panneau", 26.0, Vector4(50, 36, 50, 36))
+	if bm != null:
+		pc.add_theme_stylebox_override("panel", bm)
+	co.add_child(pc)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 18)
+	pc.add_child(vb)
+	_label("PAUSE", vb, 44).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bouton("Reprendre", func(): _fermer_menu_pause(), vb, 420)
+	_label("Son", vb, 30).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_curseurs_son(vb)
+	_bouton("Menu principal", func():
+		_fermer_menu_pause(false)
+		afficher_menu(true), vb, 420)
+	fond.theme = theme
+
+
+func _fermer_menu_pause(restaurer := true) -> void:
+	_calque_pause.visible = false
+	if restaurer:
+		pause = _pause_avant_menu
 
 
 # Bouton de l'écran d'accueil : plaque d'acier dessinée par le code (voir titre_bouton.gd)
@@ -639,7 +681,14 @@ func _basculer_camo() -> void:
 		m.ordre_camoufler(v.uid, not v.camo_voulu)
 
 func _basculer_pause() -> void:
-	pause = not pause
+	if _calque_pause == null:
+		_construire_menu_pause()
+	if _calque_pause.visible:
+		_fermer_menu_pause()
+	elif not _accueil_visible():
+		_pause_avant_menu = pause
+		pause = true
+		_calque_pause.visible = true
 
 func _basculer_feu() -> void:
 	var v = m.trouver(selection)
@@ -705,7 +754,7 @@ func _maj_interface() -> void:
 	_horloge_ui.queue_redraw()
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
 	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.fini
-	_btn_pause.text = "Reprendre" if pause else "Pause"
+	_btn_pause.text = "Pause"
 	for i in _btns_vitesse.size():
 		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)
 	for t in _toggles:
