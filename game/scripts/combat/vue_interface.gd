@@ -742,6 +742,12 @@ func _remplir_ville() -> void:
 	for ch in _boite_dial.get_children():
 		ch.queue_free()
 	var V: Dictionary = m.ville
+	if m.ville_pillee() and _ville_onglet != "bilan":   # ville pillée : le récit du rescapé et la poursuite (DEC-151)
+		_lbl_dial_titre.text = "%s brûle" % V.nom
+		_lbl_dial_texte.text = String(CombatModele.VD().variantes.pillee.recit)
+		_dialogue_bouton("Prendre la poursuite", func(): m.ville_poursuite(), m.evenement.is_empty())
+		_dialogue_bouton("Fermer", func(): _ville_ferme = true)
+		return
 	match "mission" if _ville_onglet.begins_with("mission:") else _ville_onglet:
 		"maire":
 			_lbl_dial_titre.text = "Mairie de %s" % V.nom

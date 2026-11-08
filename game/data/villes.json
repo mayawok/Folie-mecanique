@@ -25,6 +25,18 @@
   "reparation_metal_par_pv": 0.05,
   "marche": {"_doc": "Marché (DEC-148) : eau et vivres par lots, payés en métal", "lot": 5, "prix_metal": {"eau": 2, "vivres": 3}},
   "habitants": 280,
+  "variantes": {
+    "_doc": "Villes spéciales (DEC-151). « pillee » : ville en flammes, portes enfoncées, cadavres, survivants qui appellent à l'aide ; un convoi de pillards est parti avec les réserves : poursuite. Réservée au Kit et à l'histoire (pas d'apparition au hasard).",
+    "pillee": {
+      "habitants": 70, "cadavres": 16, "feux": 9,
+      "vitesse_poursuite": 4.5, "ralenti_entree_m": 40.0,
+      "pillards": ["citroen_t23", "bmw_r75", "citroen_t23", "willys_mb", "moto_bmw"],
+      "pillards_devant_m": 220.0, "pillards_vitesse_part": 0.72, "pillards_perdus_m": 700.0,
+      "butin": {"fuel_l": 180, "eau": 25, "vivres": 25, "ammo": 120, "metal": 30},
+      "phrases": ["À l'aide !", "Ils ont tout pris !", "Ils sont partis vers l'est !", "Le maire est blessé…", "De l'eau… par pitié.", "Mon frère est mort à la porte.", "Rattrapez-les !", "Quatre camions, pleins à craquer !"],
+      "recit": "Un rescapé couvert de suie s'accroche à votre portière. « Un convoi de pillards nous est tombé dessus à l'aube. Ils ont enfoncé les portes, tué ceux qui résistaient et vidé nos réserves : l'eau, les vivres, le carburant. Ils sont partis il y a moins d'une heure par la porte de l'est, avec des camions chargés à ras bord. Ils ne roulent pas vite. Rattrapez-les ! »"
+    }
+  },
   "phrases": [
     "Encore un convoi…", "Du gazole contre des œufs !", "T'aurais pas une bougie de rechange ?",
     "La tempête a pris la route du nord.", "Le maire reçoit à la mairie.", "On ne revoit jamais ceux qui s'éloignent.",
