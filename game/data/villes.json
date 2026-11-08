@@ -28,7 +28,8 @@
   "variantes": {
     "_doc": "Villes spéciales (DEC-151). « pillee » : ville en flammes, portes enfoncées, cadavres, survivants qui appellent à l'aide ; un convoi de pillards est parti avec les réserves : poursuite. Réservée au Kit et à l'histoire (pas d'apparition au hasard).",
     "pillee": {
-      "habitants": 70, "cadavres": 16, "feux": 9,
+      "habitants": 120, "cadavres": 24,
+      "feux": [[14, 3.4, 1.6], [24, 0.3, 1.4], [38, 9.0, 2.6], [46, 6.5, 1.8], [56, 6.3, 2.2], [68, 0.3, 1.6], [83, 5.0, 1.5], [97, 9.5, 1.4], [108, 8.4, 2.4], [116, 0.3, 1.3], [126, 9.0, 2.0], [135, 6.0, 1.8]],
       "vitesse_poursuite": 4.5, "ralenti_entree_m": 40.0,
       "pillards": ["citroen_t23", "bmw_r75", "citroen_t23", "willys_mb", "moto_bmw"],
       "pillards_devant_m": 220.0, "pillards_vitesse_part": 0.72, "pillards_perdus_m": 700.0,

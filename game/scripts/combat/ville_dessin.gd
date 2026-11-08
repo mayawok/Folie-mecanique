@@ -113,8 +113,8 @@ func _generer() -> void:
 	if _pillee:
 		for i in int(VP.cadavres):
 			_corps.append({"x": r.randf_range(_x0 + 3.0, _x1 - 3.0), "drap": r.randf() < 0.35, "sens": 1.0 if r.randf() < 0.5 else -1.0})
-		for i in int(VP.feux):
-			_feux.append({"x": r.randf_range(_x0 + 6.0, _x1 - 6.0), "h": r.randf_range(0.3, 7.5), "s": r.randf_range(0.8, 1.8), "ph": r.randf() * TAU})
+		for f in VP.feux:   # sur les toits et sur des épaves dans la rue : [x après la porte, hauteur, taille]
+			_feux.append({"x": _x0 + float(f[0]), "h": float(f[1]), "s": float(f[2]), "ph": r.randf() * TAU})
 	for i in n:
 		var rang := 0 if r.randf() < 0.62 else 1
 		var xi := r.randf_range(_x0 + 4.0, _x1 - 4.0)
@@ -189,16 +189,16 @@ func _cadavres() -> void:
 		var x: float = c.x
 		if not _visible(x - 2.0, x + 2.0):
 			continue
-		var y := _gy - 0.42 * _ppm
+		var y := _gy - 0.3 * _ppm
 		var a := _ex(x - 0.85 * c.sens)
 		var b := _ex(x + 0.85 * c.sens)
 		var g := minf(a, b)
 		var w := absf(b - a)
 		if c.drap:
-			_poly(PackedVector2Array([Vector2(g, y), Vector2(g + w * 0.15, y - 0.32 * _ppm), Vector2(g + w * 0.85, y - 0.28 * _ppm), Vector2(g + w, y)]), _c(Color("#9A958A")))
+			_poly(PackedVector2Array([Vector2(g, y), Vector2(g + w * 0.15, y - 0.36 * _ppm), Vector2(g + w * 0.85, y - 0.32 * _ppm), Vector2(g + w, y)]), Color("#B8B2A4").darkened(0.15 + 0.5 * _nuit))
 		else:
-			draw_rect(Rect2(g, y - 0.22 * _ppm, w * 0.8, 0.22 * _ppm), _c(Color("#3A3028")))
-			draw_circle(Vector2(b, y - 0.14 * _ppm), 0.14 * _ppm, _c(Color("#7A5E48")))
+			draw_rect(Rect2(g, y - 0.26 * _ppm, w * 0.8, 0.26 * _ppm), Color("#5A4A3A").darkened(0.5 * _nuit))
+			draw_circle(Vector2(b, y - 0.16 * _ppm), 0.16 * _ppm, Color("#B08A68").darkened(0.5 * _nuit))
 			draw_rect(Rect2(g - 0.2 * _ppm, y - 0.03 * _ppm, w * 0.7, 0.06 * _ppm), Color(0.3, 0.05, 0.04, 0.6))
 
 
