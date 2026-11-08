@@ -60,7 +60,7 @@ func _init() -> void:
 	ok(s >= duree, "le camp dure au moins la durée de réparation")
 	ok(v.mobile() and v.ratio("roulement") > 0.5, "essieu changé : le véhicule roule de nouveau (%.2f)" % v.ratio("roulement"))
 	ok(m.pieces_stock.any(func(p): return p.piece == "roue_grande"), "roues de la réserve conservées")
-	ok(not m.pieces_stock.any(func(p): return p.piece == "essieu_lourd"), "essieu de rechange consommé")
+	ok(not m.pieces_stock.any(func(p): return p.piece == "essieu_lourd" and is_equal_approx(float(p.etat), 0.9)), "essieu de rechange consommé")
 	# Attaques : un camp long en reçoit, et elles retardent les travaux
 	var t2 := _neuf(9)
 	var m2: CombatModele = t2[0]

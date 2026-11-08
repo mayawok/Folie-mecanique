@@ -23,6 +23,7 @@ jobs:
             echo "=== $t ==="
             timeout 150 godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
             tail -n 60 /tmp/$t.log
+            grep -n "ÉCHEC" /tmp/$t.log || true
             if grep -q "ÉCHEC\|SCRIPT ERROR\|Parse Error" /tmp/$t.log; then echo ">>> $t : ÉCHEC"; fin=1; fi
           done
           exit $fin
