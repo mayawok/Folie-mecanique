@@ -17,6 +17,9 @@ var _graine := -1
 var _loin: Array = []
 var _milieu: Array = []
 var _gens: Array = []
+var _corps: Array = []      # ville pillée (DEC-151)
+var _feux: Array = []
+var _pillee := false
 var _style_bulle: StyleBoxFlat
 var _f: Font
 
@@ -68,10 +71,14 @@ func _dans_murs(sx: float, marge := 0.0) -> bool:
 
 func _c(c: Color, loin := 0.0) -> Color:
 	var r := c.lerp(Color(0.72, 0.66, 0.58), loin)
+	if _pillee:   # suie et brûlures
+		r = r.darkened(0.32).lerp(Color(0.35, 0.18, 0.1), 0.12)
 	return r.lerp(Color(0.09, 0.11, 0.19), 0.68 * _nuit)
 
 
 func _lampe(intensite := 1.0) -> Color:
+	if _pillee:
+		return Color(0.12, 0.08, 0.06, 0.85)   # plus personne n'allume
 	return Color(1.0, 0.78, 0.4, (0.25 + 0.7 * _nuit) * intensite)
 
 
@@ -99,12 +106,21 @@ func _generer() -> void:
 		_milieu.append({"x": x, "w": w2, "h": r.randf_range(3.0, 7.0), "t": ["tole", "tole", "bus", "wagon", "pile", "cabane"][r.randi() % 6],
 			"c": ROUILLE[r.randi() % ROUILLE.size()], "f": r.randi() % 3})
 		x += w2 + r.randf_range(-0.8, 1.5)
-	var n := int(CombatModele.VD().habitants)
+	var VP: Dictionary = CombatModele.VD().variantes.pillee
+	var n := int(VP.habitants) if _pillee else int(CombatModele.VD().habitants)
+	_corps.clear()
+	_feux.clear()
+	if _pillee:
+		for i in int(VP.cadavres):
+			_corps.append({"x": r.randf_range(_x0 + 3.0, _x1 - 3.0), "drap": r.randf() < 0.35, "sens": 1.0 if r.randf() < 0.5 else -1.0})
+		for f in VP.feux:   # sur les toits et sur des épaves dans la rue : [x après la porte, hauteur, taille]
+			_feux.append({"x": _x0 + float(f[0]), "h": float(f[1]), "s": float(f[2]), "ph": r.randf() * TAU})
 	for i in n:
 		var rang := 0 if r.randf() < 0.62 else 1
 		var xi := r.randf_range(_x0 + 4.0, _x1 - 4.0)
-		var cafe: bool = rang == 1 and xi - _x0 > BATS.cafe[0] and xi - _x0 < BATS.cafe[1] - 4.0
-		_gens.append({"x": xi, "rang": rang, "amp": 0.0 if r.randf() < 0.45 or cafe else r.randf_range(1.0, 5.0), "vit": r.randf_range(0.12, 0.35),
+		var cafe: bool = rang == 1 and xi - _x0 > BATS.cafe[0] and xi - _x0 < BATS.cafe[1] - 4.0 and not _pillee
+		var fuit: bool = _pillee and r.randf() < 0.5
+		_gens.append({"x": xi, "rang": rang, "amp": r.randf_range(4.0, 9.0) if fuit else (0.0 if r.randf() < 0.45 or cafe else r.randf_range(1.0, 5.0)), "vit": r.randf_range(0.5, 0.9) if fuit else r.randf_range(0.12, 0.35),
 			"ph": r.randf() * TAU, "peau": r.randi() % 6, "assis": cafe and r.randf() < 0.7, "c": ROUILLE[r.randi() % ROUILLE.size()].lightened(0.15),
 			"h": r.randf_range(0.9, 1.1)})
 
@@ -117,6 +133,7 @@ func _draw() -> void:
 	var V: Dictionary = m.ville
 	_x0 = float(V.x0)
 	_x1 = float(V.x1)
+	_pillee = String(V.get("variante", "standard")) == "pillee"
 	if int(V.graine) != _graine:
 		_generer()
 	_ppm = vue.terrain.ppm
@@ -127,10 +144,62 @@ func _draw() -> void:
 	_maisons()
 	_habitants(0)
 	_route()
+	if _pillee:
+		_incendies()
+		_cadavres()
 	_habitants(1)
 	_personnages(V)
 	_porte(_x0, float(V.porte_e), String(V.nom).to_upper(), 0)
 	_porte(_x1, float(V.porte_s), "SORTIE", 1)
+	if _pillee:   # lueur des incendies sur toute la ville
+		var a := maxf(0.0, _ex(_x0 - 10.0))
+		var b := minf(size.x, _ex(_x1 + 10.0))
+		if b > a:
+			draw_rect(Rect2(a, 0, b - a, _gy + 0.2 * _ppm), Color(1.0, 0.38, 0.08, 0.07 + 0.02 * sin(_t * 7.0)))
+
+
+# Flammes et fumée noire (ville pillée, DEC-151)
+func _incendies() -> void:
+	for f in _feux:
+		var x: float = f.x
+		if not _visible(x - 4.0, x + 4.0):
+			continue
+		var base := _p(x, f.h)
+		var s: float = f.s * _ppm
+		for i in 6:   # colonne de fumée
+			var u := fposmod(_t * 0.12 + i / 6.0 + f.ph, 1.0)
+			draw_circle(base + Vector2(u * 2.0 * s + sin(_t * 0.7 + i) * 0.3 * s, -u * 9.0 * s - 0.8 * s), (0.5 + u * 1.8) * s, Color(0.1, 0.09, 0.08, 0.55 * (1.0 - u)))
+		for c in [[Color(0.8, 0.18, 0.05, 0.9), 1.0], [Color(1.0, 0.5, 0.1, 0.9), 0.7], [Color(1.0, 0.85, 0.35, 0.95), 0.4]]:
+			var k: float = c[1]
+			var pts := PackedVector2Array()
+			for j in 7:
+				var u2 := j / 6.0
+				var hh := (0.3 + 0.7 * sin(u2 * PI)) * (1.3 + 0.35 * sin(_t * 11.0 + f.ph + j * 1.7)) * k
+				pts.append(base + Vector2((u2 - 0.5) * 1.6 * k * s, -hh * s))
+			pts.append(base + Vector2(0.8 * k * s, 0))
+			pts.append(base + Vector2(-0.8 * k * s, 0))
+			_poly(pts, c[0])
+		if fposmod(_t + f.ph, 0.6) < 0.3:   # braises
+			draw_circle(base + Vector2(sin(_t * 5.0 + f.ph) * s, -2.2 * s), maxf(1.5, 0.06 * _ppm), Color(1.0, 0.7, 0.2))
+
+
+# Corps dans les rues : silhouettes sombres, certains sous un drap
+func _cadavres() -> void:
+	for c in _corps:
+		var x: float = c.x
+		if not _visible(x - 2.0, x + 2.0):
+			continue
+		var y := _gy - 0.3 * _ppm
+		var a := _ex(x - 0.85 * c.sens)
+		var b := _ex(x + 0.85 * c.sens)
+		var g := minf(a, b)
+		var w := absf(b - a)
+		if c.drap:
+			_poly(PackedVector2Array([Vector2(g, y), Vector2(g + w * 0.15, y - 0.36 * _ppm), Vector2(g + w * 0.85, y - 0.32 * _ppm), Vector2(g + w, y)]), Color("#B8B2A4").darkened(0.15 + 0.5 * _nuit))
+		else:
+			draw_rect(Rect2(g, y - 0.26 * _ppm, w * 0.8, 0.26 * _ppm), Color("#5A4A3A").darkened(0.5 * _nuit))
+			draw_circle(Vector2(b, y - 0.16 * _ppm), 0.16 * _ppm, Color("#B08A68").darkened(0.5 * _nuit))
+			draw_rect(Rect2(g - 0.2 * _ppm, y - 0.03 * _ppm, w * 0.7, 0.06 * _ppm), Color(0.3, 0.05, 0.04, 0.6))
 
 
 # Palissade du fond de l'enceinte et toits lointains
@@ -486,8 +555,10 @@ func _dortoir() -> void:
 
 # Maire, mécanicien, chef d'atelier ; bulles des habitants
 func _personnages(V: Dictionary) -> void:
-	var dedans: bool = String(V.phase) in ["entree", "dedans", "depart", "rassemblement"]
+	var dedans: bool = String(V.phase) in ["entree", "dedans", "depart", "rassemblement"] or (_pillee and String(V.phase) == "approche")
 	var roles := [["mairie", 90.0, "Le maire"], ["garage", 56.0, "Mécanicien"], ["atelier", 39.0, "Atelier"]]
+	if _pillee:
+		roles = [["mairie", 90.0, "Rattrapez-les !"]]
 	for rr in roles:
 		var x: float = _x0 + float(rr[1])
 		if not _visible(x - 2.0, x + 2.0):
@@ -508,9 +579,10 @@ func _personnages(V: Dictionary) -> void:
 	if not dedans or String(V.phase) == "rassemblement":   # pendant la scène, on n'entend que l'escorte
 		return
 	# Une bulle d'habitant de temps en temps
-	var phrases: Array = CombatModele.VD().phrases
-	var cycle := int(_t / 4.0)
-	if fposmod(_t, 4.0) > 3.2:
+	var phrases: Array = CombatModele.VD().variantes.pillee.phrases if _pillee else CombatModele.VD().phrases
+	var periode := 2.5 if _pillee else 4.0
+	var cycle := int(_t / periode)
+	if fposmod(_t, periode) > periode * 0.8:
 		return
 	var proches := []
 	for g in _gens:
@@ -550,9 +622,14 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 		draw_line(_p(m0 + dx * i, 0.0), _p(m0 + dx * i, 9.0 - 0.3 * i), _c(Color("#4A382A")), maxf(1.0, _ppm * 0.05))
 	# passage : fond sombre
 	draw_rect(Rect2(_p(a, PORTE_H), Vector2(w * _ppm, PORTE_H * _ppm)), _c(Color("#1A1612")))
-	# porte (glisse vers le haut)
+	# porte (glisse vers le haut) ; ville pillée : arrachée, couchée au sol devant la tour
 	var bas := ouverture * PORTE_H
-	if bas < PORTE_H - 0.05:
+	if _pillee:
+		var x0p := a - 4.6 if cote == 0 else b + 0.2
+		_poly(PackedVector2Array([_p(x0p, 0.0), _p(x0p + 4.4, 0.0), _p(x0p + 4.2, 0.45), _p(x0p + 0.3, 0.6)]), _c(Color("#7A5C44")))
+		draw_line(_p(x0p + 0.3, 0.3), _p(x0p + 4.1, 0.3), _c(Color("#4E3A2A")), maxf(2.0, _ppm * 0.1))
+		_poly(PackedVector2Array([_p(a + 0.3, PORTE_H), _p(a + 1.6, PORTE_H), _p(a + 1.1, PORTE_H - 2.2), _p(a + 0.4, PORTE_H - 1.4)]), _c(Color("#6A4C36")))   # lambeau tordu
+	elif bas < PORTE_H - 0.05:
 		var r := Rect2(_p(a + 0.3, PORTE_H), Vector2((w - 0.6) * _ppm, (PORTE_H - bas) * _ppm))
 		draw_rect(r, _c(Color("#7A5C44")))
 		var nb := 4
@@ -599,8 +676,8 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 		var ang := (-0.35 if cote == 0 else -2.8) + 0.35 * sin(_t * 0.5 + cote)
 		var l := 30.0 * _ppm
 		_poly(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
-	# gardes armés sur le chemin de ronde (aucune ville ne tire pour l'instant)
-	for i in 3:
+	# gardes armés sur le chemin de ronde (aucune ville ne tire pour l'instant) ; ville pillée : plus personne
+	for i in (0 if _pillee else 3):
 		var px: float = a + 0.3 + i * 1.6
 		if absf(px - gx - 0.7) < 0.8:
 			continue

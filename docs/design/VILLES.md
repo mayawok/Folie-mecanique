@@ -44,6 +44,13 @@ maisons de tôles, bus, wagons, carcasses empilées, guirlandes, cheminées qui 
 - Mode créatif : Kit → « Ville devant ».
 - Option `villes` du modèle : sans elle (anciens tests, équilibrage), aucune ville.
 
+## Ville pillée (DEC-151, Kit et histoire)
+
+Variante d'événement, jamais tirée au hasard : portes enfoncées, incendies, fumée noire, corps dans les rues, rescapés qui appellent
+à l'aide. On entre sans s'arrêter ; un rescapé raconte qu'un convoi de pillards est parti avec les réserves. « Prendre la poursuite » :
+traversée de la ville en accélérant, sortie par la porte enfoncée, le convoi des pillards roule devant (moins vite que nous).
+Détruit : réserves reprises. Trop loin (700 m) : perdu. Kit → « Ville pillée devant ». Valeurs : `villes.json` → `variantes.pillee`.
+
 ## Noms (30)
 
 Saint-Firmin-des-Prés, La Croix-Blanche, Le Moulin-Brûlé, Les Trois-Maisons, La Belle-Épine, Le Gué-de-l'Aune, La Chapelle-aux-Naux,

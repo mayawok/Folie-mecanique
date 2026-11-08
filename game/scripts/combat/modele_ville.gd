@@ -34,6 +34,10 @@ func ville_phase() -> String:
 	return String(ville.get("phase", ""))
 
 
+func ville_pillee() -> bool:
+	return String(ville.get("variante", "standard")) == "pillee"
+
+
 func ville_dedans() -> bool:
 	return ville_phase() == "dedans"
 
@@ -62,7 +66,7 @@ func _queue_x() -> float:
 
 # --- Apparition ----------------------------------------------------------------------------
 # Pose une ville dont la porte d'entrée est en x0. Le nom est tiré au hasard la première fois, puis gardé par le secteur.
-func ville_creer(x0: float) -> bool:
+func ville_creer(x0: float, variante := "standard") -> bool:
 	if ville_active() and ville_phase() != "fin":
 		return false
 	_ville_retirer()
@@ -74,7 +78,10 @@ func ville_creer(x0: float) -> bool:
 	ville_nommer(monde.secteur, r)
 	var L := float(D.longueur_m)
 	ville = {"nom": s.ville, "maire": s.maire, "secteur": monde.secteur, "x0": x0, "x1": x0 + L, "phase": "approche", "t": 0.0,
-		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false}
+		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false, "variante": variante}
+	if variante == "pillee":   # portes enfoncées, grandes ouvertes (DEC-151)
+		ville.porte_e = 1.0
+		ville.porte_s = 1.0
 	_ville_installer()
 	return true
 
@@ -112,13 +119,13 @@ func _ville_retirer() -> void:
 
 
 # Kit (Mode créatif) : une ville juste devant
-func kit_ville() -> bool:
+func kit_ville(variante := "standard") -> bool:
 	if not bac_a_sable:
 		return false
 	var xt := x_tete
 	for v in convoi:
 		xt = maxf(xt, v.x + v.longueur)
-	var ok := ville_creer(xt + float(VD().kit_distance_m))
+	var ok := ville_creer(xt + float(VD().kit_distance_m), variante)
 	if ok:
 		log_("Kit : %s à %d m." % [ville.nom, int(float(ville.x0) - x_tete)], "info")
 	return ok
@@ -137,8 +144,16 @@ func _ville(dt: float) -> void:
 		"approche":
 			if not ville.annoncee and x0 - x_tete < float(D.annonce_m):
 				ville.annoncee = true
-				log_("Les murs de %s en vue. Le convoi ralentira devant la porte." % ville.nom, "ok")
+				if ville_pillee():
+					log_("De la fumée noire au-dessus de %s. Les portes sont enfoncées." % ville.nom, "alerte")
+				else:
+					log_("Les murs de %s en vue. Le convoi ralentira devant la porte." % ville.nom, "ok")
 				evt({"t": "ville", "etat": "annonce"})
+			if ville_pillee() and x_tete >= x0 - 6.0:   # personne pour ouvrir : on entre au pas (DEC-151)
+				ville.phase = "entree"
+				ordres.marche = "halte"
+				ville.x_arret = x0 + maxf(float(D.arret_dans_ville_m), 8.0 + x_tete - _queue_x())
+				_ville_securiser()
 			if x_tete >= x0 - float(D.arret_avant_porte_m) - 0.05:
 				ville.phase = "ouverture"
 				ville.t = 0.0
@@ -153,13 +168,15 @@ func _ville(dt: float) -> void:
 				ville.phase = "entree"
 				ville.x_arret = x0 + maxf(float(D.arret_dans_ville_m), 8.0 + x_tete - _queue_x())
 		"entree":
-			if _queue_x() > x0 + 3.0:
+			if _queue_x() > x0 + 3.0 and not ville_pillee():
 				ville.porte_e = maxf(0.0, float(ville.porte_e) - dt / float(D.porte_s))   # la porte se referme derrière nous
-			if x_tete >= float(ville.x_arret) - 0.05 and float(ville.porte_e) <= 0.0:
+			if x_tete >= float(ville.x_arret) - 0.05 and (float(ville.porte_e) <= 0.0 or ville_pillee()):
 				ville.phase = "dedans"
 				_ville_arrivee()
 		"depart":
-			if x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
+			if ville_pillee() and x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
+				ville.phase = "sortie"   # porte de sortie enfoncée : on file
+			elif x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
 				ville.phase = "ouverture_s"
 				ville.t = 0.0
 				log_("La porte de sortie s'ouvre.", "info")
@@ -176,7 +193,8 @@ func _ville(dt: float) -> void:
 				log_("Le convoi a quitté %s. Bonne route." % ville.nom, "info")
 				evt({"t": "ville", "etat": "sortie"})
 		"fin":
-			ville.porte_s = maxf(0.0, float(ville.porte_s) - dt / float(D.porte_s))
+			if not ville_pillee():
+				ville.porte_s = maxf(0.0, float(ville.porte_s) - dt / float(D.porte_s))
 			if x_tete > x1 + 260.0 or x_tete < x0 - 400.0:
 				_ville_retirer()
 
@@ -195,7 +213,10 @@ func _ville_arrivee() -> void:
 	s["ville_connue"] = true
 	if neuve:
 		log_("%s est inscrite sur la carte. Point de reprise." % ville.nom, "ok")
-	log_("Bienvenue à %s. Le convoi est à l'abri derrière les murs." % ville.nom, "ok")
+	if ville_pillee():
+		log_("%s brûle. Des corps dans les rues, des survivants qui appellent à l'aide." % ville.nom, "alerte")
+	else:
+		log_("Bienvenue à %s. Le convoi est à l'abri derrière les murs." % ville.nom, "ok")
 	evt({"t": "ville", "etat": "dedans", "nouvelle": neuve})
 	_mission_arrivee()
 
@@ -214,6 +235,9 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 	var mini := float(D.vitesse_mini_freinage)
 	match ville_phase():
 		"approche":
+			if ville_pillee():   # pas d'arrêt : on ralentit en approchant de la porte enfoncée
+				var k2 := clampf((float(ville.x0) - x_tete) / float(D.variantes.pillee.ralenti_entree_m), 0.0, 1.0)
+				return minf(vit, maxf(lente, vmax * k2)) if vit > 0.0 else vit
 			var stop := float(ville.x0) - float(D.arret_avant_porte_m)
 			if vit > 0.0:
 				var k := clampf((stop - x_tete) / float(D.freinage_m), 0.0, 1.0)   # on freine doucement
@@ -227,12 +251,14 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 			return _rouler_vers(float(ville.x_arret), lente, mini)
 		"depart":
 			blocage = "Le convoi gagne la porte de sortie."
+			if ville_pillee():   # poursuite : on accélère dans la ville (DEC-151)
+				return minf(vmax, float(D.variantes.pillee.vitesse_poursuite))
 			return _rouler_vers(float(ville.x1) - float(D.arret_avant_porte_m), lente, mini)
 		"sortie":
 			blocage = "Sortie de %s." % ville.nom
-			return lente
+			return minf(vmax, float(D.variantes.pillee.vitesse_poursuite)) if ville_pillee() else lente
 		"fin":
-			if vit < 0.0 and _queue_x() <= float(ville.x1) + 4.0:
+			if vit < 0.0 and _queue_x() <= float(ville.x1) + 4.0 and not ville_pillee():
 				return 0.0   # porte refermée derrière nous
 	return vit
 

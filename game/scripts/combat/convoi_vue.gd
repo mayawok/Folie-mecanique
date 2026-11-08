@@ -163,7 +163,7 @@ func _synchroniser() -> void:
 			n.type = v.type
 			n.ppm = ppm
 			n.ennemi = v.camp == "ennemi"
-			n.miroir = v.camp == "ennemi" and v.mode != "poursuite"   # les poursuivants roulent dans notre sens (DEC-077)
+			n.miroir = v.camp == "ennemi" and not v.mode in ["poursuite", "convoi"]   # les poursuivants roulent dans notre sens (DEC-077)
 			n.sol = Terrain.bosses
 			couche.add_child(n)
 			noeuds[v.uid] = n

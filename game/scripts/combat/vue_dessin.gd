@@ -71,6 +71,12 @@ func _evenement(e: Dictionary) -> void:
 						_ville_onglet = "bilan"
 						_ville_ferme = false
 						_dial_sig = ""
+		"pillage":   # ville pillée : tambours pendant la poursuite (DEC-151)
+			var so2 := get_node_or_null("/root/Son")
+			if so2 and _audio_ok:
+				so2.musique("mus_tambours" if String(e.etat) == "poursuite" else "mus_combat")
+			if String(e.etat) == "poursuite":
+				_son("sfx_depart_convoi", -2.0)
 		"nuit_tombe":
 			_son("sfx_nuee", -4.0)
 		"marteau":

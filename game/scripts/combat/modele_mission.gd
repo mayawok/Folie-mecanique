@@ -10,6 +10,7 @@ extends "res://scripts/combat/modele_ville.gd"
 static var _mdata := {}
 
 var mission := {}          # {} ou {type, dest, dest_nom, origine, escorte:[uid], module_avant, phase: route, vagues: n posées}
+var evenement := {}        # ville pillée (DEC-151) : {type, ville, phase: attente | chasse, pillards: [uid], butin}
 var mission_bilan := {}    # dernière livraison ou dernier échec : {ok, titre, texte} (pour le panneau de la ville)
 
 
@@ -152,6 +153,7 @@ func mission_module_leve() -> float:
 
 
 func _mission(dt: float) -> void:
+	_evenement()
 	if not mission_active():
 		return
 	var M := MD()
@@ -283,14 +285,75 @@ func _mission_arrivee() -> void:
 	evt({"t": "mission", "etat": "livree"})
 
 
+# --- Ville pillée : poursuite du convoi des pillards (DEC-151) ------------------------------------
+func ville_poursuite() -> bool:
+	if not ville_dedans() or not ville_pillee() or not evenement.is_empty():
+		return false
+	var P: Dictionary = VD().variantes.pillee
+	evenement = {"type": "pillage", "ville": String(ville.nom), "phase": "attente", "pillards": [], "butin": P.butin.duplicate()}
+	ville.phase = "depart"
+	log_("En route ! Le convoi traverse %s à toute allure." % ville.nom, "alerte")
+	evt({"t": "pillage", "etat": "poursuite"})
+	return true
+
+
+func _evenement() -> void:
+	if evenement.is_empty():
+		return
+	var P: Dictionary = VD().variantes.pillee
+	if String(evenement.phase) == "attente":
+		if ville_active() and ville_phase() != "fin":
+			return
+		# le convoi des pillards roule devant, moins vite que nous
+		var vmin := INF
+		for v in convoi:
+			if v.actif():
+				vmin = minf(vmin, vitesse_attelee(v))
+		var vp := maxf(1.5, (vmin if vmin < INF else 4.0) * float(P.pillards_vitesse_part))
+		var x := x_tete + float(P.pillards_devant_m)
+		for t in P.pillards:
+			var e := creer_vehicule(String(t), "ennemi", x)
+			e.mode = "convoi"
+			_kit_convois[e.uid] = vp
+			ennemis.append(e)
+			evenement.pillards.append(e.uid)
+			x += e.longueur + 6.0
+		evenement.phase = "chasse"
+		log_("Le convoi des pillards est en vue, %d m devant. Rattrapez-le !" % int(P.pillards_devant_m), "alerte")
+		evt({"t": "contact", "ennemi": true})
+		return
+	var restants := ennemis.filter(func(e): return evenement.pillards.has(e.uid) and e.actif())
+	if restants.is_empty():
+		for k in evenement.butin:
+			stocks[k] = float(stocks.get(k, 0.0)) + float(evenement.butin[k])
+		mission_bilan = {"ok": true, "titre": "Réserves reprises", "texte": "Le convoi des pillards est détruit. Vous récupérez les réserves de %s : %s." % [evenement.ville, texte_recompense(evenement.butin)]}
+		log_("Pillards détruits : vous récupérez %s." % texte_recompense(evenement.butin), "ok")
+		evenement = {}
+		evt({"t": "pillage", "etat": "reussi"})
+		return
+	var devant := INF
+	for e in restants:
+		devant = minf(devant, e.x - x_tete)
+	if devant > float(P.pillards_perdus_m):
+		mission_bilan = {"ok": false, "titre": "Pillards perdus", "texte": "Le convoi des pillards a disparu dans le no man's land avec les réserves de %s." % evenement.ville}
+		log_("Les pillards ont disparu dans le no man's land.", "alerte")
+		ennemis = ennemis.filter(func(e): return not evenement.pillards.has(e.uid))
+		evenement = {}
+		evt({"t": "pillage", "etat": "perdu"})
+
+
 # --- Sauvegarde ------------------------------------------------------------------------------
 func mission_sauver() -> Dictionary:
-	return {"mission": mission.duplicate(true), "bilan": mission_bilan.duplicate()}
+	return {"mission": mission.duplicate(true), "bilan": mission_bilan.duplicate(), "evenement": evenement.duplicate(true)}
 
 
 func mission_charger(d: Dictionary) -> void:
 	mission = d.get("mission", {}).duplicate(true)
 	mission_bilan = d.get("bilan", {}).duplicate()
+	evenement = d.get("evenement", {}).duplicate(true)
+	if not evenement.is_empty():   # les ennemis ne sont pas sauvegardés : le convoi des pillards repart devant
+		evenement.pillards = []
+		evenement.phase = "attente"
 	if mission_active():
 		mission.dest = int(mission.dest)
 		mission.vagues = int(mission.vagues)
