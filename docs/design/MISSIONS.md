@@ -13,7 +13,10 @@ Statut : **transport de cargaison codé le 08/11 (DEC-144 à DEC-147)**. Code : 
    Ses hommes, peints à la craie, crient (« HOURRA ! », « EN ROUTE ! »…) et lèvent leurs armes ; un joueur de tambour sur la Jeep.
    Tambours de guerre. Le maire : « Bonne chance. » La porte s'ouvre.
 4. **Départ automatique** vers la destination (pas de choix de sortie). Bandes noires, sous-titres et fondus pendant les scènes ; aucun ordre possible.
-5. **Route** : motos en chasse à 30 % de l'étape, voiture armée et motos en travers à 70 %. La ville de destination est 250 m après l'entrée du secteur.
+5. **Route** (DEC-150) : de 1 à 4 vagues selon le niveau le plus haut des deux secteurs, tirées dans la table des rencontres du monde
+   (motos en chasse, voitures armées, camions, half-tracks, chars selon le niveau), placées entre 20 et 85 % de l'étape.
+   Le maire ne connaît pas le détail : il annonce une présence ennemie faible, modérée, forte ou très forte, et parfois des pillards
+   (vrai 8 fois sur 10 s'il y en a, simple rumeur 15 % sinon). La ville de destination est 250 m après l'entrée du secteur.
 6. **Livraison** à l'arrivée dans la ville, Berliet en état : récompense, cargaison déchargée, l'escorte reste dans la ville.
    **Échec** si le Berliet est hors d'usage ou en cas de demi-tour.
 
@@ -31,5 +34,5 @@ Valeurs provisoires, à régler en essai. Ajouter un type, changer l'escorte, le
 
 ## Ouvert (OQ-027)
 
-Eau et vivres : comptés mais ni affichés ni consommés (rations retirées le 07/11) ; garder l'escorte ? cargaison abîmée par les tirs ?
+Eau et vivres consommés et affichés depuis DEC-148 ; garder l'escorte ? cargaison abîmée par les tirs ?
 nombre de missions en expédition ; escortes et vagues selon le niveau ; voix du maire (DEV-026).

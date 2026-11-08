@@ -43,7 +43,25 @@ func _init() -> void:
 	var o: Dictionary = offres.filter(func(x): return x.type == "carburant")[0]
 	var voisin: int = m.ville_sorties()[0].id
 	ok(int(o.dest) == voisin, "destination : la ville du secteur voisin le plus proche (%s)" % o.dest_nom)
-	ok(String(o.texte).contains(o.dest_nom) and String(o.texte).contains("motos"), "le maire annonce la destination et les ennemis")
+	ok(String(o.texte).contains(o.dest_nom) and String(o.texte).contains("présence ennemie"), "le maire annonce la destination et la présence ennemie, sans détail")
+	ok(not String(o.texte).contains("Traction,") and not String(o.texte).contains("moto_bmw"), "le maire ne détaille pas les ennemis")
+	# Diversité selon le niveau (DEC-150)
+	var plan: Dictionary = m.mission_plan("carburant", int(o.dest))
+	var Me: Dictionary = M.menace
+	ok(plan.vagues.size() == int(Me.vagues_par_niveau[plan.niveau]), "niveau %d : %d vague(s) prévue(s)" % [plan.niveau, plan.vagues.size()])
+	var sortes := {}
+	for niv in [0, 3, 6]:
+		m.monde.secteurs[int(o.dest)].niveau = niv
+		for ty in M.types:
+			for v in m.mission_plan(ty, int(o.dest)).vagues:
+				sortes[str(v.vehicules) + v.mode] = true
+	ok(sortes.size() >= 4, "%d sortes de vagues différentes selon les niveaux et les missions" % sortes.size())
+	m.monde.secteurs[int(o.dest)].niveau = 7
+	ok(m.mission_plan("carburant", int(o.dest)).presence.contains("très forte"), "niveau 7 : très forte présence annoncée")
+	m.monde.secteurs[int(o.dest)].niveau = 0
+	m.monde.secteurs[m.monde.secteur].niveau = 0
+	ok(m.mission_plan("carburant", int(o.dest)).presence.contains("faible"), "niveau 0 : faible présence annoncée")
+	m.monde.secteurs[int(o.dest)].niveau = int(plan.niveau)
 	var n0 := m.convoi.size()
 	var fuel0 := float(m.stocks.fuel_l)
 	var stock0 := m.pieces_stock.size()
@@ -69,7 +87,7 @@ func _init() -> void:
 		if m.ennemis.size() > 0:
 			vagues[0] += 1
 		return not m.monde.en_transit(), 600.0, true)
-	ok(int(m.mission.vagues) == M.vagues.size(), "%d vagues sur la route" % int(m.mission.vagues))
+	ok(int(m.mission.vagues) == m.mission.plan.size() and m.mission.plan.size() > 0, "%d vague(s) sur la route" % int(m.mission.vagues))
 	ok(m.ville_active() and float(m.ville.x0) - m.x_tete < float(M.ville_arrivee_m) + 1.0, "la ville de destination est au bout de l'étape")
 	# Sauvegarde pendant la mission
 	var m2 := CombatModele.depuis_sauvegarde(JSON.parse_string(JSON.stringify(m.sauver())))

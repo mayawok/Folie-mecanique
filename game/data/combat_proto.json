@@ -6,8 +6,11 @@
  "stocks_depart": {
   "ammo": 140,
   "fuel_l": 70,
-  "metal": 20
+  "metal": 20,
+  "eau": 12,
+  "vivres": 12
  },
+ "ravitaillement": {"_doc": "Eau et vivres (DEC-148) : unités par survivant et par jour (jour = 400 s de jeu). À sec : l'équipage perd des points de vie, jamais sous pv_min. Alerte quand il reste moins de alerte_jours.", "eau_jour": 1.0, "vivres_jour": 1.0, "soif_pv_s": 0.06, "faim_pv_s": 0.025, "pv_min": 1.0, "alerte_jours": 1.0},
  "ecart_convoi": 1.4, "ecart_remorque": 0.6,
  "equipage_pv": 20,
  "fouille": {

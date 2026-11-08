@@ -322,6 +322,26 @@ func ville_reparer() -> bool:
 	return true
 
 
+# Marché : un lot d'eau ou de vivres contre du métal (DEC-148)
+func ville_prix_lot(k: String) -> int:
+	var Mc: Dictionary = VD().marche
+	return int(Mc.lot) * int(Mc.prix_metal[k])
+
+
+func ville_acheter(k: String) -> bool:
+	if not ville_dedans() or not VD().marche.prix_metal.has(k):
+		return false
+	var prix := ville_prix_lot(k)
+	if not bac_a_sable and stocks.metal < prix:
+		log_("Pas assez de métal (%d demandé)." % prix, "alerte")
+		return false
+	if not bac_a_sable:
+		stocks.metal -= prix
+	stocks[k] = float(stocks.get(k, 0.0)) + float(VD().marche.lot)
+	log_("Marché : %d %s pour %d métal." % [int(VD().marche.lot), "bidons d'eau" if k == "eau" else "caisses de vivres", prix], "ok")
+	return true
+
+
 func ville_texte_maire() -> String:
 	return "M. %s, maire de %s, vous reçoit dans son bureau, sous le portrait jauni d'un président dont plus personne ne se souvient.\n\n« Ici, la porte ouvre à qui ne tire pas. Restez le temps qu'il faut. Pour le travail, revenez plus tard : je n'ai rien pour vous aujourd'hui. »" % [ville.maire, ville.nom]
 

@@ -253,7 +253,7 @@ func _tap(p: Vector2) -> void:
 	if m.ville_dedans():   # toucher la mairie, le garage ou l'atelier ouvre son panneau
 		var xw: float = terrain.camera_x + (p.x - terrain.ancre_x) / ppm
 		var rel: float = xw - float(m.ville.x0)
-		var lieux := {"mairie": "maire", "garage": "garage", "atelier": "atelier"}
+		var lieux := {"mairie": "maire", "garage": "garage", "atelier": "atelier", "marche": "marche"}
 		for id in lieux:
 			var bb: Array = VilleDessin.BATS[id]
 			if rel >= float(bb[0]) and rel <= float(bb[1]) and p.y < _sy(xw) - 1.5 * ppm:

@@ -14,12 +14,17 @@
   },
   "escorte": ["bmw_r75", "willys_mb", "citroen_traction", "bmw_r75"],
   "escorte_texte": "deux side-cars armés, une Jeep et une Traction à mitrailleuse, avec leurs équipages",
-  "vagues": [
-    {"part": 0.3, "vehicules": ["bmw_r75", "moto_bmw"], "mode": "poursuite", "abordeurs": 1, "types": ["lame"],
-      "annonce": "une bande de motos qui vous prendra en chasse", "alerte": "Des motos surgissent derrière le convoi !"},
-    {"part": 0.7, "vehicules": ["citroen_traction", "bmw_r75", "moto_bmw"], "mode": "approche",
-      "annonce": "puis une voiture armée et ses motos, en travers de la route", "alerte": "Une voiture armée et des motos barrent la route !"}
-  ],
+  "menace": {
+    "_doc": "Ennemis de la route (DEC-150) : tirés au hasard au départ dans la table des rencontres du monde (combat_proto.json → rencontres, entrées avec véhicules), selon le niveau le plus haut des deux secteurs. Le maire ne connaît pas le détail : il annonce seulement la présence ennemie selon le niveau, et parfois des pillards (souvent vrai, parfois une rumeur).",
+    "vagues_par_niveau": [1, 1, 2, 2, 3, 3, 4, 4],
+    "part_min": 0.2, "part_max": 0.85,
+    "presence": [[0, 1, "une faible présence ennemie"], [2, 3, "une présence ennemie modérée"], [4, 5, "une forte présence ennemie"], [6, 99, "une très forte présence ennemie ; on parle même de blindés"]],
+    "pillards": "Des pillards ont été signalés dans le coin : ils attaquent par l'arrière et sautent sur les véhicules.",
+    "pillards_si_vrai": 0.8, "pillards_rumeur": 0.15,
+    "incertitude": "Je ne peux pas vous en dire plus : ceux qui savent ne reviennent pas toujours.",
+    "alerte_poursuite": "Des véhicules surgissent derrière le convoi !",
+    "alerte_approche": "Des véhicules ennemis droit devant !"
+  },
   "pieces_recompense": ["moteur_willys_mb", "moteur_citroen_traction", "roulement_willys_mb", "suspension_willys_mb", "moteur_r75", "roue_av_r75", "roulement_citroen_traction"],
   "chargement_s": 8.0,
   "rassemblement_s": 11.0,

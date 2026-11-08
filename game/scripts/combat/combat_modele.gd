@@ -46,7 +46,7 @@ func _init(g := 1, options := {}) -> void:
 		v.x_prev = v.x
 	monde = MondeJeu.new(self)
 	if bac_a_sable:
-		for k in ["fuel_l", "ammo", "metal"]:
+		for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
 			if stocks.has(k):
 				stocks[k] = 99999.0
 		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
@@ -283,6 +283,55 @@ func sauver() -> Dictionary:
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
 
+# --- Eau et vivres (DEC-148) ------------------------------------------------------------------
+var _alerte_ravit := {}   # alertes déjà données : {"eau_bas": true, "eau_vide": true, ...}
+
+func survivants_nourris() -> int:
+	var n := reserve_survivants
+	for v in convoi:
+		for pv in v.equipage:
+			if float(pv) > 0.0:
+				n += 1
+	return n
+
+
+# Jours de réserve pour une ressource (eau ou vivres) au rythme actuel
+func jours_de(k: String) -> float:
+	var R: Dictionary = donnees().ravitaillement
+	var par_jour := float(R[k + "_jour"]) * survivants_nourris()
+	return 999.0 if par_jour <= 0.0 else float(stocks.get(k, 0.0)) / par_jour
+
+
+func _ravitaillement(dt: float) -> void:
+	if bac_a_sable or fini:
+		return
+	var R: Dictionary = donnees().ravitaillement
+	var n := survivants_nourris()
+	if n == 0:
+		return
+	for k in ["eau", "vivres"]:
+		var avant := float(stocks.get(k, 0.0))
+		stocks[k] = maxf(0.0, avant - float(R[k + "_jour"]) * n * dt / MondeJeu.JOUR_S)
+		var nom := "d'eau" if k == "eau" else "de vivres"
+		if stocks[k] <= 0.0:
+			var perte := float(R.soif_pv_s if k == "eau" else R.faim_pv_s) * dt
+			for v in convoi:
+				for i in v.equipage.size():
+					if float(v.equipage[i]) > float(R.pv_min):
+						v.equipage[i] = maxf(float(R.pv_min), float(v.equipage[i]) - perte)
+			if not _alerte_ravit.has(k + "_vide"):
+				_alerte_ravit[k + "_vide"] = true
+				log_("Plus %s : l'équipage s'affaiblit. Achetez-en en ville ou trouvez-en sur la route." % nom, "alerte")
+				evt({"t": "ravitaillement", "k": k, "etat": "vide"})
+		elif jours_de(k) < float(R.alerte_jours):
+			if not _alerte_ravit.has(k + "_bas"):
+				_alerte_ravit[k + "_bas"] = true
+				log_("Il reste moins d'un jour %s." % nom, "alerte")
+		else:
+			_alerte_ravit.erase(k + "_bas")
+			_alerte_ravit.erase(k + "_vide")
+
+
 static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	var m := CombatModele.new(int(d.graine))
 	m.convoi.clear()
@@ -346,6 +395,9 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.monde.quete = {}
 	if not w.quete.is_empty():
 		m.monde.quete = {"titre": w.quete.titre, "abattre": int(w.quete.abattre), "depart": int(w.quete.depart), "recompense": w.quete.recompense}
+	for k in ["eau", "vivres"]:   # sauvegardes d'avant le 08/11 (DEC-148) : réserve de départ
+		if not m.stocks.has(k) or not d.stocks.has(k):
+			m.stocks[k] = float(donnees().stocks_depart[k]) if not m.bac_a_sable else 99999.0
 	m.ville_charger(d.get("villes", {}))
 	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
@@ -402,6 +454,7 @@ func avancer(dt := DT) -> void:
 	_marche(dt)
 	_ville(dt)
 	_mission(dt)
+	_ravitaillement(dt)
 	_camp(dt)
 	_soins(dt)
 	_ia_ennemis(dt)

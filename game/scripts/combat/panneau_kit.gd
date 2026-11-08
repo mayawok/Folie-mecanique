@@ -61,7 +61,7 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	sc.add_child(v)
 	_titre(v, "KIT DE DÉVELOPPEMENT")
 	_etat = Label.new()
-	_etat.add_theme_font_size_override("font_size", 20)
+	_etat.add_theme_font_size_override("font_size", 24)
 	v.add_child(_etat)
 	if _ouvrir_berliet.is_valid():
 		_titre(v, "Camion de l'expédition")
@@ -110,7 +110,7 @@ func _maj() -> void:
 func _titre(parent: Control, t: String) -> void:
 	var l := Label.new()
 	l.text = t
-	l.add_theme_font_size_override("font_size", 24)
+	l.add_theme_font_size_override("font_size", 29)
 	l.add_theme_color_override("font_color", Color("#E8A33D"))
 	parent.add_child(l)
 
@@ -119,7 +119,7 @@ func _bouton(parent: Control, t: String, action: Callable) -> Button:
 	var b := Button.new()
 	b.text = t
 	b.custom_minimum_size = Vector2(0, 56)
-	b.add_theme_font_size_override("font_size", 22)
+	b.add_theme_font_size_override("font_size", 26)
 	b.pressed.connect(func():
 		action.call()
 		if _son.is_valid():

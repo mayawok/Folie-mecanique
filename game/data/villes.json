@@ -23,6 +23,7 @@
   "kit_distance_m": 120.0,
   "sorties": 3,
   "reparation_metal_par_pv": 0.05,
+  "marche": {"_doc": "Marché (DEC-148) : eau et vivres par lots, payés en métal", "lot": 5, "prix_metal": {"eau": 2, "vivres": 3}},
   "habitants": 280,
   "phrases": [
     "Encore un convoi…", "Du gazole contre des œufs !", "T'aurais pas une bougie de rechange ?",
