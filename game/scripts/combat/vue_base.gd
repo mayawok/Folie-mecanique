@@ -339,7 +339,7 @@ static var _polices := {}
 static func police(nom := "oswald", graisse := 500) -> Font:
 	var cle := "%s%d" % [nom, graisse]
 	if not _polices.has(cle):
-		var chemin := {"oswald": "res://assets/fonts/Oswald.ttf", "pochoir": "res://assets/fonts/BigShouldersStencil.ttf", "inter": "res://assets/fonts/Inter-Medium.otf"}[nom]
+		var chemin: String = {"oswald": "res://assets/fonts/Oswald.ttf", "pochoir": "res://assets/fonts/BigShouldersStencil.ttf", "inter": "res://assets/fonts/Inter-Medium.otf"}[nom]
 		if not ResourceLoader.exists(chemin):
 			return ThemeDB.fallback_font
 		var f := FontVariation.new()
