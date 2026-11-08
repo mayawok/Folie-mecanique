@@ -149,7 +149,7 @@ func _construire_elements() -> void:
 	_btn_ordres.offset_right = -16
 	_btn_ordres.offset_top = -BARRE_H - 140
 	_btn_ordres.offset_bottom = -BARRE_H - 80
-	_btn_marche = _bouton("Avancer", func(): m.ordre_marche("halte" if m.ordres.marche == "avancer" else "avancer"), self, 300)
+	_btn_marche = _bouton("Avancer", func(): _action_marche(), self, 300)
 	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
 	_btn_marche.offset_left = -320
 	_btn_marche.offset_right = -16
@@ -518,7 +518,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := false, bac := false) -> 
 	if sauve.is_empty():
 		_effacer_sauvegarde()
 		# Départ avec le Berliet, camion de l'expédition (DEC-139) ; l'ancien début guidé (moto à assembler, DEC-035) reste possible par ouverture = true
-		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true})
+		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true, "villes": true})
 		m = CombatModele.new(g, opts)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
@@ -715,9 +715,70 @@ func _fermer_carte() -> void:
 	pause = _pause_avant
 
 func _partir() -> void:
+	if m.ville_dedans():   # depuis une ville, on part par la porte de sortie (DEC-141)
+		if _carte_sel >= 0 and m.ville_partir(_carte_sel):
+			_fermer_carte()
+		return
 	if _carte_sel >= 0 and m.monde.choisir_destination(_carte_sel):
 		m.ordre_marche("avancer")
 		_fermer_carte()
+
+# --- Ville (DEC-140 à DEC-143) ----------------------------------------------------------------
+func _action_marche() -> void:
+	if m.ville_dedans():
+		_ville_onglet = "sorties"
+		_ville_ferme = false
+		_dial_sig = ""
+		return
+	m.ordre_marche("halte" if m.ordres.marche == "avancer" else "avancer")
+
+func _ville_aller(onglet: String) -> void:
+	_ville_onglet = onglet
+	_dial_sig = ""
+
+func _remplir_ville() -> void:
+	for ch in _boite_dial.get_children():
+		ch.queue_free()
+	var V: Dictionary = m.ville
+	match _ville_onglet:
+		"maire":
+			_lbl_dial_titre.text = "Mairie de %s" % V.nom
+			_lbl_dial_texte.text = m.ville_texte_maire()
+			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+		"garage":
+			_lbl_dial_titre.text = "Garage · mécanique"
+			var c: int = m.ville_cout_reparation()
+			if m.ville_a_reparer():
+				_lbl_dial_texte.text = "« Laissez-moi le convoi, je vous le rends comme neuf. » Prix : %d métal." % (0 if m.bac_a_sable else c)
+				_dialogue_bouton("Faire réparer tout le convoi", func(): m.ville_reparer(); _ville_aller("garage"), m.bac_a_sable or m.stocks.metal >= c)
+			else:
+				_lbl_dial_texte.text = "« Rien à faire sur vos véhicules. Revenez quand ça cognera. »"
+			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+		"atelier":
+			_lbl_dial_titre.text = "Atelier de %s" % V.nom
+			_lbl_dial_texte.text = "Les postes à souder et le pont roulant sont à vous : transformez vos véhicules sur la grille."
+			var vp = m.vehicule_principal()
+			var cible: int = selection if m.trouver(selection) in m.convoi else (vp.uid if vp != null else 0)
+			_dialogue_bouton("Ouvrir la grille", func(): _ouvrir_editeur(cible), cible != 0)
+			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+		"sorties":
+			_lbl_dial_titre.text = "Quitter %s" % V.nom
+			_lbl_dial_texte.text = "Par quelle porte sortir ? La route qui suit mène au secteur choisi."
+			for o in m.ville_sorties():
+				var dest: int = o.id
+				var t := "%s : %s, niveau %d, %d m" % [o.porte, o.secteur, o.niveau, o.distance_m]
+				if String(o.ville) != "":
+					t += " (ville : %s)" % o.ville
+				_dialogue_bouton(t, func(): m.ville_partir(dest))
+			_dialogue_bouton("Rester", func(): _ville_aller("accueil"))
+		_:
+			_lbl_dial_titre.text = V.nom
+			_lbl_dial_texte.text = "Plusieurs centaines d'âmes derrière des murs de tôle. Ici, ni tempête ni pillard : le convoi est à l'abri."
+			_dialogue_bouton("Mairie : parler au maire", func(): _ville_aller("maire"))
+			_dialogue_bouton("Garage : le mécanicien", func(): _ville_aller("garage"))
+			_dialogue_bouton("Atelier : la grille", func(): _ville_aller("atelier"))
+			_dialogue_bouton("Repartir : choisir la sortie", func(): _ville_aller("sorties"))
+			_dialogue_bouton("Fermer", func(): _ville_ferme = true)
 
 func _dialogue_bouton(texte: String, action: Callable, actif := true) -> void:
 	var b := _bouton(texte, action, _boite_dial, 0)
@@ -872,6 +933,11 @@ func _maj_interface() -> void:
 	_ord.visible = _ord_t > 0.0
 	_btn_ordres.visible = _ord_t <= 0.0
 	_btn_marche.text = "Halte" if m.ordres.marche == "avancer" else "Avancer"
+	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()
+	if m.ville_dedans():
+		_btn_marche.text = "Repartir…"
+	elif m.ville_protegee():
+		_btn_marche.text = "Entrée en ville" if m.ville_phase() in ["ouverture", "entree"] else "Sortie de la ville"
 	if _bande_actions.visible:
 		var ab_g = m.abri_garage()
 		_btn_garage.text = "Sortir du garage" if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
@@ -914,7 +980,8 @@ func _maj_interface() -> void:
 	var champ_vu: bool = not champ.is_empty() and champ.dist <= float(m.mines_cfg().alerte_m)
 	var vf = w.voyageur_actuel()
 	var camp = w.camp_proche()
-	var dial: bool = vf != null or (camp != null and m.ordres.marche == "halte" and camp.uid != _camp_ferme)
+	var vdial: bool = m.ville_dedans() and not _ville_ferme
+	var dial: bool = vdial or vf != null or (camp != null and m.ordres.marche == "halte" and camp.uid != _camp_ferme)
 	_panneau_alerte.visible = (m.camp_actif() or not al.is_empty() or poste or cache or m.mines.any(func(mn): return not mn.has("champ")) or not m.transits.is_empty() or not ann.is_empty() or nuit_alerte or tempete or champ_vu) and not dial and not _voile_carte.visible
 	if _panneau_alerte.visible:
 		var txt := ""
@@ -962,7 +1029,12 @@ func _maj_interface() -> void:
 		_btn_sortir.visible = poste or cache or not m.transits.is_empty()
 	# Dialogue : voyageur ou camp allié
 	_panneau_dial.visible = dial and not _voile_carte.visible
-	if _panneau_dial.visible:
+	if _panneau_dial.visible and vdial:
+		var sig_v := "ville|%s|%d|%d" % [_ville_onglet, int(m.stocks.metal), m.ville_cout_reparation()]
+		if sig_v != _dial_sig:
+			_dial_sig = sig_v
+			_remplir_ville()
+	elif _panneau_dial.visible:
 		var sig_d := "%s|%d|%d|%d" % ["v" if vf != null else "c", vf.uid if vf != null else camp.uid, int(m.stocks.metal), int(m.stocks.ammo)]
 		if sig_d != _dial_sig:
 			_dial_sig = sig_d

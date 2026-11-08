@@ -1,6 +1,6 @@
 # Modèle du mode convoi : un convoi contrôlable avance de profil, affronte des ennemis
 class_name CombatModele
-extends "res://scripts/combat/modele_camp.gd"
+extends "res://scripts/combat/modele_ville.gd"
 
 
 # Pièces du camion de l'expédition (Berliet GDR, DEC-136) : châssis, pneus, échappement, réservoir, module arrière
@@ -14,6 +14,7 @@ func _init(g := 1, options := {}) -> void:
 	var D := donnees()
 	bac_a_sable = bool(options.get("bac_a_sable", false))
 	Terrain.zone = "terre"
+	Terrain.aplanir_effacer()
 	meteo_on = bool(options.get("meteo", options.get("ouverture", bac_a_sable)))
 	champs_on = bool(options.get("champs", options.get("ouverture", bac_a_sable)))
 	_init_meteo()
@@ -53,6 +54,9 @@ func _init(g := 1, options := {}) -> void:
 		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
 		return
 	log_("Le Berliet et son équipage reprennent la route du no man's land.", "info")
+	villes_on = bool(options.get("villes", false))
+	if villes_on:
+		ville_creer(x_tete + float(VD().apparition_depart_m))
 
 
 # Change une pièce du camion de l'expédition ; la longueur du véhicule suit le châssis. Vrai si accepté.
@@ -78,6 +82,8 @@ func vehicule_principal():
 
 # --- Ordres ----------------------------------------------------------------
 func ordre_marche(m: String) -> void:
+	if ville_bloque_marche():
+		return
 	if m in ["avancer", "halte", "recul"] and ordres.marche != m:
 		ordres.marche = m
 		if m != "halte":
@@ -205,6 +211,9 @@ func affecter(de_uid: int, idx: int, vers_uid: int) -> bool:
 
 # --- Demi-tour : le convoi repart dans l'autre sens ---------------------------------
 func ordre_demi_tour() -> bool:
+	if ville_protegee():
+		log_("Demi-tour impossible dans l'enceinte d'une ville.", "alerte")
+		return false
 	if menace() or not transits.is_empty() or monde.en_transit() and false:
 		log_("Demi-tour impossible : des ennemis sont trop proches.", "alerte")
 		return false
@@ -242,6 +251,8 @@ func ordre_demi_tour() -> bool:
 	_prochain_x = x_tete + 150.0
 	monde.x_entree = x_tete
 	ordres.marche = "halte"
+	if ville_active():
+		_ville_retirer()   # la ville qu'on laisse derrière ne se retrouve pas sur cette route
 	log_("Demi-tour : le convoi repart dans l'autre sens.", "info")
 	evt({"t": "demitour"})
 	return true
@@ -274,7 +285,7 @@ func sauver() -> Dictionary:
 	var w := monde
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
-		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(),
+		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(),
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
 
 static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
@@ -340,8 +351,9 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.monde.quete = {}
 	if not w.quete.is_empty():
 		m.monde.quete = {"titre": w.quete.titre, "abattre": int(w.quete.abattre), "depart": int(w.quete.depart), "recompense": w.quete.recompense}
+	m.ville_charger(d.get("villes", {}))
 	m.journal.clear()
-	m.log_("Partie reprise.", "ok")
+	m.log_("Partie reprise." if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")
 	return m
 
 func monter(uid: int) -> void:
@@ -392,6 +404,7 @@ func avancer(dt := DT) -> void:
 	for v in convoi + ennemis:
 		v.x_prev = v.x
 	_marche(dt)
+	_ville(dt)
 	_camp(dt)
 	_soins(dt)
 	_ia_ennemis(dt)
@@ -519,6 +532,10 @@ func _marche(dt: float) -> void:
 						vit = 0.0
 						blocage = "La route est barrée par un véhicule ennemi."
 						break
+	var vmax_ville := 0.0
+	for v in actifs:
+		vmax_ville = vitesse_attelee(v) if vmax_ville == 0.0 else minf(vmax_ville, vitesse_attelee(v))
+	vit = _ville_vitesse(vit, vmax_ville)
 	x_tete += vit * dt
 	vitesse_convoi = vit
 	if vit != 0.0:
@@ -556,6 +573,8 @@ func _rencontres() -> void:
 		return   # Mode créatif : rien n'arrive sans le Kit (DEC-110)
 	if tempete_active():
 		return   # pas de nouvelle vague pendant la tempête (DEC-027)
+	if ville_calme() or ville_protegee():
+		return   # abords et intérieur d'une ville : calme (DEC-142)
 	if calme_ouverture() and not ouverture_en_cours():
 		return   # la dernière trouvaille (l'arme) n'est pas encore ramassée
 	var R: Dictionary = donnees().rencontres

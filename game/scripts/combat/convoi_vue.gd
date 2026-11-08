@@ -13,6 +13,10 @@ func _ready() -> void:
 	terrain.ancre_x = 150.0
 	terrain.z_index = -10   # le décor reste derrière véhicules, épaves et bâtiments
 	add_child(terrain)
+	ville_calque = VilleDessin.new()   # la ville passe devant le décor, derrière les véhicules
+	ville_calque.vue = self
+	ville_calque.z_index = -9
+	add_child(ville_calque)
 	couche = Control.new()
 	couche.mouse_filter = MOUSE_FILTER_IGNORE
 	couche.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
@@ -110,6 +114,15 @@ func _camera(delta: float) -> void:
 				gauche = minf(gauche, b.x - 2.0)
 		if proche:
 			plafond = minf(plafond, 600.0 / b.hauteur)   # un grand bâtiment (église) doit tenir à l'écran
+	if m.ville_active() and m.ville_phase() != "fin":   # la porte, puis la place de la ville, restent à l'écran
+		var x0v: float = float(m.ville.x0)
+		if m.ville_dedans():
+			gauche = minf(gauche, x0v + 34.0)
+			droite = maxf(droite, x0v + 101.0)
+		elif x0v - m.x_tete < 85.0 and m.ville_phase() == "approche":
+			droite = maxf(droite, x0v + 5.0)
+		if x0v - m.x_tete < 85.0:
+			plafond = minf(plafond, 600.0 / 15.5)
 	var span := maxf(droite - gauche + 4.0, 26.0)
 	var cible := clampf(1560.0 / span, 24.0, plafond)
 	if m.fini:   # convoi anéanti : grand dézoom lent sur le désert (DEC-055)
@@ -225,6 +238,18 @@ func _tap(p: Vector2) -> void:
 			_action_icone(ic)
 			accept_event()
 			return
+	if m.ville_dedans():   # toucher la mairie, le garage ou l'atelier ouvre son panneau
+		var xw: float = terrain.camera_x + (p.x - terrain.ancre_x) / ppm
+		var rel: float = xw - float(m.ville.x0)
+		var lieux := {"mairie": "maire", "garage": "garage", "atelier": "atelier"}
+		for id in lieux:
+			var bb: Array = VilleDessin.BATS[id]
+			if rel >= float(bb[0]) and rel <= float(bb[1]) and p.y < _sy(xw) - 1.5 * ppm:
+				_ville_onglet = lieux[id]
+				_ville_ferme = false
+				_dial_sig = ""
+				accept_event()
+				return
 	var trouve := 0
 	for v in m.convoi + m.epaves:
 		if v.statut == "epave":

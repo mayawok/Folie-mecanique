@@ -43,7 +43,33 @@ var ancre_x := 0.0      # abscisse écran (px) qui correspond à camera_x
 
 # Collines : grandes ondulations (jusqu'à 15° de pente) ; le véhicule les suit en s'inclinant
 static func relief(x: float) -> float:
-	return 3.4 * sin(x / 46.0) + 2.0 * sin(x / 19.0 + 1.0) + 0.7 * sin(x / 8.0 + 2.0) - 3.4 * sin(0.0)
+	var h := 3.4 * sin(x / 46.0) + 2.0 * sin(x / 19.0 + 1.0) + 0.7 * sin(x / 8.0 + 2.0) - 3.4 * sin(0.0)
+	for p in plats:
+		var w := _poids_plat(p, x)
+		if w > 0.0:
+			h = lerpf(h, float(p[2]), w)
+	return h
+
+
+# Zones aplanies (villes, DEC-140) : [x0, x1, hauteur] ; rampe douce de RAMPE m de chaque côté
+const RAMPE := 30.0
+static var plats: Array = []
+
+static func aplanir(x0: float, x1: float) -> void:
+	plats = [[x0, x1, 0.0]]
+	var h := 3.4 * sin(x0 / 46.0) + 2.0 * sin(x0 / 19.0 + 1.0) + 0.7 * sin(x0 / 8.0 + 2.0)
+	plats[0][2] = h
+
+static func aplanir_effacer() -> void:
+	plats = []
+
+static func _poids_plat(p: Array, x: float) -> float:
+	if x < float(p[0]) - RAMPE or x > float(p[1]) + RAMPE:
+		return 0.0
+	if x >= float(p[0]) and x <= float(p[1]):
+		return 1.0
+	var d := float(p[0]) - x if x < float(p[0]) else x - float(p[1])
+	return smoothstep(RAMPE, 0.0, d)
 
 
 # Petites bosses et cailloux (secousses des suspensions)
@@ -57,7 +83,10 @@ static func bosses(x: float) -> float:
 
 
 static func sol(x: float) -> float:
-	return relief(x) + bosses(x)
+	var b := bosses(x)
+	for p in plats:
+		b *= 1.0 - 0.75 * _poids_plat(p, x)   # sol tassé dans l'enceinte
+	return relief(x) + b
 
 
 # Pente moyenne (m/m) sur 6 m autour de x : positive en montée

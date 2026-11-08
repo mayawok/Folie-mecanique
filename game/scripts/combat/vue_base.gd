@@ -9,6 +9,9 @@ var _lbl_dial_titre: Label
 var _lbl_dial_texte: Label
 var _boite_dial: VBoxContainer
 var _dial_sig := ""
+var ville_calque: VilleDessin   # ville standard dessinée par le code (DEC-143)
+var _ville_onglet := "accueil"   # panneau de la ville : accueil | maire | garage | atelier | sorties
+var _ville_ferme := false
 var _camp_ferme := 0
 var _lbl_camp: Label
 var _lbl_nuit: Label
@@ -287,6 +290,14 @@ class CarteMap extends Control:
 			draw_string(f, p + Vector2(-80, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color(0, 0, 0, 0.9))
 			draw_string(f, p + Vector2(-81, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color("#F6F0DC"))
 			draw_string(f, p + Vector2(-20, 4), str(s.faction), HORIZONTAL_ALIGNMENT_CENTER, 40, 18, Color(0.05, 0.05, 0.05))
+			if bool(s.get("ville_connue", false)):   # ville inscrite sur la carte (DEC-142) : petite enceinte et son nom
+				var q := p + Vector2(26, -34)
+				draw_rect(Rect2(q, Vector2(26, 16)), Color("#3A2E24"))
+				for k in 4:
+					draw_rect(Rect2(q + Vector2(k * 7, -5), Vector2(5, 5)), Color("#3A2E24"))
+				draw_rect(Rect2(q + Vector2(9, 6), Vector2(8, 10)), Color("#E8A33D"))
+				draw_string(f, p + Vector2(-110, 70), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 20, Color(0, 0, 0, 0.9))
+				draw_string(f, p + Vector2(-111, 69), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 20, Color("#E8A33D"))
 
 class FxVue extends Control:
 	var vue: ConvoiVue

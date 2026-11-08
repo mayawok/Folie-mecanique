@@ -19,6 +19,10 @@ Mis à jour : 2026-11-08. Résumé volontairement court (≈ 60 lignes). Détail
 - **Méthode de travail** : Claude fusionne lui-même dans `main` (autorisation du 07/11) ; la page web se reconstruit ensuite toute seule.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
+- **Villes standard (08/11, DEC-140 à 143)** : enceinte plate, grande porte gardée ; freinage seul devant la porte, entrée et sortie au pas sans ordre ;
+  dans la ville rien n'arrive (point de reprise, ville inscrite sur la carte) ; mairie et maire, garage (réparation), atelier (grille) ; sortie au choix
+  vers un secteur voisin. Dessin par le code, 30 noms de lieux-dits. Kit → « Ville devant ». Détail : [`docs/design/VILLES.md`](docs/design/VILLES.md). Suite : textures (DEV-024), quêtes (DEV-025), OQ-026.
+
 ## Ce qui existe
 
 - Prototype Godot 4.3 / GDScript dans `game/`, publié sur GitHub Pages ([`game/LISEZMOI.md`](game/LISEZMOI.md)). Tests sans écran dans `game/tests/`.

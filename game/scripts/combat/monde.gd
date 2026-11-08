@@ -172,7 +172,7 @@ func _tout_abrite() -> bool:
 
 
 func alerte_nuit() -> bool:
-	return heure >= CREPUSCULE - 0.02 and heure < AUBE and not _tout_abrite() and repos_t <= 0.0
+	return heure >= CREPUSCULE - 0.02 and heure < AUBE and not _tout_abrite() and repos_t <= 0.0 and not m.ville_protegee() and not m.ville_calme()
 
 
 func _facteur_temps() -> float:
@@ -239,7 +239,10 @@ func _horloge(dt: float) -> void:
 		_aube_fait = false
 	if heure >= CREPUSCULE and not _crep_fait:
 		_crep_fait = true
-		m.log_("La nuit tombe. Abritez-vous dans un bâtiment : les rôdeurs sortent.", "alerte")
+		if m.ville_protegee() or m.ville_calme():
+			m.log_("La nuit tombe. Derrière les murs, le convoi ne risque rien.", "info")
+		else:
+			m.log_("La nuit tombe. Abritez-vous dans un bâtiment : les rôdeurs sortent.", "alerte")
 		m.evt({"t": "nuit_tombe"})
 	if heure >= AUBE and not _aube_fait:
 		_aube_fait = true
@@ -265,6 +268,8 @@ func _cap(dt: float) -> void:
 		var s: Dictionary = secteurs[secteur]
 		m.log_("Vous entrez à %s : %s (%s), niveau %d." % [s.nom, FACTIONS[s.faction], ATTITUDE[s.faction], s.niveau], "ok")
 		m.evt({"t": "secteur"})
+		if m.villes_on:   # une ville par secteur, un peu plus loin sur la route (DEC-141)
+			m.ville_creer(m.x_tete + float(m.VD().apparition_secteur_m))
 
 
 func _batiments(dt: float) -> void:
@@ -525,8 +530,8 @@ func _assauts(dt: float) -> void:
 		return
 	if not nuit():
 		return
-	if camp_proche() != null:
-		return   # le camp allié monte la garde
+	if camp_proche() != null or m.ville_protegee() or m.ville_calme():
+		return   # le camp allié ou la ville montent la garde
 	_assaut_t -= dt
 	if _assaut_t > 0.0 or vivants() >= 6:
 		return

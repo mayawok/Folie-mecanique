@@ -42,6 +42,19 @@ func _evenement(e: Dictionary) -> void:
 			if so2 and _audio_ok and _temps - _t_son.voix > 25.0:
 				_t_son.voix = _temps
 				so2.voix("voix_pillards")
+		"ville":
+			match String(e.etat):
+				"annonce":
+					_son("sfx_radio", -6.0)
+				"porte":
+					_son("sfx_atelier", -8.0)
+				"dedans":
+					_ville_onglet = "accueil"
+					_ville_ferme = false
+					_dial_sig = ""
+					call("_sauver_vue")   # point de reprise (défini dans vue_interface.gd)
+				"depart", "sortie":
+					_son("sfx_depart_convoi", -6.0)
 		"nuit_tombe":
 			_son("sfx_nuee", -4.0)
 		"marteau":
