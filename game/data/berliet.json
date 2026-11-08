@@ -1,0 +1,62 @@
+{
+  "_lisez_moi": "Berliet GDR dessiné à partir de l'art (planches ChatGPT du 08/11, découpées par tools/decouper_berliet.py dans assets/vehicules/berliet). Unité de position 'u' = 1 pixel du châssis long ; ppm_art u par mètre ; y vers le bas, sol à y = sol. Chaque pièce : image, x et y (coin haut-gauche, en u), echelle (u par pixel de la planche d'origine ; les images du jeu sont réduites d'un facteur 'reduction', le code en tient compte, pivot aussi en pixels de planche). Les deux châssis sont calés sur l'essieu avant (même x de moyeu avant) : la cabine, l'échappement et la trappe ne bougent pas quand on change de châssis. Ajouter un modèle (pneu, échappement, réservoir, module) = une entrée ici + une image, aucun code. Valeurs de jeu (charge, litres, bonus) provisoires, non branchées sur le combat (à régler en essai).",
+  "reduction": 0.5,
+  "ppm_art": 250.0,
+  "sol": 335.0,
+  "rayon_roue": 125.0,
+  "chassis": {
+    "long": {"nom": "Long, 3 essieux", "image": "chassis_long", "x": 0.0, "y": 0.0, "echelle": 1.0,
+      "moyeux": [[324.0, 210.0, "ar"], [853.0, 210.0, "ar"], [1912.0, 210.0, "av"]],
+      "plateau": [20.0, 1210.0], "rail": 30.0, "charge_t": 6.0, "garage": 2},
+    "court": {"nom": "Court, 2 essieux", "image": "chassis_court", "x": 442.0, "y": 0.0, "echelle": 0.91,
+      "moyeux": [[920.0, 210.0, "ar"], [1912.0, 210.0, "av"]],
+      "plateau": [455.0, 1210.0], "rail": 40.0, "charge_t": 3.2, "garage": 0}
+  },
+  "cabine": {"image": "cabine", "x": 1373.5, "y": -347.0, "echelle": 0.5385},
+  "trappe": {"image": "trappe", "x": 1446.0, "y": -354.0, "echelle": 0.115, "pivot": [45.0, 125.0], "ouverture_deg": -115.0},
+  "roues": {
+    "echelle_av": 0.592,
+    "echelle_ar": 0.566,
+    "pneus": {
+      "route":    {"nom": "Route",     "av": "roue_av_route",    "ar": "roue_ar_route",    "vitesse_route": 1.0,  "tout_terrain": 0.85, "pv": 1.0},
+      "agraire":  {"nom": "Agraire",   "av": "roue_av_agraire",  "ar": "roue_ar_agraire",  "vitesse_route": 0.92, "tout_terrain": 1.1,  "pv": 1.05},
+      "crampons": {"nom": "Crampons",  "av": "roue_av_crampons", "ar": "roue_ar_crampons", "vitesse_route": 0.94, "tout_terrain": 1.15, "pv": 1.1},
+      "chaines":  {"nom": "Chaînes",   "av": "roue_av_chaines",  "ar": "roue_ar_chaines",  "vitesse_route": 0.85, "tout_terrain": 1.25, "pv": 1.1},
+      "blindee":  {"nom": "Blindée",   "av": "roue_av_blindee",  "ar": "roue_ar_blindee",  "vitesse_route": 0.88, "tout_terrain": 1.05, "pv": 1.6}
+    }
+  },
+  "echappement": {"droite": 1366.0, "bas": 66.0, "echelle": 0.707,
+    "niveaux": [
+      {"image": "echappement_1", "nom": "Tuyau simple",      "bonus_puissance": 0.0},
+      {"image": "echappement_2", "nom": "Pot perforé",       "bonus_puissance": 0.02},
+      {"image": "echappement_3", "nom": "Pot à chambres",    "bonus_puissance": 0.04},
+      {"image": "echappement_4", "nom": "Grand pot perforé", "bonus_puissance": 0.06},
+      {"image": "echappement_5", "nom": "Cheminée",          "bonus_puissance": 0.08}
+    ]},
+  "reservoir": {"x": 1068.0, "haut": 104.0, "echelle": 0.6,
+    "niveaux": [
+      {"image": "reservoir_1", "nom": "Réservoir d'origine", "litres": 120},
+      {"image": "reservoir_2", "nom": "Double réservoir",    "litres": 220},
+      {"image": "reservoir_3", "nom": "Cuve cylindrique",    "litres": 300},
+      {"image": "reservoir_4", "nom": "Caisson renforcé",    "litres": 420},
+      {"image": "reservoir_5", "nom": "Triple cuve en cage", "litres": 560}
+    ]},
+  "modules": {
+    "aucun":    {"nom": "Châssis nu"},
+    "plateau":  {"nom": "Plateau",                "base": "plateau_nu"},
+    "citerne":  {"nom": "Citerne de carburant",   "base": "citerne", "litres": 3000},
+    "benne":    {"nom": "Benne à épaves",          "base": "benne"},
+    "grue":     {"nom": "Grue et plateau",         "base": "", "levage_t": 8.0, "garage": 2},
+    "troupes":  {"nom": "Transport de troupes",    "base": "", "places": 12},
+    "ridelles": {"nom": "Ridelles hautes (vivres)", "base": ""}
+  },
+  "ancrages": {
+    "_note": "Points de vie de l'équipage, en u (même repère). portes : x au sol ; toit : x et y du toit au droit de la trappe ; feu : x du feu de camp (derrière le camion).",
+    "porte_avant": 1795.0,
+    "porte_arriere": 1600.0,
+    "toit": [1540.0, -330.0],
+    "moteur": 2020.0,
+    "feu": -560.0
+  },
+  "defaut": {"chassis": "court", "pneu_av": "route", "pneu_ar": "route", "echappement": 0, "reservoir": 0, "module": "plateau"}
+}

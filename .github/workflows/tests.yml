@@ -3,7 +3,7 @@
 name: Tests
 on:
   push:
-    branches: ["grille-v2", "grille-v2-suite", "grille-v2-dessin", "grille-v2-ecran", "grille-v2-camp", "grille-v2-camp-ui"]
+    branches: ["grille-v2", "grille-v2-suite", "grille-v2-dessin", "grille-v2-ecran", "grille-v2-camp", "grille-v2-camp-ui", "dev/**"]
     paths: ["game/**", ".github/workflows/tests.yml"]
   workflow_dispatch:
 permissions:
@@ -19,7 +19,7 @@ jobs:
       - name: Lancer les tests
         run: |
           fin=0
-          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_camp; do
+          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_camp test_berliet; do
             echo "=== $t ==="
             timeout 150 godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
             tail -n 60 /tmp/$t.log
@@ -48,6 +48,8 @@ jobs:
           xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_camp.gd -- /tmp/captures/camp.jpg 2>&1 | grep -v ALSA | tail -20
           test -f /tmp/captures/camp.jpg
           echo "B64DEBUT"; base64 -w0 /tmp/captures/camp_avant.jpg | fold -w 3000; echo; echo "B64FIN"
+          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_berliet.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
+          for f in /tmp/captures/berliet_*.jpg; do echo "B64DEBUT $(basename $f)"; base64 -w0 $f | fold -w 3000; echo; echo "B64FIN"; done
       - uses: actions/upload-artifact@v4
         with:
           name: captures

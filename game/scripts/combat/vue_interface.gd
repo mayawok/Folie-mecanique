@@ -1031,7 +1031,7 @@ func _installer_kit() -> void:
 	_btn_kit.visible = m.bac_a_sable
 	if not m.bac_a_sable:
 		return
-	_kit = PanneauKit.new(m, func(): _demarrer_audio())
+	_kit = PanneauKit.new(m, func(): _demarrer_audio(), _ouvrir_vitrine_berliet)
 	_kit.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE)
 	_kit.offset_left = -470
 	_kit.offset_right = -20
@@ -1039,6 +1039,17 @@ func _installer_kit() -> void:
 	_kit.offset_bottom = -(BARRE_H + 10)
 	_kit.visible = false
 	add_child(_kit)
+
+
+# Vitrine du Berliet GDR (pièces interchangeables et halte de l'équipage), ouverte depuis le Kit ; le jeu est en pause
+func _ouvrir_vitrine_berliet() -> void:
+	var pause_avant := pause
+	pause = true
+	if _kit != null:
+		_kit.visible = false
+	var vit := VitrineBerliet.new()
+	_par_dessus(vit)
+	vit.ferme.connect(func(): pause = pause_avant)
 
 
 func _basculer_kit() -> void:

@@ -30,6 +30,7 @@ var _vitesse_convoi := 4.5
 var _btn_calme: Button
 var _etat: Label
 var _son: Callable
+var _ouvrir_berliet: Callable
 
 
 static func tout_le_catalogue() -> Array:
@@ -42,9 +43,10 @@ static func tout_le_catalogue() -> Array:
 	return res
 
 
-func _init(modele, son: Callable = Callable()) -> void:
+func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callable()) -> void:
 	m = modele
 	_son = son
+	_ouvrir_berliet = ouvrir_berliet
 	var fond := StyleBoxFlat.new()
 	fond.bg_color = Color(0.07, 0.08, 0.09, 1.0)
 	fond.set_corner_radius_all(10)
@@ -61,6 +63,9 @@ func _init(modele, son: Callable = Callable()) -> void:
 	_etat = Label.new()
 	_etat.add_theme_font_size_override("font_size", 20)
 	v.add_child(_etat)
+	if _ouvrir_berliet.is_valid():
+		_titre(v, "Camion de l'expédition")
+		_bouton(v, "Berliet GDR : pièces et halte", func(): _ouvrir_berliet.call())
 	_titre(v, "Zone et décor")
 	_rangee(v, KIT_ZONES_LIBELLES(), func(z): m.kit_regler_zone(z); _maj())
 	_titre(v, "Heure")
