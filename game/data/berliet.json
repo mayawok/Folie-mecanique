@@ -48,7 +48,9 @@
     "benne":    {"nom": "Benne à épaves",          "base": "benne"},
     "grue":     {"nom": "Grue et plateau",         "base": "", "levage_t": 8.0, "garage": 2},
     "troupes":  {"nom": "Transport de troupes",    "base": "", "places": 12},
-    "ridelles": {"nom": "Ridelles hautes (vivres)", "base": ""}
+    "ridelles": {"nom": "Ridelles hautes (vivres)", "base": ""},
+    "citerne_eau": {"nom": "Citerne d'eau potable", "base": "", "litres": 3000},
+    "munitions": {"nom": "Caisses de munitions", "base": ""}
   },
   "ancrages": {
     "_note": "Points de vie de l'équipage, en u (même repère). portes : x au sol ; toit : x et y du toit au droit de la trappe ; feu : x du feu de camp (derrière le camion).",

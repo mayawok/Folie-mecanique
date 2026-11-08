@@ -32,6 +32,10 @@ func _ready() -> void:
 	terrain_avant.sol_y = SOL_Y
 	terrain_avant.ancre_x = 150.0
 	add_child(terrain_avant)
+	mission_calque = MissionDessin.new()   # scènes de mission : au-dessus de tout, bandes noires comprises (DEC-145)
+	mission_calque.vue = self
+	mission_calque.z_index = 10
+	add_child(mission_calque)
 	_construire_interface()
 	var sv := _charger_sauvegarde()
 	if sv.is_empty():
@@ -116,7 +120,13 @@ func _camera(delta: float) -> void:
 			plafond = minf(plafond, 600.0 / b.hauteur)   # un grand bâtiment (église) doit tenir à l'écran
 	if m.ville_active() and m.ville_phase() != "fin":   # la porte, puis la place de la ville, restent à l'écran
 		var x0v: float = float(m.ville.x0)
-		if m.ville_dedans():
+		if m.ville_phase() == "chargement":   # plan de l'atelier
+			gauche = x0v + 26.0
+			droite = x0v + 52.0
+		elif m.ville_phase() == "rassemblement":   # plan de la place : le convoi et le maire
+			gauche = minf(gauche, x0v + 88.0)
+			droite = _rtete() + 3.0
+		elif m.ville_dedans():
 			gauche = minf(gauche, x0v + 34.0)
 			droite = maxf(droite, x0v + 101.0)
 		elif x0v - m.x_tete < 85.0 and m.ville_phase() == "approche":
@@ -161,6 +171,8 @@ func _synchroniser() -> void:
 			n.configurer(v.type)
 		if v.type == "berliet_gdr" and v.camp == "joueur" and n.art_config != m.berliet_config:
 			n.configurer_art(m.berliet_config)   # pièces du camion de l'expédition (DEC-136, 139)
+		if v.principal:
+			n.module_leve = m.mission_module_leve()
 		if absf(n.ppm - ppm) > 0.01 and not n.D.is_empty():
 			n.ppm = ppm
 			n.size = Vector2(n.D.longueur, n.D.hauteur) * ppm

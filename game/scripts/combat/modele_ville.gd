@@ -8,8 +8,9 @@ extends "res://scripts/combat/modele_camp.gd"
 # Valeurs et noms : game/data/villes.json. Dessin : ville_dessin.gd.
 
 # Phases : approche, ouverture, entree, dedans, depart, ouverture_s, sortie, fin
-const PHASES_FORCEES := ["ouverture", "entree", "depart", "ouverture_s", "sortie"]
-const PHASES_PROTEGEES := ["ouverture", "entree", "dedans", "depart", "ouverture_s", "sortie"]
+# chargement et rassemblement : scènes de départ en mission (modele_mission.gd, DEC-145)
+const PHASES_FORCEES := ["ouverture", "entree", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
+const PHASES_PROTEGEES := ["ouverture", "entree", "dedans", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
 
 static var _vdata := {}
 
@@ -70,6 +71,18 @@ func ville_creer(x0: float) -> bool:
 	var r := RandomNumberGenerator.new()
 	r.seed = graine * 97 + 13 * _n_villes + monde.secteur
 	_n_villes += 1
+	ville_nommer(monde.secteur, r)
+	var L := float(D.longueur_m)
+	ville = {"nom": s.ville, "maire": s.maire, "secteur": monde.secteur, "x0": x0, "x1": x0 + L, "phase": "approche", "t": 0.0,
+		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false}
+	_ville_installer()
+	return true
+
+
+# Nom (tiré au hasard, sans doublon) et maire de la ville d'un secteur, gardés ensuite par le secteur
+func ville_nommer(sid: int, r: RandomNumberGenerator) -> String:
+	var D := VD()
+	var s: Dictionary = monde.secteurs[sid]
 	if String(s.get("ville", "")) == "":
 		var pris := {}
 		for s2 in monde.secteurs:
@@ -79,11 +92,7 @@ func ville_creer(x0: float) -> bool:
 			libres = D.noms
 		s["ville"] = String(libres[r.randi() % libres.size()])
 		s["maire"] = String(D.maires[r.randi() % D.maires.size()])
-	var L := float(D.longueur_m)
-	ville = {"nom": s.ville, "maire": s.maire, "secteur": monde.secteur, "x0": x0, "x1": x0 + L, "phase": "approche", "t": 0.0,
-		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false}
-	_ville_installer()
-	return true
+	return String(s.ville)
 
 
 # Terrain plat dans l'enceinte ; rien de ce qui avait été semé sur la route ne reste dans la ville
@@ -188,6 +197,12 @@ func _ville_arrivee() -> void:
 		log_("%s est inscrite sur la carte. Point de reprise." % ville.nom, "ok")
 	log_("Bienvenue à %s. Le convoi est à l'abri derrière les murs." % ville.nom, "ok")
 	evt({"t": "ville", "etat": "dedans", "nouvelle": neuve})
+	_mission_arrivee()
+
+
+# Redéfinie par modele_mission.gd : livraison à l'arrivée
+func _mission_arrivee() -> void:
+	pass
 
 
 # Vitesse du convoi imposée par la ville (appelée par _marche) : vit = vitesse voulue, vmax = vitesse possible
@@ -204,8 +219,8 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 				var k := clampf((stop - x_tete) / float(D.freinage_m), 0.0, 1.0)   # on freine doucement
 				return minf(vit, maxf(mini, vmax * k)) if x_tete < stop else 0.0
 			return vit
-		"ouverture", "ouverture_s", "dedans":
-			blocage = "" if ville_dedans() else "Ouverture de la porte."
+		"ouverture", "ouverture_s", "dedans", "chargement", "rassemblement":
+			blocage = "" if ville_dedans() else ("Préparatifs du départ." if ville_phase() in ["chargement", "rassemblement"] else "Ouverture de la porte.")
 			return 0.0
 		"entree":
 			blocage = "Entrée dans %s." % ville.nom

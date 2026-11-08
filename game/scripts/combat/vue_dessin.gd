@@ -55,6 +55,22 @@ func _evenement(e: Dictionary) -> void:
 					call("_sauver_vue")   # point de reprise (défini dans vue_interface.gd)
 				"depart", "sortie":
 					_son("sfx_depart_convoi", -6.0)
+		"mission":
+			var so := get_node_or_null("/root/Son")
+			match String(e.etat):
+				"chargement":
+					_son("sfx_atelier", -4.0)
+				"rassemblement":
+					if so and _audio_ok:
+						so.musique("mus_tambours")   # tambours de guerre jusqu'à la livraison (tools/synth_tambours.py)
+					_son("sfx_depart_convoi", -4.0)
+				"livree", "echec":
+					if so and _audio_ok:
+						so.musique("mus_combat")
+					if String(e.etat) == "livree":
+						_ville_onglet = "bilan"
+						_ville_ferme = false
+						_dial_sig = ""
 		"nuit_tombe":
 			_son("sfx_nuee", -4.0)
 		"marteau":

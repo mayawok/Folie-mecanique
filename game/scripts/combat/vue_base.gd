@@ -12,6 +12,7 @@ var _dial_sig := ""
 var ville_calque: VilleDessin   # ville standard dessinée par le code (DEC-143)
 var _ville_onglet := "accueil"   # panneau de la ville : accueil | maire | garage | atelier | sorties
 var _ville_ferme := false
+var mission_calque: MissionDessin   # scènes de départ en mission (DEC-145)
 var _camp_ferme := 0
 var _lbl_camp: Label
 var _lbl_nuit: Label

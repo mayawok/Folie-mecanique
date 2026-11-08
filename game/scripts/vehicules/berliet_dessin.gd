@@ -15,6 +15,7 @@ var teinte := Color.WHITE    # nuit, crépuscule
 var roues_visibles := true   # faux : épave posée sur le châssis
 var ci: CanvasItem = self    # surface de dessin : le véhicule du convoi (VehiculeDessin) dessine le Berliet sur lui-même
 var base := Transform2D.IDENTITY   # repère du camion sur cette surface (assiette, sens, suspension)
+var module_leve := 0.0       # m : cargaison suspendue au-dessus de sa place (pont roulant de l'atelier, mission DEC-145)
 
 static var _tex := {}
 
@@ -68,7 +69,7 @@ func dessiner() -> void:
 	for c in BerlietConfig.calques(config):
 		match String(c.id):
 			"module":
-				_tr(sec, 0.0)
+				_tr(sec - Vector2(0, module_leve * ppm), 0.0)
 				_module()
 				_tr0()
 			"roue":
@@ -168,6 +169,10 @@ func _module() -> void:
 			_tablier(x1, r)
 		"citerne":
 			_citerne(x0, x1, r)
+		"citerne_eau":
+			_citerne(x0, x1, r, Color("#9DB2B8"), "EAU POTABLE", Color("#2E5E8A"))
+		"munitions":
+			_munitions(x0, x1, r)
 		"benne":
 			_benne(x0, x1, r)
 		"grue":
@@ -185,7 +190,7 @@ func _tablier(x1: float, r: float) -> void:
 		_ligne_u(Vector2(x1 - 22.0, y), Vector2(x1, y), ACIER_C, 6.0)
 
 
-func _citerne(x0: float, x1: float, r: float) -> void:
+func _citerne(x0: float, x1: float, r: float, col := Color("#5B6248"), etiquette := "GAZOLE", bande := Color("#B8862A")) -> void:
 	var d := 330.0                     # diamètre 1,32 m
 	var a := x0 + 40.0
 	var b := x1 - 40.0
@@ -195,7 +200,6 @@ func _citerne(x0: float, x1: float, r: float) -> void:
 	for x in [a + 120.0, (a + b) / 2.0, b - 120.0]:
 		_rect_u(x - 30.0, yb - 40.0, x + 30.0, r, ACIER.darkened(0.2))
 	# corps : rectangle + deux fonds bombés
-	var col := Color("#5B6248")
 	var rr := d / 2.0
 	ci.draw_circle(pu(a + rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
 	ci.draw_circle(pu(b - rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
@@ -218,6 +222,32 @@ func _citerne(x0: float, x1: float, r: float) -> void:
 		y += 50.0
 	# vanne de vidange
 	_rect_u(a + 30.0, yb - 10.0, a + 70.0, yb + 30.0, ROUILLE)
+	# bande peinte et marquage : on reconnaît la cargaison (gazole ou eau, DEC-147)
+	var m0 := (a + b) / 2.0
+	_rect_u(m0 - 230.0, yh + 120.0, m0 + 230.0, yh + 215.0, bande, false)
+	var fs := int(clampf(64.0 * k(), 8.0, 64.0))
+	ci.draw_string(ThemeDB.fallback_font, pu(m0 - 230.0, yh + 192.0), etiquette, HORIZONTAL_ALIGNMENT_CENTER, 460.0 * k(), fs, _c(Color("#F0EAD8")))
+
+
+# Caisses de munitions empilées et sanglées sur le plateau (mission, DEC-147)
+func _munitions(x0: float, x1: float, r: float) -> void:
+	_plancher(x0, x1, r)
+	var olive := Color("#4E5634")
+	var x := x0 + 40.0
+	var i := 0
+	while x < x1 - 140.0:
+		for j in 3:
+			if j == 2 and i % 2 == 1:
+				continue
+			var y1 := r - 26.0 - 100.0 * j
+			_rect_u(x, y1 - 95.0, x + 170.0, y1, olive.darkened(0.06 * ((i + j) % 2)))
+			_rect_u(x + 20.0, y1 - 62.0, x + 150.0, y1 - 38.0, Color("#C9A43A"), false)   # bande jaune au pochoir
+			_rect_u(x - 6.0, y1 - 80.0, x + 4.0, y1 - 50.0, ACIER_C)   # poignée
+		x += 180.0
+		i += 1
+	for xs in [x0 + 200.0, (x0 + x1) / 2.0, x1 - 220.0]:   # sangles
+		_ligne_u(Vector2(xs, r - 330.0), Vector2(xs, r - 26.0), Color("#3A3020"), 10.0)
+	_tablier(x1, r)
 
 
 func _benne(x0: float, x1: float, r: float) -> void:
@@ -342,7 +372,8 @@ func _ridelles_hautes(x0: float, x1: float, r: float) -> void:
 func haut_module_u() -> float:
 	var r := BerlietConfig.rail(config)
 	match String(config.module):
-		"citerne": return r - 400.0
+		"citerne", "citerne_eau": return r - 400.0
+		"munitions": return r - 330.0
 		"benne": return r - 380.0
 		"grue": return r - 650.0
 		"troupes": return r - 300.0
