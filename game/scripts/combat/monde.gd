@@ -172,7 +172,7 @@ func _tout_abrite() -> bool:
 
 
 func alerte_nuit() -> bool:
-	return heure >= CREPUSCULE - 0.02 and heure < AUBE and not _tout_abrite() and repos_t <= 0.0
+	return heure >= CREPUSCULE - 0.02 and heure < AUBE and not _tout_abrite() and repos_t <= 0.0 and not m.ville_protegee() and not m.ville_calme()
 
 
 func _facteur_temps() -> float:
@@ -239,7 +239,10 @@ func _horloge(dt: float) -> void:
 		_aube_fait = false
 	if heure >= CREPUSCULE and not _crep_fait:
 		_crep_fait = true
-		m.log_("La nuit tombe. Abritez-vous dans un bâtiment : les rôdeurs sortent.", "alerte")
+		if m.ville_protegee() or m.ville_calme():
+			m.log_("La nuit tombe. Derrière les murs, le convoi ne risque rien.", "info")
+		else:
+			m.log_("La nuit tombe. Abritez-vous dans un bâtiment : les rôdeurs sortent.", "alerte")
 		m.evt({"t": "nuit_tombe"})
 	if heure >= AUBE and not _aube_fait:
 		_aube_fait = true

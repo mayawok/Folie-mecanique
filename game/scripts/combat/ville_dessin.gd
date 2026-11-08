@@ -174,12 +174,23 @@ func _fond() -> void:
 				draw_line(Vector2(sx + w * 0.5, base - h * 1.5), Vector2(sx + w * 1.6, base - h * 1.35), col.darkened(0.3), maxf(1.5, _ppm * k * 0.15))
 			"clocher":
 				draw_rect(Rect2(sx, base - h * 1.4, w * 0.6, h * 1.4), _c(Color("#9C8E78"), 0.42))
-				draw_colored_polygon(PackedVector2Array([Vector2(sx - w * 0.05, base - h * 1.4), Vector2(sx + w * 0.3, base - h * 2.0), Vector2(sx + w * 0.65, base - h * 1.4)]), _c(Color("#4E5258"), 0.42))
+				_poly(PackedVector2Array([Vector2(sx - w * 0.05, base - h * 1.4), Vector2(sx + w * 0.3, base - h * 2.0), Vector2(sx + w * 0.65, base - h * 1.4)]), _c(Color("#4E5258"), 0.42))
 			_:
 				draw_rect(Rect2(sx, base - h, w, h), col)
-				draw_colored_polygon(PackedVector2Array([Vector2(sx, base - h), Vector2(sx + w, base - h * 1.08), Vector2(sx + w, base - h)]), col.darkened(0.2))
+				_poly(PackedVector2Array([Vector2(sx, base - h), Vector2(sx + w, base - h * 1.08), Vector2(sx + w, base - h)]), col.darkened(0.2))
 		if _nuit > 0.3 and int(o.x) % 3 == 0:
 			draw_rect(Rect2(sx + w * 0.35, base - h * 0.6, maxf(2.0, w * 0.12), maxf(2.0, w * 0.12)), _lampe(0.8))
+
+
+# Polygone ignoré s'il est trop petit à l'écran (la triangulation échoue sur les formes presque plates)
+func _poly(pts: PackedVector2Array, col: Color) -> void:
+	var aire := 0.0
+	for i in pts.size():
+		var a := pts[i]
+		var b := pts[(i + 1) % pts.size()]
+		aire += a.x * b.y - b.x * a.y
+	if absf(aire) > 4.0:
+		draw_colored_polygon(pts, col)
 
 
 func _fumee(p: Vector2, s: float, graine: float) -> void:
@@ -209,7 +220,7 @@ func _maisons() -> void:
 				draw_rect(Rect2(sx + w * 0.1, base - h * 0.08, w * 0.8, h * 0.08), _c(Color("#3A332C")))
 			"wagon":
 				draw_rect(Rect2(sx, base - h * 0.65, w, h * 0.55), col)
-				draw_colored_polygon(PackedVector2Array([Vector2(sx - 2, base - h * 0.65), Vector2(sx + w * 0.5, base - h * 0.75), Vector2(sx + w + 2, base - h * 0.65)]), col.darkened(0.25))
+				_poly(PackedVector2Array([Vector2(sx - 2, base - h * 0.65), Vector2(sx + w * 0.5, base - h * 0.75), Vector2(sx + w + 2, base - h * 0.65)]), col.darkened(0.25))
 				draw_rect(Rect2(sx + w * 0.42, base - h * 0.55, w * 0.16, h * 0.42), _c(Color("#2E2822")))
 				for wx in [0.15, 0.85]:
 					draw_circle(Vector2(sx + w * wx, base - h * 0.06), h * 0.07, _c(Color("#26221E")))
@@ -221,14 +232,14 @@ func _maisons() -> void:
 					draw_rect(Rect2(sx + dx + w * 0.15, y - h * 0.24, w * 0.18, h * 0.12), _c(Color("#2A2E30")))
 			"cabane":
 				draw_rect(Rect2(sx, base - h * 0.75, w, h * 0.75), _c(Color("#7A6448"), 0.18))
-				draw_colored_polygon(PackedVector2Array([Vector2(sx - 3, base - h * 0.75), Vector2(sx + w * 0.5, base - h), Vector2(sx + w + 3, base - h * 0.75)]), col.darkened(0.3))
+				_poly(PackedVector2Array([Vector2(sx - 3, base - h * 0.75), Vector2(sx + w * 0.5, base - h), Vector2(sx + w + 3, base - h * 0.75)]), col.darkened(0.3))
 				draw_rect(Rect2(sx + w * 0.6, base - h * 0.55, w * 0.22, h * 0.2), _lampe())
 			_:
 				draw_rect(Rect2(sx, base - h, w, h), col)
 				var nb := int(w / maxf(4.0, 0.3 * _ppm * k))
 				for i in nb:
 					draw_line(Vector2(sx + i * w / nb, base - h), Vector2(sx + i * w / nb, base), col.darkened(0.18), 1.0)
-				draw_colored_polygon(PackedVector2Array([Vector2(sx - 3, base - h), Vector2(sx + w + 3, base - h * 1.12), Vector2(sx + w + 3, base - h * 0.98), Vector2(sx - 3, base - h * 0.9)]), col.darkened(0.3))
+				_poly(PackedVector2Array([Vector2(sx - 3, base - h), Vector2(sx + w + 3, base - h * 1.12), Vector2(sx + w + 3, base - h * 0.98), Vector2(sx - 3, base - h * 0.9)]), col.darkened(0.3))
 				draw_rect(Rect2(sx + w * 0.2, base - h * 0.6, w * 0.2, h * 0.2), _lampe() if o.f != 0 else _c(Color("#2A2622")))
 				draw_rect(Rect2(sx + w * 0.6, base - h * 0.45, w * 0.18, h * 0.45), _c(Color("#33291F")))
 	# Guirlandes de lampes entre les maisons
@@ -324,7 +335,7 @@ func _marche() -> void:
 			draw_line(_p(px, 0.0), _p(px, 3.0), _c(Color("#3E3226")), maxf(2.0, _ppm * 0.12))
 		var c1: Color = couleurs[i]
 		for j in 5:   # bâche rayée
-			draw_colored_polygon(PackedVector2Array([_p(x - 0.3 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 2.8), _p(x - 0.3 + j * 0.92, 2.9)]), _c(c1 if j % 2 == 0 else Color("#E4DCC8")))
+			_poly(PackedVector2Array([_p(x - 0.3 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 2.8), _p(x - 0.3 + j * 0.92, 2.9)]), _c(c1 if j % 2 == 0 else Color("#E4DCC8")))
 		draw_rect(Rect2(_p(x + 0.2, 1.0), Vector2(3.6 * _ppm, 1.0 * _ppm)), _c(Color("#6B5236")))
 		for j in 4:   # caisses, bidons, cageots
 			var cc: Color = [Color("#8A6A3C"), Color("#4E5A4C"), Color("#9A8A5A"), Color("#6E3A2A")][(i + j) % 4]
@@ -343,7 +354,7 @@ func _atelier() -> void:
 		pts.append(_p(b[0] + u * w, 6.0 + sin(u * PI) * 3.2))
 	pts.append(_p(b[1], 0.0))
 	pts.append(_p(b[0], 0.0))
-	draw_colored_polygon(pts, _c(Color("#6E6A62")))
+	_poly(pts, _c(Color("#6E6A62")))
 	for i in range(1, 12):
 		var xx: float = b[0] + i * w / 12.0
 		var hh := 6.0 + sin(i / 12.0 * PI) * 3.2
@@ -369,7 +380,7 @@ func _garage() -> void:
 		return
 	var w: float = b[1] - b[0]
 	_toles(Rect2(_p(b[0], 6.0), Vector2(w * _ppm, 6.0 * _ppm)), _c(Color("#7A4E34")))
-	draw_colored_polygon(PackedVector2Array([_p(b[0] - 0.4, 6.0), _p(b[1] + 0.4, 6.6), _p(b[1] + 0.4, 6.2), _p(b[0] - 0.4, 5.7)]), _c(Color("#4A3428")))
+	_poly(PackedVector2Array([_p(b[0] - 0.4, 6.0), _p(b[1] + 0.4, 6.6), _p(b[1] + 0.4, 6.2), _p(b[0] - 0.4, 5.7)]), _c(Color("#4A3428")))
 	draw_rect(Rect2(_p(b[0] + 1.5, 4.2), Vector2(7.0 * _ppm, 4.2 * _ppm)), _c(Color("#201C18")))
 	draw_rect(Rect2(_p(b[0] + 2.0, 1.6), Vector2(4.8 * _ppm, 1.2 * _ppm)), _c(Color("#5C6A5E")))   # voiture sur cric
 	draw_rect(Rect2(_p(b[0] + 3.3, 0.4), Vector2(0.3 * _ppm, 0.6 * _ppm)), _c(Color("#8A8A80")))
@@ -396,9 +407,9 @@ func _mairie() -> void:
 	# corps : deux étages, toit d'ardoise, fronton central avec horloge
 	draw_rect(Rect2(_p(x0, 9.0), Vector2(w * _ppm, 9.0 * _ppm)), pierre)
 	draw_rect(Rect2(_p(x0, 4.6), Vector2(w * _ppm, 0.3 * _ppm)), pierre.darkened(0.12))
-	draw_colored_polygon(PackedVector2Array([_p(x0 - 0.5, 9.0), _p(x0 + 0.8, 10.6), _p(x1 - 0.8, 10.6), _p(x1 + 0.5, 9.0)]), _c(Color("#4A5058")))
+	_poly(PackedVector2Array([_p(x0 - 0.5, 9.0), _p(x0 + 0.8, 10.6), _p(x1 - 0.8, 10.6), _p(x1 + 0.5, 9.0)]), _c(Color("#4A5058")))
 	var cx := (x0 + x1) * 0.5
-	draw_colored_polygon(PackedVector2Array([_p(cx - 3.0, 9.0), _p(cx, 11.6), _p(cx + 3.0, 9.0)]), pierre.lightened(0.05))
+	_poly(PackedVector2Array([_p(cx - 3.0, 9.0), _p(cx, 11.6), _p(cx + 3.0, 9.0)]), pierre.lightened(0.05))
 	draw_circle(_p(cx, 9.75), 0.62 * _ppm, _c(Color("#EDE6D2")))
 	draw_arc(_p(cx, 9.75), 0.62 * _ppm, 0.0, TAU, 24, _c(Color("#2A2520")), maxf(1.0, _ppm * 0.06))
 	draw_line(_p(cx, 9.75), _p(cx, 10.2), _c(Color("#2A2520")), maxf(1.0, _ppm * 0.06))
@@ -432,7 +443,7 @@ func _mairie() -> void:
 		for j in 2:
 			var u1 := (i + 1 - j) / 3.0
 			pts.append(_p(cx + u1 * 2.4, 13.6 + 0.15 * sin(_t * 3.0 + u1 * 4.0)))
-		draw_colored_polygon(pts, _c(cols[i].lerp(Color("#A89A80"), 0.3)))
+		_poly(pts, _c(cols[i].lerp(Color("#A89A80"), 0.3)))
 
 
 func _cafe() -> void:
@@ -441,12 +452,12 @@ func _cafe() -> void:
 		return
 	var w: float = b[1] - b[0]
 	draw_rect(Rect2(_p(b[0], 7.0), Vector2(w * _ppm, 7.0 * _ppm)), _c(Color("#A88C68")))
-	draw_colored_polygon(PackedVector2Array([_p(b[0] - 0.4, 7.0), _p(b[0] + w * 0.5, 8.6), _p(b[1] + 0.4, 7.0)]), _c(Color("#6A3A2A")))
+	_poly(PackedVector2Array([_p(b[0] - 0.4, 7.0), _p(b[0] + w * 0.5, 8.6), _p(b[1] + 0.4, 7.0)]), _c(Color("#6A3A2A")))
 	for i in 3:
 		draw_rect(Rect2(_p(b[0] + 1.2 + i * 4.6, 6.0), Vector2(1.4 * _ppm, 1.6 * _ppm)), _lampe() if i != 1 else _c(Color("#2E2A26")))
 	draw_rect(Rect2(_p(b[0] + 0.5, 3.4), Vector2((w - 1.0) * _ppm, 3.1 * _ppm)), _lampe(0.7) if _nuit > 0.2 else _c(Color("#3A3028")))
 	for j in 7:   # store
-		draw_colored_polygon(PackedVector2Array([_p(b[0] + j * w / 7.0, 3.9), _p(b[0] + (j + 1) * w / 7.0, 3.9), _p(b[0] + (j + 1) * w / 7.0 + 0.3, 3.3), _p(b[0] + j * w / 7.0 + 0.3, 3.3)]), _c(Color("#7A2A22") if j % 2 == 0 else Color("#D8CDB2")))
+		_poly(PackedVector2Array([_p(b[0] + j * w / 7.0, 3.9), _p(b[0] + (j + 1) * w / 7.0, 3.9), _p(b[0] + (j + 1) * w / 7.0 + 0.3, 3.3), _p(b[0] + j * w / 7.0 + 0.3, 3.3)]), _c(Color("#7A2A22") if j % 2 == 0 else Color("#D8CDB2")))
 	for i in 3:   # tables de terrasse
 		var tx: float = b[0] + 2.0 + i * 4.5
 		draw_line(_p(tx, 0.0), _p(tx, 0.9), _c(Color("#2A2622")), maxf(1.0, _ppm * 0.06))
@@ -514,7 +525,7 @@ func _bulle(bas: Vector2, txt: String, accent: bool) -> void:
 	var fs := int(clampf(_ppm * 0.48, 14.0, 26.0))
 	var tz := _f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 	var r := Rect2(bas.x - tz.x * 0.5 - 12.0, bas.y - tz.y - 18.0, tz.x + 24.0, tz.y + 12.0)
-	draw_colored_polygon(PackedVector2Array([Vector2(bas.x - 7, r.end.y - 1), Vector2(bas.x + 7, r.end.y - 1), Vector2(bas.x, bas.y)]), Color("#2A2520"))
+	_poly(PackedVector2Array([Vector2(bas.x - 7, r.end.y - 1), Vector2(bas.x + 7, r.end.y - 1), Vector2(bas.x, bas.y)]), Color("#2A2520"))
 	_style_bulle.bg_color = Color("#F4D58A") if accent else Color("#F4EEDF")
 	draw_style_box(_style_bulle, r)
 	draw_string(_f, Vector2(r.position.x + 12.0, r.end.y - 9.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#1E1A16"))
@@ -531,7 +542,7 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 	# murailles qui partent de la tour (vues de biais, plus basses)
 	var dx := -1.0 if cote == 0 else 1.0
 	var m0 := a if cote == 0 else b
-	draw_colored_polygon(PackedVector2Array([_p(m0, 0.0), _p(m0, 9.0), _p(m0 + dx * 6.0, 7.2), _p(m0 + dx * 6.0, 0.0)]), _c(Color("#5A4636")))
+	_poly(PackedVector2Array([_p(m0, 0.0), _p(m0, 9.0), _p(m0 + dx * 6.0, 7.2), _p(m0 + dx * 6.0, 0.0)]), _c(Color("#5A4636")))
 	for i in 6:
 		draw_line(_p(m0 + dx * i, 0.0), _p(m0 + dx * i, 9.0 - 0.3 * i), _c(Color("#4A382A")), maxf(1.0, _ppm * 0.05))
 	# passage : fond sombre
@@ -573,18 +584,18 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 	draw_rect(Rect2(_p(a - 0.3, TOUR_H + 0.35), Vector2((w + 0.6) * _ppm, 0.35 * _ppm)), metal.darkened(0.2))
 	var gx := b - 1.6 if cote == 0 else a + 0.2
 	draw_rect(Rect2(_p(gx, TOUR_H + 2.6), Vector2(1.4 * _ppm, 2.6 * _ppm)), _c(Color("#5A4A3A")))
-	draw_colored_polygon(PackedVector2Array([_p(gx - 0.3, TOUR_H + 2.6), _p(gx + 0.7, TOUR_H + 3.3), _p(gx + 1.7, TOUR_H + 2.6)]), _c(Color("#3A2E24")))
+	_poly(PackedVector2Array([_p(gx - 0.3, TOUR_H + 2.6), _p(gx + 0.7, TOUR_H + 3.3), _p(gx + 1.7, TOUR_H + 2.6)]), _c(Color("#3A2E24")))
 	draw_rect(Rect2(_p(gx + 0.35, TOUR_H + 1.9), Vector2(0.7 * _ppm, 0.5 * _ppm)), _lampe())
 	var mx := a + 0.4 if cote == 0 else b - 0.4
 	draw_line(_p(mx, TOUR_H), _p(mx, TOUR_H + 4.2), _c(Color("#2A2622")), maxf(1.5, _ppm * 0.07))
 	var drap := PackedVector2Array([_p(mx, TOUR_H + 4.1), _p(mx + 1.6, TOUR_H + 3.9 + 0.2 * sin(_t * 4.0)), _p(mx + 1.5, TOUR_H + 3.2 + 0.2 * sin(_t * 4.0 + 1.0)), _p(mx, TOUR_H + 3.3)])
-	draw_colored_polygon(drap, _c(Color("#8A3A2A")))
+	_poly(drap, _c(Color("#8A3A2A")))
 	# projecteur la nuit
 	if _nuit > 0.35:
 		var src := _p(gx + 0.7, TOUR_H + 2.1)
 		var ang := (-0.35 if cote == 0 else -2.8) + 0.35 * sin(_t * 0.5 + cote)
 		var l := 30.0 * _ppm
-		draw_colored_polygon(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
+		_poly(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
 	# gardes armés sur le chemin de ronde (aucune ville ne tire pour l'instant)
 	for i in 3:
 		var px: float = a + 0.3 + i * 1.6

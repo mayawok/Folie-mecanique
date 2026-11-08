@@ -715,6 +715,10 @@ func _fermer_carte() -> void:
 	pause = _pause_avant
 
 func _partir() -> void:
+	if m.ville_dedans():   # depuis une ville, on part par la porte de sortie (DEC-141)
+		if _carte_sel >= 0 and m.ville_partir(_carte_sel):
+			_fermer_carte()
+		return
 	if _carte_sel >= 0 and m.monde.choisir_destination(_carte_sel):
 		m.ordre_marche("avancer")
 		_fermer_carte()
