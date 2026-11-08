@@ -153,6 +153,7 @@ func mission_module_leve() -> float:
 
 
 func _mission(dt: float) -> void:
+	_evenement()
 	if not mission_active():
 		return
 	var M := MD()
@@ -171,7 +172,6 @@ func _mission(dt: float) -> void:
 				evt({"t": "mission", "etat": "depart"})
 	if mission_en_route():
 		_mission_route()
-	_evenement()
 
 
 # L'escorte rejoint le convoi sur la place : une moto devant le Berliet, le reste derrière
