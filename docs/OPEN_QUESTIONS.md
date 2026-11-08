@@ -202,4 +202,5 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Pourquoi la trancher** : sans elles, les pièces ne changent que le dessin (DEC-136).
 - **Documents concernés** : game/data/berliet.json, game/data/bases.json, docs/design/GRILLE.md
 - **Options connues** : valeurs provisoires actuelles ; châssis long et grue au garage de niveau 2
+- **Ajout (08/11, DEC-139)** : le Berliet, véhicule principal, peut-il être détruit en combat ? Options : mêmes règles qu'aujourd'hui (fin de partie possible) ; ou jamais détruit, seulement immobilisé et à réparer.
 - **Statut** : ouverte
