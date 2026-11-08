@@ -289,6 +289,17 @@ func calme_ouverture() -> bool:
 	return not ids_stock().any(func(id): return Assemblage.piece(id).get("famille", "") == "arme")
 
 
+# Villes (DEC-140) : redéfinies par modele_ville.gd ; ici, valeurs par défaut pour les couches inférieures
+func ville_protegee() -> bool:
+	return false
+
+func ville_calme() -> bool:
+	return false
+
+func ville_zone(_x: float) -> bool:
+	return false
+
+
 func ids_stock() -> Array:
 	return pieces_stock.map(func(e): return e.piece)
 

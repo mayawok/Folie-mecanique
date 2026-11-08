@@ -83,6 +83,8 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_rangee(v, POURSUITES.map(func(e): return [e[0], e]), func(e): _lancer(e))
 	_titre(v, "Bâtiments")
 	_rangee(v, BATIMENTS.map(func(b): return [b[0], ["", "batiment", {"type": b[1]}]]), func(e): _lancer(e))
+	_titre(v, "Ville")
+	_bouton(v, "Ville devant (enceinte, porte, mairie)", func(): m.kit_ville())
 	_titre(v, "Divers")
 	_rangee(v, DIVERS.map(func(e): return [e[0], e]), func(e): _lancer(e))
 	_maj()

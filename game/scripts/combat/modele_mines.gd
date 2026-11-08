@@ -29,8 +29,8 @@ func _champs_generer() -> void:
 		var x0 := _prochain_champ_x
 		var iv: Array = C.intervalle
 		_prochain_champ_x = x0 + rng_mines.randf_range(iv[0], iv[1])
-		if not monde.trajet.is_empty():
-			continue   # zone calme entre deux secteurs : pas de champ
+		if not monde.trajet.is_empty() or ville_zone(x0):
+			continue   # zone calme entre deux secteurs, abords d'une ville : pas de champ
 		var p := float(C.proba_base) + float(C.proba_par_niveau) * monde.niveau_a(x0)
 		if rng_mines.randf() > p:
 			continue

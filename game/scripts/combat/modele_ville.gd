@@ -1,0 +1,339 @@
+extends "res://scripts/combat/modele_camp.gd"
+# Villes standard (DEC-140 à DEC-143). Couche du modèle de combat, entre le camp de réparation et CombatModele.
+# Une ville = une enceinte plate de ~150 m avec une porte d'entrée (x0) et une porte de sortie (x1).
+# Déroulé : le convoi freine seul devant la porte fermée, les gardes l'ouvrent, le convoi entre au pas (mouvement forcé)
+# et s'arrête sur la place. Dedans : rien ne peut arriver (ni ennemis, ni tempête, ni rôdeurs) ; la ville est inscrite
+# sur la carte (point de reprise). Pour repartir, le joueur choisit sa sortie (une direction = un secteur voisin) :
+# le convoi roule jusqu'à la porte de sortie, elle s'ouvre, il sort vers la droite et la route suivante mène au secteur choisi.
+# Valeurs et noms : game/data/villes.json. Dessin : ville_dessin.gd.
+
+# Phases : approche, ouverture, entree, dedans, depart, ouverture_s, sortie, fin
+const PHASES_FORCEES := ["ouverture", "entree", "depart", "ouverture_s", "sortie"]
+const PHASES_PROTEGEES := ["ouverture", "entree", "dedans", "depart", "ouverture_s", "sortie"]
+
+static var _vdata := {}
+
+var villes_on := false     # villes actives (nouvelle expédition) ; le Mode créatif les fait venir par le Kit
+var ville := {}            # {} ou {nom, maire, secteur, x0, x1, phase, t, porte_e, porte_s, x_arret, dest, graine}
+var _n_villes := 0
+
+
+static func VD() -> Dictionary:
+	if _vdata.is_empty():
+		var f := FileAccess.open("res://data/villes.json", FileAccess.READ)
+		_vdata = JSON.parse_string(f.get_as_text())
+	return _vdata
+
+
+func ville_active() -> bool:
+	return not ville.is_empty()
+
+
+func ville_phase() -> String:
+	return String(ville.get("phase", ""))
+
+
+func ville_dedans() -> bool:
+	return ville_phase() == "dedans"
+
+
+func ville_protegee() -> bool:
+	return ville_phase() in PHASES_PROTEGEES
+
+
+# Abords de la ville : pas de rencontre, de champ de mines ni de rôdeur (aucune ville ne tire sur nous pour l'instant)
+func ville_calme() -> bool:
+	if not ville_active() or ville_phase() == "fin":
+		return false
+	return float(ville.x0) - x_tete < float(VD().calme_m)
+
+
+func ville_zone(x: float) -> bool:
+	return ville_active() and x > float(ville.x0) - 150.0 and x < float(ville.x1) + 100.0
+
+
+func _queue_x() -> float:
+	var q := x_tete
+	for v in convoi:
+		q = minf(q, v.x)
+	return q
+
+
+# --- Apparition ----------------------------------------------------------------------------
+# Pose une ville dont la porte d'entrée est en x0. Le nom est tiré au hasard la première fois, puis gardé par le secteur.
+func ville_creer(x0: float) -> bool:
+	if ville_active() and ville_phase() != "fin":
+		return false
+	_ville_retirer()
+	var D := VD()
+	var s: Dictionary = monde.secteurs[monde.secteur]
+	var r := RandomNumberGenerator.new()
+	r.seed = graine * 97 + 13 * _n_villes + monde.secteur
+	_n_villes += 1
+	if String(s.get("ville", "")) == "":
+		var pris := {}
+		for s2 in monde.secteurs:
+			pris[String(s2.get("ville", ""))] = true
+		var libres: Array = D.noms.filter(func(n): return not pris.has(n))
+		if libres.is_empty():
+			libres = D.noms
+		s["ville"] = String(libres[r.randi() % libres.size()])
+		s["maire"] = String(D.maires[r.randi() % D.maires.size()])
+	var L := float(D.longueur_m)
+	ville = {"nom": s.ville, "maire": s.maire, "secteur": monde.secteur, "x0": x0, "x1": x0 + L, "phase": "approche", "t": 0.0,
+		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false}
+	_ville_installer()
+	return true
+
+
+# Terrain plat dans l'enceinte ; rien de ce qui avait été semé sur la route ne reste dans la ville
+func _ville_installer() -> void:
+	var x0 := float(ville.x0)
+	var x1 := float(ville.x1)
+	Terrain.aplanir(x0 - 6.0, x1 + 6.0)
+	batiments = batiments.filter(func(b): return b.x + b.longueur < x0 - 40.0 or b.x > x1 + 40.0)
+	mines = mines.filter(func(mn): return float(mn.x) < x0 - 150.0 or float(mn.x) > x1 + 100.0)
+	monde.pnj = monde.pnj.filter(func(p): return float(p.x) < x0 - 60.0 or float(p.x) > x1 + 40.0)
+	_prochain_champ_x = maxf(_prochain_champ_x, x1 + 200.0)
+
+
+func _ville_retirer() -> void:
+	ville = {}
+	Terrain.aplanir_effacer()
+
+
+# Kit (Mode créatif) : une ville juste devant
+func kit_ville() -> bool:
+	if not bac_a_sable:
+		return false
+	var xt := x_tete
+	for v in convoi:
+		xt = maxf(xt, v.x + v.longueur)
+	var ok := ville_creer(xt + float(VD().kit_distance_m))
+	if ok:
+		log_("Kit : %s à %d m." % [ville.nom, int(float(ville.x0) - x_tete)], "info")
+	return ok
+
+
+# --- Pas de simulation -----------------------------------------------------------------------
+func _ville(dt: float) -> void:
+	if not ville_active():
+		return
+	var D := VD()
+	var x0 := float(ville.x0)
+	var x1 := float(ville.x1)
+	if ville_protegee():
+		_ville_securiser()
+	match ville_phase():
+		"approche":
+			if not ville.annoncee and x0 - x_tete < float(D.annonce_m):
+				ville.annoncee = true
+				log_("Les murs de %s en vue. Le convoi ralentira devant la porte." % ville.nom, "ok")
+				evt({"t": "ville", "etat": "annonce"})
+			if x_tete >= x0 - float(D.arret_avant_porte_m) - 0.05:
+				ville.phase = "ouverture"
+				ville.t = 0.0
+				ordres.marche = "halte"
+				_ville_securiser()
+				log_("Les gardes de %s ouvrent la grande porte." % ville.nom, "info")
+				evt({"t": "ville", "etat": "porte"})
+		"ouverture":
+			ville.t += dt
+			ville.porte_e = clampf(float(ville.t) / float(D.porte_s), 0.0, 1.0)
+			if float(ville.t) >= float(D.porte_s):
+				ville.phase = "entree"
+				ville.x_arret = x0 + maxf(float(D.arret_dans_ville_m), 8.0 + x_tete - _queue_x())
+		"entree":
+			if _queue_x() > x0 + 3.0:
+				ville.porte_e = maxf(0.0, float(ville.porte_e) - dt / float(D.porte_s))   # la porte se referme derrière nous
+			if x_tete >= float(ville.x_arret) - 0.05 and float(ville.porte_e) <= 0.0:
+				ville.phase = "dedans"
+				_ville_arrivee()
+		"depart":
+			if x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
+				ville.phase = "ouverture_s"
+				ville.t = 0.0
+				log_("La porte de sortie s'ouvre.", "info")
+				evt({"t": "ville", "etat": "porte"})
+		"ouverture_s":
+			ville.t += dt
+			ville.porte_s = clampf(float(ville.t) / float(D.porte_s), 0.0, 1.0)
+			if float(ville.t) >= float(D.porte_s):
+				ville.phase = "sortie"
+		"sortie":
+			if _queue_x() > x1 + 4.0:
+				ville.phase = "fin"
+				ordres.marche = "avancer"
+				log_("Le convoi a quitté %s. Bonne route." % ville.nom, "info")
+				evt({"t": "ville", "etat": "sortie"})
+		"fin":
+			ville.porte_s = maxf(0.0, float(ville.porte_s) - dt / float(D.porte_s))
+			if x_tete > x1 + 260.0 or x_tete < x0 - 400.0:
+				_ville_retirer()
+
+
+# Dans l'enceinte : rien ne peut arriver
+func _ville_securiser() -> void:
+	ennemis = ennemis.filter(func(e): return not e.actif())
+	abordeurs.clear()
+	tempete = {}
+	monde.pietons = monde.pietons.filter(func(p): return p.camp == "joueur")
+
+
+func _ville_arrivee() -> void:
+	var s: Dictionary = monde.secteurs[int(ville.secteur)]
+	var neuve := not bool(s.get("ville_connue", false))
+	s["ville_connue"] = true
+	if neuve:
+		log_("%s est inscrite sur la carte. Point de reprise." % ville.nom, "ok")
+	log_("Bienvenue à %s. Le convoi est à l'abri derrière les murs." % ville.nom, "ok")
+	evt({"t": "ville", "etat": "dedans", "nouvelle": neuve})
+
+
+# Vitesse du convoi imposée par la ville (appelée par _marche) : vit = vitesse voulue, vmax = vitesse possible
+func _ville_vitesse(vit: float, vmax: float) -> float:
+	if not ville_active():
+		return vit
+	var D := VD()
+	var lente := float(D.vitesse_forcee)
+	var mini := float(D.vitesse_mini_freinage)
+	match ville_phase():
+		"approche":
+			var stop := float(ville.x0) - float(D.arret_avant_porte_m)
+			if vit > 0.0:
+				var k := clampf((stop - x_tete) / float(D.freinage_m), 0.0, 1.0)   # on freine doucement
+				return minf(vit, maxf(mini, vmax * k)) if x_tete < stop else 0.0
+			return vit
+		"ouverture", "ouverture_s", "dedans":
+			blocage = "" if ville_dedans() else "Ouverture de la porte."
+			return 0.0
+		"entree":
+			blocage = "Entrée dans %s." % ville.nom
+			return _rouler_vers(float(ville.x_arret), lente, mini)
+		"depart":
+			blocage = "Le convoi gagne la porte de sortie."
+			return _rouler_vers(float(ville.x1) - float(D.arret_avant_porte_m), lente, mini)
+		"sortie":
+			blocage = "Sortie de %s." % ville.nom
+			return lente
+		"fin":
+			if vit < 0.0 and _queue_x() <= float(ville.x1) + 4.0:
+				return 0.0   # porte refermée derrière nous
+	return vit
+
+
+func _rouler_vers(cible: float, lente: float, mini: float) -> float:
+	var reste := cible - x_tete
+	if reste <= 0.0:
+		return 0.0
+	return minf(reste / DT, maxf(mini, lente * clampf(reste / 10.0, 0.0, 1.0)))
+
+
+# Ordres de marche ignorés pendant les mouvements forcés et dans la ville
+func ville_bloque_marche() -> bool:
+	if ville_phase() in PHASES_FORCEES:
+		return true
+	if ville_dedans():
+		log_("Le convoi est garé dans %s : demandez à repartir et choisissez votre sortie." % ville.nom, "info")
+		return true
+	return false
+
+
+# --- Sorties ---------------------------------------------------------------------------------
+const CARDINAUX := ["l'est", "le sud-est", "le sud", "le sud-ouest", "l'ouest", "le nord-ouest", "le nord", "le nord-est"]
+
+# Les secteurs voisins les plus proches : [{id, porte, secteur, ville, niveau, distance_m}]
+func ville_sorties() -> Array:
+	var ici: Vector2 = monde.secteurs[monde.secteur].pos
+	var autres: Array = monde.secteurs.filter(func(s): return int(s.id) != monde.secteur)
+	autres.sort_custom(func(a, b): return ici.distance_to(a.pos) < ici.distance_to(b.pos))
+	var res := []
+	for s in autres.slice(0, int(VD().sorties)):
+		var d: Vector2 = s.pos - ici
+		var oct := int(round(fposmod(atan2(d.y, d.x), TAU) / (TAU / 8.0))) % 8   # y de la carte vers le bas = sud
+		var connue := bool(s.get("ville_connue", false))
+		res.append({"id": int(s.id), "porte": "Porte vers " + CARDINAUX[oct], "secteur": s.nom, "ville": String(s.get("ville", "")) if connue else "",
+			"niveau": int(s.niveau), "distance_m": int(250.0 + ici.distance_to(s.pos) * 900.0)})
+	return res
+
+
+func ville_partir(dest: int) -> bool:
+	if not ville_dedans():
+		return false
+	if not monde.choisir_destination(dest):
+		return false
+	ville.dest = dest
+	ville.phase = "depart"
+	log_("Le convoi se met en route vers la sortie.", "info")
+	evt({"t": "ville", "etat": "depart"})
+	return true
+
+
+# --- Services --------------------------------------------------------------------------------
+func ville_cout_reparation() -> int:
+	var manque := 0.0
+	for v in convoi:
+		for pid in v.pieces:
+			manque += maxf(0.0, float(v.pieces[pid].max) - float(v.pieces[pid].pv))
+	return int(ceil(manque * float(VD().reparation_metal_par_pv)))
+
+
+func ville_a_reparer() -> bool:
+	for v in convoi:
+		if not v.roues_perdues.is_empty():
+			return true
+		for pid in v.pieces:
+			if float(v.pieces[pid].pv) < float(v.pieces[pid].max):
+				return true
+	return false
+
+
+# Le mécanicien remet tout le convoi en état, contre du métal
+func ville_reparer() -> bool:
+	if not ville_dedans() or not ville_a_reparer():
+		return false
+	var cout := ville_cout_reparation()
+	if not bac_a_sable and stocks.metal < cout:
+		log_("Le mécanicien demande %d métal." % cout, "alerte")
+		return false
+	if not bac_a_sable:
+		stocks.metal -= cout
+	for v in convoi:
+		for pid in v.pieces:
+			v.pieces[pid].pv = v.pieces[pid].max
+		v.roues_perdues.clear()
+	log_("Le mécanicien a remis le convoi en état (%d métal)." % (0 if bac_a_sable else cout), "ok")
+	evt({"t": "repare"})
+	return true
+
+
+func ville_texte_maire() -> String:
+	return "M. %s, maire de %s, vous reçoit dans son bureau, sous le portrait jauni d'un président dont plus personne ne se souvient.\n\n« Ici, la porte ouvre à qui ne tire pas. Restez le temps qu'il faut. Pour le travail, revenez plus tard : je n'ai rien pour vous aujourd'hui. »" % [ville.maire, ville.nom]
+
+
+# --- Sauvegarde ------------------------------------------------------------------------------
+func ville_sauver() -> Dictionary:
+	var connues := {}
+	for s in monde.secteurs:
+		if String(s.get("ville", "")) != "":
+			connues[str(s.id)] = {"ville": s.ville, "maire": s.get("maire", ""), "connue": bool(s.get("ville_connue", false))}
+	return {"on": villes_on, "n": _n_villes, "ville": ville.duplicate(), "secteurs": connues}
+
+
+func ville_charger(d: Dictionary) -> void:
+	villes_on = bool(d.get("on", false))
+	_n_villes = int(d.get("n", 0))
+	var sc: Dictionary = d.get("secteurs", {})
+	for k in sc:
+		var s: Dictionary = monde.secteurs[int(k)]
+		s["ville"] = String(sc[k].ville)
+		s["maire"] = String(sc[k].maire)
+		s["ville_connue"] = bool(sc[k].connue)
+	var v: Dictionary = d.get("ville", {})
+	if not v.is_empty():
+		ville = v.duplicate()
+		for k in ["x0", "x1", "t", "porte_e", "porte_s", "x_arret"]:
+			ville[k] = float(ville[k])
+		for k in ["secteur", "dest", "graine"]:
+			ville[k] = int(ville[k])
+		Terrain.aplanir(float(ville.x0) - 6.0, float(ville.x1) + 6.0)

@@ -1,0 +1,34 @@
+{
+  "_doc": "Villes standard (DEC-140 à DEC-143). Une ville par secteur, nom tiré au hasard dans « noms » quand elle approche. Distances en mètres, durées en secondes, vitesses en m/s. Lu par modele_ville.gd et ville_dessin.gd.",
+  "noms": [
+    "Saint-Firmin-des-Prés", "La Croix-Blanche", "Le Moulin-Brûlé", "Les Trois-Maisons", "La Belle-Épine",
+    "Le Gué-de-l'Aune", "La Chapelle-aux-Naux", "Villeneuve-la-Lionne", "Mesnil-Rury", "Les Granges-Hautes",
+    "Fontaine-le-Comte", "Champ-Rond", "La Maison-Rouge", "Les Quatre-Chemins", "Le Plessis-Grimoult",
+    "Bourg-Achard", "La Pierre-Levée", "Vieux-Moulin", "Le Bout-du-Monde", "La Folie-Herbault",
+    "Les Baraques", "La Tuilerie", "Le Relais-de-la-Poste", "Haut-Clocher", "Sainte-Colombe-sur-Gand",
+    "Les Ormes-Brûlés", "Notre-Dame-de-Cenilly", "Beauregard-Vendon", "Saint-Aubin-des-Bois", "La Ferté-Aurain"
+  ],
+  "maires": ["Delaunay", "Péricard", "Lemoine", "Vasseur", "Gaudin", "Morvan", "Chauvet", "Rabier", "Têtu", "Mallet", "Bouvier", "Lhermitte"],
+  "longueur_m": 150.0,
+  "annonce_m": 160.0,
+  "calme_m": 320.0,
+  "arret_avant_porte_m": 3.0,
+  "freinage_m": 32.0,
+  "vitesse_mini_freinage": 0.35,
+  "vitesse_forcee": 2.0,
+  "porte_s": 5.0,
+  "arret_dans_ville_m": 75.0,
+  "apparition_secteur_m": 700.0,
+  "apparition_depart_m": 600.0,
+  "kit_distance_m": 120.0,
+  "sorties": 3,
+  "reparation_metal_par_pv": 0.05,
+  "habitants": 280,
+  "phrases": [
+    "Encore un convoi…", "Du gazole contre des œufs !", "T'aurais pas une bougie de rechange ?",
+    "La tempête a pris la route du nord.", "Le maire reçoit à la mairie.", "On ne revoit jamais ceux qui s'éloignent.",
+    "Faites le plein tant que la porte est ouverte.", "Mon frère est parti avec un convoi l'an dernier.",
+    "Le garage du père Mallet répare tout.", "Pas de bagarre dans l'enceinte !", "Elle est belle, ta bétaillère.",
+    "Ça sent la pluie. Enfin, j'espère."
+  ]
+}
