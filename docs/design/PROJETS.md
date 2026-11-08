@@ -134,3 +134,67 @@ puis des remorques par découpe. En attendant, un dessin par le code, comme pour
 - Les Raffineurs du Sud sont-ils bien les propriétaires principaux ?
 - À quel moment de l'histoire le joueur peut-il en avoir un ?
 - Le coupleur se fabrique-t-il, ou se récupère-t-il seulement sur un train routier détruit ?
+
+---
+
+## PRJ-003 — Le char à voile (08/11)
+
+### L'idée du créateur
+
+Tomber au hasard sur un véhicule qui avance **au vent**, avec une voile.
+
+### Ancrage historique et lore
+
+Le **char à voile** est une invention qui a pris racine sur les plages françaises : Louis Blériot en construisait au début du siècle
+(ses « aéroplages », sur les plages du Nord). Dans le jeu, c'est un engin de plage récupéré et bricolé par des gens qui n'ont plus de
+carburant : châssis tubulaire, trois roues, mât et voile rapiécée. Les **Récupérateurs** (FAC-005) ou les familles du **Réseau des Marées**
+(FAC-003) en possèdent sur les grandes plages et les étendues plates.
+
+### Mécanique proposée
+
+- **Trouvaille rare**, tirée au hasard sur les routes plates (déserts, grèves), comme les véhicules abandonnés actuels.
+- **Pas de carburant** : il avance avec le vent. On ajoute un vent au monde (force et direction, tiré avec une graine fixe), qui
+  sert aussi aux tempêtes de sable déjà codées.
+  - Vent dans le dos : très rapide.
+  - Vent de travers : vitesse correcte.
+  - Vent de face ou pas de vent : il se traîne ou s'arrête. On peut le remorquer, ou il pousse à la main.
+- **Fragile et léger** : une ou deux places, aucun blindage, mât et voile cassables (nouvelles pièces). Il ne monte pas les côtes raides.
+- **Rôle** : un éclaireur silencieux et gratuit (rôle éclaireur, DEC-114), parfait pour partir en avant sur une grève quand le vent est bon.
+  Pendant une tempête, il file, mais il risque de chavirer.
+- **Grille** : de nouvelles pièces (mât, voile, bôme) qu'on peut greffer sur un châssis léger. Un buggy à voile, c'est très « Mad Max ».
+
+### À trancher (OQ-030)
+
+Vent visible à l'écran (manche à air, poussière) ; le char à voile ne sert-il qu'en éclaireur ou fait-il partie du convoi ;
+peut-on poser une voile sur d'autres véhicules ?
+
+---
+
+## PRJ-004 — La côte bretonne et ses bateaux abandonnés (08/11)
+
+### L'idée du créateur
+
+Sur la carte de Bretagne, des **bateaux abandonnés** dans le décor, sur lesquels on peut tomber.
+
+### Ancrage lore
+
+La Bible lie la Bretagne à la mer : villages au bord de l'eau, pêche qui ne rapporte presque rien, gens qui savent reconnaître les
+épaves et lire les marées (Réseau des Marées, FAC-003). Le décor par zone, y compris l'eau, est déjà décidé (DEC-109, DEV-008).
+
+### Proposition
+
+- **Une zone de décor « côte bretonne »** dans le Kit : grèves, rochers, landes, phares éteints, calvaires, maisons de granit.
+  On y trouve des **chalutiers échoués**, couchés sur le flanc dans le sable, des **coques retournées** devenues abris ou maisons, des épaves
+  à moitié dans l'eau à marée haute (lien avec PRJ-001), des bateaux sur des bers de bois, des filets et des bouées.
+- **Ce qu'on peut en faire** :
+  - **Fouille** : moteurs de bateau, cordages, toile, métal. Les règles de fouille existantes servent telles quelles.
+  - **Coques de donneur** : une coque de bateau sciée et posée sur un châssis donne une carrosserie, avec le système de coques et de scie
+    déjà codé (DEC-067 à 072). Un camion à coque de chalutier, très « Mad Max ».
+  - **Abri** : une coque retournée sert d'abri pour la nuit ou pour une tempête.
+  - **Voile** : la toile récupérée alimente PRJ-003.
+- **Art** : selon la méthode DEC-138 : une planche de 4 à 5 bateaux en pièces, avec la coque et la cabine séparées pour pouvoir les découper.
+
+### À trancher (OQ-030)
+
+Taille et nombre de bateaux dans le décor ; un bateau qui flotte encore peut-il servir (bac, PRJ-001) ;
+quelle part de la carte de 12 ou 13 secteurs est bretonne.

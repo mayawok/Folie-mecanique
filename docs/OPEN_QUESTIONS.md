@@ -216,3 +216,6 @@ Emplacement et nom de la ville (Mont-Tombe ?) ; rythme des marées ; moteur noy�
 
 ## OQ-029 — Trains routiers à deux moteurs (PRJ-002, 08/11, pour plus tard)
 Véhicule à part ou évolution du Berliet ; Raffineurs du Sud comme propriétaires principaux ; moment de l'histoire ; coupleur fabriqué ou seulement récupéré. Voir `docs/design/PROJETS.md`.
+
+## OQ-030 — Char à voile et côte bretonne (PRJ-003, PRJ-004, 08/11, pour plus tard)
+Vent visible, rôle du char à voile, voile sur d'autres véhicules ; nombre de bateaux dans le décor, bateau encore flottant, part bretonne de la carte. Voir `docs/design/PROJETS.md`.
