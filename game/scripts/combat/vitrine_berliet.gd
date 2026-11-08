@@ -16,7 +16,8 @@ var camion: BerlietDessin
 var nuit := false
 var distance := 0.0
 var _arriere: Node2D      # calque derrière le camion (vigie dans la trappe)
-var _avant: Node2D        # calque devant le camion (équipage au sol, feu)
+var _avant: Node2D        # calque devant le camion (équipage au sol et sur le toit)
+var _lumiere: Node2D      # feu de camp et fumées (non assombris la nuit)
 var _infos: Label
 var _btn_halte: Button
 var _btn_trappe: Button
@@ -43,6 +44,9 @@ func _ready() -> void:
 	_avant = Calque.new()
 	_avant.dessin = _dessiner_avant
 	add_child(_avant)
+	_lumiere = Calque.new()
+	_lumiere.dessin = _dessiner_lumiere
+	add_child(_lumiere)
 	_construire_panneau()
 	_nouveau_bivouac()
 	_maj()
@@ -199,27 +203,36 @@ func _process(delta: float) -> void:
 	camion.queue_redraw()
 	_arriere.queue_redraw()
 	_avant.queue_redraw()
+	_lumiere.queue_redraw()
+	_avant.modulate = camion.teinte
+	_arriere.modulate = camion.teinte
 
 
 func _zone() -> Rect2:
 	return Rect2(Vector2.ZERO, Vector2(size.x - PANNEAU_L - 16.0, size.y))
 
 
+# La scène montrée va du feu de camp (moins 1,5 m) au pare-chocs avant
+func _etendue_m() -> Vector2:
+	var A := BerlietConfig.ancrages_m(config)
+	return Vector2(float(A.feu) - 1.6, 2154.0 / BerlietConfig.ppm_art() + 0.6)
+
+
 func _ppm() -> float:
 	var z := _zone()
-	return minf(z.size.x * 0.62 / 8.6, z.size.y * 0.5 / 4.0)
+	var e := _etendue_m()
+	return minf(z.size.x * 0.94 / (e.y - e.x), z.size.y * 0.62 / 4.5)
 
 
 func _sol_y() -> float:
-	return size.y * 0.74
+	return size.y * 0.8
 
 
 # Origine du camion à l'écran (sol, au droit de u = 0) : le camion reste centré, le décor défile
 func _origine() -> Vector2:
 	var z := _zone()
-	var l := BerlietConfig.longueur_m(config) * _ppm()
-	var xa := BerlietConfig.x_arriere(config) / BerlietConfig.ppm_art() * _ppm()
-	return Vector2(z.size.x * 0.5 - l * 0.45 - xa, _sol_y())
+	var e := _etendue_m()
+	return Vector2(z.size.x * 0.5 - (e.x + e.y) * 0.5 * _ppm(), _sol_y())
 
 
 # Point du repère camion (m, y vers le haut) -> écran
@@ -246,13 +259,13 @@ func _draw() -> void:
 	var p := _ppm()
 	var off := -fmod(distance * p * 0.08, 900.0)
 	var coll := Color("#2A2E33") if nuit else Color("#8C8A78")
-	var pts := PackedVector2Array([Vector2(-900 + off, _sol_y())])
 	var x := -900.0 + off
 	while x < W + 900.0:
-		pts.append(Vector2(x, _sol_y() - 70.0 - 50.0 * sin(x * 0.007) - 30.0 * sin(x * 0.019)))
+		var h0 := 70.0 + 50.0 * sin(x * 0.007) + 30.0 * sin(x * 0.019)
+		var h1 := 70.0 + 50.0 * sin((x + 30.0) * 0.007) + 30.0 * sin((x + 30.0) * 0.019)
+		draw_colored_polygon(PackedVector2Array([Vector2(x, _sol_y()), Vector2(x, _sol_y() - h0),
+			Vector2(x + 31.0, _sol_y() - h1), Vector2(x + 31.0, _sol_y())]), coll)
 		x += 30.0
-	pts.append(Vector2(x, _sol_y()))
-	draw_colored_polygon(pts, coll)
 	# sol de terre, cailloux qui défilent à la vitesse du camion
 	var terre := Color("#3B3226") if nuit else Color("#7A6448")
 	draw_rect(Rect2(0, _sol_y() - 4.0, W, H - _sol_y() + 4.0), terre)
@@ -275,21 +288,25 @@ func _dessiner_arriere(ci: CanvasItem) -> void:
 			_perso(ci, q)
 
 
-# Devant le camion : feu de camp, équipage au sol et sur le toit, fumées
+# Devant le camion : équipage au sol et sur le toit
 func _dessiner_avant(ci: CanvasItem) -> void:
-	var p := _ppm()
-	var orig := _origine()
-	_feu(ci)
 	for q in bivouac.equipiers:
 		if q.etat in ["a_bord", "attend"]:
 			continue
 		if q.porte == "trappe" and q.etat in ["sort", "descend"]:
 			continue
 		_perso(ci, q)
+
+
+# Feu de camp et fumées
+func _dessiner_lumiere(ci: CanvasItem) -> void:
+	var p := _ppm()
+	var orig := _origine()
+	_feu(ci)
 	for f in _fumees:
 		var a: float = f.age / 3.0
 		var pos := orig + Vector2(f.p.x - distance, -f.p.y) * p
-		ci.draw_circle(pos, (0.12 + 0.35 * a) * p, Color(0.35, 0.33, 0.31, 0.35 * (1.0 - a)))
+		ci.draw_circle(pos, (0.08 + 0.3 * a) * p, Color(0.35, 0.33, 0.31, 0.22 * (1.0 - a)))
 	if bivouac.fumee > 0.0:
 		for i in 5:
 			var hh := fmod(bivouac.t * 0.6 + i * 0.4, 2.0)
@@ -338,7 +355,7 @@ func _feu(ci: CanvasItem) -> void:
 		ci.draw_circle(c, (2.6 - i * 0.55) * p, Color(1.0, 0.55, 0.2, lueur * 0.25))
 	var tt := bivouac.t
 	for i in 5:
-		var h := (0.35 + 0.25 * sin(tt * 9.0 + i * 1.7)) * f
+		var h := maxf(0.05, (0.35 + 0.25 * sin(tt * 9.0 + i * 1.7)) * f)
 		var bx := (i - 2) * 0.09 * p
 		var flamme := PackedVector2Array([c + Vector2(bx - 0.08 * p, 0), c + Vector2(bx + 0.08 * p, 0),
 			c + Vector2(bx + 0.02 * p * sin(tt * 7.0 + i), -h * p)])
