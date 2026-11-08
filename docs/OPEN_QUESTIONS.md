@@ -210,3 +210,6 @@ Textures propres à chaque ville ; quêtes, marché et recrutement ; la route en
 
 ## OQ-027 — Missions du maire (08/11)
 Eau et vivres : tranché le 08/11 (DEC-148, consommés et affichés). L'escorte reste dans la ville d'arrivée : faut-il pouvoir la garder ? Cargaison abîmée par les tirs (citerne percée) ? Combien de missions en expédition, et une seule à la fois ?
+
+## OQ-028 — Baie des marées (PRJ-001, 08/11, pour plus tard)
+Emplacement et nom de la ville (Mont-Tombe ?) ; rythme des marées ; moteur noyé réparable ou perdu ; rouille par l'eau de mer ; bancs de sable pour attendre ; bac payant du Réseau des Marées. Voir `docs/design/PROJETS.md`.
