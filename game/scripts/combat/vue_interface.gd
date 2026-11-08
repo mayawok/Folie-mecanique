@@ -1087,7 +1087,10 @@ func _maj_interface() -> void:
 	var sct: Dictionary = w.secteurs[w.secteur]
 	_lbl_dist.text = "%s · %d m · Jour %d" % [sct.nom, int(m.x_tete), w.jour]
 	if w.en_transit():
-		_lbl_quete.text = "Cap sur %s : %d m de route calme" % [w.secteurs[w.trajet.dest].nom, int(w.trajet.reste)]
+		if m.mission_en_route():   # mission du maire (DEC-146)
+			_lbl_quete.text = "Mission : %s pour %s, %d m" % [String(CombatModele.MD().types[m.mission.type].nom).to_lower(), m.mission.dest_nom, int(w.trajet.reste)]
+		else:
+			_lbl_quete.text = "Cap sur %s : %d m de route calme" % [w.secteurs[w.trajet.dest].nom, int(w.trajet.reste)]
 	elif not w.quete.is_empty():
 		_lbl_quete.text = "Quête : %s (%d/%d)" % [w.quete.titre, mini(m.ennemis_detruits - w.quete.depart, w.quete.abattre), w.quete.abattre]
 	else:

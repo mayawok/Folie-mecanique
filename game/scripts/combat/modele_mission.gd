@@ -144,7 +144,8 @@ func _rassembler() -> void:
 		else:
 			convoi.append(e)
 	_replacer(true)
-	log_("%s rejoignent le convoi." % String(MD().escorte_texte).capitalize(), "ok")
+	var et := String(MD().escorte_texte)
+	log_("%s rejoignent le convoi." % (et.left(1).to_upper() + et.substr(1)), "ok")
 	evt({"t": "mission", "etat": "rassemblement"})
 
 

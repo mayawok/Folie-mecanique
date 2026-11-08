@@ -12,6 +12,7 @@ var _style: StyleBoxFlat
 
 func _init() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
+	visible = false
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_f = ThemeDB.fallback_font
 	_style = StyleBoxFlat.new()
@@ -33,6 +34,8 @@ func scene() -> bool:
 
 func _draw() -> void:
 	var m = vue.m
+	if m == null or not m.mission_active():
+		return
 	var ppm: float = vue.terrain.ppm
 	var t: float = vue._temps
 	var ph: String = m.ville_phase()

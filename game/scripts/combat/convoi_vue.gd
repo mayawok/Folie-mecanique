@@ -124,7 +124,8 @@ func _camera(delta: float) -> void:
 			gauche = x0v + 26.0
 			droite = x0v + 52.0
 		elif m.ville_phase() == "rassemblement":   # plan de la place : le convoi et le maire
-			gauche = minf(gauche, x0v + 84.0)
+			gauche = minf(gauche, x0v + 88.0)
+			droite = _rtete() + 3.0
 		elif m.ville_dedans():
 			gauche = minf(gauche, x0v + 34.0)
 			droite = maxf(droite, x0v + 101.0)
