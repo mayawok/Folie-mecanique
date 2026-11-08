@@ -52,7 +52,7 @@ func _evenement(e: Dictionary) -> void:
 					_ville_onglet = "accueil"
 					_ville_ferme = false
 					_dial_sig = ""
-					_sauver_vue()   # point de reprise
+					call("_sauver_vue")   # point de reprise (défini dans vue_interface.gd)
 				"depart", "sortie":
 					_son("sfx_depart_convoi", -6.0)
 		"nuit_tombe":

@@ -88,7 +88,7 @@ func _generer() -> void:
 	var clocher := r.randf_range(0.3, 0.7)
 	while x < _x1 + 20.0:
 		var w := r.randf_range(3.0, 8.0)
-		var t := ["bloc", "bloc", "bloc", "tour", "chem", "reservoir", "grue"][r.randi() % 7]
+		var t: String = ["bloc", "bloc", "bloc", "tour", "chem", "reservoir", "grue"][r.randi() % 7]
 		if absf((x - _x0) / (_x1 - _x0) - clocher) < 0.04 and not _loin.any(func(o): return o.t == "clocher"):
 			t = "clocher"
 		_loin.append({"x": x, "w": w, "h": r.randf_range(5.0, 13.0), "t": t, "c": ROUILLE[r.randi() % ROUILLE.size()]})
@@ -327,7 +327,7 @@ func _marche() -> void:
 			draw_colored_polygon(PackedVector2Array([_p(x - 0.3 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 3.4), _p(x + 0.62 + j * 0.92, 2.8), _p(x - 0.3 + j * 0.92, 2.9)]), _c(c1 if j % 2 == 0 else Color("#E4DCC8")))
 		draw_rect(Rect2(_p(x + 0.2, 1.0), Vector2(3.6 * _ppm, 1.0 * _ppm)), _c(Color("#6B5236")))
 		for j in 4:   # caisses, bidons, cageots
-			var cc := [Color("#8A6A3C"), Color("#4E5A4C"), Color("#9A8A5A"), Color("#6E3A2A")][(i + j) % 4]
+			var cc: Color = [Color("#8A6A3C"), Color("#4E5A4C"), Color("#9A8A5A"), Color("#6E3A2A")][(i + j) % 4]
 			draw_rect(Rect2(_p(x + 0.4 + j * 0.85, 1.45), Vector2(0.65 * _ppm, 0.45 * _ppm)), _c(cc))
 	_enseigne(b[0] + 5.0, 4.9, 9.0, "MARCHÉ", Color("#D8CBA8"), Color("#3A2A1E"))
 

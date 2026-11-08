@@ -44,12 +44,12 @@ func _init() -> void:
 	# Ouverture puis entrée au pas
 	_jusqua(m, func(): return m.ville_phase() == "entree", 10.0)
 	ok(float(m.ville.porte_e) >= 0.99, "porte ouverte")
-	var vmax := 0.0
+	var vmax := [0.0]   # tableau : une lambda ne peut pas réaffecter une variable locale
 	s = _jusqua(m, func():
-		vmax = maxf(vmax, m.vitesse_convoi)
+		vmax[0] = maxf(vmax[0], m.vitesse_convoi)
 		return m.ville_phase() == "dedans", 200.0)
 	ok(m.ville_dedans(), "convoi garé dans la ville en %d s" % int(s))
-	ok(vmax <= float(D.vitesse_forcee) + 0.01, "entrée au pas (%.1f m/s au plus)" % vmax)
+	ok(vmax[0] > 0.5 and vmax[0] <= float(D.vitesse_forcee) + 0.01, "entrée au pas (%.1f m/s au plus)" % vmax[0])
 	ok(m._queue_x() > x0 + 3.0, "tout le convoi est passé")
 	ok(float(m.ville.porte_e) <= 0.0, "la porte s'est refermée")
 	ok(bool(m.monde.secteurs[m.monde.secteur].get("ville_connue", false)), "ville inscrite sur la carte")

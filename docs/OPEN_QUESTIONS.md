@@ -204,3 +204,6 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Options connues** : valeurs provisoires actuelles ; châssis long et grue au garage de niveau 2
 - **Ajout (08/11, DEC-139)** : le Berliet, véhicule principal, peut-il être détruit en combat ? Options : mêmes règles qu'aujourd'hui (fin de partie possible) ; ou jamais détruit, seulement immobilisé et à réparer.
 - **Statut** : ouverte
+
+## OQ-026 — Villes (08/11)
+Textures propres à chaque ville ; quêtes, marché et recrutement ; la route entre deux secteurs (aujourd'hui « zone calme ») doit-elle devenir le no man's land dangereux (DEC-095) ? décor de la route selon la sortie choisie ; villes hostiles possibles ? Voir `docs/design/VILLES.md`.
