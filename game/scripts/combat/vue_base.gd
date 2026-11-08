@@ -66,7 +66,7 @@ const C_ACCENT := Color("#E8A33D")
 const C_VERT := Color("#5FB36B")
 const C_ORANGE := Color("#E0A03C")
 const C_ROUGE := Color("#D9503F")
-const C_FOND := Color(0.07, 0.075, 0.08, 0.86)
+const C_FOND := Color(0.055, 0.055, 0.05, 0.78)
 const CODES := {"chassis": "CHA", "roulement": "ROU", "suspension": "SUS", "moteur": "MOT", "cabine": "CAB"}
 var m: CombatModele
 var terrain: Terrain
@@ -154,6 +154,15 @@ class IconeRes extends Control:
 				draw_rect(Rect2(8, 5, 8, 6), Color("#9A5A1A"))
 				draw_line(Vector2(10, 16), Vector2(24, 26), Color("#7A4412"), 2.5)
 				draw_line(Vector2(24, 16), Vector2(10, 26), Color("#7A4412"), 2.5)
+			"eau":   # bidon d'eau
+				draw_rect(Rect2(8, 9, 18, 22), Color("#6FA8C8"))
+				draw_rect(Rect2(8, 9, 18, 22), o, false, 2.0)
+				draw_rect(Rect2(13, 4, 8, 6), Color("#4A7A96"))
+				draw_colored_polygon(PackedVector2Array([Vector2(17, 13), Vector2(21, 21), Vector2(17, 25), Vector2(13, 21)]), Color("#E8F4FA"))
+			"vivres":   # sac de grain
+				draw_colored_polygon(PackedVector2Array([Vector2(7, 31), Vector2(5, 18), Vector2(11, 9), Vector2(23, 9), Vector2(29, 18), Vector2(27, 31)]), Color("#C9A46A"))
+				draw_line(Vector2(11, 9), Vector2(23, 9), Color("#7A5A2A"), 3.0)
+				draw_line(Vector2(10, 20), Vector2(24, 20), Color("#9A7A44"), 2.0)
 			"metal":   # lingot
 				draw_colored_polygon(PackedVector2Array([Vector2(3, 28), Vector2(9, 12), Vector2(25, 12), Vector2(31, 28)]), Color("#9FB3BD"))
 				draw_colored_polygon(PackedVector2Array([Vector2(9, 12), Vector2(25, 12), Vector2(22, 8), Vector2(12, 8)]), Color("#CFDDE4"))
@@ -196,10 +205,10 @@ class Carte extends Button:
 		if v == null:
 			return
 		var rang := vue.m.convoi.find(v)
-		draw_string(f, Vector2(16, 34), v.nom, HORIZONTAL_ALIGNMENT_LEFT, size.x - 32, 24, ConvoiVue.C_TEXTE)
+		draw_string(f, Vector2(16, 36), v.nom, HORIZONTAL_ALIGNMENT_LEFT, size.x - 32, 29, ConvoiVue.C_TEXTE)
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
-		draw_rect(Rect2(16, 46, size.x - 32, 9), Color(0, 0, 0, 0.55))
-		draw_rect(Rect2(16, 46, (size.x - 32) * q, 9), ConvoiVue.couleur_etat(q))
+		draw_rect(Rect2(16, 48, size.x - 32, 9), Color(0, 0, 0, 0.55))
+		draw_rect(Rect2(16, 48, (size.x - 32) * q, 9), ConvoiVue.couleur_etat(q))
 		for k in v.equipage.size():
 			draw_circle(Vector2(26 + k * 22, 74), 7, ConvoiVue.C_VERT if v.equipage[k] > 0.0 else Color(0.3, 0.3, 0.3))
 		var txt := ""   # l'essentiel seulement : on n'affiche que ce qui cloche
@@ -213,7 +222,7 @@ class Carte extends Button:
 			txt = "Feu coupé"
 			col2 = ConvoiVue.C_ORANGE
 		if txt != "":
-			draw_string(f, Vector2(size.x - 16 - 150, 80), txt, HORIZONTAL_ALIGNMENT_RIGHT, 150, 18, col2)
+			draw_string(f, Vector2(size.x - 16 - 150, 80), txt, HORIZONTAL_ALIGNMENT_RIGHT, 150, 22, col2)
 
 static func couleur_etat(q: float) -> Color:
 	if q > 0.66:
@@ -288,17 +297,17 @@ class CarteMap extends Control:
 				draw_arc(p, 28.0, 0.0, TAU, 32, Color.WHITE, 3.0)
 			if s.id == w.secteur:
 				draw_colored_polygon(PackedVector2Array([p + Vector2(0, -44), p + Vector2(10, -28), p + Vector2(-10, -28)]), Color.WHITE)
-			draw_string(f, p + Vector2(-80, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color(0, 0, 0, 0.9))
-			draw_string(f, p + Vector2(-81, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 22, Color("#F6F0DC"))
-			draw_string(f, p + Vector2(-20, 4), str(s.faction), HORIZONTAL_ALIGNMENT_CENTER, 40, 18, Color(0.05, 0.05, 0.05))
+			draw_string(f, p + Vector2(-80, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 26, Color(0, 0, 0, 0.9))
+			draw_string(f, p + Vector2(-81, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 26, Color("#F6F0DC"))
+			draw_string(f, p + Vector2(-20, 4), str(s.faction), HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(0.05, 0.05, 0.05))
 			if bool(s.get("ville_connue", false)):   # ville inscrite sur la carte (DEC-142) : petite enceinte et son nom
 				var q := p + Vector2(26, -34)
 				draw_rect(Rect2(q, Vector2(26, 16)), Color("#3A2E24"))
 				for k in 4:
 					draw_rect(Rect2(q + Vector2(k * 7, -5), Vector2(5, 5)), Color("#3A2E24"))
 				draw_rect(Rect2(q + Vector2(9, 6), Vector2(8, 10)), Color("#E8A33D"))
-				draw_string(f, p + Vector2(-110, 70), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 20, Color(0, 0, 0, 0.9))
-				draw_string(f, p + Vector2(-111, 69), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 20, Color("#E8A33D"))
+				draw_string(f, p + Vector2(-110, 70), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 24, Color(0, 0, 0, 0.9))
+				draw_string(f, p + Vector2(-111, 69), String(s.ville), HORIZONTAL_ALIGNMENT_CENTER, 220, 24, Color("#E8A33D"))
 
 class FxVue extends Control:
 	var vue: ConvoiVue
@@ -324,37 +333,71 @@ func _boite_metal(nom: String, marge: float, contenu: Vector4, teinte := Color.W
 	b.modulate_color = teinte
 	return b
 
+# Polices (DEC-149) : Oswald, gothique étroite d'affiche des années 40 mais nette ; Big Shoulders Stencil pour les titres ; Inter pour les longs textes
+static var _polices := {}
+
+static func police(nom := "oswald", graisse := 500) -> Font:
+	var cle := "%s%d" % [nom, graisse]
+	if not _polices.has(cle):
+		var chemin := {"oswald": "res://assets/fonts/Oswald.ttf", "pochoir": "res://assets/fonts/BigShouldersStencil.ttf", "inter": "res://assets/fonts/Inter-Medium.otf"}[nom]
+		if not ResourceLoader.exists(chemin):
+			return ThemeDB.fallback_font
+		var f := FontVariation.new()
+		f.base_font = load(chemin)
+		if nom != "inter":
+			f.variation_opentype = {"wght": graisse}
+		if nom == "oswald":
+			f.spacing_glyph = 1
+		_polices[cle] = f
+	return _polices[cle]
+
+# Verre fumé : fond sombre semi-transparent, bord ambre discret (DEC-149)
+static func verre(fond: float, bord: float, accent := false, rayon := 12) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.91, 0.64, 0.24, 0.88) if accent else Color(0.055, 0.055, 0.05, fond)
+	s.border_color = Color(1.0, 0.82, 0.55, bord)
+	s.set_border_width_all(2)
+	s.set_corner_radius_all(rayon)
+	s.shadow_color = Color(0, 0, 0, 0.28)
+	s.shadow_size = 4
+	s.content_margin_left = 18
+	s.content_margin_right = 18
+	s.content_margin_top = 6
+	s.content_margin_bottom = 6
+	return s
+
 func _theme() -> Theme:
 	var t := Theme.new()
-	t.default_font = load("res://assets/fonts/Inter-Medium.otf")
-	t.default_font_size = 26
-	for etat in ["normal", "hover", "pressed", "disabled", "focus"]:
-		var s := StyleBoxFlat.new()
-		s.set_corner_radius_all(14)
-		s.set_content_margin_all(12)
-		s.bg_color = {"normal": Color("#2E302F"), "hover": Color("#3A3C3A"), "pressed": C_ACCENT, "disabled": Color("#1E1F1E"), "focus": Color(0, 0, 0, 0)}[etat]
-		if etat == "focus":
-			s.draw_center = false
-		t.set_stylebox(etat, "Button", s)
-	var metal := {"normal": ["ui_onglet", Color.WHITE], "hover": ["ui_onglet", Color(1.25, 1.2, 1.1)], "pressed": ["ui_onglet_actif", Color.WHITE], "disabled": ["ui_onglet", Color(0.55, 0.55, 0.55)]}
-	for etat in metal:
-		var bm := _boite_metal(metal[etat][0], 20.0, Vector4(16, 8, 16, 8), metal[etat][1])
-		if bm != null:
-			t.set_stylebox(etat, "Button", bm)
+	t.default_font = police("oswald", 450)
+	t.default_font_size = 30
+	t.set_stylebox("normal", "Button", verre(0.52, 0.32))
+	t.set_stylebox("hover", "Button", verre(0.66, 0.6))
+	t.set_stylebox("pressed", "Button", verre(0.0, 0.9, true))
+	t.set_stylebox("disabled", "Button", verre(0.3, 0.12))
+	var fo := StyleBoxEmpty.new()
+	t.set_stylebox("focus", "Button", fo)
+	t.set_font("font", "Button", police("oswald", 560))
 	t.set_color("font_color", "Button", C_TEXTE)
-	t.set_color("font_hover_color", "Button", C_TEXTE)
-	t.set_color("font_pressed_color", "Button", Color("#FFD9A0") if _boite_metal("ui_onglet_actif", 1, Vector4()) != null else Color("#1A1A18"))
-	t.set_color("font_disabled_color", "Button", C_DISCRET)
-	t.set_font_size("font_size", "Button", 24)
-	t.set_font_size("font_size", "Label", 26)
+	t.set_color("font_hover_color", "Button", Color.WHITE)
+	t.set_color("font_pressed_color", "Button", Color("#1A140C"))
+	t.set_color("font_hover_pressed_color", "Button", Color("#1A140C"))
+	t.set_color("font_disabled_color", "Button", Color(0.66, 0.63, 0.58, 0.7))
+	t.set_color("font_outline_color", "Button", Color(0, 0, 0, 0.55))
+	t.set_constant("outline_size", "Button", 3)
+	t.set_font_size("font_size", "Button", 30)
+	t.set_font_size("font_size", "Label", 30)
+	t.set_font_size("font_size", "LineEdit", 30)
 	return t
 
 func _panneau(parent: Node, fond := C_FOND) -> PanelContainer:
 	var p := PanelContainer.new()
 	var s := StyleBoxFlat.new()
 	s.bg_color = fond
-	s.set_corner_radius_all(0)
-	s.set_content_margin_all(14)
+	s.set_corner_radius_all(14 if fond.a > 0.0 else 0)
+	s.set_content_margin_all(18)
+	if fond.a > 0.0:   # panneaux en verre fumé (DEC-149)
+		s.border_color = Color(1.0, 0.82, 0.55, 0.28)
+		s.set_border_width_all(2)
 	p.add_theme_stylebox_override("panel", s)
 	parent.add_child(p)
 	return p
@@ -371,8 +414,9 @@ func _bulle(parent: Node) -> PanelContainer:
 	s.content_margin_right = 18
 	s.content_margin_top = 8
 	s.content_margin_bottom = 8
-	var bm := _boite_metal("ui_onglet", 20.0, Vector4(14, 6, 14, 6))
-	p.add_theme_stylebox_override("panel", bm if bm != null else s)
+	s.set_corner_radius_all(14)
+	s.border_color = Color(1.0, 0.82, 0.55, 0.22)
+	p.add_theme_stylebox_override("panel", s)   # pastille en verre fumé (DEC-149)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	return p
@@ -380,7 +424,7 @@ func _bulle(parent: Node) -> PanelContainer:
 func _bouton(texte: String, action: Callable, parent: Node, largeur := 0.0) -> Button:
 	var b := Button.new()
 	b.text = texte
-	b.custom_minimum_size = Vector2(largeur, 64)
+	b.custom_minimum_size = Vector2(largeur, 70)
 	b.pressed.connect(action)
 	b.pressed.connect(func(): _demarrer_audio(); _son("sfx_ui_clic", -6.0))
 	parent.add_child(b)
@@ -398,7 +442,7 @@ func _rangee(parent: Node, titre: String, options: Array, getter: Callable, sett
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 8)
 	parent.add_child(hb)
-	var l := _label(titre, hb, 22, C_DISCRET)
+	var l := _label(titre, hb, 26, C_DISCRET)
 	l.custom_minimum_size = Vector2(110, 0)
 	var groupe := ButtonGroup.new()
 	for o in options:
@@ -407,7 +451,7 @@ func _rangee(parent: Node, titre: String, options: Array, getter: Callable, sett
 		b.toggle_mode = true
 		b.button_group = groupe
 		b.custom_minimum_size = Vector2(large, 56)
-		b.add_theme_font_size_override("font_size", 22)
+		b.add_theme_font_size_override("font_size", 26)
 		var val: String = o[1]
 		b.pressed.connect(func(): setter.call(val); _demarrer_audio(); _son("sfx_ui_clic", -6.0))
 		hb.add_child(b)

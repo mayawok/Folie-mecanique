@@ -55,25 +55,23 @@ func _construire_elements() -> void:
 	_horloge_ui = Horloge.new()
 	_horloge_ui.vue = self
 	hb.add_child(_horloge_ui)
-	for k in [["ammo", "Munitions", "#E8C25A"], ["fuel_l", "Carburant", "#E8A33D"], ["metal", "Métal", "#9FB3BD"], ["pieces", "Pièces", "#8CC152"]]:
+	for k in [["ammo", "Munitions", "#E8C25A"], ["fuel_l", "Carburant", "#E8A33D"], ["eau", "Eau", "#7FB8D8"], ["vivres", "Vivres", "#C9A46A"], ["metal", "Métal", "#9FB3BD"], ["pieces", "Pièces", "#8CC152"]]:
 		var bulle := _bulle(hb)
 		var bh := HBoxContainer.new()
 		bh.add_theme_constant_override("separation", 8)
 		bulle.add_child(bh)
 		bh.add_child(IconeRes.new(k[0]))
-		var l := _label("", bh, 24, Color.WHITE)
+		var l := _label("", bh, 32, Color.WHITE)
 		_chips[k[0]] = [l, k[1], bulle]
-	var esp := Control.new()
-	esp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hb.add_child(esp)
-	var bulle_d := _bulle(hb)
-	_lbl_dist = _label("", bulle_d, 22)
+	var bulle_d := _bulle(self)   # secteur, distance, jour : seconde ligne, à gauche (DEC-149)
+	bulle_d.position = Vector2(30, 98)
+	_lbl_dist = _label("", bulle_d, 28)
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
 	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), hb, 190)
 	_btn_atelier.visible = false
-	_btn_nouveau = _bouton("Nouveau véhicule", func(): _ouvrir_editeur(0), hb, 200)
+	_btn_nouveau = _bouton("Construire", func(): _ouvrir_editeur(0), hb, 160)
 	_btn_nouveau.visible = false
 	_btn_kit = _bouton("Kit", _basculer_kit, hb, 90)
 	_btn_kit.visible = false
@@ -84,18 +82,19 @@ func _construire_elements() -> void:
 		var b := _bouton("x%d" % v, func(): vitesse_sim = v, hb, 60)
 		b.toggle_mode = true
 		_btns_vitesse.append(b)
-	_lbl_quete = _label("", self, 22, C_ACCENT)
-	_lbl_quete.position = Vector2(30, 96)
+	_lbl_quete = _label("", self, 28, C_ACCENT)
+	_lbl_quete.position = Vector2(30, 164)
 	_lbl_quete.add_theme_constant_override("outline_size", 6)
 	_lbl_quete.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	# --- Journal
 	var jb := VBoxContainer.new()
-	jb.position = Vector2(30, 134)
+	jb.position = Vector2(30, 208)
 	jb.custom_minimum_size = Vector2(900, 0)
 	jb.mouse_filter = MOUSE_FILTER_IGNORE
 	add_child(jb)
-	for i in 5:
-		var l := _label("", jb, 22)
+	for i in 4:
+		var l := _label("", jb, 30)
+		l.add_theme_font_override("font", police("inter"))
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size = Vector2(900, 0)
 		l.add_theme_constant_override("outline_size", 6)
@@ -105,7 +104,8 @@ func _construire_elements() -> void:
 	_lbl_banniere = Label.new()
 	_lbl_banniere.set_anchors_and_offsets_preset(PRESET_CENTER_TOP)
 	_lbl_banniere.position.y = 400
-	_lbl_banniere.add_theme_font_size_override("font_size", 34)
+	_lbl_banniere.add_theme_font_size_override("font_size", 50)
+	_lbl_banniere.add_theme_font_override("font", police("pochoir", 800))
 	_lbl_banniere.add_theme_constant_override("outline_size", 10)
 	_lbl_banniere.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_lbl_banniere.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -190,17 +190,17 @@ func _construire_elements() -> void:
 	var av := VBoxContainer.new()
 	av.add_theme_constant_override("separation", 8)
 	_panneau_alerte.add_child(av)
-	_lbl_alerte = _label("", av, 26, C_TEXTE)
+	_lbl_alerte = _label("", av, 31, C_TEXTE)
 	_lbl_alerte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_alerte.custom_minimum_size = Vector2(500, 0)
-	_lbl_camp = _label("", av, 24, Color.WHITE)
+	_lbl_camp = _label("", av, 29, Color.WHITE)
 	_lbl_camp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_camp.custom_minimum_size = Vector2(500, 0)
-	_lbl_nuit = _label("", av, 24, Color("#9FB8FF"))
+	_lbl_nuit = _label("", av, 29, Color("#9FB8FF"))
 	_lbl_nuit.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_nuit.custom_minimum_size = Vector2(500, 0)
 	_btn_nuit = _bouton("Passer la nuit à l'abri", func(): m.monde.ordre_nuit(), av, 0)
-	_lbl_meteo = _label("", av, 24, Color("#FFD27A"))
+	_lbl_meteo = _label("", av, 29, Color("#FFD27A"))
 	_lbl_meteo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_meteo.custom_minimum_size = Vector2(500, 0)
 	_btn_demin_det = _bouton("Déminer : détecteur de métaux", func(): m.ordre_deminer("detecteur"), av, 0)
@@ -265,8 +265,10 @@ func _construire_elements() -> void:
 	var dv := VBoxContainer.new()
 	dv.add_theme_constant_override("separation", 10)
 	_panneau_dial.add_child(dv)
-	_lbl_dial_titre = _label("", dv, 32, C_ACCENT)
-	_lbl_dial_texte = _label("", dv, 24)
+	_lbl_dial_titre = _label("", dv, 42, C_ACCENT)
+	_lbl_dial_titre.add_theme_font_override("font", police("pochoir", 800))
+	_lbl_dial_texte = _label("", dv, 27)
+	_lbl_dial_texte.add_theme_font_override("font", police("inter"))
 	_lbl_dial_texte.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_dial_texte.custom_minimum_size = Vector2(720, 0)
 	_boite_dial = VBoxContainer.new()
@@ -303,7 +305,7 @@ func _construire_elements() -> void:
 	cv.add_theme_constant_override("separation", 14)
 	pc.add_child(cv)
 	_label("CARTE DES SECTEURS", cv, 34, C_ACCENT)
-	_lbl_carte_info = _label("", cv, 26)
+	_lbl_carte_info = _label("", cv, 31)
 	_lbl_carte_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_carte_info.custom_minimum_size = Vector2(480, 0)
 	_lbl_carte_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -359,7 +361,7 @@ func _construire_elements() -> void:
 		if vj is Dictionary and vj.has("version"):
 			txt = "Version " + str(vj.version)
 	ver.text = txt
-	ver.add_theme_font_size_override("font_size", 22)
+	ver.add_theme_font_size_override("font_size", 26)
 	ver.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
 	ver.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	ver.add_theme_constant_override("outline_size", 6)
@@ -431,9 +433,9 @@ func _construire_menu_pause() -> void:
 	co.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	fond.add_child(co)
 	var pc := PanelContainer.new()
-	var bm := _boite_metal("ui_panneau", 26.0, Vector4(50, 36, 50, 36))
-	if bm != null:
-		pc.add_theme_stylebox_override("panel", bm)
+	var bm := verre(0.8, 0.35, false, 18)   # panneau de pause en verre fumé (DEC-149)
+	bm.set_content_margin_all(40)
+	pc.add_theme_stylebox_override("panel", bm)
 	co.add_child(pc)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 18)
@@ -678,7 +680,7 @@ func _maj_survivants() -> void:
 		var etat: String = m.etat_sante(q.pv)
 		var le := _label("%s (%d/%d)" % [etat, int(q.pv), int(m.donnees().equipage_pv)], ligne, 26, {"En forme": C_VERT, "Blessé": C_ORANGE, "Gravement blessé": C_ROUGE, "Hors de combat": C_DISCRET}[etat])
 		le.custom_minimum_size = Vector2(380, 0)
-		var ll := _label(q.lieu, ligne, 26, C_DISCRET)
+		var ll := _label(q.lieu, ligne, 31, C_DISCRET)
 		ll.custom_minimum_size = Vector2(300, 0)
 		if q.veh_uid >= 0 and q.pv > 0.0:
 			var qq: Dictionary = q
@@ -701,7 +703,7 @@ func _maj_survivants() -> void:
 				bb.disabled = not libre
 		_bouton("Annuler", func(): _surv_sel = {}; _surv_sig = "", rang, 0)
 	if m.ordres.marche != "halte":
-		_label("Mettez le convoi en Halte pour changer les affectations.", _pied_surv, 24, C_ORANGE)
+		_label("Mettez le convoi en Halte pour changer les affectations.", _pied_surv, 29, C_ORANGE)
 
 func _ouvrir_carte() -> void:
 	_pause_avant = pause
@@ -752,6 +754,15 @@ func _remplir_ville() -> void:
 					var ty: String = o.type
 					_dialogue_bouton("%s pour %s (%d m)" % [o.nom, o.dest_nom, o.distance_m], func(): _ville_aller("mission:" + ty))
 			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+		"marche":   # eau et vivres contre du métal (DEC-148)
+			_lbl_dial_titre.text = "Marché de %s" % V.nom
+			_lbl_dial_texte.text = "Bidons d'eau et caisses de vivres, par lots de %d. Il vous reste %d jours d'eau et %d jours de vivres pour %d bouches." % [
+				int(CombatModele.VD().marche.lot), int(minf(m.jours_de("eau"), 99.0)), int(minf(m.jours_de("vivres"), 99.0)), m.survivants_nourris()]
+			for k in ["eau", "vivres"]:
+				var kk: String = k
+				var p: int = m.ville_prix_lot(kk)
+				_dialogue_bouton("Acheter %d %s (%d métal)" % [int(CombatModele.VD().marche.lot), "bidons d'eau" if kk == "eau" else "caisses de vivres", p], func(): m.ville_acheter(kk); _ville_aller("marche"), m.bac_a_sable or m.stocks.metal >= p)
+			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
 		"bilan":
 			var b: Dictionary = m.mission_bilan
 			_lbl_dial_titre.text = String(b.get("titre", V.nom))
@@ -797,6 +808,7 @@ func _remplir_ville() -> void:
 			_lbl_dial_titre.text = V.nom
 			_lbl_dial_texte.text = "Plusieurs centaines d'âmes derrière des murs de tôle. Ici, ni tempête ni pillard : le convoi est à l'abri."
 			_dialogue_bouton("Mairie : parler au maire (missions)", func(): _ville_aller("maire"))
+			_dialogue_bouton("Marché : eau et vivres", func(): _ville_aller("marche"))
 			_dialogue_bouton("Garage : le mécanicien", func(): _ville_aller("garage"))
 			_dialogue_bouton("Atelier : la grille", func(): _ville_aller("atelier"))
 			_dialogue_bouton("Repartir : choisir la sortie", func(): _ville_aller("sorties"))
@@ -892,11 +904,12 @@ func _effacer_sauvegarde() -> void:
 
 # --- Interface -------------------------------------------------------------
 func _maj_interface() -> void:
-	for k in ["ammo", "fuel_l", "metal"]:
+	for k in ["ammo", "fuel_l", "metal", "eau", "vivres"]:
 		var l: Label = _chips[k][0]
-		var val: float = m.stocks[k]
-		l.text = "%d" % int(val) + (" L" if k == "fuel_l" else "")
-		l.modulate = C_ROUGE if val <= 0.5 else Color.WHITE
+		var val: float = m.stocks.get(k, 0.0)
+		l.text = "∞" if val >= 99990.0 else ("%d" % int(ceil(val)) + (" L" if k == "fuel_l" else ""))
+		var bas: bool = k in ["eau", "vivres"] and m.jours_de(k) < 1.0
+		l.modulate = C_ROUGE if val <= 0.5 else (C_ACCENT if bas else Color.WHITE)
 	_chips.pieces[0].text = "%d" % (m.composants.size() + m.pieces_stock.size())
 	_horloge_ui.queue_redraw()
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
@@ -1052,7 +1065,7 @@ func _maj_interface() -> void:
 	# Dialogue : voyageur ou camp allié
 	_panneau_dial.visible = dial and not _voile_carte.visible
 	if _panneau_dial.visible and vdial:
-		var sig_v := "ville|%s|%d|%d" % [_ville_onglet, int(m.stocks.metal), m.ville_cout_reparation()]
+		var sig_v := "ville|%s|%d|%d|%d|%d" % [_ville_onglet, int(m.stocks.metal), m.ville_cout_reparation(), int(m.stocks.get("eau", 0.0)), int(m.stocks.get("vivres", 0.0))]
 		if sig_v != _dial_sig:
 			_dial_sig = sig_v
 			_remplir_ville()

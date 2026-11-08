@@ -81,7 +81,7 @@ func _construire_panneau() -> void:
 	sc.add_child(v)
 	_titre(v, "BERLIET GDR")
 	_infos = Label.new()
-	_infos.add_theme_font_size_override("font_size", 19)
+	_infos.add_theme_font_size_override("font_size", 23)
 	_infos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(_infos)
 	var hb := HBoxContainer.new()
@@ -113,7 +113,7 @@ func _construire_panneau() -> void:
 func _titre(parent: Control, t: String) -> void:
 	var l := Label.new()
 	l.text = t
-	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_font_size_override("font_size", 26)
 	l.add_theme_color_override("font_color", Color("#E8A33D"))
 	parent.add_child(l)
 
@@ -122,7 +122,7 @@ func _bouton(parent: Control, t: String, action: Callable) -> Button:
 	var b := Button.new()
 	b.text = t
 	b.custom_minimum_size = Vector2(0, 54)
-	b.add_theme_font_size_override("font_size", 19)
+	b.add_theme_font_size_override("font_size", 23)
 	b.pressed.connect(action)
 	parent.add_child(b)
 	return b
