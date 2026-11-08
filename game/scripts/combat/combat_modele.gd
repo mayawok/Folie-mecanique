@@ -1,6 +1,6 @@
 # Modèle du mode convoi : un convoi contrôlable avance de profil, affronte des ennemis
 class_name CombatModele
-extends "res://scripts/combat/modele_ville.gd"
+extends "res://scripts/combat/modele_mission.gd"
 
 
 # Pièces du camion de l'expédition (Berliet GDR, DEC-136) : châssis, pneus, échappement, réservoir, module arrière
@@ -253,6 +253,8 @@ func ordre_demi_tour() -> bool:
 	ordres.marche = "halte"
 	if ville_active():
 		_ville_retirer()   # la ville qu'on laisse derrière ne se retrouve pas sur cette route
+	if mission_en_route():
+		mission_echouer("Vous avez fait demi-tour : la cargaison n'arrivera pas à %s." % mission.dest_nom)
 	log_("Demi-tour : le convoi repart dans l'autre sens.", "info")
 	evt({"t": "demitour"})
 	return true
@@ -285,7 +287,7 @@ func sauver() -> Dictionary:
 	var w := monde
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
-		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(),
+		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
 
 static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
@@ -352,6 +354,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	if not w.quete.is_empty():
 		m.monde.quete = {"titre": w.quete.titre, "abattre": int(w.quete.abattre), "depart": int(w.quete.depart), "recompense": w.quete.recompense}
 	m.ville_charger(d.get("villes", {}))
+	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
 	m.log_("Partie reprise." if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")
 	return m
@@ -405,6 +408,7 @@ func avancer(dt := DT) -> void:
 		v.x_prev = v.x
 	_marche(dt)
 	_ville(dt)
+	_mission(dt)
 	_camp(dt)
 	_soins(dt)
 	_ia_ennemis(dt)

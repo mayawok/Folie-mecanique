@@ -486,7 +486,7 @@ func _dortoir() -> void:
 
 # Maire, mécanicien, chef d'atelier ; bulles des habitants
 func _personnages(V: Dictionary) -> void:
-	var dedans: bool = String(V.phase) in ["entree", "dedans", "depart"]
+	var dedans: bool = String(V.phase) in ["entree", "dedans", "depart", "rassemblement"]
 	var roles := [["mairie", 90.0, "Le maire"], ["garage", 56.0, "Mécanicien"], ["atelier", 39.0, "Atelier"]]
 	for rr in roles:
 		var x: float = _x0 + float(rr[1])
@@ -501,7 +501,10 @@ func _personnages(V: Dictionary) -> void:
 			draw_line(pied + Vector2(-0.18, -1.45) * _ppm, pied + Vector2(0.2, -0.95) * _ppm, _c(Color("#3F4F7A")), maxf(2.0, _ppm * 0.1))
 			draw_line(pied + Vector2(-0.12, -1.48) * _ppm, pied + Vector2(0.26, -0.98) * _ppm, _c(Color("#9A3A34")), maxf(1.5, _ppm * 0.06))
 		var hb := pied + Vector2(0, -2.6 * _ppm - (4.0 * sin(_t * 3.0) if dedans else 0.0))
-		_bulle(hb, String(rr[2]), dedans)
+		var mot := String(rr[2])
+		if rr[0] == "mairie" and String(V.phase) == "rassemblement" and float(V.t) >= 4.0:
+			mot = "Bonne chance !"   # le maire salue le départ en mission (DEC-145)
+		_bulle(hb, mot, dedans)
 	if not dedans:
 		return
 	# Une bulle d'habitant de temps en temps

@@ -268,7 +268,9 @@ func _cap(dt: float) -> void:
 		var s: Dictionary = secteurs[secteur]
 		m.log_("Vous entrez à %s : %s (%s), niveau %d." % [s.nom, FACTIONS[s.faction], ATTITUDE[s.faction], s.niveau], "ok")
 		m.evt({"t": "secteur"})
-		if m.villes_on:   # une ville par secteur, un peu plus loin sur la route (DEC-141)
+		if m.mission_en_route():   # mission du maire : la ville de destination est au bout de l'étape (DEC-146)
+			m.ville_creer(m.x_tete + float(m.MD().ville_arrivee_m))
+		elif m.villes_on:   # une ville par secteur, un peu plus loin sur la route (DEC-141)
 			m.ville_creer(m.x_tete + float(m.VD().apparition_secteur_m))
 
 

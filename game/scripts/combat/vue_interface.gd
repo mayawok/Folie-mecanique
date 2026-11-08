@@ -740,11 +740,23 @@ func _remplir_ville() -> void:
 	for ch in _boite_dial.get_children():
 		ch.queue_free()
 	var V: Dictionary = m.ville
-	match _ville_onglet:
+	match "mission" if _ville_onglet.begins_with("mission:") else _ville_onglet:
 		"maire":
 			_lbl_dial_titre.text = "Mairie de %s" % V.nom
-			_lbl_dial_texte.text = m.ville_texte_maire()
+			var offres: Array = m.mission_offres()
+			if offres.is_empty():
+				_lbl_dial_texte.text = m.ville_texte_maire()
+			else:   # le maire propose ses missions (DEC-144)
+				_lbl_dial_texte.text = "M. %s, maire de %s, déplie une carte sur son bureau. « J'ai du travail pour un convoi comme le vôtre. Choisissez. »" % [V.maire, V.nom]
+				for o in offres:
+					var ty: String = o.type
+					_dialogue_bouton("%s pour %s (%d m)" % [o.nom, o.dest_nom, o.distance_m], func(): _ville_aller("mission:" + ty))
 			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+		"bilan":
+			var b: Dictionary = m.mission_bilan
+			_lbl_dial_titre.text = String(b.get("titre", V.nom))
+			_lbl_dial_texte.text = String(b.get("texte", ""))
+			_dialogue_bouton("Continuer", func(): _ville_aller("accueil"))
 		"garage":
 			_lbl_dial_titre.text = "Garage · mécanique"
 			var c: int = m.ville_cout_reparation()
@@ -771,10 +783,20 @@ func _remplir_ville() -> void:
 					t += " (ville : %s)" % o.ville
 				_dialogue_bouton(t, func(): m.ville_partir(dest))
 			_dialogue_bouton("Rester", func(): _ville_aller("accueil"))
+		"mission":
+			var ty: String = _ville_onglet.substr(8)
+			var offre := {}
+			for o in m.mission_offres():
+				if o.type == ty:
+					offre = o
+			_lbl_dial_titre.text = "Mission : %s" % String(offre.get("nom", ty)).to_lower()
+			_lbl_dial_texte.text = String(offre.get("texte", ""))
+			_dialogue_bouton("Accepter", func(): m.mission_accepter(ty), not offre.is_empty())
+			_dialogue_bouton("Refuser", func(): _ville_aller("maire"))
 		_:
 			_lbl_dial_titre.text = V.nom
 			_lbl_dial_texte.text = "Plusieurs centaines d'âmes derrière des murs de tôle. Ici, ni tempête ni pillard : le convoi est à l'abri."
-			_dialogue_bouton("Mairie : parler au maire", func(): _ville_aller("maire"))
+			_dialogue_bouton("Mairie : parler au maire (missions)", func(): _ville_aller("maire"))
 			_dialogue_bouton("Garage : le mécanicien", func(): _ville_aller("garage"))
 			_dialogue_bouton("Atelier : la grille", func(): _ville_aller("atelier"))
 			_dialogue_bouton("Repartir : choisir la sortie", func(): _ville_aller("sorties"))
