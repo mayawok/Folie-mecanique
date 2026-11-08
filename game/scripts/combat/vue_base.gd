@@ -344,8 +344,9 @@ static func police(nom := "oswald", graisse := 500) -> Font:
 			return ThemeDB.fallback_font
 		var f := FontVariation.new()
 		f.base_font = load(chemin)
-		if nom != "inter":
-			f.variation_opentype = {"wght": graisse}
+		if nom != "inter":   # axe de graisse par son étiquette OpenType (entier), plus sûr que le nom
+			var ts := TextServerManager.get_primary_interface()
+			f.variation_opentype = {ts.name_to_tag("wght"): graisse}
 		if nom == "oswald":
 			f.spacing_glyph = 1
 		_polices[cle] = f
