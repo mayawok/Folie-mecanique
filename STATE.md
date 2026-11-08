@@ -27,6 +27,10 @@ Mis à jour : 2026-11-08. Résumé volontairement court (≈ 60 lignes). Détail
   le maire annonce ennemis, escorte et récompense ; scènes de départ (atelier et pont roulant, rassemblement de l'escorte, tambours, « Bonne chance »),
   départ automatique, vagues sur la route, livraison = récompense. Citerne d'eau distincte de celle de carburant. Kit : toutes les missions. Suite : DEV-026, OQ-027.
 
+- **08/11 soir (DEC-148 à 151)** : eau et vivres de retour (consommés, affichés, marché des villes) ; HUD en verre fumé (polices Oswald
+  et pochoir, textes plus grands, plus d'images ChatGPT pour les boutons) ; menaces de mission tirées selon le niveau, maire mal renseigné ;
+  ville pillée (événement du Kit : incendies, rescapés, poursuite du convoi des pillards).
+
 ## Ce qui existe
 
 - Prototype Godot 4.3 / GDScript dans `game/`, publié sur GitHub Pages ([`game/LISEZMOI.md`](game/LISEZMOI.md)). Tests sans écran dans `game/tests/`.
