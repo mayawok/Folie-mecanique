@@ -207,3 +207,6 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 
 ## OQ-026 — Villes (08/11)
 Textures propres à chaque ville ; quêtes, marché et recrutement ; la route entre deux secteurs (aujourd'hui « zone calme ») doit-elle devenir le no man's land dangereux (DEC-095) ? décor de la route selon la sortie choisie ; villes hostiles possibles ? Voir `docs/design/VILLES.md`.
+
+## OQ-027 — Missions du maire (08/11)
+Eau et vivres : simples récompenses comptées (stocks `eau`, `vivres`), ni affichées ni consommées ; rations retirées le 07/11 (DEC-114) : faut-il les afficher, à quoi servent-elles ? L'escorte reste dans la ville d'arrivée : faut-il pouvoir la garder ? Cargaison abîmée par les tirs (citerne percée) ? Combien de missions en expédition, et une seule à la fois ?

@@ -247,6 +247,7 @@ var fouille_demandee := 0         # uid du bâtiment ou de l'épave que le joueu
 var _lore_dit := false
 var _n_noms := 0
 var reserve_survivants := 0      # recrues sans place : elles monteront dans le prochain véhicule
+var berliet_config := BerlietConfig.defaut()   # (déplacé de combat_modele.gd : lu aussi par modele_mission.gd)
 var pieces_stock: Array = []     # pièces de véhicule en réserve : {piece, etat} (grille, DEC-035)
 var ouverture := false           # début de partie guidé : moto à assembler, trouvailles dans l'ordre
 var etape_ouverture := 0         # indice de la prochaine trouvaille de l'ouverture
@@ -298,6 +299,13 @@ func ville_calme() -> bool:
 
 func ville_zone(_x: float) -> bool:
 	return false
+
+
+func vehicule_principal():
+	for v in convoi:
+		if v.principal:
+			return v
+	return null
 
 
 func ids_stock() -> Array:

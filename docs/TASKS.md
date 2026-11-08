@@ -304,3 +304,4 @@ avertissement.\
 | DEV-023 | Lot 12 (motos, side-cars) : découper les planches et poser la nacelle devant ou derrière la moto selon le sens (DEC-138) | P2 | images du lot 12 | `tools/`, `game/assets/vehicules/` | Capture des deux sens | En attente des images |
 | DEV-024 | Villes : textures propres à chaque ville (fond, mairie, porte) à la place du dessin par code (DEC-143) | P2 | OQ-026 | `game/scripts/combat/ville_dessin.gd`, `game/assets/` | Capture d'une ville texturée | À faire |
 | DEV-025 | Villes : quêtes du maire et des habitants (bulles), marché, recrutement (DEC-143) | P2 | OQ-026 | `modele_ville.gd`, `vue_interface.gd` | Test : une quête acceptée à la mairie | À faire |
+| DEV-026 | Missions : autres types (escorte de voyageurs, épave à ramener), escortes et vagues selon le niveau du secteur, voix du maire (DEC-144) | P2 | OQ-027 | `game/data/missions.json`, `modele_mission.gd` | Test : mission de niveau 4 plus dure | À faire |

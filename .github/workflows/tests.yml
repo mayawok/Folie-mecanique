@@ -41,17 +41,17 @@ jobs:
       - name: Captures d'écran
         run: |
           mkdir -p /tmp/captures
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_base.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -20
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_base.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -20
           ls -la /tmp/captures
           test -f /tmp/captures/base_t23.png
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_ecran.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -20
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_ecran.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -20
           test -f /tmp/captures/ecran.jpg
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_camp.gd -- /tmp/captures/camp.jpg 2>&1 | grep -v ALSA | tail -20
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_camp.gd -- /tmp/captures/camp.jpg 2>&1 | grep -v ALSA | tail -20
           test -f /tmp/captures/camp.jpg
           echo "B64DEBUT"; base64 -w0 /tmp/captures/camp_avant.jpg | fold -w 3000; echo; echo "B64FIN"
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_berliet.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_ville.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
-          xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_mission.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_berliet.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_ville.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path game --rendering-driver opengl3 --resolution 1280x720 -s res://tests/capture_mission.gd -- /tmp/captures 2>&1 | grep -v ALSA | tail -30
           for f in /tmp/captures/mission_*.jpg; do echo "B64DEBUT $(basename $f)"; base64 -w0 $f | fold -w 3000; echo; echo "B64FIN"; done
           for f in /tmp/captures/ville_*.jpg; do echo "B64DEBUT $(basename $f)"; base64 -w0 $f | fold -w 3000; echo; echo "B64FIN"; done
           for f in /tmp/captures/berliet_*.jpg; do echo "B64DEBUT $(basename $f)"; base64 -w0 $f | fold -w 3000; echo; echo "B64FIN"; done

@@ -94,6 +94,15 @@ Garder **la même voix** pour toutes les répliques du jeu.
 
 Les voix du récit (système 8) seront listées une fois les moments narratifs écrits.
 
+## Tambours de départ en mission (DEC-145, 08/11)
+
+Version actuelle : `mus_tambours.wav`, **synthétisée** par `tools/synth_tambours.py` (aucun crédit). Pour une version produite :
+déposer `mus_tambours.mp3` dans `game/assets/audio/` (le jeu prend l'ogg ou le mp3 avant le wav, puis supprimer le wav).
+
+| Fichier | Outil | Consigne |
+|---|---|---|
+| `mus_tambours.mp3` | Music, 45 s | `Savage war drums for a desert raiding party leaving the gates: huge low taiko-like drums, tribal tom rolls, heavy snare hits, distorted low drone and growling bass, wild driving 120 BPM rhythm, post-apocalyptic, 1940s scrap-metal percussion (oil drums, metal sheets). No vocals, no melody lead. Loopable, ends on the downbeat.` |
+
 ## Musique de fin — convoi anéanti (DEC-055)
 
 Fichier : `game/assets/audio/mus_fin.mp3` (outil **Music**, 60 à 90 s, sans boucle). Prompt à coller :

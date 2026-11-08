@@ -3,8 +3,6 @@ class_name CombatModele
 extends "res://scripts/combat/modele_mission.gd"
 
 
-# Pièces du camion de l'expédition (Berliet GDR, DEC-136) : châssis, pneus, échappement, réservoir, module arrière
-var berliet_config := BerlietConfig.defaut()
 
 
 # --- État de la partie -----------------------------------------------------
@@ -73,11 +71,6 @@ func _appliquer_berliet() -> void:
 			v.longueur = BerlietConfig.longueur_m(berliet_config)
 
 
-func vehicule_principal():
-	for v in convoi:
-		if v.principal:
-			return v
-	return null
 
 
 # --- Ordres ----------------------------------------------------------------
