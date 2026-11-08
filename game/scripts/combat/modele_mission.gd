@@ -58,9 +58,51 @@ func mission_offres() -> Array:
 func _texte_offre(t: String, dest_nom: String, dest: Dictionary) -> String:
 	var M := MD()
 	var T: Dictionary = M.types[t]
-	var ennemis: Array = M.vagues.map(func(v): return String(v.annonce))
-	return "« J'ai %s qui doivent arriver à %s. C'est une seule étape, %d m par la %s, sans détour.\n\nSur la route, attendez-vous à %s.\n\nJe vous donne des hommes : %s. Livrez tout à %s et le maire là-bas vous paiera : %s. »" % [
-		T.cargaison, dest_nom, int(dest.distance_m), String(dest.porte).to_lower(), ", ".join(ennemis), M.escorte_texte, dest_nom, texte_recompense(T.recompense)]
+	var plan := mission_plan(t, int(dest.id))
+	return "« J'ai %s qui doivent arriver à %s. C'est une seule étape, %d m par la %s, sans détour.\n\nSur la route, on me parle de %s.%s %s\n\nJe vous donne des hommes : %s. Livrez tout à %s et le maire là-bas vous paiera : %s. »" % [
+		T.cargaison, dest_nom, int(dest.distance_m), String(dest.porte).to_lower(), plan.presence, (" " + String(M.menace.pillards)) if plan.pillards_annonces else "",
+		M.menace.incertitude, M.escorte_texte, dest_nom, texte_recompense(T.recompense)]
+
+
+# Ce qui attend vraiment le convoi sur l'étape (DEC-150) : vagues tirées dans la table des rencontres du monde selon le niveau,
+# et ce que le maire en sait (présence selon le niveau, pillards parfois signalés à tort ou passés sous silence).
+# Même graine pour l'offre et l'acceptation : ce que le maire annonce correspond à la mission jouée.
+func mission_plan(t: String, dest: int) -> Dictionary:
+	var Me: Dictionary = MD().menace
+	var niveau := maxi(int(monde.secteurs[monde.secteur].niveau), int(monde.secteurs[dest].niveau))
+	var r := RandomNumberGenerator.new()
+	r.seed = int(ville.get("graine", 0)) * 53 + dest * 11 + String(t).hash() % 1000
+	var table: Array = donnees().rencontres.liste.filter(func(e): return not e.get("vehicules", []).is_empty() and niveau >= int(e.niveau_min) and niveau <= int(e.niveau_max))
+	var n: int = int(Me.vagues_par_niveau[clampi(niveau, 0, Me.vagues_par_niveau.size() - 1)])
+	var parts := []
+	for i in n:
+		parts.append(r.randf_range(float(Me.part_min), float(Me.part_max)))
+	parts.sort()
+	var vagues := []
+	var total := 0.0
+	for e in table:
+		total += float(e.poids)
+	for i in n:
+		if table.is_empty():
+			break
+		var tirage := r.randf() * total
+		var choix: Dictionary = table[table.size() - 1]
+		for e in table:
+			tirage -= float(e.poids)
+			if tirage <= 0.0:
+				choix = e
+				break
+		var v: Dictionary = choix.duplicate(true)
+		v["part"] = parts[i]
+		v["mode"] = String(choix.get("mode", "approche"))
+		vagues.append(v)
+	var vrais_pillards := vagues.any(func(v): return v.mode == "poursuite")
+	var annonce := r.randf() < (float(Me.pillards_si_vrai) if vrais_pillards else float(Me.pillards_rumeur))
+	var presence := ""
+	for p in Me.presence:
+		if niveau >= int(p[0]) and niveau <= int(p[1]):
+			presence = String(p[2])
+	return {"niveau": niveau, "vagues": vagues, "presence": presence, "pillards_annonces": annonce}
 
 
 static func texte_recompense(rc: Dictionary) -> String:
@@ -82,7 +124,7 @@ func mission_accepter(t: String) -> bool:
 	if offre.is_empty() or vp == null:
 		return false
 	mission = {"type": t, "dest": int(offre.dest), "dest_nom": String(offre.dest_nom), "origine": String(ville.nom), "escorte": [],
-		"module_avant": String(berliet_config.module), "phase": "prep", "vagues": 0}
+		"module_avant": String(berliet_config.module), "phase": "prep", "vagues": 0, "plan": mission_plan(t, int(offre.dest)).vagues}
 	mission_bilan = {}
 	BerlietConfig.regler(berliet_config, "module", String(MD().types[t].module))
 	_berliet_longueur()
@@ -173,7 +215,7 @@ func _mission_route() -> void:
 		return
 	if not monde.en_transit() or ville_protegee():
 		return
-	var vagues: Array = MD().vagues
+	var vagues: Array = mission.plan
 	var i := int(mission.vagues)
 	if i >= vagues.size():
 		return
@@ -198,7 +240,7 @@ func _poser_vague(v: Dictionary) -> void:
 			e.mode = String(v.get("mode", "approche"))
 			ennemis.append(e)
 			x += e.longueur + 8.0
-	log_(String(v.alerte), "alerte")
+	log_(String(MD().menace.alerte_poursuite if String(v.get("mode", "")) == "poursuite" else MD().menace.alerte_approche), "alerte")
 	evt({"t": "contact", "ennemi": true})
 
 
