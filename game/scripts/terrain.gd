@@ -137,6 +137,57 @@ func ecran_x(xm: float) -> float:
 	return ancre_x + (xm - camera_x) * ppm
 
 
+# Sol dessiné par le code (DEC-153) : terre en couches qui suivent le relief, route tassée et ornières, cailloux,
+# touffes d'herbe sur la crête (zone terre), le tout assombri la nuit.
+func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dictionary) -> void:
+	var nuitc := Color(0.08, 0.1, 0.18)
+	var base := Color(pal.sol).lerp(nuitc, 0.62 * nuit)
+	draw_colored_polygon(sol_pts, base.darkened(0.25))
+	# couches : [profondeur haute, profondeur basse (m), couleur]
+	var couches := [[0.0, 0.55, Color(pal.trace).lightened(0.22)], [0.55, 1.4, Color(pal.sol)], [1.4, 2.6, Color(pal.sol).darkened(0.12)], [2.6, 4.5, Color(pal.sol).darkened(0.24)]]
+	for c in couches:
+		var col: Color = Color(c[2]).lerp(nuitc, 0.62 * nuit)
+		var pts := PackedVector2Array()
+		for p in crete:
+			pts.append(p + Vector2(0, float(c[0]) * ppm))
+		for i in range(crete.size() - 1, -1, -1):
+			var q: Vector2 = crete[i]
+			var ond := 0.12 * ppm * sin((q.x + camera_x * ppm) * 0.013 + float(c[1]))   # limite de couche un peu ondulée
+			pts.append(q + Vector2(0, float(c[1]) * ppm + ond))
+		draw_colored_polygon(pts, col)
+	# ornières de la route
+	for d in [0.18, 0.42]:
+		var orn := PackedVector2Array()
+		for p in crete:
+			orn.append(p + Vector2(0, d * ppm))
+		draw_polyline(orn, Color(0, 0, 0, 0.16), maxf(2.0, 0.07 * ppm))
+	# crête : liseré et touffes d'herbe (zone terre)
+	draw_polyline(crete, Color(pal.crete).lerp(nuitc, 0.6 * nuit), maxf(2.0, 0.06 * ppm))
+	if zone == "terre":
+		var herbe := Color(pal.crete).lightened(0.12).lerp(nuitc, 0.6 * nuit)
+		var k0 := floorf((camera_x - ancre_x / ppm) / 0.7)
+		for i in int(size.x / ppm / 0.7) + 2:
+			var k := k0 + i
+			if alea(k, 31.0) < 0.45:
+				continue
+			var xm := k * 0.7 + 0.5 * alea(k, 32.0)
+			var pied := Vector2(ecran_x(xm), sol_y - sol(xm) * ppm)
+			var h := (0.12 + 0.22 * alea(k, 33.0)) * ppm
+			for j in 3:
+				var dx := (j - 1) * 0.06 * ppm
+				draw_line(pied + Vector2(dx, 0), pied + Vector2(dx + (j - 1) * 0.05 * ppm + 0.03 * ppm * sin(k), -h * (0.7 + 0.3 * float(j % 2))), herbe, maxf(1.0, 0.035 * ppm))
+	# cailloux pris dans la terre
+	var m0 := floorf((camera_x - ancre_x / ppm) / 1.3)
+	for i in int(size.x / ppm / 1.3) + 2:
+		var k := m0 + i
+		var xm2 := k * 1.3 + 0.9 * alea(k, 34.0)
+		var prof := (0.7 + 3.2 * alea(k, 35.0)) * ppm
+		var r := (0.04 + 0.1 * alea(k, 36.0)) * ppm
+		var cp := Vector2(ecran_x(xm2), sol_y - sol(xm2) * ppm + prof)
+		draw_circle(cp, r, Color(pal.trace).lightened(0.3 * alea(k, 37.0)).lerp(nuitc, 0.62 * nuit))
+		draw_circle(cp + Vector2(-r * 0.3, -r * 0.3), r * 0.45, Color(1, 1, 1, 0.08 * (1.0 - nuit)))
+
+
 func _dessiner_avant() -> void:
 	if not _avec_images():
 		return
@@ -226,23 +277,7 @@ func _draw() -> void:
 		crete.append(p)
 		x2 += 8
 	sol_pts.append(Vector2(w, hgt))
-	draw_colored_polygon(sol_pts, Color("#302510") if img else Color(pal.sol))
-	if img:
-		var ts := texture("terre_sol")
-		var th := float(ts.get_height())
-		var v0 := 0.74
-		var recul := 0.9 * ppm   # la route commence derrière les roues : les véhicules roulent au milieu de la bande
-		var prof := th * (1.0 - v0) + recul
-		for i in range(crete.size() - 1):
-			var a: Vector2 = crete[i]
-			var b: Vector2 = crete[i + 1]
-			var ua := (a.x + camera_x * ppm) / ts.get_width()
-			var ub := (b.x + camera_x * ppm) / ts.get_width()
-			draw_polygon(PackedVector2Array([a + Vector2(0, -recul), b + Vector2(0, -recul), b + Vector2(0, prof - recul), a + Vector2(0, prof - recul)]),
-				PackedColorArray([teinte, teinte, teinte, teinte]),
-				PackedVector2Array([Vector2(ua, v0), Vector2(ub, v0), Vector2(ub, 1.0), Vector2(ua, 1.0)]), ts)
-	else:
-		draw_polyline(crete, Color(pal.crete), 3.0, true)
+	_sol_code(sol_pts, crete, pal)   # sol dessiné par le code (DEC-153), plus de texture d'image
 	# Traces et cailloux de premier plan
 	var m0 := floorf((camera_x - ancre_x / ppm) / 3.0)
 	for i in int(w / ppm / 3.0) + 2:
