@@ -30,7 +30,7 @@ func _equipe(m: CombatModele) -> void:
 func _init() -> void:
 	# --- Départ
 	var m := CombatModele.new(42)
-	verifier(m.convoi.size() == 1 and m.convoi[0].type == "willys_mb", "le départ est une Jeep seule")
+	verifier(m.convoi.size() == 1 and m.convoi[0].type == "berliet_gdr" and m.convoi[0].principal, "le départ est le Berliet seul, véhicule principal (DEC-139)")
 	_equipe(m)
 	verifier(m.convoi.size() == 3, "le convoi de départ compte 3 véhicules")
 	var ok_pos := true
