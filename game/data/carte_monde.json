@@ -1,0 +1,853 @@
+{
+ "_doc": "Carte du monde (DEC-154). Positions de 0 à 1 sur l'image. Ajouter un lieu, une route ou un type = une entrée ici, sans code. Proposition de conception : rien n'est définitif (OQ-010, OQ-011).",
+ "image": "res://assets/carte/carte_france.jpg",
+ "echelle_km": 1000,
+ "factions": {
+  "FAC-001": {
+   "nom": "Compagnies de l'Est",
+   "couleur": "#6F86A6"
+  },
+  "FAC-002": {
+   "nom": "Raffineurs du Sud",
+   "couleur": "#C8762E"
+  },
+  "FAC-003": {
+   "nom": "Réseau des Marées",
+   "couleur": "#3A9C9C"
+  },
+  "FAC-004": {
+   "nom": "Communautés des Hautes-Terres",
+   "couleur": "#6E9A44"
+  },
+  "FAC-005": {
+   "nom": "Les Récupérateurs",
+   "couleur": "#B89B4A"
+  },
+  "FAC-006": {
+   "nom": "Les Veilleurs",
+   "couleur": "#9A86B8"
+  },
+  "FAC-007": {
+   "nom": "Les Hommes du Péage",
+   "couleur": "#B03A2E"
+  }
+ },
+ "types": {
+  "ville": {
+   "nom": "Ville-étape",
+   "couleur": "#E8A33D"
+  },
+  "petrole": {
+   "nom": "Pétrole brut",
+   "couleur": "#2B2B2B"
+  },
+  "raffinerie": {
+   "nom": "Raffinerie",
+   "couleur": "#C8762E"
+  },
+  "gaz": {
+   "nom": "Gaz et chimie",
+   "couleur": "#9DB33A"
+  },
+  "mine": {
+   "nom": "Mine",
+   "couleur": "#7A6A58"
+  },
+  "eau": {
+   "nom": "Eau",
+   "couleur": "#3D7FC4"
+  },
+  "depot": {
+   "nom": "Dépôt de carburant",
+   "couleur": "#8E5A2B"
+  },
+  "epaves": {
+   "nom": "Épaves et arsenal",
+   "couleur": "#3A9C9C"
+  },
+  "bunker": {
+   "nom": "Bunker",
+   "couleur": "#6B6F72"
+  },
+  "antenne": {
+   "nom": "Antenne",
+   "couleur": "#9A86B8"
+  },
+  "peage": {
+   "nom": "Péage",
+   "couleur": "#B03A2E"
+  },
+  "bataille": {
+   "nom": "Champ de bataille",
+   "couleur": "#7D2A20"
+  },
+  "preservee": {
+   "nom": "Terre préservée",
+   "couleur": "#5E9A3A"
+  },
+  "desert": {
+   "nom": "Désert",
+   "couleur": "#D9B56B"
+  }
+ },
+ "routes_types": {
+  "route": {
+   "nom": "Route",
+   "couleur": "#F2E3B3"
+  },
+  "piste": {
+   "nom": "Piste (no man's land)",
+   "couleur": "#E0A060"
+  },
+  "rail": {
+   "nom": "Voie ferrée",
+   "couleur": "#2A2A2A"
+  }
+ },
+ "lieux": [
+  {
+   "id": "kerbrume",
+   "type": "ville",
+   "nom": "Kerbrume",
+   "pos": [
+    0.2181,
+    0.2852
+   ],
+   "faction": "FAC-003",
+   "niveau": 1,
+   "zone": "terre",
+   "repere": "Rennes (Bretagne)",
+   "maire": "Le Goff",
+   "note": "Ville de granit des familles du Réseau des Marées. Point de départ conseillé : calme, marché aux épaves."
+  },
+  {
+   "id": "pertuis",
+   "type": "ville",
+   "nom": "Les Pertuis",
+   "pos": [
+    0.194,
+    0.5
+   ],
+   "faction": "FAC-003",
+   "niveau": 1,
+   "zone": "terre",
+   "repere": "La Rochelle",
+   "maire": "Guérin",
+   "note": "Port à moitié ensablé ; on y lit les marées et on y répare les coques."
+  },
+  {
+   "id": "estuaire",
+   "type": "ville",
+   "nom": "Port-Estuaire",
+   "pos": [
+    0.4674,
+    0.1191
+   ],
+   "faction": "FAC-003",
+   "niveau": 3,
+   "zone": "terre",
+   "repere": "Le Havre",
+   "maire": "Lemaire",
+   "note": "Grand port de l'estuaire ; les Compagnies y achètent le carburant raffiné."
+  },
+  {
+   "id": "capitale",
+   "type": "ville",
+   "nom": "Vieille-Capitale",
+   "pos": [
+    0.5013,
+    0.2324
+   ],
+   "faction": "FAC-001",
+   "niveau": 5,
+   "zone": "cailloux",
+   "repere": "Paris",
+   "maire": "Vasseur",
+   "note": "Secteurs discontinus, gravats et sable ; quartiers tenus par des groupes organisés."
+  },
+  {
+   "id": "puits",
+   "type": "ville",
+   "nom": "Fort-des-Puits",
+   "pos": [
+    0.5846,
+    0.3369
+   ],
+   "faction": "FAC-001",
+   "niveau": 4,
+   "zone": "terre",
+   "repere": "Brie (Seine-et-Marne)",
+   "maire": "Marceau",
+   "note": "Siège des Compagnies de l'Est : registres, quotas, puits gardés."
+  },
+  {
+   "id": "corons",
+   "type": "ville",
+   "nom": "Les Corons",
+   "pos": [
+    0.5729,
+    0.0928
+   ],
+   "faction": "FAC-005",
+   "niveau": 4,
+   "zone": "cailloux",
+   "repere": "Lille (Nord)",
+   "maire": "Delattre",
+   "note": "Ville de mineurs et de récupérateurs au bord des vieux champs de bataille."
+  },
+  {
+   "id": "rhin",
+   "type": "ville",
+   "nom": "Rhin-Gris",
+   "pos": [
+    0.8724,
+    0.3174
+   ],
+   "faction": "FAC-001",
+   "niveau": 7,
+   "zone": "cailloux",
+   "repere": "Strasbourg (Alsace)",
+   "maire": "Kieffer",
+   "note": "Avant-poste de l'Est au-delà du no man's land. Fin de partie."
+  },
+  {
+   "id": "loire",
+   "type": "ville",
+   "nom": "Pont-de-Loire",
+   "pos": [
+    0.4167,
+    0.4346
+   ],
+   "faction": "FAC-005",
+   "niveau": 2,
+   "zone": "sable",
+   "repere": "Orléans",
+   "maire": "Bertin",
+   "note": "Dernier pont debout sur la Loire ; péage officieux, atelier réputé."
+  },
+  {
+   "id": "chais",
+   "type": "ville",
+   "nom": "Les Chais-Noirs",
+   "pos": [
+    0.2637,
+    0.5977
+   ],
+   "faction": "FAC-002",
+   "niveau": 3,
+   "zone": "terre",
+   "repere": "Bordeaux",
+   "maire": "Vautrin",
+   "note": "Capitale des familles raffineuses ; dépôts et transporteurs."
+  },
+  {
+   "id": "terminus",
+   "type": "ville",
+   "nom": "Le Terminus",
+   "pos": [
+    0.5156,
+    0.6953
+   ],
+   "faction": "FAC-004",
+   "niveau": 3,
+   "zone": "terre",
+   "repere": "Clermont (Massif central)",
+   "maire": "Fabre",
+   "note": "Bout de la voie ferrée ; communautés ferroviaires et éleveurs des Hautes-Terres."
+  },
+  {
+   "id": "confluent",
+   "type": "ville",
+   "nom": "Confluent",
+   "pos": [
+    0.6302,
+    0.5977
+   ],
+   "faction": "FAC-005",
+   "niveau": 5,
+   "zone": "cailloux",
+   "repere": "Lyon",
+   "maire": "Morel",
+   "note": "Carrefour des routes du sud et de l'est ; grand marché de pièces."
+  },
+  {
+   "id": "massalie",
+   "type": "ville",
+   "nom": "Massalie",
+   "pos": [
+    0.5729,
+    0.7832
+   ],
+   "faction": "FAC-002",
+   "niveau": 4,
+   "zone": "sable",
+   "repere": "Marseille",
+   "maire": "Salvat",
+   "note": "Port et raffineries de l'étang ; trains de citernes vers le nord."
+  },
+  {
+   "id": "combes",
+   "type": "ville",
+   "nom": "Hautes-Combes",
+   "pos": [
+    0.7324,
+    0.6885
+   ],
+   "faction": "FAC-004",
+   "niveau": 5,
+   "zone": "cailloux",
+   "repere": "Alpes",
+   "maire": "Rochaix",
+   "note": "Village fortifié de montagne ; sources d'eau et troupeaux, accès gardés."
+  },
+  {
+   "id": "p_brie",
+   "type": "petrole",
+   "nom": "Puits de Brie",
+   "pos": [
+    0.5501,
+    0.293
+   ],
+   "faction": "FAC-001",
+   "zone": "terre",
+   "note": "Pétrole brut (RES-001) ; puits clôturés, postes de garde."
+  },
+  {
+   "id": "p_parentis",
+   "type": "petrole",
+   "nom": "Champ de Parentis",
+   "pos": [
+    0.2148,
+    0.6494
+   ],
+   "faction": "FAC-002",
+   "zone": "sable",
+   "note": "Pétrole brut des Landes ; anciens ouvriers, savoir-faire rare."
+  },
+  {
+   "id": "p_rhin",
+   "type": "petrole",
+   "nom": "Vieux puits du Rhin",
+   "pos": [
+    0.8398,
+    0.2441
+   ],
+   "faction": "FAC-001",
+   "zone": "cailloux",
+   "note": "Gisement ancien, presque tari ; très convoité."
+  },
+  {
+   "id": "r_etang",
+   "type": "raffinerie",
+   "nom": "Raffinerie de l'Étang",
+   "pos": [
+    0.5501,
+    0.8281
+   ],
+   "faction": "FAC-002",
+   "zone": "sable",
+   "note": "Essence et gazole raffinés : la vraie richesse du Sud."
+  },
+  {
+   "id": "r_estuaire",
+   "type": "raffinerie",
+   "nom": "Raffinerie de l'Estuaire",
+   "pos": [
+    0.4167,
+    0.0977
+   ],
+   "faction": "FAC-001",
+   "zone": "eau",
+   "note": "Raffinerie de l'estuaire, à moitié en ruine."
+  },
+  {
+   "id": "g_lacq",
+   "type": "gaz",
+   "nom": "Complexe de Lacq",
+   "pos": [
+    0.2604,
+    0.7734
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Gaz et produits chimiques ; zone « maudite » : fuites, réservoirs sous pression."
+  },
+  {
+   "id": "m_nord",
+   "type": "mine",
+   "nom": "Puits de charbon",
+   "pos": [
+    0.6771,
+    0.0469
+   ],
+   "faction": "FAC-005",
+   "zone": "cailloux",
+   "note": "Charbon pour les forges et les gazogènes."
+  },
+  {
+   "id": "m_lorraine",
+   "type": "mine",
+   "nom": "Mines de fer",
+   "pos": [
+    0.7715,
+    0.21
+   ],
+   "faction": "FAC-001",
+   "zone": "cailloux",
+   "note": "Minerai de fer ; métal pour la grille."
+  },
+  {
+   "id": "m_massif",
+   "type": "mine",
+   "nom": "Mines du Massif",
+   "pos": [
+    0.5957,
+    0.6562
+   ],
+   "faction": "FAC-004",
+   "zone": "cailloux",
+   "note": "Plomb et fer ; galeries qui servent d'abri."
+  },
+  {
+   "id": "m_sud",
+   "type": "mine",
+   "nom": "Carrières du Sud",
+   "pos": [
+    0.4362,
+    0.7715
+   ],
+   "faction": "FAC-002",
+   "zone": "cailloux",
+   "note": "Carrières et vieux puits de bauxite."
+  },
+  {
+   "id": "e_sources",
+   "type": "eau",
+   "nom": "Sources des Hautes-Terres",
+   "pos": [
+    0.485,
+    0.6396
+   ],
+   "faction": "FAC-004",
+   "zone": "terre",
+   "note": "Eau potable ; gardée par les éleveurs.",
+   "batiment": "ferme"
+  },
+  {
+   "id": "e_lac",
+   "type": "eau",
+   "nom": "Lac de montagne",
+   "pos": [
+    0.7585,
+    0.625
+   ],
+   "faction": "FAC-004",
+   "zone": "cailloux",
+   "note": "Eau claire, accès difficile."
+  },
+  {
+   "id": "e_puits",
+   "type": "eau",
+   "nom": "Puits artésien",
+   "pos": [
+    0.3646,
+    0.5469
+   ],
+   "faction": "",
+   "zone": "sable",
+   "note": "Point d'eau au milieu des sables ; tout le monde s'y arrête.",
+   "batiment": "ferme"
+  },
+  {
+   "id": "d_normandie",
+   "type": "depot",
+   "nom": "Dépôt militaire de Normandie",
+   "pos": [
+    0.3678,
+    0.2559
+   ],
+   "faction": "",
+   "zone": "terre",
+   "note": "Dépôt de carburant (essence et gazole) ; souvent pillé.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "d_loire",
+   "type": "depot",
+   "nom": "Dépôt de la Loire",
+   "pos": [
+    0.4492,
+    0.4219
+   ],
+   "faction": "FAC-005",
+   "zone": "sable",
+   "note": "Fûts et bidons ; les Récupérateurs le tiennent.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "a_brest",
+   "type": "epaves",
+   "nom": "Arsenal et épaves",
+   "pos": [
+    0.1172,
+    0.2324
+   ],
+   "faction": "FAC-003",
+   "zone": "eau",
+   "note": "Navires abandonnés : métal, moteurs, carburant de soute."
+  },
+  {
+   "id": "a_cimetiere",
+   "type": "epaves",
+   "nom": "Cimetière de navires",
+   "pos": [
+    0.1628,
+    0.3857
+   ],
+   "faction": "FAC-003",
+   "zone": "eau",
+   "note": "Coques échouées ; carrosseries de donneur."
+  },
+  {
+   "id": "b_maginot",
+   "type": "bunker",
+   "nom": "Fort de la vieille ligne",
+   "pos": [
+    0.791,
+    0.2617
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Ouvrages bétonnés ; armes lourdes et pièges.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "b_alpes",
+   "type": "bunker",
+   "nom": "Casemate des Alpes",
+   "pos": [
+    0.651,
+    0.5615
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Casemate à flanc de montagne.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "b_pyrenees",
+   "type": "bunker",
+   "nom": "Abri des Pyrénées",
+   "pos": [
+    0.3613,
+    0.8574
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Abri militaire ; rumeur d'un char intact.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "b_nord",
+   "type": "bunker",
+   "nom": "Blockhaus du Nord",
+   "pos": [
+    0.6576,
+    0.0801
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Blockhaus au bord des tranchées.",
+   "batiment": "bunker"
+  },
+  {
+   "id": "v_antenne",
+   "type": "antenne",
+   "nom": "Antenne des Veilleurs",
+   "pos": [
+    0.7064,
+    0.4961
+   ],
+   "faction": "FAC-006",
+   "zone": "terre",
+   "note": "Les Veilleurs écoutent la radio et observent le ciel."
+  },
+  {
+   "id": "t_bordeaux",
+   "type": "peage",
+   "nom": "Péage des Landes",
+   "pos": [
+    0.306,
+    0.6885
+   ],
+   "faction": "FAC-007",
+   "zone": "sable",
+   "note": "Barrage : payer, se battre ou faire demi-tour.",
+   "batiment": "camp_pillard"
+  },
+  {
+   "id": "t_rhone",
+   "type": "peage",
+   "nom": "Péage du Rhône",
+   "pos": [
+    0.6022,
+    0.6982
+   ],
+   "faction": "FAC-007",
+   "zone": "sable",
+   "note": "Barrage sur la route du Rhône.",
+   "batiment": "camp_pillard"
+  },
+  {
+   "id": "t_capitale",
+   "type": "peage",
+   "nom": "Péage du Nord",
+   "pos": [
+    0.459,
+    0.3271
+   ],
+   "faction": "FAC-007",
+   "zone": "terre",
+   "note": "Barrage sur la voie ferrée.",
+   "batiment": "camp_pillard"
+  },
+  {
+   "id": "c_somme",
+   "type": "bataille",
+   "nom": "Champs de la Somme",
+   "pos": [
+    0.6543,
+    0.1465
+   ],
+   "faction": "",
+   "zone": "cailloux",
+   "note": "Tranchées, barbelés, épaves de chars ; mines partout."
+  },
+  {
+   "id": "c_champagne",
+   "type": "bataille",
+   "nom": "Front de Champagne",
+   "pos": [
+    0.6836,
+    0.376
+   ],
+   "faction": "",
+   "zone": "sable",
+   "note": "La ligne de front figée ; no man's land."
+  },
+  {
+   "id": "x_vallee",
+   "type": "preservee",
+   "nom": "Vallée préservée (rumeur)",
+   "pos": [
+    0.7617,
+    0.752
+   ],
+   "faction": "FAC-004",
+   "zone": "terre",
+   "note": "Terre préservée minuscule ; évoquée, jamais visitée (Bible 04.1 bis)."
+  },
+  {
+   "id": "s_beauce",
+   "type": "desert",
+   "nom": "Désert de Beauce",
+   "pos": [
+    0.3971,
+    0.5078
+   ],
+   "faction": "",
+   "zone": "sable",
+   "note": "Sable et dunes ; tempêtes de sable."
+  },
+  {
+   "id": "s_landes",
+   "type": "desert",
+   "nom": "Dunes des Landes",
+   "pos": [
+    0.1953,
+    0.7031
+   ],
+   "faction": "",
+   "zone": "sable",
+   "note": "Dunes côtières mouvantes."
+  }
+ ],
+ "routes": [
+  {
+   "a": "kerbrume",
+   "b": "pertuis",
+   "type": "route",
+   "danger": 1,
+   "zone": "terre",
+   "nom": "Route des grèves"
+  },
+  {
+   "a": "kerbrume",
+   "b": "estuaire",
+   "type": "piste",
+   "danger": 3,
+   "zone": "terre",
+   "nom": "Piste de la Manche"
+  },
+  {
+   "a": "kerbrume",
+   "b": "loire",
+   "type": "route",
+   "danger": 2,
+   "zone": "terre",
+   "nom": "Route de la Loire"
+  },
+  {
+   "a": "estuaire",
+   "b": "capitale",
+   "type": "route",
+   "danger": 3,
+   "zone": "terre",
+   "nom": "Route de l'estuaire"
+  },
+  {
+   "a": "estuaire",
+   "b": "corons",
+   "type": "piste",
+   "danger": 4,
+   "zone": "cailloux",
+   "nom": "Piste des falaises"
+  },
+  {
+   "a": "corons",
+   "b": "capitale",
+   "type": "rail",
+   "danger": 4,
+   "zone": "cailloux",
+   "nom": "Voie ferrée du Nord"
+  },
+  {
+   "a": "corons",
+   "b": "puits",
+   "type": "piste",
+   "danger": 5,
+   "zone": "cailloux",
+   "nom": "Piste des tranchées"
+  },
+  {
+   "a": "capitale",
+   "b": "puits",
+   "type": "route",
+   "danger": 3,
+   "zone": "terre",
+   "nom": "Route des pompes"
+  },
+  {
+   "a": "capitale",
+   "b": "loire",
+   "type": "rail",
+   "danger": 3,
+   "zone": "sable",
+   "nom": "Voie ferrée du Sud"
+  },
+  {
+   "a": "puits",
+   "b": "rhin",
+   "type": "piste",
+   "danger": 7,
+   "zone": "sable",
+   "nom": "Traversée de l'Est (no man's land)"
+  },
+  {
+   "a": "puits",
+   "b": "confluent",
+   "type": "piste",
+   "danger": 6,
+   "zone": "sable",
+   "nom": "Piste du front"
+  },
+  {
+   "a": "loire",
+   "b": "pertuis",
+   "type": "route",
+   "danger": 2,
+   "zone": "sable",
+   "nom": "Route de l'ouest"
+  },
+  {
+   "a": "loire",
+   "b": "terminus",
+   "type": "rail",
+   "danger": 3,
+   "zone": "terre",
+   "nom": "Voie ferrée du Massif"
+  },
+  {
+   "a": "pertuis",
+   "b": "chais",
+   "type": "route",
+   "danger": 2,
+   "zone": "terre",
+   "nom": "Route des marais"
+  },
+  {
+   "a": "chais",
+   "b": "terminus",
+   "type": "piste",
+   "danger": 4,
+   "zone": "terre",
+   "nom": "Piste des plateaux"
+  },
+  {
+   "a": "chais",
+   "b": "massalie",
+   "type": "piste",
+   "danger": 5,
+   "zone": "sable",
+   "nom": "Route des citernes (Lacq)"
+  },
+  {
+   "a": "terminus",
+   "b": "confluent",
+   "type": "route",
+   "danger": 4,
+   "zone": "terre",
+   "nom": "Route des monts"
+  },
+  {
+   "a": "terminus",
+   "b": "massalie",
+   "type": "piste",
+   "danger": 4,
+   "zone": "cailloux",
+   "nom": "Descente des Cévennes"
+  },
+  {
+   "a": "confluent",
+   "b": "combes",
+   "type": "route",
+   "danger": 5,
+   "zone": "cailloux",
+   "nom": "Route du col"
+  },
+  {
+   "a": "confluent",
+   "b": "massalie",
+   "type": "route",
+   "danger": 4,
+   "zone": "sable",
+   "nom": "Route du Rhône"
+  },
+  {
+   "a": "combes",
+   "b": "rhin",
+   "type": "piste",
+   "danger": 7,
+   "zone": "cailloux",
+   "nom": "Piste des crêtes"
+  },
+  {
+   "a": "massalie",
+   "b": "combes",
+   "type": "piste",
+   "danger": 5,
+   "zone": "cailloux",
+   "nom": "Piste des gorges"
+  }
+ ]
+}

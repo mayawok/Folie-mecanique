@@ -720,3 +720,31 @@ func _nettoyer() -> void:
 	batiments = batiments.filter(func(b): return b.x + b.longueur > limite)
 	mines = mines.filter(func(mn): return mn.x > limite)
 	monde.nettoyer(limite)
+
+
+# --- Kit : carte du monde de conception (DEC-154) ----------------------------------------------
+# Lieu de la carte où se trouve le convoi (Mode créatif seulement, non sauvegardé)
+var kit_lieu := "kerbrume"
+
+# Se rendre directement à un lieu de la carte : la zone de décor suit le lieu ; une ville-étape est posée juste devant
+# (avec son nom, son maire et son niveau) ; un lieu d'intérêt fait apparaître son bâtiment s'il en a un.
+func kit_aller(id: String) -> bool:
+	if not bac_a_sable or mission_active():
+		return false
+	var l := CarteMonde.lieu(id)
+	if l.is_empty():
+		return false
+	if ville_active():
+		_ville_retirer()
+	kit_lieu = id
+	kit_regler_zone(String(l.get("zone", kit_zone)))
+	if String(l.type) == "ville":
+		var s: Dictionary = monde.secteurs[monde.secteur]
+		s["ville"] = String(l.nom)
+		s["maire"] = String(l.get("maire", "Morel"))
+		s["niveau"] = int(l.get("niveau", 0))
+		kit_ville()
+	elif String(l.get("batiment", "")) != "":
+		kit_apparaitre("batiment", {"type": String(l.batiment)})
+	log_("Kit : le convoi se rend à %s." % l.nom, "info")
+	return true

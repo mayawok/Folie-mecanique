@@ -1149,7 +1149,7 @@ func _installer_kit() -> void:
 	_btn_kit.visible = m.bac_a_sable
 	if not m.bac_a_sable:
 		return
-	_kit = PanneauKit.new(m, func(): _demarrer_audio(), _ouvrir_vitrine_berliet)
+	_kit = PanneauKit.new(m, func(): _demarrer_audio(), _ouvrir_vitrine_berliet, _ouvrir_carte_kit)
 	_kit.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE)
 	_kit.offset_left = -470
 	_kit.offset_right = -20
@@ -1169,6 +1169,19 @@ func _ouvrir_vitrine_berliet() -> void:
 	vit.modele = m   # les pièces choisies s'appliquent au camion du convoi
 	_par_dessus(vit)
 	vit.ferme.connect(func(): pause = pause_avant)
+
+
+# Carte du monde de conception (DEC-154), ouverte depuis le Kit ; le jeu est en pause
+func _ouvrir_carte_kit() -> CarteKit:
+	var pause_avant := pause
+	pause = true
+	if _kit != null:
+		_kit.visible = false
+	var c := CarteKit.new()
+	c.modele = m
+	_par_dessus(c)
+	c.ferme.connect(func(): pause = pause_avant)
+	return c
 
 
 func _basculer_kit() -> void:
