@@ -195,3 +195,11 @@ Identifiants stables : ne jamais les réutiliser. Statuts : ouverte, en discussi
 - **Documents concernés** : docs/lore/communautes-ferroviaires.md, docs/scenario/mission-liberation-camp-travailleurs.md, docs/lore/01_BIBLE_FOUNDATION
 - **Options connues** : FAC-008 descriptive ; ou aucune entrée collective
 - **Statut** : ouverte
+
+## OQ-025 — Berliet : valeurs et modules
+
+- **Question** : valeurs de jeu des pièces du Berliet (charge des châssis, litres des réservoirs, bonus des échappements, effets des pneus) ; les modules grue, troupes et ridelles hautes entrent-ils dans `bases.json` (nouveaux identifiants) ou restent-ils propres au Berliet ? Niveau de garage requis pour chaque amélioration.
+- **Pourquoi la trancher** : sans elles, les pièces ne changent que le dessin (DEC-136).
+- **Documents concernés** : game/data/berliet.json, game/data/bases.json, docs/design/GRILLE.md
+- **Options connues** : valeurs provisoires actuelles ; châssis long et grue au garage de niveau 2
+- **Statut** : ouverte

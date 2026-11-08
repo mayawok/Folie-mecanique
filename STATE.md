@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-07. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
+Mis à jour : 2026-11-08. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
 
 ## Cap (recentrage du 06/11, DEC-091 à DEC-102)
 
@@ -15,6 +15,7 @@ Mis à jour : 2026-11-07. Résumé volontairement court (≈ 60 lignes). Détail
 - **Équilibrage (07/11, DEC-113)** : ennemis en groupes, plus fragiles et moins meurtriers que le convoi, rôdeurs plus rares ; à régler en essai avec le Kit.
 - **Décors et interface (07/11, DEC-114)** : zone « terre et herbe » en couches puis habillage de l'interface (concept art dans `docs/art/reference/`) ; rations et gestion retirées, panneaux repliables, rôle éclaireur. Décor terre et herbe intégré (DEC-115, DEV-011 fait) ; images d'interface rangées, à brancher : DEV-012 à 014.
 - **Grille V2 (07/11, DEC-121 à DEC-125)** : véhicules trouvés = « bases » à transformer (rallonge par crans, essieux, modules, blindage) plutôt que châssis dessinés ; transformations lourdes au garage, essieu/moteur/boîte réparables en camp (long, camp à défendre) ; fiabilité sans bonus d'origine. Code fusionné, test Godot passé en CI ; **interface et dessin à faire** (DEV-016 à DEV-019). Détails : `docs/design/GRILLE.md`.
+- **Berliet GDR (08/11, DEC-136 à 138)** : camion de l'expédition dessiné par l'art (2 châssis, 5 pneus avant et arrière, 5 échappements, 5 réservoirs, trappe), 6 modules arrière dessinés par le code, halte de l'équipage animée ; à essayer dans le Kit (« Berliet GDR : pièces et halte »). Suite : DEV-020 (dans le convoi), DEV-021 (portières), lot 12 motos et side-cars (prompts dans `docs/art/prompts/motos_sidecars.md`).
 - **Méthode de travail** : Claude fusionne lui-même dans `main` (autorisation du 07/11) ; la page web se reconstruit ensuite toute seule.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
