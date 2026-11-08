@@ -11,6 +11,7 @@ const ORDRE := [["chassis", "Châssis"], ["pneu_av", "Pneus avant"], ["pneu_ar",
 	["echappement", "Échappement"], ["reservoir", "Réservoir"], ["module", "Module arrière"]]
 
 var config := BerlietConfig.defaut()
+var modele = null         # CombatModele : si fourni, les choix s'appliquent au camion de l'expédition (DEC-139)
 var bivouac: Bivouac
 var camion: BerlietDessin
 var nuit := false
@@ -34,6 +35,8 @@ class Calque extends Node2D:
 
 
 func _ready() -> void:
+	if modele != null:
+		config = modele.berliet_config   # même dictionnaire : la vitrine règle le camion du convoi
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter = MOUSE_FILTER_STOP
 	_arriere = Calque.new()
@@ -126,7 +129,8 @@ func _bouton(parent: Control, t: String, action: Callable) -> Button:
 
 
 func _choisir(cle: String, val) -> void:
-	if BerlietConfig.regler(config, cle, val):
+	var ok: bool = modele.berliet_regler(cle, val) if modele != null else BerlietConfig.regler(config, cle, val)
+	if ok:
 		if cle == "chassis":
 			# les ancrages (feu, roues arrière) changent avec la longueur : nouvel équipage, à bord, même état de marche
 			var roule := bivouac.phase in ["route", "demarrage"]

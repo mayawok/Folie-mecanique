@@ -110,5 +110,29 @@ func _init() -> void:
 	simuler(b2, 60.0, "demarrage")
 	ok(b2.phase == "demarrage" and b2.a_bord() == b2.equipiers.size(), "tout le monde remonte même interrompu")
 
+	# --- Camion de l'expédition dans le jeu (DEC-139) ---
+	var m := CombatModele.new(4)
+	var cam = m.convoi[0]
+	ok(cam.type == "berliet_gdr" and cam.principal, "nouvelle partie : le Berliet est le véhicule principal")
+	ok(cam.equipage_vivant() >= 2 and not cam.armes.is_empty(), "le Berliet a son équipage et sa mitrailleuse")
+	var mc := CombatModele.new(4, {"bac_a_sable": true})
+	ok(mc.convoi[0].type == "berliet_gdr" and mc.convoi[0].principal, "Mode créatif : départ avec le Berliet")
+	m.convoi.append(m.creer_vehicule("willys_mb", "joueur", 0.0))
+	m.abandonner(cam.uid)
+	ok(m.convoi.has(cam), "on n'abandonne pas le camion de l'expédition")
+	cam.garage = 99
+	m.monde.heure = 0.80
+	ok("camion de l'expédition" in m.raison_demontage(cam.uid), "il ne se démonte pas")
+	var l0: float = cam.longueur
+	ok(m.berliet_regler("chassis", "long") and cam.longueur > l0 + 1.0, "châssis long : le camion s'allonge (%.1f m)" % cam.longueur)
+	ok(not m.berliet_regler("module", "piscine"), "module inconnu refusé")
+	m.berliet_regler("module", "citerne")
+	m.berliet_regler("pneu_ar", "chaines")
+	var m2 := CombatModele.depuis_sauvegarde(JSON.parse_string(JSON.stringify(m.sauver())))
+	var cam2 = m2.convoi[0]
+	ok(cam2.principal and cam2.type == "berliet_gdr", "sauvegarde : le Berliet reste le véhicule principal")
+	ok(m2.berliet_config.chassis == "long" and m2.berliet_config.module == "citerne" and m2.berliet_config.pneu_ar == "chaines",
+		"sauvegarde : pièces du Berliet gardées")
+	ok(absf(cam2.longueur - cam.longueur) < 0.01, "sauvegarde : longueur gardée")
 	print("Échecs : %d" % echecs)
 	quit(1 if echecs > 0 else 0)

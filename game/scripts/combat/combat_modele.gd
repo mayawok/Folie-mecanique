@@ -3,6 +3,10 @@ class_name CombatModele
 extends "res://scripts/combat/modele_camp.gd"
 
 
+# Pièces du camion de l'expédition (Berliet GDR, DEC-136) : châssis, pneus, échappement, réservoir, module arrière
+var berliet_config := BerlietConfig.defaut()
+
+
 # --- État de la partie -----------------------------------------------------
 func _init(g := 1, options := {}) -> void:
 	graine = g
@@ -30,6 +34,9 @@ func _init(g := 1, options := {}) -> void:
 	stocks = D.stocks_depart.duplicate()
 	for t in D.depart:
 		convoi.append(creer_vehicule(t, "joueur", 0.0))
+	if not convoi.is_empty():
+		convoi[0].principal = true   # premier véhicule du départ : le camion de l'expédition (DEC-139)
+	_appliquer_berliet()
 	var bord := 0.0
 	for v in convoi:
 		bord += v.longueur + D.ecart_convoi
@@ -45,7 +52,28 @@ func _init(g := 1, options := {}) -> void:
 				stocks[k] = 99999.0
 		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
 		return
-	log_("Une Jeep et deux survivants. Avancez pour trouver de quoi vous équiper.", "info")
+	log_("Le Berliet et son équipage reprennent la route du no man's land.", "info")
+
+
+# Change une pièce du camion de l'expédition ; la longueur du véhicule suit le châssis. Vrai si accepté.
+func berliet_regler(cle: String, valeur) -> bool:
+	if not BerlietConfig.regler(berliet_config, cle, valeur):
+		return false
+	_appliquer_berliet()
+	return true
+
+
+func _appliquer_berliet() -> void:
+	for v in convoi:
+		if v.type == "berliet_gdr":
+			v.longueur = BerlietConfig.longueur_m(berliet_config)
+
+
+func vehicule_principal():
+	for v in convoi:
+		if v.principal:
+			return v
+	return null
 
 
 # --- Ordres ----------------------------------------------------------------
@@ -242,11 +270,11 @@ func sauver() -> Dictionary:
 		for s in monde.pietons:   # les soldats à terre sont sauvegardés comme montés : ils rembarquent à la reprise
 			if s.camp == "joueur" and s.veh == v.uid and s.actif():
 				troupes.append(s.pv)
-		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir, "troupes": troupes})
+		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir, "troupes": troupes, "principal": v.principal})
 	var w := monde
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
-		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs,
+		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(),
 		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
 
 static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
@@ -287,7 +315,12 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 			v.troupes.append(float(pv))
 		v.statut = e.statut
 		v.tir = bool(e.tir)
+		v.principal = bool(e.get("principal", false))   # anciennes sauvegardes : aucun véhicule principal
 		m.convoi.append(v)
+	var bc: Dictionary = d.get("berliet", {})
+	for k in bc:
+		BerlietConfig.regler(m.berliet_config, k, bc[k])
+	m._appliquer_berliet()
 	m.ordres.marche = "halte"
 	m._replacer(true)
 	m.x_tete_prev = m.x_tete
@@ -334,6 +367,9 @@ func abandonner(uid: int) -> void:
 		if v.uid == uid:
 			if convoi.size() <= 1:
 				log_("Impossible d'abandonner le dernier véhicule.", "alerte")
+				return
+			if v.principal:
+				log_("Le %s est le camion de l'expédition : on ne l'abandonne pas." % v.nom, "alerte")
 				return
 			convoi.remove_at(i)
 			reserve_survivants += v.troupes_vivantes()   # les soldats des bancs suivent le convoi

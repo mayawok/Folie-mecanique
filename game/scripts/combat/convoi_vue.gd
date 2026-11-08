@@ -146,6 +146,8 @@ func _synchroniser() -> void:
 			noeuds[v.uid] = n
 		elif n.type != v.type:   # véhicule transformé à l'atelier (moto -> side-car)
 			n.configurer(v.type)
+		if v.type == "berliet_gdr" and v.camp == "joueur" and n.art_config != m.berliet_config:
+			n.configurer_art(m.berliet_config)   # pièces du camion de l'expédition (DEC-136, 139)
 		if absf(n.ppm - ppm) > 0.01 and not n.D.is_empty():
 			n.ppm = ppm
 			n.size = Vector2(n.D.longueur, n.D.hauteur) * ppm

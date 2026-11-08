@@ -503,7 +503,7 @@ func afficher_menu(continuer: bool) -> void:
 
 
 # --- Partie ----------------------------------------------------------------
-func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> void:
+func _nouvelle_partie(g: int, sauve := {}, ouverture := false, bac := false) -> void:
 	graine = g
 	if _voile_menu != null:
 		if _voile_menu.visible:
@@ -517,7 +517,9 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := true, bac := false) -> v
 		_editeur = null
 	if sauve.is_empty():
 		_effacer_sauvegarde()
-		m = CombatModele.new(g, {"bac_a_sable": true} if bac else {"ouverture": ouverture})   # début guidé : moto à assembler (DEC-035)
+		# Départ avec le Berliet, camion de l'expédition (DEC-139) ; l'ancien début guidé (moto à assembler, DEC-035) reste possible par ouverture = true
+		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true})
+		m = CombatModele.new(g, opts)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
 	_rng.seed = g
@@ -1048,6 +1050,7 @@ func _ouvrir_vitrine_berliet() -> void:
 	if _kit != null:
 		_kit.visible = false
 	var vit := VitrineBerliet.new()
+	vit.modele = m   # les pièces choisies s'appliquent au camion du convoi
 	_par_dessus(vit)
 	vit.ferme.connect(func(): pause = pause_avant)
 

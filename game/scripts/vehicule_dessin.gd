@@ -44,6 +44,8 @@ var _voile := Color.WHITE    # peinture de bande (DEC-080) : ton posé sur les v
 var plat := false           # éditeur de grille : le véhicule reste droit, vrai à la case près (DEC-081)
 var _ass := 0.0             # assiette statique d'un véhicule penché (pente de la ligne de sol dans son repère, DEC-081)
 var _piv := Vector2.ZERO    # point de contact autour duquel il pivote (m)
+var art_config := {}         # véhicule dessiné par l'art (Berliet, DEC-136) : pièces choisies ; vide = formes du code
+var _art: BerlietDessin = null
 var roues_perdues: Array = []   # indices des roues arrachées en combat (DEC-080) : on ne les dessine plus
 
 
@@ -66,7 +68,29 @@ func _ready() -> void:
 
 func configurer(t: String) -> void:
 	type = t
+	if String(donnees().vehicules[t].get("art", "")) == "berliet":
+		configurer_art(art_config if not art_config.is_empty() else BerlietConfig.defaut())
+		return
+	art_config = {}
 	configurer_d(donnees().vehicules[t])
+
+
+# Berliet dessiné par l'art : longueur, roues, arme et tireur suivent le châssis choisi (cotes de la forme = châssis court)
+func configurer_art(cfg: Dictionary) -> void:
+	art_config = cfg.duplicate()
+	var f: Dictionary = donnees().vehicules[type].duplicate(true)
+	var pa := BerlietConfig.ppm_art()
+	var xa := BerlietConfig.x_arriere(art_config)
+	var dx := (442.0 - xa) / pa
+	f.longueur = BerlietConfig.longueur_m(art_config)
+	f.roues = []
+	for mo in BerlietConfig.moyeux(art_config):
+		f.roues.append({"x": (float(mo.x) - xa) / pa, "r": float(BerlietConfig.donnees().rayon_roue) / pa})
+	for a in f.get("armes", []):
+		a.x = float(a.x) + dx
+	for e in f.get("equipage", []):
+		e.x = float(e.x) + dx
+	configurer_d(f)
 
 
 # Dessin à partir d'une description directe (atelier : une pièce seule, découpée dans un véhicule).
@@ -210,6 +234,9 @@ func _coul(nom: String) -> Color:
 func _draw() -> void:
 	if D.is_empty():
 		return
+	if not art_config.is_empty():
+		_dessiner_art()
+		return
 	if sans_roues and not D.has("chenille"):
 		var chute := 0.0
 		for a in _appuis:
@@ -235,6 +262,33 @@ func _draw() -> void:
 	_formes(2)
 	_formes(3)   # coques de donneur (DEC-067)
 	_armes()
+
+
+# Berliet : l'art posé dans le repère de la caisse (suspension, assiette, sens), puis le tireur dans la trappe et l'arme
+func _dessiner_art() -> void:
+	if _art == null:
+		_art = BerlietDessin.new()
+		_art.visible = false
+		_art.ci = self
+		add_child(_art)
+	_art.config = art_config
+	_art.ppm = ppm
+	_art.roues_visibles = not sans_roues
+	var xa := BerlietConfig.x_arriere(art_config) / BerlietConfig.ppm_art()
+	var o := _c(Vector2(-xa, 0.0))
+	var ex := (_c(Vector2(-xa + 1.0, 0.0)) - o).normalized()
+	var ey := (o - _c(Vector2(-xa, 1.0))).normalized()
+	_decal = Vector2(0, 0.42 * ppm) if sans_roues else Vector2.ZERO
+	_art.base = Transform2D(ex, ey, o + _decal)
+	_art.angle_roues = dist / 0.5
+	_art.teinte = _voile
+	_art.dessiner()
+	draw_set_transform(_decal)
+	if equipage and not equipage_dehors:
+		_equipage()
+	_armes()
+	_decal = Vector2.ZERO
+	draw_set_transform(_decal)
 
 
 func _formes(z: int) -> void:

@@ -40,4 +40,21 @@ func _init() -> void:
 		var chemin: String = dos + "/berliet_" + c[0] + ".jpg"
 		root.get_viewport().get_texture().get_image().save_jpg(chemin, 0.85)
 		print("capture ", chemin, " phase ", vit.bivouac.phase, " dehors ", vit.bivouac.dehors())
+	vit.queue_free()
+	# Convoi : nouvelle expédition avec le Berliet, puis châssis long et citerne
+	var vue := ConvoiVue.new()
+	root.add_child(vue)
+	for i in 30: await process_frame
+	vue._nouvelle_partie(7)
+	for i in 40: await process_frame
+	vue.m.ordre_marche("avancer")
+	vue.pause = false
+	for i in 90: await process_frame
+	root.get_viewport().get_texture().get_image().save_jpg(dos + "/berliet_7_convoi.jpg", 0.85)
+	vue.m.berliet_regler("chassis", "long")
+	vue.m.berliet_regler("module", "citerne")
+	vue.m.berliet_regler("echappement", 4)
+	for i in 60: await process_frame
+	root.get_viewport().get_texture().get_image().save_jpg(dos + "/berliet_8_convoi_long.jpg", 0.85)
+	print("convoi : ", vue.m.convoi[0].nom, " ", vue.m.convoi[0].longueur)
 	quit()

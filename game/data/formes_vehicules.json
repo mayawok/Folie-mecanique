@@ -116,20 +116,20 @@
     },
     "berliet_gdr": {
       "nom": "Berliet GDR",
-      "longueur": 6.3,
-      "hauteur": 2.4,
-      "teinte": "pillards",
+      "longueur": 6.85,
+      "hauteur": 2.85,
+      "teinte": "joueur",
       "moteur": "camion",
       "course": 0.1,
-      "fiche": "Vieux camion de transport français (série GD). Plateau rafistolé, mitrailleuse sur la cabine.",
+      "fiche": "Berliet de la série GD, camion de l'expédition : rare, usé, retrouvé dans le no man's land. Véhicule principal du convoi, gardé du début à la fin.",
       "roues": [
         {
-          "x": 1.35,
-          "r": 0.47
+          "x": 1.91,
+          "r": 0.5
         },
         {
-          "x": 5.5,
-          "r": 0.45
+          "x": 5.88,
+          "r": 0.5
         }
       ],
       "formes": [
@@ -334,8 +334,8 @@
       "armes": [
         {
           "type": "mitrailleuse",
-          "x": 3.8,
-          "y": 2.32,
+          "x": 4.63,
+          "y": 2.8,
           "pied": 0.22,
           "long": 1.1,
           "ep": 0.045
@@ -343,18 +343,14 @@
       ],
       "equipage": [
         {
-          "x": 3.55,
-          "y": 2.0,
+          "x": 4.39,
+          "y": 2.62,
           "role": "tireur",
-          "h": 0.4
-        },
-        {
-          "x": 1.5,
-          "y": 1.15,
-          "role": "passager",
-          "debout": true
+          "h": 0.42
         }
-      ]
+      ],
+      "art": "berliet",
+      "_note_art": "Dessiné par l'art (BerlietDessin, data/berliet.json). Cotes pour le châssis court ; VehiculeDessin les décale si le châssis est long. 'formes' : repli si l'art manque."
     },
     "diamond_t": {
       "nom": "Diamond T 969 dépanneuse", "longueur": 7.42, "hauteur": 3.0, "teinte": "joueur", "moteur": "camion", "course": 0.10,

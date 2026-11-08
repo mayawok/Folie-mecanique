@@ -1,7 +1,7 @@
 {
  "_lisez_moi": "Valeurs de prototypage du mode convoi (scripts/combat/). Véhicules : data/pieces.json. Distances en m, vitesses en m/s, durées en s, pv = points de vie. Tout se règle ici.",
  "depart": [
-  "willys_mb"
+  "berliet_gdr"
  ],
  "stocks_depart": {
   "ammo": 140,

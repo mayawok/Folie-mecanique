@@ -157,6 +157,8 @@ func raison_demontage(uid: int) -> String:
 		return "Un démontage est déjà en cours."
 	if convoi.size() <= 1:
 		return "Impossible de démonter le dernier véhicule."
+	if v.principal:
+		return "Le camion de l'expédition ne se démonte pas : on le transforme au garage."
 	if menace():
 		return "Trop dangereux : des ennemis sont proches."
 	var mecano := false
