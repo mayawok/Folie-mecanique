@@ -23,6 +23,10 @@ Mis à jour : 2026-11-08. Résumé volontairement court (≈ 60 lignes). Détail
   dans la ville rien n'arrive (point de reprise, ville inscrite sur la carte) ; mairie et maire, garage (réparation), atelier (grille) ; sortie au choix
   vers un secteur voisin. Dessin par le code, 30 noms de lieux-dits. Kit → « Ville devant ». Détail : [`docs/design/VILLES.md`](docs/design/VILLES.md). Suite : textures (DEV-024), quêtes (DEV-025), OQ-026.
 
+- **Missions du maire (08/11, DEC-144 à 147)** : transport de cargaison (carburant, eau, vivres, munitions, pièces) vers la ville voisine, en une étape ;
+  le maire annonce ennemis, escorte et récompense ; scènes de départ (atelier et pont roulant, rassemblement de l'escorte, tambours, « Bonne chance »),
+  départ automatique, vagues sur la route, livraison = récompense. Citerne d'eau distincte de celle de carburant. Kit : toutes les missions. Suite : DEV-026, OQ-027.
+
 ## Ce qui existe
 
 - Prototype Godot 4.3 / GDScript dans `game/`, publié sur GitHub Pages ([`game/LISEZMOI.md`](game/LISEZMOI.md)). Tests sans écran dans `game/tests/`.

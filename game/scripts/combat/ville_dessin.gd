@@ -505,7 +505,7 @@ func _personnages(V: Dictionary) -> void:
 		if rr[0] == "mairie" and String(V.phase) == "rassemblement" and float(V.t) >= 4.0:
 			mot = "Bonne chance !"   # le maire salue le départ en mission (DEC-145)
 		_bulle(hb, mot, dedans)
-	if not dedans:
+	if not dedans or String(V.phase) == "rassemblement":   # pendant la scène, on n'entend que l'escorte
 		return
 	# Une bulle d'habitant de temps en temps
 	var phrases: Array = CombatModele.VD().phrases
