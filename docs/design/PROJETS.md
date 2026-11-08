@@ -75,3 +75,62 @@ P1 modèle (niveau d'eau, point critique par véhicule, avertissement, tests san
 - L'eau de mer abîme-t-elle les véhicules avec le temps (rouille) ?
 - Bancs de sable où s'arrêter à mi-chemin pour attendre ?
 - Le Réseau des Marées fait-il passer les véhicules un par un en bac, contre paiement ?
+
+---
+
+## PRJ-002 — Les trains routiers à deux moteurs (08/11)
+
+### L'idée du créateur
+
+Des **super camions** : de gros tracteurs à **deux moteurs**, dans l'esprit des War Rigs de Mad Max. Réfléchir à leur place dans le jeu
+et à la faction qui pourrait en posséder.
+
+### Nom d'époque
+
+**Train routier**, un vrai terme français du début du siècle pour un tracteur qui tire plusieurs remorques. Surnom sur la route :
+**mastodonte**. Le mot « War Rig » n'est pas repris.
+
+### Qui en possède (proposition, à valider, sans faction « bonne » ni « mauvaise », comme le veut la Bible)
+
+| Faction | Leurs trains routiers | Pourquoi |
+|---|---|---|
+| **Raffineurs du Sud (FAC-002)**, propriétaires principaux | Des trains de citernes qui montent le carburant raffiné vers ceux qui paient. Chaque famille peint le sien à ses couleurs ; les rivalités entre familles se voient sur la route | Leur puissance est de transformer et de **transporter** le carburant ; la Bible cite transporteurs et familles rivales |
+| **Compagnies de l'Est (FAC-001)** | Peu nombreux, numérotés et inscrits aux registres (« Tracteur n° 7 »), escortés de façon militaire, chargés selon des quotas | Organisation industrielle, registres, quotas, contrôle des stocks |
+| **Récupérateurs (FAC-005)** | Rares monstres bricolés qui servent d'ateliers mobiles | La Bible leur donne des véhicules blindés et des ateliers mobiles |
+| Hommes du Péage (FAC-007) | Ils n'en ont pas : ils les rançonnent ou les capturent à leurs barrages | Événement possible : un train routier bloqué à un péage |
+
+### Comment l'implanter avec ce qui existe
+
+- **Base** : un tracteur lourd de chantier ou de transport de chars. Le Diamond T, déjà au catalogue, fera l'affaire au début. En Grille V2
+  (DEC-121 à 125), c'est une base qu'on **rallonge**, à laquelle on **ajoute un essieu** et qu'on **renforce**, au garage seulement.
+- **Deux moteurs** : la grille accepte déjà plusieurs moteurs, mais elle les pénalise. Proposition : une nouvelle pièce, le **coupleur**
+  (boîte de transfert), qui relie les deux moteurs. Avec elle, les puissances s'additionnent, avec une petite perte, et chaque moteur
+  exige son radiateur.
+- **L'intérêt en jeu, la redondance** : si un moteur est détruit, le train routier continue à moitié de puissance au lieu de s'arrêter et
+  de bloquer le convoi. C'est la vraie différence avec un camion ordinaire.
+- **Le prix** : il consomme deux fois plus. Avec essence et gazole distincts (DEC-094), on peut même avoir un moteur de chaque.
+- **Remorques** : déjà codées (DEC-080) ; le train routier en tire une ou deux (citerne, plateau, cage). Il ralentit moins qu'un camion
+  ordinaire grâce à ses deux moteurs.
+- **Combat** : une grosse cible avec beaucoup de postes de tir, idéale pour les abordages (DEC-077). Côté ennemi, c'est le **chef de convoi** :
+  détruire ses deux moteurs l'immobilise, et ses remorques sont un gros butin.
+- **Rencontres** : trains de citernes des Raffineurs à escorter (une mission du maire), à attaquer (gros butin, faction fâchée) ou à
+  croiser pour commercer, comme les marchands sur châssis de char du lore du prototype.
+
+### Pour le joueur : deux voies, à choisir
+
+1. **Un véhicule à part**, rare, de fin de partie : base trouvée ou prise à l'ennemi, garage de haut niveau, deux moteurs et un coupleur.
+2. **L'évolution du Berliet** : le Berliet reste le camion de l'expédition du début à la fin (DEC-139). Son châssis long, rallongé et
+   renforcé, recevrait un second moteur derrière la cabine et deviendrait le train routier de l'expédition. Cette voie garde le lien
+   affectif avec le camion de départ.
+
+### Art
+
+Selon la méthode DEC-138 : une image maître en pièces séparées (tracteur, second moteur avec ses échappements, coupleur, pare-buffle),
+puis des remorques par découpe. En attendant, un dessin par le code, comme pour les modules du Berliet.
+
+### À trancher (OQ-029)
+
+- Voie 1 (véhicule à part) ou voie 2 (le Berliet devient train routier), ou les deux ?
+- Les Raffineurs du Sud sont-ils bien les propriétaires principaux ?
+- À quel moment de l'histoire le joueur peut-il en avoir un ?
+- Le coupleur se fabrique-t-il, ou se récupère-t-il seulement sur un train routier détruit ?

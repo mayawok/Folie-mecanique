@@ -213,3 +213,6 @@ Eau et vivres : tranché le 08/11 (DEC-148, consommés et affichés). L'escorte 
 
 ## OQ-028 — Baie des marées (PRJ-001, 08/11, pour plus tard)
 Emplacement et nom de la ville (Mont-Tombe ?) ; rythme des marées ; moteur noyé réparable ou perdu ; rouille par l'eau de mer ; bancs de sable pour attendre ; bac payant du Réseau des Marées. Voir `docs/design/PROJETS.md`.
+
+## OQ-029 — Trains routiers à deux moteurs (PRJ-002, 08/11, pour plus tard)
+Véhicule à part ou évolution du Berliet ; Raffineurs du Sud comme propriétaires principaux ; moment de l'histoire ; coupleur fabriqué ou seulement récupéré. Voir `docs/design/PROJETS.md`.
