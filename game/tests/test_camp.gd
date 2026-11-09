@@ -151,5 +151,28 @@ func _init() -> void:
 	m7.stocks.metal = 100.0
 	ok(m7.transformer(v7.uid, g7, 30.0, 600.0), "transformation : grille identique acceptée")
 	ok(absf(float(m7.stocks.metal) - 70.0) < 0.5, "transformation : métal des travaux retiré (%d)" % int(m7.stocks.metal))
+	# Halte dans la nature (DEV-031) et caches (DEC-157)
+	var t8 := _neuf(8)
+	var m8: CombatModele = t8[0]
+	ok(m8.halte_bivouac(true), "halte : le camp se monte")
+	ok(not bool(m8.halte.pret), "halte : le camp n'est pas monté tout de suite")
+	_avancer(m8, 30.0)
+	ok(bool(m8.halte.get("pret", false)), "halte : camp monté après le délai")
+	m8.monde.heure = 1.0
+	ok(m8.halte_repos(), "halte : camper pour la nuit permet le repos")
+	ok(m8.envoyer_eclaireurs(), "éclaireurs : partis")
+	_avancer(m8, 25.0)
+	ok(m8._eclaireurs_t <= 0.0 and m8.eclaireurs_rapport_texte().begins_with("Les éclaireurs"), "éclaireurs : rapport rendu")
+	m8.stocks.fuel_l = 100.0
+	ok(m8.cache_creer({"fuel_l": 40.0}) and absf(float(m8.stocks.fuel_l) - 60.0) < 0.01, "cache : 40 L enterrés")
+	ok(not m8.cache_creer({"fuel_l": 500.0}), "cache : refusée au-delà des réserves")
+	ok(m8.cache_proche() >= 0 and m8.cache_reprendre(), "cache : déterrée sur place")
+	ok(m8.caches.is_empty(), "cache : retirée de la liste")
+	var sv := m8.sauver()
+	ok(sv.has("caches"), "cache : sauvegardée")
+	m8.ordre_marche("avancer")
+	_avancer(m8, 1.0)
+	ok(m8.halte.is_empty(), "halte : levée quand le convoi repart")
+	ok(m8.halte_garde() and m8.convoi[0].reparation, "surveillance : les mécaniciens réparent")
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)

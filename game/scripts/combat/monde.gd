@@ -180,7 +180,7 @@ func alerte_nuit() -> bool:
 
 
 func _facteur_temps() -> float:
-	if nuit() and (_tout_abrite() or repos_t > 0.0):
+	if nuit() and (_tout_abrite() or repos_t > 0.0 or m.halte_repos()):
 		return 3.0
 	return 1.0
 

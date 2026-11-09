@@ -124,6 +124,7 @@ func appliquer_panne(v, organe: String) -> void:
 # Un pas de simulation (appelé par avancer)
 func _camp(dt: float) -> void:
 	_pannes()
+	_halte(dt)
 	if not camp_actif():
 		return
 	var C: Dictionary = camp_rep.camp
@@ -215,4 +216,154 @@ func transformer(uid: int, a: Dictionary, metal: float, duree_s: float) -> bool:
 		stocks.metal = maxf(0.0, float(stocks.metal) - maxf(0.0, metal - deja))
 	var v = trouver(uid)
 	log_("%s transformé : %d min de travaux." % [v.nom if v != null else "Véhicule", int(ceil(duree_s / 60.0))], "info")
+	return true
+
+
+# --- Halte dans la nature (DEV-031, DEC-161) -------------------------------------------------------------------
+# Convoi arrêté hors d'une ville : « bivouac » (camp qui se monte peu à peu, nuit possible), « garde » (tous aux aguets,
+# les mécaniciens réparent), « embuscade » (débarquer et camoufler, voir la vue), éclaireurs et caches.
+# Valeurs dans combat_proto.json → halte.
+var halte := {}             # {"mode": "bivouac"|"garde", "t": s, "pret": bool, "nuit": bool} ; vide = aucune
+var caches: Array = []      # [{"x", "res": {stock: qté}, "pillee": bool|null}] (DEC-157)
+var _eclaireurs_t := 0.0    # > 0 : éclaireurs partis, rapport dans … s
+
+func H() -> Dictionary:
+	return donnees().get("halte", {"montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0})
+
+
+func halte_possible() -> String:
+	if ville_dedans() or ville_protegee():
+		return "En ville, le convoi est déjà à l'abri."
+	if not ennemis.filter(func(e): return e.actif()).is_empty():
+		return "Impossible : des ennemis sont en vue."
+	return ""
+
+
+func halte_bivouac(passer_la_nuit := false) -> bool:
+	var r := halte_possible()
+	if r != "":
+		log_(r, "alerte")
+		return false
+	ordre_marche("halte")
+	halte = {"mode": "bivouac", "t": 0.0, "pret": false, "nuit": passer_la_nuit}
+	log_("Halte : l'équipage descend et monte le camp. Les mitrailleurs restent à leur poste.", "info")
+	evt({"t": "halte", "mode": "bivouac"})
+	return true
+
+
+func halte_garde() -> bool:
+	var r := halte_possible()
+	if r != "":
+		log_(r, "alerte")
+		return false
+	ordre_marche("halte")
+	halte = {"mode": "garde", "t": 0.0, "pret": true, "nuit": false}
+	for v in convoi:
+		if v.actif():
+			v.reparation = true   # les mécaniciens travaillent, les autres restent aux aguets
+	log_("Halte : tout le monde aux aguets, les mécaniciens réparent.", "info")
+	return true
+
+
+func halte_lever() -> void:
+	if halte.is_empty():
+		return
+	halte = {}
+	log_("On lève le camp.", "info")
+
+
+# Repos de nuit au bivouac monté : la nuit passe plus vite (comme à l'abri)
+func halte_repos() -> bool:
+	return not halte.is_empty() and halte.mode == "bivouac" and bool(halte.pret) and bool(halte.nuit)
+
+
+func _halte(dt: float) -> void:
+	if halte.is_empty():
+		return
+	if ordres.marche != "halte":
+		halte = {}   # le convoi repart : le camp est levé
+		return
+	halte.t += dt
+	if not halte.pret and halte.t >= float(H().montage_s):
+		halte.pret = true
+		log_("Le camp est monté : tentes dressées, feu allumé.", "ok")
+	if halte.mode == "bivouac" and not ennemis.filter(func(e): return e.actif()).is_empty() and bool(halte.pret):
+		halte.nuit = false   # alerte : personne ne dort
+	if _eclaireurs_t > 0.0:
+		_eclaireurs_t -= dt
+		if _eclaireurs_t <= 0.0:
+			_eclaireurs_rapport()
+
+
+func envoyer_eclaireurs() -> bool:
+	if ordres.marche != "halte" or halte.is_empty():
+		log_("Les éclaireurs partent seulement pendant une halte.", "alerte")
+		return false
+	if _eclaireurs_t > 0.0:
+		return false
+	_eclaireurs_t = float(H().eclaireurs_s)
+	log_("Deux éclaireurs partent à pied reconnaître le secteur.", "info")
+	return true
+
+
+# Rapport : prochaine présence ennemie, niveau du secteur, bâtiments en vue. Rien d'aléatoire : c'est ce qui est vraiment devant.
+func eclaireurs_rapport_texte() -> String:
+	var portee := float(H().eclaireurs_portee_m)
+	var morceaux := []
+	var niv := monde.niveau_a(x_tete + portee * 0.5)
+	morceaux.append(["secteur calme", "secteur peu sûr", "secteur dangereux", "secteur très dangereux"][clampi(niv / 2, 0, 3)])
+	var d := float(get("_prochain_x")) - x_tete
+	if d < portee and is_finite(d):
+		morceaux.append("traces de véhicules à %d m" % int(maxf(0.0, d)))
+	else:
+		morceaux.append("rien sur %d m" % int(portee))
+	var bats := batiments.filter(func(b): return b.x > x_tete and b.x < x_tete + portee)
+	if not bats.is_empty():
+		morceaux.append("%d bâtiment(s) devant" % bats.size())
+	return "Les éclaireurs reviennent : " + ", ".join(morceaux) + "."
+
+
+func _eclaireurs_rapport() -> void:
+	_eclaireurs_t = 0.0
+	log_(eclaireurs_rapport_texte(), "alerte")
+	evt({"t": "eclaireurs"})
+
+
+# Cache (DEC-157) : on enterre une part des réserves ici ; au retour, elle a pu être pillée (tirage à graine fixe).
+func cache_creer(res: Dictionary) -> bool:
+	if ordres.marche != "halte":
+		log_("Arrêtez le convoi pour faire une cache.", "alerte")
+		return false
+	for k in res:
+		if float(stocks.get(k, 0.0)) < float(res[k]):
+			log_("Pas assez de réserves pour cette cache.", "alerte")
+			return false
+	for k in res:
+		stocks[k] = float(stocks[k]) - float(res[k])
+	caches.append({"x": x_tete, "res": res.duplicate(), "pillee": null})
+	log_("Cache enterrée au kilomètre %d." % int(x_tete / 1000.0), "ok")
+	return true
+
+
+func cache_proche() -> int:
+	for i in caches.size():
+		if absf(float(caches[i].x) - x_tete) <= float(H().cache_rayon_m):
+			return i
+	return -1
+
+
+func cache_reprendre() -> bool:
+	var i := cache_proche()
+	if i < 0:
+		return false
+	var c: Dictionary = caches[i]
+	var rr := RandomNumberGenerator.new()
+	rr.seed = graine * 4243 + int(c.x)
+	caches.remove_at(i)
+	if rr.randf() < float(H().cache_pillage):
+		log_("La cache a été fouillée : il ne reste rien.", "alerte")
+		return true
+	for k in c.res:
+		stocks[k] = float(stocks.get(k, 0.0)) + float(c.res[k])
+	log_("Cache retrouvée intacte.", "ok")
 	return true

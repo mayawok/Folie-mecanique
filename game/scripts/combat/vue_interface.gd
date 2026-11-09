@@ -151,6 +151,7 @@ func _construire_elements() -> void:
 	_btn_ordres.offset_bottom = -BARRE_H - 80
 	_btn_marche = _bouton("Avancer", func(): pass, self, 300)   # bouton unique de marche (DEC-160) : toucher, glisser
 	_btn_marche.gui_input.connect(_glisse_marche)
+	_construire_halte()
 	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
 	_btn_marche.offset_left = -320
 	_btn_marche.offset_right = -16
@@ -746,6 +747,56 @@ func _partir() -> void:
 		_fermer_carte()
 
 # --- Ville (DEC-140 à DEC-143) ----------------------------------------------------------------
+# Panneau de halte dans la nature (DEC-161) : visible quand le convoi est arrêté hors d'une ville
+var _panneau_halte: VBoxContainer
+var _halte_sig := ""
+
+func _construire_halte() -> void:
+	_panneau_halte = VBoxContainer.new()
+	_panneau_halte.add_theme_constant_override("separation", 4)
+	_panneau_halte.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_panneau_halte.offset_left = -320
+	_panneau_halte.offset_right = -16
+	_panneau_halte.offset_bottom = -BARRE_H - 82
+	_panneau_halte.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	add_child(_panneau_halte)
+
+
+func _maj_halte() -> void:
+	var montrer: bool = m.ordres.marche == "halte" and not m.ville_dedans() and not m.ville_protegee() and not m.convoi.is_empty()
+	_panneau_halte.visible = montrer
+	if not montrer:
+		return
+	var H: Dictionary = m.halte
+	var sig := "%s|%s|%s|%d|%s" % [H.get("mode", ""), H.get("pret", false), H.get("nuit", false), m.cache_proche(), m._eclaireurs_t > 0.0]
+	if sig == _halte_sig:
+		return
+	_halte_sig = sig
+	for ch in _panneau_halte.get_children():
+		ch.queue_free()
+	if H.is_empty():
+		_bouton("Monter le camp", func(): m.halte_bivouac(false), _panneau_halte, 300)
+		_bouton("Camper pour la nuit", func(): m.halte_bivouac(true), _panneau_halte, 300)
+		_bouton("Surveiller et réparer", func(): m.halte_garde(), _panneau_halte, 300)
+		_bouton("Tendre une embuscade", func(): _embuscade(), _panneau_halte, 300)
+	else:
+		var b := _bouton("Éclaireurs partis…" if m._eclaireurs_t > 0.0 else "Envoyer des éclaireurs", func(): m.envoyer_eclaireurs(), _panneau_halte, 300)
+		b.disabled = m._eclaireurs_t > 0.0
+		_bouton("Faire une cache (un quart des réserves)", func(): _cache_quart(), _panneau_halte, 300)
+		_bouton("Lever le camp", func(): m.halte_lever(), _panneau_halte, 300)
+	if m.cache_proche() >= 0:
+		_bouton("Déterrer la cache", func(): m.cache_reprendre(), _panneau_halte, 300)
+
+
+func _cache_quart() -> void:
+	var res := {}
+	for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
+		var q := floorf(float(m.stocks.get(k, 0.0)) * 0.25)
+		if q > 0.0:
+			res[k] = q
+	if not res.is_empty():
+		m.cache_creer(res)
+
 # Bouton de marche unique (DEC-160) : toucher = halte, glisser vers la droite = avancer, vers la gauche = reculer.
 # En ville, le toucher ouvre le choix de la sortie comme avant.
 var _marche_x0 := -1.0
@@ -1025,6 +1076,7 @@ func _maj_interface() -> void:
 	var sel = m.trouver(selection)
 	_bande_actions.visible = _bande_on and sel is CombatModele.Veh and sel in m.convoi
 	_ord.visible = false            # menu « Ordres du convoi » supprimé (DEC-160)
+	_maj_halte()
 	_btn_ordres.visible = false
 	_btn_marche.text = {"avancer": "■  ◀ glisser ▶  (en avant)", "recul": "■  ◀ glisser ▶  (recul)"}.get(m.ordres.marche, "◀  glisser  ▶   (halte)")
 	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()

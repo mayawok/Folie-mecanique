@@ -350,6 +350,7 @@
    }
   }
  },
+ "halte": {"_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.", "montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0},
  "oiseau": {"_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).", "delai_min_s": 900.0, "delai_max_s": 2400.0, "duree_s": 9.0, "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."},
  "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
  "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
