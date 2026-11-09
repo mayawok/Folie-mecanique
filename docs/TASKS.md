@@ -314,3 +314,4 @@ avertissement.\
 | DEV-033 | Voies ferrées, gares et train à quai (voyage rapide payé) (DEC-163) | P2 | DEV-009 | `monde.gd`, `terrain.gd` | Test : embarquer et arriver à destination | À faire |
 | DEV-034 | Projecteurs de la ville sur le convoi la nuit et dialogue en bulles (DEC-164) | P2 | — | `ville_dessin.gd` | Capture de nuit | À faire |
 | DEV-035 | Escorte : pilotes aux fenêtres, armes sorties, sans hommes en blanc ; équipage visible du Berliet (DEC-165) | P2 | — | `mission_dessin.gd`, `berliet_dessin.gd` | Captures | À faire |
+| DEV-036 | Repaire de boss : entrée en flammes, cinématique monte-charge et trône (même méthode que les scènes de mission), arène et combat de boss (DEC-166) | P2 | OQ-031 | `modele_ville.gd` (variante), `mission_dessin.gd` | Captures de la cinématique ; test : l'arène se termine par la victoire ou la défaite | À faire |
