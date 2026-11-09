@@ -219,3 +219,13 @@ Véhicule à part ou évolution du Berliet ; Raffineurs du Sud comme propriétai
 
 ## OQ-030 — Char à voile et côte bretonne (PRJ-003, PRJ-004, 08/11, pour plus tard)
 Vent visible, rôle du char à voile, voile sur d'autres véhicules ; nombre de bateaux dans le décor, bateau encore flottant, part bretonne de la carte. Voir `docs/design/PROJETS.md`.
+
+## OQ-031 — Repaire de boss (DEC-166, 09/11)
+
+Quelle faction tient le repaire ? Proposition : les Hommes du Péage ou une famille des Raffineurs du Sud.
+
+## OQ-032 — Le Berliet dans la grille 2D (09/11, à poser au créateur à la prochaine discussion)
+
+Le Berliet est déjà ouvrable dans la grille (atelier de ville, bac à sable), mais dessiné en formes simplifiées, et sa vitrine de modules est à part.
+Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son vrai dessin dans la grille ; 2) le modifier librement pièce par pièce ;
+3) fusionner sa vitrine de modules dans la grille ? Autre question en suspens : remettre un bouton de demi-tour (retiré avec le menu d'ordres, DEC-160) ?
