@@ -232,7 +232,7 @@ func H() -> Dictionary:
 
 
 func halte_possible() -> String:
-	if ville_dedans() or ville_protegee():
+	if bool(call("ville_dedans")) or ville_protegee():
 		return "En ville, le convoi est déjà à l'abri."
 	if not ennemis.filter(func(e): return e.actif()).is_empty():
 		return "Impossible : des ennemis sont en vue."
@@ -244,7 +244,7 @@ func halte_bivouac(passer_la_nuit := false) -> bool:
 	if r != "":
 		log_(r, "alerte")
 		return false
-	ordre_marche("halte")
+	ordres.marche = "halte"
 	halte = {"mode": "bivouac", "t": 0.0, "pret": false, "nuit": passer_la_nuit}
 	log_("Halte : l'équipage descend et monte le camp. Les mitrailleurs restent à leur poste.", "info")
 	evt({"t": "halte", "mode": "bivouac"})
@@ -256,7 +256,7 @@ func halte_garde() -> bool:
 	if r != "":
 		log_(r, "alerte")
 		return false
-	ordre_marche("halte")
+	ordres.marche = "halte"
 	halte = {"mode": "garde", "t": 0.0, "pret": true, "nuit": false}
 	for v in convoi:
 		if v.actif():
