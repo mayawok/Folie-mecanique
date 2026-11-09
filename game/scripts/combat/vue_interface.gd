@@ -752,7 +752,7 @@ var _marche_x0 := -1.0
 const GLISSE_MARCHE_PX := 40.0
 
 func _glisse_marche(ev: InputEvent) -> void:
-	var appui := ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT or ev is InputEventScreenTouch
+	var appui: bool = (ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT) or ev is InputEventScreenTouch
 	if not appui:
 		return
 	if ev.pressed:
