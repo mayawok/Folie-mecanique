@@ -117,9 +117,9 @@ func _init() -> void:
 		mk.x_tete += 400000.0
 		mk._pannes()
 		var pv := []
-		for v in mk.convoi:
-			for id in v.pieces:
-				pv.append(snappedf(float(v.pieces[id].pv), 0.01))
+		for vk in mk.convoi:
+			for id in vk.pieces:
+				pv.append(snappedf(float(vk.pieces[id].pv), 0.01))
 		if k == 0: u1 = pv
 		else: u2 = pv
 	ok(u1 == u2, "pannes déterministes pour une graine")
