@@ -308,7 +308,7 @@ avertissement.\
 | DEV-027 | Dépôt en ville contre reçu (perte 10 % au retrait ailleurs) et caches dans la nature (DEC-157) | P1 | — | `modele_ville.gd`, `villes.json` | Test : déposer 100, retirer 90 ailleurs ; cache pillable | À faire |
 | DEV-028 | Pièce gazogène dans la grille, moteurs essence seulement (DEC-158) | P2 | DEV-001 | `pieces.json`, `construction_libre.gd` | Test : refusé sur moteur gazole ; consomme du charbon ou du bois | À faire |
 | DEV-029 | Centrale électrique au secteur des Corons : décor, lumières, arcs, véhicules à batterie (DEC-159) | P2 | DEV-008 | `carte_monde.json`, `vue_dessin.gd` | Capture de la centrale de nuit | À faire |
-| DEV-030 | Bouton de marche unique (toucher, glisser) ; suppression du menu Ordres du convoi (DEC-160) | P1 | — | `vue_interface.gd` | Test tactile ; capture | À faire |
+| DEV-030 | Bouton de marche unique (toucher, glisser) ; suppression du menu Ordres du convoi (DEC-160) | P1 | — | `vue_interface.gd` | Test tactile ; capture | Fait le 09/11 (non vérifié sur iPhone ; le demi-tour n’a plus de bouton) |
 | DEV-031 | Halte dans la nature : camp progressif, surveillance et réparation, embuscade, éclaireurs, cache (DEC-161) | P1 | DEV-030 | `modele_camp.gd`, `vue_interface.gd` | Tests du modèle ; capture du camp | À faire |
 | DEV-032 | Phares sur tous les véhicules, visibilité de nuit (DEC-162) | P1 | — | `vue_dessin.gd` | Capture de nuit | Fait le 09/11 |
 | DEV-033 | Voies ferrées, gares et train à quai (voyage rapide payé) (DEC-163) | P2 | DEV-009 | `monde.gd`, `terrain.gd` | Test : embarquer et arriver à destination | À faire |

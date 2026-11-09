@@ -149,7 +149,8 @@ func _construire_elements() -> void:
 	_btn_ordres.offset_right = -16
 	_btn_ordres.offset_top = -BARRE_H - 140
 	_btn_ordres.offset_bottom = -BARRE_H - 80
-	_btn_marche = _bouton("Avancer", func(): _action_marche(), self, 300)
+	_btn_marche = _bouton("Avancer", func(): pass, self, 300)   # bouton unique de marche (DEC-160) : toucher, glisser
+	_btn_marche.gui_input.connect(_glisse_marche)
 	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
 	_btn_marche.offset_left = -320
 	_btn_marche.offset_right = -16
@@ -745,6 +746,38 @@ func _partir() -> void:
 		_fermer_carte()
 
 # --- Ville (DEC-140 à DEC-143) ----------------------------------------------------------------
+# Bouton de marche unique (DEC-160) : toucher = halte, glisser vers la droite = avancer, vers la gauche = reculer.
+# En ville, le toucher ouvre le choix de la sortie comme avant.
+var _marche_x0 := -1.0
+const GLISSE_MARCHE_PX := 40.0
+
+func _glisse_marche(ev: InputEvent) -> void:
+	var appui := ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT or ev is InputEventScreenTouch
+	if not appui:
+		return
+	if ev.pressed:
+		_marche_x0 = ev.position.x
+		return
+	if _marche_x0 < 0.0:
+		return
+	var dx: float = ev.position.x - _marche_x0
+	_marche_x0 = -1.0
+	_btn_marche.accept_event()
+	action_marche_geste(dx)
+
+
+func action_marche_geste(dx: float) -> void:
+	if m.ville_dedans() or (m.ville_protegee() and absf(dx) < GLISSE_MARCHE_PX):
+		_action_marche()
+		return
+	if dx > GLISSE_MARCHE_PX:
+		m.ordre_marche("avancer")
+	elif dx < -GLISSE_MARCHE_PX:
+		m.ordre_marche("recul")
+	else:
+		m.ordre_marche("halte")
+
+
 func _action_marche() -> void:
 	if m.ville_dedans():
 		_ville_onglet = "sorties"
@@ -991,9 +1024,9 @@ func _maj_interface() -> void:
 		ch.queue_redraw()
 	var sel = m.trouver(selection)
 	_bande_actions.visible = _bande_on and sel is CombatModele.Veh and sel in m.convoi
-	_ord.visible = _ord_t > 0.0
-	_btn_ordres.visible = _ord_t <= 0.0
-	_btn_marche.text = "Halte" if m.ordres.marche == "avancer" else "Avancer"
+	_ord.visible = false            # menu « Ordres du convoi » supprimé (DEC-160)
+	_btn_ordres.visible = false
+	_btn_marche.text = {"avancer": "■  ◀ glisser ▶  (en avant)", "recul": "■  ◀ glisser ▶  (recul)"}.get(m.ordres.marche, "◀  glisser  ▶   (halte)")
 	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()
 	if m.ville_dedans():
 		_btn_marche.text = "Repartir…"
