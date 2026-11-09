@@ -520,7 +520,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := false, bac := false) -> 
 	if sauve.is_empty():
 		_effacer_sauvegarde()
 		# Départ avec le Berliet, camion de l'expédition (DEC-139) ; l'ancien début guidé (moto à assembler, DEC-035) reste possible par ouverture = true
-		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true, "villes": true})
+		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true, "villes": true, "pannes": true})
 		m = CombatModele.new(g, opts)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
@@ -584,6 +584,25 @@ func _ouvrir_editeur(vehicule_uid: int) -> void:
 	_par_dessus(_editeur)
 	_editeur.ferme.connect(func(_ok: bool):
 		_editeur = null
+		pause = pause_avant and not m.convoi.is_empty())
+
+# Écran de transformation d'une base (DEV-016) : ouvert depuis l'atelier d'une ville ; le modèle applique le résultat
+func _ouvrir_transformation(vehicule_uid: int) -> void:
+	if _editeur != null or _atelier != null:
+		return
+	var raison: String = m.raison_grille(vehicule_uid)
+	if raison != "":
+		m.log_(raison, "alerte")
+		return
+	var pause_avant := pause
+	pause = true
+	var ecran := EcranTransformation.new()
+	ecran.ouvrir(m.grille_de(vehicule_uid), m.transformation_contexte(vehicule_uid))
+	_par_dessus(ecran)
+	ecran.ferme.connect(func(valide: bool, g: Dictionary, metal: float, duree_s: float):
+		if valide:
+			m.transformer(vehicule_uid, g, metal, duree_s)
+		ecran.queue_free()
 		pause = pause_avant and not m.convoi.is_empty())
 
 # --- Camp de réparation (DEV-018) -----------------------------------------------------------------
@@ -789,6 +808,7 @@ func _remplir_ville() -> void:
 			var vp = m.vehicule_principal()
 			var cible: int = selection if m.trouver(selection) in m.convoi else (vp.uid if vp != null else 0)
 			_dialogue_bouton("Ouvrir la grille", func(): _ouvrir_editeur(cible), cible != 0)
+			_dialogue_bouton("Transformer (rallonge, plateau, blindage)", func(): _ouvrir_transformation(cible), cible != 0)
 			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
 		"sorties":
 			_lbl_dial_titre.text = "Quitter %s" % V.nom

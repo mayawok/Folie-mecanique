@@ -314,6 +314,8 @@ func _maj(revoir_vue := false) -> void:
 
 
 func _placer_apercu(b := {}) -> void:
+	if _apercu == null:   # appelé avant _ready (éditeur ouvert hors de l'arbre) : rien à placer
+		return
 	var source: Dictionary = a if b.is_empty() else b
 	if source.get("cases", []).is_empty():
 		_apercu.visible = false

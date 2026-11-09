@@ -92,5 +92,64 @@ func _init() -> void:
 	e3.mode = "approche"
 	m3.ennemis.append(e3)
 	ok(not m3.camp_etablir(m3.convoi[0].uid, "changer_moteur", {"moteur": "moteur_4cyl_moyen"}), "pas de camp avec un ennemi en vue")
+	# Pannes en route (DEV-019) : déterministes, jamais destructrices, absentes sans l'option
+	var t4 := _neuf(9)
+	var m4: CombatModele = t4[0]
+	var v4 = t4[1]
+	m4.pannes_on = true
+	m4._pannes()
+	ok(m4._km_pannes >= 0, "pannes : recalage sur la position au départ")
+	m4.appliquer_panne(v4, "essieu")
+	ok(v4.pieces.roulement.pv <= v4.pieces.roulement.max * 0.4 + 0.001 and v4.pieces.roulement.pv > 0.0, "panne d'essieu : roues abîmées, pas détruites")
+	var t5 := _neuf(9)
+	var m5: CombatModele = t5[0]
+	m5._pannes()
+	m5.x_tete += 50000.0
+	m5._pannes()
+	ok(m5._km_pannes < 0, "sans l'option : aucune panne tirée")
+	var u1 := []
+	var u2 := []
+	for k in 2:
+		var tk := _neuf(11)
+		var mk: CombatModele = tk[0]
+		mk.pannes_on = true
+		mk._pannes()
+		mk.x_tete += 400000.0
+		mk._pannes()
+		var pv := []
+		for v in mk.convoi:
+			for id in v.pieces:
+				pv.append(snappedf(float(v.pieces[id].pv), 0.01))
+		if k == 0: u1 = pv
+		else: u2 = pv
+	ok(u1 == u2, "pannes déterministes pour une graine")
+	ok(str(u1) != "", "pannes tirées sur 400 km")
+	# Oiseau rare (DEV-004) : de jour, il apparaît puis s'en va ; jamais la nuit
+	var t6 := _neuf(4)
+	var m6: CombatModele = t6[0]
+	m6.monde.heure = 12.0
+	m6.monde._oiseau(0.01)
+	ok(m6.monde._oiseau_t >= 900.0, "oiseau : délai rare tiré (%d s)" % int(m6.monde._oiseau_t))
+	m6.monde._oiseau_t = 0.001
+	m6.monde._oiseau(0.01)
+	ok(not m6.monde.oiseau.is_empty(), "oiseau : il traverse le ciel de jour")
+	m6.monde._oiseau(20.0)
+	ok(m6.monde.oiseau.is_empty(), "oiseau : il s'en va")
+	m6.monde.heure = 1.0
+	m6.monde._oiseau_t = 0.001
+	m6.monde._oiseau(0.01)
+	ok(m6.monde.oiseau.is_empty() or not m6.monde.nuit(), "oiseau : jamais la nuit")
+	# Transformation dans la partie (DEV-016)
+	var t7 := _neuf(6)
+	var m7: CombatModele = t7[0]
+	var v7 = t7[1]
+	var cx := m7.transformation_contexte(v7.uid)
+	ok(int(cx.niveau) == 0 and cx.has("reserve") and cx.has("metal"), "transformation : sur la route, niveau 0")
+	m7.stocks.metal = 5.0
+	var g7 := m7.grille_de(v7.uid)
+	ok(not m7.transformer(v7.uid, g7, 50.0, 600.0) and absf(float(m7.stocks.metal) - 5.0) < 0.01, "transformation : refusée sans métal, rien ne change")
+	m7.stocks.metal = 100.0
+	ok(m7.transformer(v7.uid, g7, 30.0, 600.0), "transformation : grille identique acceptée")
+	ok(absf(float(m7.stocks.metal) - 70.0) < 0.5, "transformation : métal des travaux retiré (%d)" % int(m7.stocks.metal))
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)

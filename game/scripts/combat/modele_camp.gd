@@ -5,6 +5,10 @@ extends "res://scripts/combat/modele_atelier.gd"
 # Véhicules d'origine (Veh) : essieu ou roue = pièce « roulement », moteur = pièce « moteur ». La boîte n'existe que sur les bases.
 
 var camp_rep := {}          # {"uid", "camp": CampReparation, "ennemis": [uid]} ; vide = pas de camp
+var pannes_on := false      # pannes en route (DEV-019) : option « pannes » du modèle
+var _km_pannes := -1        # dernier kilomètre déjà tiré ; -1 = recaler sur la position (nouvelle partie ou reprise)
+const ORGANE_PIECE := {"moteur": "moteur", "boite": "moteur", "essieu": "roulement", "chassis": "chassis"}
+const NOMS_PANNE := {"moteur": "panne de moteur", "boite": "boîte de vitesses qui lâche", "essieu": "essieu fendu", "chassis": "châssis fissuré"}
 
 
 func camp_actif() -> bool:
@@ -88,8 +92,38 @@ func camp_reprendre() -> void:
 		camp_rep.camp = CampReparation.reprendre(camp_rep.camp)
 
 
+# Pannes en route (DEV-019, DEC-123) : à chaque kilomètre parcouru, FiabiliteVehicule tire les pannes de chaque véhicule
+# du convoi (graine explicite : partie, kilomètre, véhicule). Une panne abîme la pièce (40 % au plus) sans la détruire :
+# le convoi peut continuer lentement, réparer à l'arrêt ou établir un camp pour changer la pièce depuis la réserve.
+func _pannes() -> void:
+	if not pannes_on or camp_actif():
+		return
+	var k := int(floor(maxf(0.0, x_tete) / 1000.0))
+	if _km_pannes < 0:
+		_km_pannes = k
+		return
+	while _km_pannes < k:
+		_km_pannes += 1
+		for v in convoi:
+			if v.statut != "actif" or v.remorque():
+				continue
+			for pn in FiabiliteVehicule.tirer_pannes(grille_de(v.uid), 1.0, graine * 7919 + _km_pannes * 131 + v.uid):
+				appliquer_panne(v, String(pn.organe))
+
+
+func appliquer_panne(v, organe: String) -> void:
+	var id := String(ORGANE_PIECE.get(organe, ""))
+	if id == "" or not v.pieces.has(id):
+		return
+	var P: Dictionary = v.pieces[id]
+	P.pv = minf(float(P.pv), float(P.max) * 0.4)
+	log_("%s : %s." % [v.nom, NOMS_PANNE.get(organe, "panne")], "alerte")
+	evt({"t": "panne", "uid": v.uid, "organe": organe})
+
+
 # Un pas de simulation (appelé par avancer)
 func _camp(dt: float) -> void:
+	_pannes()
 	if not camp_actif():
 		return
 	var C: Dictionary = camp_rep.camp
@@ -150,3 +184,35 @@ func _etat_moteur(a: Dictionary) -> float:
 		if String(Assemblage.piece(String(p.piece)).get("famille", "")) == "moteur":
 			return float(p.get("etat", 1.0))
 	return 1.0
+
+
+# --- Transformation d'une base dans la partie (DEV-016, DEC-121, DEC-128) -------------------------------------
+# Niveau du lieu : 2 = atelier d'une ville (checkpoint), 1 = véhicule garé dans un hangar ou une grange, 0 = sur la route.
+func transformation_contexte(uid: int) -> Dictionary:
+	var v = trouver(uid)
+	var niveau := 0
+	if ville_protegee():
+		niveau = 2
+	elif v is Veh and int(v.garage) != 0:
+		niveau = 1
+	var meca := maxi(1, int(v.profil.get("mecaniciens", 0))) if v is Veh else 1
+	return {"niveau": niveau, "atelier_mobile": false, "mecaniciens": meca, "metal": float(stocks.metal),
+		"reserve": pieces_stock.duplicate(true), "bac_a_sable": bac_a_sable}
+
+
+# Applique le résultat de l'écran de transformation : la grille passe par construire_grille (pièces, réserve, coût de la grille),
+# puis le métal propre aux transformations (rallonge, renforts, modules) est retiré s'il dépasse ce qui a déjà été payé. Atomique :
+# rien ne change si le métal manque ou si la grille est refusée.
+func transformer(uid: int, a: Dictionary, metal: float, duree_s: float) -> bool:
+	if not bac_a_sable and float(stocks.metal) < metal:
+		log_("Il faut %d métal (vous en avez %d)." % [int(ceil(metal)), int(stocks.metal)], "alerte")
+		return false
+	var avant := float(stocks.metal)
+	if not construire_grille(uid, a):
+		return false
+	if not bac_a_sable:
+		var deja := avant - float(stocks.metal)
+		stocks.metal = maxf(0.0, float(stocks.metal) - maxf(0.0, metal - deja))
+	var v = trouver(uid)
+	log_("%s transformé : %d min de travaux." % [v.nom if v != null else "Véhicule", int(ceil(duree_s / 60.0))], "info")
+	return true

@@ -256,6 +256,22 @@ func _dessiner_tempete(c: CanvasItem) -> void:
 			var x := fposmod(float(i) * 211.7 - _temps * (700.0 + float(i % 5) * 160.0), size.x + 240.0) - 120.0
 			c.draw_line(Vector2(x, y), Vector2(x + 70.0, y + 9.0), Color(0.95, 0.85, 0.62, 0.4 * tp), 2.0)
 
+# Oiseau rare (DEV-004) : il traverse le ciel de droite à gauche en battant des ailes, avec un halo discret qui attire l'œil
+func _dessiner_oiseau(c: CanvasItem) -> void:
+	var O: Dictionary = m.monde.oiseau
+	if O.is_empty():
+		return
+	var k: float = float(O.t) / float(O.duree)
+	var p := _px(Vector2(float(O.x0) - k * 90.0, float(O.y) + sin(k * 9.0) * 1.2))
+	var e := ppm * 0.55
+	var b := sin(_temps * 11.0) * e * 0.6
+	var a := minf(1.0, minf(k * 6.0, (1.0 - k) * 6.0))
+	c.draw_circle(p, e * 2.2, Color(1.0, 0.9, 0.6, 0.12 * a))
+	var col := Color(0.08, 0.07, 0.06, a)
+	c.draw_polyline(PackedVector2Array([p + Vector2(-e, b), p + Vector2(-e * 0.4, -e * 0.15), p]), col, maxf(1.5, e * 0.18), true)
+	c.draw_polyline(PackedVector2Array([p, p + Vector2(e * 0.4, -e * 0.15), p + Vector2(e, b)]), col, maxf(1.5, e * 0.18), true)
+
+
 func dessiner_fx(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
 	var obs: float = m.monde.obscurite()
@@ -267,6 +283,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var av := _px(Vector2(_rx(v) + v.longueur, 0.9))
 				c.draw_colored_polygon(PackedVector2Array([av, av + Vector2(14.0 * ppm, -1.2 * ppm), av + Vector2(14.0 * ppm, 1.8 * ppm)]), Color(1.0, 0.95, 0.7, 0.16 * obs))
 	_dessiner_monde(c)
+	_dessiner_oiseau(c)
 	# Fumée des véhicules endommagés et épaves
 	for v in m.convoi + m.ennemis + m.epaves:
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max

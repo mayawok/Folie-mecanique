@@ -15,6 +15,7 @@ func _init(g := 1, options := {}) -> void:
 	Terrain.aplanir_effacer()
 	meteo_on = bool(options.get("meteo", options.get("ouverture", bac_a_sable)))
 	champs_on = bool(options.get("champs", options.get("ouverture", bac_a_sable)))
+	pannes_on = bool(options.get("pannes", false))
 	_init_meteo()
 	_init_mines()
 	if options.get("ouverture", false):

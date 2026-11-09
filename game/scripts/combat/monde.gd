@@ -56,6 +56,9 @@ var dialogue := {}             # {pnj: uid}
 var quete := {}                # {titre, abattre, depart, recompense}
 var repos_t := 0.0             # > 0 : l'équipage se repose dans un camp allié
 var _assaut_t := 40.0
+var oiseau := {}               # oiseau en vol (DEV-004, DEC-097) : {t, duree, x0, y} ; vide = aucun
+var _oiseau_t := -1.0          # délai avant le prochain oiseau (-1 = à tirer)
+var _rng_oiseau: RandomNumberGenerator   # générateur propre : ne décale pas les tirages du combat
 var _crep_fait := false
 var _aube_fait := false
 var _marteau_t := 0.0
@@ -225,10 +228,38 @@ func avancer(dt: float) -> void:
 	_cap(dt)
 	_batiments(dt)
 	_assauts(dt)
+	_oiseau(dt)
 	_pietons(dt)
 	_voyageurs(dt)
 	_quete()
 	repos_t = maxf(0.0, repos_t - dt)
+
+
+# Un oiseau traverse le ciel, rarement et seulement de jour (DEC-097 : « voir un oiseau est un événement rare, mis en valeur »).
+# Délai tiré avec le générateur du modèle (graine de la partie) ; valeurs dans combat_proto.json → oiseau.
+func _oiseau(dt: float) -> void:
+	var O: Dictionary = m.donnees().get("oiseau", {})
+	if O.is_empty():
+		return
+	if not oiseau.is_empty():
+		oiseau.t += dt
+		if oiseau.t >= oiseau.duree:
+			oiseau = {}
+		return
+	if _rng_oiseau == null:
+		_rng_oiseau = RandomNumberGenerator.new()
+		_rng_oiseau.seed = int(m.graine) * 977 + 1
+	if _oiseau_t < 0.0:
+		_oiseau_t = _rng_oiseau.randf_range(float(O.delai_min_s), float(O.delai_max_s))
+	if nuit() or m.tempete_active():
+		return
+	_oiseau_t -= dt
+	if _oiseau_t > 0.0:
+		return
+	_oiseau_t = -1.0
+	oiseau = {"t": 0.0, "duree": float(O.duree_s), "x0": m.x_tete + 40.0, "y": _rng_oiseau.randf_range(14.0, 22.0)}
+	m.log_(String(O.message), "info")
+	m.evt({"t": "oiseau"})
 
 
 func _horloge(dt: float) -> void:

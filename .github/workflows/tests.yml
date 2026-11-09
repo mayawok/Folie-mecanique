@@ -19,7 +19,7 @@ jobs:
       - name: Lancer les tests
         run: |
           fin=0
-          for t in test_base_vehicule test_libre test_voiture test_assemblage test_ouverture test_grange test_camp test_berliet test_kit test_ville test_mission test_ville_pillee test_ravitaillement test_carte test_combat; do
+          for t in test_base_vehicule test_editeur test_libre test_voiture test_assemblage test_ouverture test_grange test_camp test_berliet test_kit test_ville test_mission test_ville_pillee test_ravitaillement test_carte test_combat; do
             echo "=== $t ==="
             timeout 150 godot --headless --path game -s res://tests/$t.gd > /tmp/$t.log 2>&1 || true
             tail -n 60 /tmp/$t.log
