@@ -190,6 +190,8 @@ func _titre(parent: Control, t: String) -> void:
 func _bouton(parent: Control, t: String, action: Callable) -> Button:
 	var b := Button.new()
 	b.text = t
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # un long libellé passe à la ligne : le panneau ne déborde plus de l'écran
+	b.clip_text = true
 	b.custom_minimum_size = Vector2(0, 56)
 	b.add_theme_font_size_override("font_size", 26)
 	b.pressed.connect(func():

@@ -32,5 +32,8 @@ static func marges(taille: Vector2) -> Dictionary:
 		cote = maxf(_css[0], _css[2]) * k
 		haut = _css[1] * k
 		bas = _css[3] * k
+	# gc / dc : marges des éléments dans un coin (haut ou bas) : l'encoche et l'île sont au milieu du bord, ces éléments n'ont
+	# à éviter que l'arrondi de l'écran. g / d : marges des éléments à hauteur du milieu de l'écran.
 	return {"g": maxf(cote, taille.x * CONFORT_X), "d": maxf(cote, taille.x * CONFORT_X),
+		"gc": taille.x * CONFORT_X, "dc": taille.x * CONFORT_X,
 		"h": maxf(haut, 8.0), "b": maxf(bas, taille.y * CONFORT_BAS)}

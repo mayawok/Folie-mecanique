@@ -22,7 +22,8 @@ func _construire_interface() -> void:
 func _appliquer_marges() -> void:
 	_mg = ZonesSures.marges(size)
 	for c in _ui_noeuds:
-		_decaler(c)
+		if is_instance_valid(c):
+			_decaler(c)
 
 
 func _decaler(c) -> void:
@@ -35,8 +36,11 @@ func _decaler(c) -> void:
 	if not c.has_meta("o0"):
 		c.set_meta("o0", [c.offset_left, c.offset_top, c.offset_right, c.offset_bottom])
 	var o: Array = c.get_meta("o0")
-	var dx_g: float = _mg.g if c.anchor_left == 0.0 else (-_mg.d if c.anchor_left == 1.0 else 0.0)
-	var dx_d: float = _mg.g if c.anchor_right == 0.0 else (-_mg.d if c.anchor_right == 1.0 else 0.0)
+	var coin: bool = c.anchor_top == c.anchor_bottom and (c.anchor_top == 0.0 or c.anchor_top == 1.0)   # collé en haut ou en bas : loin de l'encoche
+	var mg_g: float = _mg.gc if coin else _mg.g
+	var mg_d: float = _mg.dc if coin else _mg.d
+	var dx_g: float = mg_g if c.anchor_left == 0.0 else (-mg_d if c.anchor_left == 1.0 else 0.0)
+	var dx_d: float = mg_g if c.anchor_right == 0.0 else (-mg_d if c.anchor_right == 1.0 else 0.0)
 	var dy_h: float = _mg.h if c.anchor_top == 0.0 else (-_mg.b if c.anchor_top == 1.0 else 0.0)
 	var dy_b: float = _mg.h if c.anchor_bottom == 0.0 else (-_mg.b if c.anchor_bottom == 1.0 else 0.0)
 	c.offset_left = o[0] + dx_g
@@ -899,6 +903,8 @@ func _installer_kit() -> void:
 	_kit.offset_bottom = -(BARRE_H + 10)
 	_kit.visible = false
 	add_child(_kit)
+	_ui_noeuds.append(_kit)   # suit les marges sûres comme le reste de l'interface
+	_decaler(_kit)
 
 
 # Réputation auprès des factions : celle de la ville choisie en premier (DEC-184, DEC-217)
