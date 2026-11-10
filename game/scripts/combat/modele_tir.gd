@@ -28,7 +28,7 @@ func _armes_vehicule(v: Veh, dt: float) -> void:
 			if not v.tir:
 				a.cd = 0.0
 				continue
-			if float(w.get("carburant", 0.0)) > 0.0 and stocks.fuel_l < float(w.carburant):
+			if float(w.get("carburant", 0.0)) > 0.0 and stocks.gazole < float(w.carburant):
 				a.cd = 0.0   # lance-flammes : il brûle le carburant du convoi (DEC-052)
 				continue
 			if stocks.ammo < w.munitions:
@@ -135,7 +135,7 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	var Z: Dictionary = donnees().zones
 	if joueur:
 		stocks.ammo -= w.munitions
-		stocks.fuel_l = maxf(0.0, stocks.fuel_l - float(w.get("carburant", 0.0)))
+		stocks.gazole = maxf(0.0, stocks.gazole - float(w.get("carburant", 0.0)))
 		_alerte_muni = false
 	var cd: float = w.cadence * rng.randf_range(0.9, 1.1)
 	if att is Veh and int(att.profil.get("chargeurs", 0)) > 0:   # un chargeur raccourcit le rechargement (DEC-050)
@@ -474,9 +474,9 @@ func _sortir_du_combat(v: Veh) -> void:
 func _butin_vehicule(v: Veh, facteur: float) -> Dictionary:
 	var res := {
 		"metal": round(v.profil.metal * facteur),
-		"fuel_l": round(rng.randf_range(0.3, 1.0) * v.profil.reservoir * facteur),
 		"ammo": round(rng.randf_range(6.0, 18.0) * v.armes.size() * facteur),
 	}
+	res[carburant_de(v)] = round(rng.randf_range(0.3, 1.0) * v.profil.reservoir * facteur)
 	var comps := []
 	for id in v.pieces:
 		if id == "chassis":

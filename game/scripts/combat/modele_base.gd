@@ -223,7 +223,7 @@ var convoi: Array = []            # Veh, indice 0 = tête
 var ennemis: Array = []
 var batiments: Array = []
 var epaves: Array = []            # véhicules hors combat, fouillables
-var stocks := {"ammo": 0.0, "fuel_l": 0.0, "metal": 0.0}
+var stocks := {"ammo": 0.0, "gazole": 0.0, "essence": 0.0, "metal": 0.0}
 var composants: Array = []        # {kind, classe, nom, etat}
 var ordres := {"marche": "halte", "cible": "proche", "visee": "libre", "fouille": "auto"}
 var x_tete := 0.0                 # bord avant du premier véhicule
@@ -400,6 +400,46 @@ func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") 
 		v.pieces[pid] = {"id": pid, "nom": w.nom, "pv": float(w.pv) * float(etats.get("arme", 1.0)), "max": float(w.pv)}
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.4, float(w.cadence)), "idx": i})
 
+# --- Carburants : essence et gazole (DEC-094), capacité = réservoirs + citerne + bidons (DEC-190, DEC-206) ---
+const CARBURANTS := ["gazole", "essence"]
+
+func carburant_de(v) -> String:
+	return String(v.profil.get("carburant", "essence"))
+
+# Litres du réservoir d'un véhicule : le Berliet suit son niveau de réservoir (berliet.json), les autres leur châssis
+func litres_reservoir(v) -> float:
+	return float(v.profil.get("gazole_l", v.profil.get("reservoir", 0.0)))
+
+func capacite_carburant(type: String) -> float:
+	var C: Dictionary = donnees().carburants
+	var c := float(C.bidons_l)
+	for v in convoi:
+		if v.statut == "actif" and carburant_de(v) == type:
+			c += litres_reservoir(v)
+			if v.type == "berliet_gdr" and String(berliet_config.module) == "citerne":
+				c += float(C.citerne_l)
+	return c
+
+# Les stocks ne dépassent pas la capacité (le Mode créatif n'a pas de limite). Renvoie les litres perdus par carburant.
+func borner_carburants() -> Dictionary:
+	var perdu := {}
+	if bac_a_sable:
+		return perdu
+	for t in CARBURANTS:
+		var cap := capacite_carburant(t)
+		var s := float(stocks.get(t, 0.0))
+		if s > cap + 0.5:
+			perdu[t] = s - cap
+			stocks[t] = cap
+	return perdu
+
+# Premier carburant à sec parmi ceux que brûlent les véhicules actifs ("" si tout va bien)
+func carburant_manquant() -> String:
+	for t in CARBURANTS:
+		if float(stocks.get(t, 0.0)) <= 0.0 and convoi.any(func(v): return v.actif() and carburant_de(v) == t and float(v.profil.conso) > 0.0):
+			return Textes.t("carb." + t)
+	return ""
+
 # Niveau de rencontre ajouté hors de la région de la quête principale (DEC-172) ; redéfini par le Kit (modele_kit.gd)
 func malus_hors_region() -> int:
 	return 0
@@ -534,7 +574,7 @@ func vitesse_attelee(v: Veh) -> float:
 
 # --- Lecture pour tests et interface --------------------------------------
 func resume() -> String:
-	var s := "t=%.0fs x=%.0fm muni=%.0f carb=%.0f metal=%.0f" % [temps, x_tete, stocks.ammo, stocks.fuel_l, stocks.metal]
+	var s := "t=%.0fs x=%.0fm muni=%.0f carb=%.0f metal=%.0f" % [temps, x_tete, stocks.ammo, stocks.gazole, stocks.metal]
 	for v in convoi:
 		s += " | %s ch%.0f ro%.0f" % [v.type, v.pieces.chassis.pv, v.pieces.roulement.pv]
 	return s

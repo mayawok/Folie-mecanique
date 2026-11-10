@@ -25,7 +25,7 @@ func _init() -> void:
 	for i in 30: await process_frame
 	vue._nouvelle_partie(5, {}, false, true)
 	var m = vue.m
-	m.stocks.fuel_l = 900.0
+	m.stocks.gazole = 900.0
 	m.monde.heure = 0.3
 	vue.pause = true
 	m.kit_ville()

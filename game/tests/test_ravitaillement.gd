@@ -42,7 +42,7 @@ func _init() -> void:
 	mv.meteo_on = false
 	mv.monde._assaut_t = 1.0e9
 	mv._prochain_x = INF
-	mv.stocks.fuel_l = 500.0
+	mv.stocks.gazole = 500.0
 	mv.ordre_marche("avancer")
 	var s := 0.0
 	while s < 600.0 and not mv.ville_dedans():

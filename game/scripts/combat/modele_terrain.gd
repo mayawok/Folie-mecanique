@@ -432,7 +432,7 @@ func _recolter(c) -> void:
 	c.butin_pris = true
 	var res: Dictionary = c.butin.ressources
 	var morceaux := []
-	var noms := {"ammo": "munitions", "fuel_l": "L carburant", "metal": "métal"}
+	var noms := {"ammo": "munitions", "gazole": "L gazole", "essence": "L essence", "metal": "métal"}
 	for k in res:
 		if res[k] <= 0:
 			continue

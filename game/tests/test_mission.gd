@@ -34,7 +34,7 @@ func _init() -> void:
 	for pid in M.pieces_recompense:
 		ok(cat.has(pid), "pièce de récompense %s au catalogue" % pid)
 	var m := CombatModele.new(5, {"bac_a_sable": true})
-	m.stocks.fuel_l = 900.0
+	m.stocks.gazole = 900.0
 	ok(m.kit_ville(), "Kit : ville devant")
 	_en_ville(m)
 	ok(m.ville_dedans(), "dans la ville")
@@ -63,7 +63,7 @@ func _init() -> void:
 	ok(m.mission_plan("carburant", int(o.dest)).presence.contains("faible"), "niveau 0 : faible présence annoncée")
 	m.monde.secteurs[int(o.dest)].niveau = int(plan.niveau)
 	var n0 := m.convoi.size()
-	var fuel0 := float(m.stocks.fuel_l)
+	var fuel0 := float(m.stocks.gazole)
 	var stock0 := m.pieces_stock.size()
 	var module0 := String(m.berliet_config.module)
 	ok(m.mission_accepter("carburant"), "mission acceptée")
@@ -98,10 +98,10 @@ func _init() -> void:
 	ok(m.convoi.size() == n0, "l'escorte reste dans la ville")
 	ok(String(m.berliet_config.module) == module0, "citerne déchargée")
 	ok(m.pieces_stock.size() == stock0 + int(M.types.carburant.recompense.pieces), "pièce de véhicule reçue")
-	ok(String(m.mission_bilan.texte).contains("carburant"), "bilan : %s" % m.mission_bilan.texte.substr(0, 80))
+	ok(String(m.mission_bilan.texte).contains("gazole"), "bilan : %s" % m.mission_bilan.texte.substr(0, 80))
 	# Eau : citerne différente ; échec par demi-tour
 	var m3 := CombatModele.new(9, {"bac_a_sable": true})
-	m3.stocks.fuel_l = 900.0
+	m3.stocks.gazole = 900.0
 	m3.kit_ville()
 	_en_ville(m3)
 	ok(m3.mission_accepter("eau") and m3.berliet_config.module == "citerne_eau", "mission eau : citerne d'eau")
@@ -111,7 +111,7 @@ func _init() -> void:
 	ok(not m3.mission_active() and not bool(m3.mission_bilan.get("ok", true)), "demi-tour : mission échouée")
 	# Expédition : deux offres
 	var m4 := CombatModele.new(7, {"villes": true})
-	m4.stocks.fuel_l = 900.0
+	m4.stocks.gazole = 900.0
 	m4.champs_on = false
 	m4.meteo_on = false
 	m4.monde._assaut_t = 1.0e9

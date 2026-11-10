@@ -22,7 +22,7 @@ func _process(_d: float) -> bool:
 		vue._nouvelle_partie(11, {}, false)
 		var m = vue.m
 		m._prochain_x = 1.0e9
-		m.stocks.fuel_l = 300.0
+		m.stocks.gazole = 300.0
 		for v in m.convoi:
 			m.ordre_tir(v.uid, false)
 		var xq: float = m.x_tete

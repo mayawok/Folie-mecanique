@@ -149,7 +149,7 @@ class IconeRes extends Control:
 					draw_rect(Rect2(x, 14, 8, 15), Color("#C9A04A"))
 					draw_colored_polygon(PackedVector2Array([Vector2(x, 14), Vector2(x + 8, 14), Vector2(x + 4, 4)]), Color("#E8C25A"))
 					draw_rect(Rect2(x, 26, 8, 3), Color("#8A6A2A"))
-			"fuel_l":   # jerrican
+			"gazole", "essence":   # jerrican
 				draw_rect(Rect2(6, 10, 22, 20), Color("#D07A2A"))
 				draw_rect(Rect2(6, 10, 22, 20), o, false, 2.0)
 				draw_rect(Rect2(8, 5, 8, 6), Color("#9A5A1A"))

@@ -363,6 +363,7 @@
   "moteur_berliet_gdr": {
    "famille": "moteur",
    "nom": "Berliet GDR 4 cyl.",
+   "carburant": "gazole",
    "puissance_ch": 85,
    "conso": 2.8,
    "poids_kg": 300,

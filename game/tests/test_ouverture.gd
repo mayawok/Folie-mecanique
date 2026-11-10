@@ -68,9 +68,9 @@ func _init() -> void:
 	verifier(absf(moto.vitesse() - 7.5) < 0.01, "le side-car roule moins vite (7,5 m/s)")
 
 	# 2. L'essence
-	var carb: float = m.stocks.fuel_l
+	var carb: float = m.stocks.essence
 	ru = _fouiller_suivante(m)
-	verifier(ru != null and m.stocks.fuel_l >= carb + 19.0, "deuxième trouvaille : de l'essence (%.1f L)" % m.stocks.fuel_l)
+	verifier(ru != null and m.stocks.essence >= carb + 19.0, "deuxième trouvaille : de l'essence (%.1f L)" % m.stocks.essence)
 
 	# 3. L'arme et les munitions
 	ru = _fouiller_suivante(m)

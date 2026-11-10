@@ -715,7 +715,8 @@ func _quete() -> void:
 func actions_camp() -> Array:
 	return [
 		{"id": "munitions", "txt": "40 munitions contre 10 métal", "prend": {"metal": 10}, "donne": {"ammo": 40}},
-		{"id": "carburant", "txt": "25 L de carburant contre 10 métal", "prend": {"metal": 10}, "donne": {"fuel_l": 25}},
+		{"id": "carburant", "txt": "25 L de gazole contre 10 métal", "prend": {"metal": 10}, "donne": {"gazole": 25}},
+		{"id": "essence", "txt": "25 L d'essence contre 12 métal", "prend": {"metal": 12}, "donne": {"essence": 25}},
 		{"id": "atelier", "txt": "Atelier : toutes les pièces remises à 70 % (15 métal)", "prend": {"metal": 15}, "donne": {}},
 		{"id": "repos", "txt": "Se reposer : soigne l'équipage (la nuit passe vite)", "prend": {}, "donne": {}},
 	]

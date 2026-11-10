@@ -140,7 +140,7 @@ static func statistiques(a: Dictionary) -> Dictionary:
 	var plaques := int(a.get("plaques", 0))
 	var p := {"blindage": float(ch.blindage) + plaques * float(R.plaque.blindage), "reservoir": float(ch.reservoir),
 		"metal": int(ch.metal) + plaques * int(R.plaque.metal), "equipage": 0, "ouvert": false, "armes": [],
-		"conso": 0.0, "pv": {"chassis": float(ch.pv)}, "poids_kg": poids(a)}
+		"conso": 0.0, "carburant": "essence", "pv": {"chassis": float(ch.pv)}, "poids_kg": poids(a)}
 	if ch.has("standoff"):
 		p.standoff = ch.standoff
 	var vmax := INF
@@ -153,6 +153,7 @@ static func statistiques(a: Dictionary) -> Dictionary:
 				p.pv.roulement = p.pv.get("roulement", 0.0) + float(f.pv)
 			"moteur":
 				p.conso += float(f.conso)
+				p.carburant = String(f.get("carburant", "essence"))
 				p.pv.moteur = p.pv.get("moteur", 0.0) + float(f.pv)
 			"suspension":
 				p.pv.suspension = p.pv.get("suspension", 0.0) + float(f.pv)

@@ -20,7 +20,7 @@ func _avancer(m: CombatModele, secondes: float) -> void:
 func _grange(graine: int) -> Array:
 	var m := CombatModele.new(graine)
 	m._prochain_x = INF
-	m.stocks.fuel_l = 300.0
+	m.stocks.gazole = 300.0
 	m.monde._assaut_t = 1.0e9
 	var tr = m.ajouter_vehicule("citroen_traction")
 	var b = m.creer_batiment("grange", m.x_tete + 4.0)

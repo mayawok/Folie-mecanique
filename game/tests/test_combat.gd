@@ -40,11 +40,11 @@ func _init() -> void:
 
 	# --- Marche et carburant
 	var x0 := m.x_tete
-	var c0: float = m.stocks.fuel_l
+	var c0: float = m.stocks.gazole
 	m.ordre_marche("avancer")
 	_avancer(m, 10.0)
 	verifier(m.x_tete > x0 + 20.0, "le convoi avance (%.0f m en 10 s)" % (m.x_tete - x0))
-	verifier(m.stocks.fuel_l < c0, "le carburant baisse (%.1f L)" % (c0 - m.stocks.fuel_l))
+	verifier(m.stocks.gazole < c0, "le carburant baisse (%.1f L)" % (c0 - m.stocks.gazole))
 	m.ordre_marche("halte")
 	var x1 := m.x_tete
 	_avancer(m, 2.0)
@@ -241,7 +241,7 @@ func _init() -> void:
 			autre = sct.id
 	verifier(w1.choisir_destination(autre) and w1.en_transit(), "choisir un secteur lance un trajet calme")
 	mc2.ordre_marche("avancer")
-	mc2.stocks.fuel_l = 1.0e5
+	mc2.stocks.gazole = 1.0e5
 	var vus := 0
 	for i in 12000:
 		mc2.avancer()
@@ -352,7 +352,7 @@ func _init() -> void:
 	var kills := []
 	for g in range(1, 7):
 		var s := CombatModele.new(g)
-		s.stocks.fuel_l = 1.0e6
+		s.stocks.gazole = 1.0e6
 		s.ordre_marche("avancer")
 		var t := 0.0
 		while not s.fini and t < 1500.0:

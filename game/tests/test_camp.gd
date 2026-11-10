@@ -18,7 +18,7 @@ func _avancer(m: CombatModele, s: float) -> void:
 func _neuf(graine: int) -> Array:
 	var m := CombatModele.new(graine)
 	m._prochain_x = INF
-	m.stocks.fuel_l = 300.0
+	m.stocks.gazole = 300.0
 	m.monde._assaut_t = 1.0e9
 	var v = m.convoi[0]
 	return [m, v]
@@ -163,9 +163,9 @@ func _init() -> void:
 	ok(m8.envoyer_eclaireurs(), "éclaireurs : partis")
 	_avancer(m8, 25.0)
 	ok(m8._eclaireurs_t <= 0.0 and m8.eclaireurs_rapport_texte().begins_with("Les éclaireurs"), "éclaireurs : rapport rendu")
-	m8.stocks.fuel_l = 100.0
-	ok(m8.cache_creer({"fuel_l": 40.0}) and absf(float(m8.stocks.fuel_l) - 60.0) < 0.01, "cache : 40 L enterrés")
-	ok(not m8.cache_creer({"fuel_l": 500.0}), "cache : refusée au-delà des réserves")
+	m8.stocks.gazole = 100.0
+	ok(m8.cache_creer({"gazole": 40.0}) and absf(float(m8.stocks.gazole) - 60.0) < 0.01, "cache : 40 L enterrés")
+	ok(not m8.cache_creer({"gazole": 500.0}), "cache : refusée au-delà des réserves")
 	ok(m8.cache_proche() >= 0 and m8.cache_reprendre(), "cache : déterrée sur place")
 	ok(m8.caches.is_empty(), "cache : retirée de la liste")
 	var sv := m8.sauver()

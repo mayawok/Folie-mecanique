@@ -1,0 +1,29 @@
+{
+ "_lisez_moi": "Textes du jeu (DEC-193). « fr » et « en » doivent avoir exactement les mêmes clés (test_textes.gd). Appel : Textes.t(\"cle\", [valeurs]). Les valeurs s'insèrent avec %s ou %d. Ajouter une langue = un bloc de plus avec les mêmes clés.",
+ "fr": {
+  "res.gazole": "Gazole",
+  "res.essence": "Essence",
+  "res.ammo": "Munitions",
+  "res.eau": "Eau",
+  "res.vivres": "Vivres",
+  "res.metal": "Métal",
+  "res.pieces": "Pièces",
+  "carb.gazole": "gazole",
+  "carb.essence": "essence",
+  "carb.panne": "Panne sèche : plus de %s.",
+  "carb.perdu": "Réservoirs pleins : %d L de %s perdus."
+ },
+ "en": {
+  "res.gazole": "Diesel",
+  "res.essence": "Petrol",
+  "res.ammo": "Ammo",
+  "res.eau": "Water",
+  "res.vivres": "Food",
+  "res.metal": "Metal",
+  "res.pieces": "Parts",
+  "carb.gazole": "diesel",
+  "carb.essence": "petrol",
+  "carb.panne": "Out of fuel: no more %s.",
+  "carb.perdu": "Tanks full: %d L of %s lost."
+ }
+}

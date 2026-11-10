@@ -29,7 +29,7 @@ func _init() -> void:
 	m.champs_on = false
 	m.meteo_on = false
 	m.monde._assaut_t = 1.0e9
-	m.stocks.fuel_l = 500.0
+	m.stocks.gazole = 500.0
 	m.monde.heure = 0.35
 	vue.pause = true
 	m.ordre_marche("avancer")

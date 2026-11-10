@@ -47,7 +47,7 @@ func _init(g := 1, options := {}) -> void:
 		v.x_prev = v.x
 	monde = MondeJeu.new(self)
 	if bac_a_sable:
-		for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
+		for k in ["gazole", "essence", "ammo", "metal", "eau", "vivres"]:
 			if stocks.has(k):
 				stocks[k] = 99999.0
 		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
@@ -340,7 +340,8 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.temps = float(d.temps)
 	m.x_tete = float(d.x_tete)
 	for k in d.stocks:
-		m.stocks[k] = float(d.stocks[k])
+		if k != "fuel_l":
+			m.stocks[k] = float(d.stocks[k])
 	m.composants = d.composants
 	m.distance_max = float(d.distance_max)
 	m.ennemis_detruits = int(d.tues)
@@ -401,6 +402,10 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.monde.quete = {}
 	if not w.quete.is_empty():
 		m.monde.quete = {"titre": w.quete.titre, "abattre": int(w.quete.abattre), "depart": int(w.quete.depart), "recompense": w.quete.recompense}
+	if not d.stocks.has("gazole") and d.stocks.has("fuel_l"):   # sauvegardes d'avant le 10/11 : un seul carburant (gazole)
+		m.stocks.gazole = float(d.stocks.fuel_l)
+	if not d.stocks.has("essence"):
+		m.stocks.essence = float(donnees().stocks_depart.essence) if not m.bac_a_sable else 99999.0
 	for k in ["eau", "vivres"]:   # sauvegardes d'avant le 08/11 (DEC-148) : réserve de départ
 		if not m.stocks.has(k) or not d.stocks.has(k):
 			m.stocks[k] = float(donnees().stocks_depart[k]) if not m.bac_a_sable else 99999.0
@@ -569,8 +574,8 @@ func _marche(dt: float) -> void:
 			blocage = "%s ne roule pas : %s. Ouvrez sa grille." % [v0.nom, v0.profil.get("immobile", "conception à revoir")]
 		elif immobilise:
 			blocage = "Un véhicule est immobilisé : réparez-le ou abandonnez-le."
-		elif stocks.fuel_l <= 0.0:
-			blocage = "Panne sèche : plus de carburant."
+		elif not carburant_manquant().is_empty():
+			blocage = Textes.t("carb.panne", [carburant_manquant()])
 		elif not fouille_en_cours.is_empty():
 			blocage = "Fouille en cours."
 		elif champ_bloque():
@@ -595,13 +600,17 @@ func _marche(dt: float) -> void:
 	x_tete += vit * dt
 	vitesse_convoi = vit
 	if vit != 0.0:
-		var litres := 0.0
 		for v in actifs:
 			var kr := 1.0
 			for r in remorques_de(v):   # tirer une remorque fait consommer plus
 				kr += 0.5 * float(r.profil.get("poids_kg", 0.0)) / maxf(1.0, float(v.profil.get("poids_kg", 1000.0)))
-			litres += v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso)
-		stocks.fuel_l = maxf(0.0, stocks.fuel_l - litres)
+			var litres: float = v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso)
+			var t := carburant_de(v)   # chaque véhicule brûle son carburant (essence ou gazole)
+			stocks[t] = maxf(0.0, float(stocks.get(t, 0.0)) - litres)
+	var perdu := borner_carburants()   # réservoirs, citerne et bidons pleins : le surplus est perdu
+	for t in perdu:
+		if perdu[t] >= 1.0:
+			log_(Textes.t("carb.perdu", [int(perdu[t]), Textes.t("carb." + t)]), "info")
 	_replacer()
 	for v in convoi:
 		v.x = move_toward(v.x, v.x_cible, (absf(vit) + 6.0) * dt)
@@ -706,7 +715,7 @@ func _rencontres() -> void:
 		b.butin.ressources["survivants"] = 1 if (choix.get("survivant", false) or r.randf() < 0.4) else 0
 		if choix.has("butin_fixe"):   # trouvaille prévue de l'ouverture : rien d'autre
 			var bf: Dictionary = choix.butin_fixe
-			for k in ["ammo", "fuel_l", "metal", "survivants"]:
+			for k in ["ammo", "gazole", "essence", "metal", "survivants"]:
 				b.butin.ressources[k] = bf.get(k, 0)
 			b.butin["pieces"] = bf.get("pieces", []).duplicate()
 		if choix.has("annonce"):

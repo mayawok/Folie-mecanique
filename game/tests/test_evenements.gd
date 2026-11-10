@@ -20,7 +20,7 @@ func _avancer(m: CombatModele, secondes: float) -> void:
 func _modele(graine: int, options: Dictionary) -> CombatModele:
 	var m := CombatModele.new(graine, options)
 	m._prochain_x = INF
-	m.stocks.fuel_l = 500.0
+	m.stocks.gazole = 500.0
 	m.stocks.ammo = 200.0
 	return m
 

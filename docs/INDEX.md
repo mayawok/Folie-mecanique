@@ -19,6 +19,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 | Je cherche… | Document |
 |---|---|
 | Où en est le projet | [`STATE.md`](../STATE.md) |
+| Textes fr/en | [`design/TEXTES.md`](design/TEXTES.md) |
 | Décisions par thème | [`DECISIONS_INDEX.md`](DECISIONS_INDEX.md) |
 | Tous les documents, leur statut | [`DOCUMENT_REGISTRY.md`](DOCUMENT_REGISTRY.md) |
 | Ce qui est décidé | [`DECISIONS.md`](DECISIONS.md) |

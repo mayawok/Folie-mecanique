@@ -1240,6 +1240,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		"precision": precision, "immobile": immobile, "phares": phares, "classe": classe, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
 		"infirmiers": roles.count("infirmier")}
+	stats["carburant"] = "gazole" if _pieces(a).any(func(p): return p.fiche.get("famille", "") == "moteur" and p.fiche.get("carburant", "") == "gazole") else "essence"
 	if a.has("origine"):
 		var ch := Assemblage.piece(String(a.origine.chassis))
 		stats.reservoir = maxf(stats.reservoir, float(ch.get("reservoir", 0)))

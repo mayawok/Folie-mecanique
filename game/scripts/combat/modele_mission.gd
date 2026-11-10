@@ -107,7 +107,7 @@ func mission_plan(t: String, dest: int) -> Dictionary:
 
 
 static func texte_recompense(rc: Dictionary) -> String:
-	var mots := {"fuel_l": "%d L de carburant", "ammo": "%d munitions", "metal": "%d métal", "eau": "%d bidons d'eau", "vivres": "%d caisses de vivres", "pieces": "%d pièce(s) de véhicule"}
+	var mots := {"gazole": "%d L de gazole", "essence": "%d L d'essence", "ammo": "%d munitions", "metal": "%d métal", "eau": "%d bidons d'eau", "vivres": "%d caisses de vivres", "pieces": "%d pièce(s) de véhicule"}
 	var l := []
 	for k in rc:
 		if mots.has(k):

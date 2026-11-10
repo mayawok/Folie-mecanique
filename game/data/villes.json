@@ -34,14 +34,14 @@
       "monte_charge_s": 8.0, "hauteur_m": 9.0, "trone_s": 12.0,
       "repliques": ["Un convoi indépendant… chez moi.", "Ici, chaque litre qui coule m'appartient.", "Tu veux passer ? Montre-moi ce que vaut ta ferraille.", "Ouvrez l'arène !"],
       "arene": {"distance_m": 45.0, "vehicules": ["m4_sherman", "m3_half_track", "m3_half_track"], "pv_boss": 1.6},
-      "recompense": {"fuel_l": 300, "ammo": 200, "metal": 80}},
+      "recompense": {"gazole": 300, "ammo": 200, "metal": 80}},
     "pillee": {
       "habitants": 120, "cadavres": 24,
       "feux": [[14, 3.4, 1.6], [24, 0.3, 1.4], [38, 9.0, 2.6], [46, 6.5, 1.8], [56, 6.3, 2.2], [68, 0.3, 1.6], [83, 5.0, 1.5], [97, 9.5, 1.4], [108, 8.4, 2.4], [116, 0.3, 1.3], [126, 9.0, 2.0], [135, 6.0, 1.8]],
       "vitesse_poursuite": 4.5, "ralenti_entree_m": 40.0,
       "pillards": ["citroen_t23", "bmw_r75", "citroen_t23", "willys_mb", "moto_bmw"],
       "pillards_devant_m": 220.0, "pillards_vitesse_part": 0.72, "pillards_perdus_m": 700.0,
-      "butin": {"fuel_l": 180, "eau": 25, "vivres": 25, "ammo": 120, "metal": 30},
+      "butin": {"gazole": 180, "eau": 25, "vivres": 25, "ammo": 120, "metal": 30},
       "phrases": ["À l'aide !", "Ils ont tout pris !", "Ils sont partis vers l'est !", "Le maire est blessé…", "De l'eau… par pitié.", "Mon frère est mort à la porte.", "Rattrapez-les !", "Quatre camions, pleins à craquer !"],
       "recit": "Un rescapé couvert de suie s'accroche à votre portière. « Un convoi de pillards nous est tombé dessus à l'aube. Ils ont enfoncé les portes, tué ceux qui résistaient et vidé nos réserves : l'eau, les vivres, le carburant. Ils sont partis il y a moins d'une heure par la porte de l'est, avec des camions chargés à ras bord. Ils ne roulent pas vite. Rattrapez-les ! »"
     }

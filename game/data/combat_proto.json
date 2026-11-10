@@ -5,7 +5,8 @@
  ],
  "stocks_depart": {
   "ammo": 140,
-  "fuel_l": 70,
+  "gazole": 70,
+  "essence": 20,
   "metal": 20,
   "eau": 12,
   "vivres": 12
@@ -172,7 +173,7 @@
      10,
      25
     ],
-    "fuel_l": [
+    "gazole": [
      4,
      14
     ],
@@ -194,7 +195,7 @@
      8,
      20
     ],
-    "fuel_l": [
+    "gazole": [
      3,
      10
     ],
@@ -216,7 +217,7 @@
      8,
      20
     ],
-    "fuel_l": [
+    "gazole": [
      10,
      28
     ],
@@ -239,7 +240,7 @@
      12,
      30
     ],
-    "fuel_l": [
+    "gazole": [
      4,
      12
     ],
@@ -262,7 +263,7 @@
      20,
      45
     ],
-    "fuel_l": [
+    "gazole": [
      6,
      18
     ],
@@ -284,7 +285,7 @@
      20,
      50
     ],
-    "fuel_l": [
+    "gazole": [
      10,
      30
     ],
@@ -307,7 +308,7 @@
      40,
      90
     ],
-    "fuel_l": [
+    "gazole": [
      20,
      50
     ],
@@ -339,7 +340,7 @@
      12,
      30
     ],
-    "fuel_l": [
+    "gazole": [
      14,
      34
     ],
@@ -358,6 +359,7 @@
   {"nom": "Maximum", "vitesse": 1.4, "conso": 1.9, "usure": 2.6}],
  "halte": {"_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.", "montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0},
  "oiseau": {"_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).", "delai_min_s": 900.0, "delai_max_s": 2400.0, "duree_s": 9.0, "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."},
+ "carburants": {"_note": "Deux carburants (DEC-094, DEC-190). Capacité par carburant = réservoirs des véhicules qui le brûlent + citerne du module + bidons (jerrycans, DEC-206).", "bidons_l": 100, "citerne_l": 3000},
  "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
  "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
  "rencontres": {
@@ -703,7 +705,7 @@
     "ammo": 8
    },
    "donne": {
-    "fuel_l": 25
+    "gazole": 25
    }
   },
   {
@@ -726,7 +728,7 @@
     "metal": 12
    },
    "donne": {
-    "fuel_l": 30
+    "gazole": 30
    }
   },
   {
@@ -812,7 +814,7 @@
   "survivants": 1,
   "stocks": {
    "ammo": 0,
-   "fuel_l": 4,
+   "essence": 4,
    "metal": 0
   },
   "kit": [
@@ -850,7 +852,7 @@
     "ruine": "maison",
     "annonce": "Une maison abandonnée. Ça sent l'essence.",
     "butin_fixe": {
-     "fuel_l": 20
+     "essence": 20
     }
    },
    {

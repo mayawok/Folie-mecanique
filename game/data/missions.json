@@ -1,16 +1,16 @@
 {
-  "_doc": "Missions du maire (DEC-144 à DEC-147). Transport d'une cargaison vers la ville du secteur voisin le plus proche (une seule étape). Chaque type : nom, cargaison (texte du maire), module posé sur le Berliet (berliet.json → modules), récompense (fuel_l, ammo, metal, eau, vivres, pieces = nombre de pièces de véhicule tirées dans pieces_recompense). Ajouter un type = une entrée ici, aucun code. Mode créatif (Kit) : le maire propose tous les types ; expédition : 2 types tirés au sort par ville.",
+  "_doc": "Missions du maire (DEC-144 à DEC-147). Transport d'une cargaison vers la ville du secteur voisin le plus proche (une seule étape). Chaque type : nom, cargaison (texte du maire), module posé sur le Berliet (berliet.json → modules), récompense (gazole, ammo, metal, eau, vivres, pieces = nombre de pièces de véhicule tirées dans pieces_recompense). Ajouter un type = une entrée ici, aucun code. Mode créatif (Kit) : le maire propose tous les types ; expédition : 2 types tirés au sort par ville.",
   "types": {
     "carburant": {"nom": "Carburant", "cargaison": "trois mille litres de gazole", "module": "citerne",
-      "recompense": {"fuel_l": 150, "ammo": 60, "metal": 20, "pieces": 1}},
+      "recompense": {"gazole": 150, "ammo": 60, "metal": 20, "pieces": 1}},
     "eau": {"nom": "Eau potable", "cargaison": "trois mille litres d'eau potable", "module": "citerne_eau",
       "recompense": {"eau": 40, "vivres": 10, "metal": 25, "pieces": 1}},
     "vivres": {"nom": "Vivres", "cargaison": "du grain, des conserves et des cageots d'œufs", "module": "ridelles",
-      "recompense": {"vivres": 30, "fuel_l": 60, "ammo": 40}},
+      "recompense": {"vivres": 30, "gazole": 60, "ammo": 40}},
     "munitions": {"nom": "Munitions", "cargaison": "des caisses de cartouches et d'obus", "module": "munitions",
       "recompense": {"ammo": 220, "metal": 15, "pieces": 1}},
     "pieces": {"nom": "Pièces détachées", "cargaison": "des moteurs, des ponts et des roues de récupération", "module": "benne",
-      "recompense": {"metal": 60, "fuel_l": 40, "pieces": 3}}
+      "recompense": {"metal": 60, "gazole": 40, "pieces": 3}}
   },
   "escorte": ["bmw_r75", "willys_mb", "citroen_traction", "bmw_r75"],
   "escorte_texte": "deux side-cars armés, une Jeep et une Traction à mitrailleuse, avec leurs équipages",

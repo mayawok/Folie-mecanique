@@ -23,7 +23,7 @@ func _init() -> void:
 	var D: Dictionary = CombatModele.VD()
 	ok(D.noms.size() >= 30, "%d noms de villes" % D.noms.size())
 	var m := CombatModele.new(7, {"meteo": true, "champs": true, "villes": true})
-	m.stocks.fuel_l = 500.0
+	m.stocks.gazole = 500.0
 	m.champs_on = false
 	m.meteo_on = false
 	m.monde._assaut_t = 1.0e9
@@ -73,14 +73,14 @@ func _init() -> void:
 	ok(float(v.pieces.moteur.pv) == float(v.pieces.moteur.max), "moteur remis à neuf")
 	ok(m.ville_texte_maire().contains(nom), "le maire parle")
 	# Dépôt contre reçu (DEC-157)
-	m.stocks.fuel_l = 200.0
-	ok(m.ville_deposer({"fuel_l": 100.0}) and absf(float(m.stocks.fuel_l) - 100.0) < 0.01 and m.recus.size() == 1, "dépôt : reçu tamponné")
-	ok(not m.ville_deposer({"fuel_l": 999.0}), "dépôt : refusé au-delà des réserves")
+	m.stocks.gazole = 200.0
+	ok(m.ville_deposer({"gazole": 100.0}) and absf(float(m.stocks.gazole) - 100.0) < 0.01 and m.recus.size() == 1, "dépôt : reçu tamponné")
+	ok(not m.ville_deposer({"gazole": 999.0}), "dépôt : refusé au-delà des réserves")
 	var sv_r := m.sauver()
 	ok(sv_r.recus.size() == 1, "dépôt : reçu sauvegardé")
 	var sect := m.monde.secteur
 	m.monde.secteur = (sect + 1) % m.monde.secteurs.size()
-	ok(m.ville_retirer() and absf(float(m.stocks.fuel_l) - 190.0) < 0.01, "retrait ailleurs : 10 %% perdus (%d L)" % int(m.stocks.fuel_l))
+	ok(m.ville_retirer() and absf(float(m.stocks.gazole) - 190.0) < 0.01, "retrait ailleurs : 10 %% perdus (%d L)" % int(m.stocks.gazole))
 	m.monde.secteur = sect
 	ok(m.recus.is_empty(), "reçus rendus")
 	# Sauvegarde dans la ville (point de reprise)
@@ -121,11 +121,11 @@ func _init() -> void:
 	_jusqua(mr, func(): return mr.ville_phase() == "arene", 20.0)
 	var arene: Array = mr.ennemis.filter(func(e): return e.actif() and e.get_meta("arene", false))
 	ok(mr.ville_phase() == "arene" and arene.size() >= 1, "repaire : arène ouverte (%d ennemis)" % arene.size())
-	var f0 := float(mr.stocks.fuel_l)
+	var f0 := float(mr.stocks.gazole)
 	for e in arene:
 		e.pieces.chassis.pv = 0.0
 		e.statut = "epave"
 	mr.avancer()
-	ok(mr.ville_dedans() and float(mr.stocks.fuel_l) > f0, "repaire : victoire et butin")
+	ok(mr.ville_dedans() and float(mr.stocks.gazole) > f0, "repaire : victoire et butin")
 	print("Villes : %d échec(s)." % echecs)
 	quit(1 if echecs > 0 else 0)

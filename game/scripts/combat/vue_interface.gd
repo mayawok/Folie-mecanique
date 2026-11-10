@@ -55,7 +55,7 @@ func _construire_elements() -> void:
 	_horloge_ui = Horloge.new()
 	_horloge_ui.vue = self
 	hb.add_child(_horloge_ui)
-	for k in [["ammo", "Munitions", "#E8C25A"], ["fuel_l", "Carburant", "#E8A33D"], ["eau", "Eau", "#7FB8D8"], ["vivres", "Vivres", "#C9A46A"], ["metal", "Métal", "#9FB3BD"], ["pieces", "Pièces", "#8CC152"]]:
+	for k in [["ammo", Textes.t("res.ammo"), "#E8C25A"], ["gazole", Textes.t("res.gazole"), "#E8A33D"], ["essence", Textes.t("res.essence"), "#D9C46A"], ["eau", Textes.t("res.eau"), "#7FB8D8"], ["vivres", Textes.t("res.vivres"), "#C9A46A"], ["metal", Textes.t("res.metal"), "#9FB3BD"], ["pieces", Textes.t("res.pieces"), "#8CC152"]]:
 		var bulle := _bulle(hb)
 		var bh := HBoxContainer.new()
 		bh.add_theme_constant_override("separation", 8)
@@ -791,7 +791,7 @@ func _maj_halte() -> void:
 
 func _deposer_quart() -> void:
 	var res := {}
-	for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
+	for k in ["gazole", "essence", "ammo", "metal", "eau", "vivres"]:
 		var q := floorf(float(m.stocks.get(k, 0.0)) * 0.25)
 		if q > 0.0:
 			res[k] = q
@@ -800,7 +800,7 @@ func _deposer_quart() -> void:
 
 func _cache_quart() -> void:
 	var res := {}
-	for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
+	for k in ["gazole", "essence", "ammo", "metal", "eau", "vivres"]:
 		var q := floorf(float(m.stocks.get(k, 0.0)) * 0.25)
 		if q > 0.0:
 			res[k] = q
@@ -1010,10 +1010,12 @@ func _effacer_sauvegarde() -> void:
 
 # --- Interface -------------------------------------------------------------
 func _maj_interface() -> void:
-	for k in ["ammo", "fuel_l", "metal", "eau", "vivres"]:
+	for k in ["ammo", "gazole", "essence", "metal", "eau", "vivres"]:
 		var l: Label = _chips[k][0]
 		var val: float = m.stocks.get(k, 0.0)
-		l.text = "∞" if val >= 99990.0 else ("%d" % int(ceil(val)) + (" L" if k == "fuel_l" else ""))
+		l.text = "∞" if val >= 99990.0 else ("%d" % int(ceil(val)))
+		if k in CombatModele.CARBURANTS and val < 99990.0:   # stock / capacité (réservoirs + citerne + bidons)
+			l.text = "%d/%d L" % [int(ceil(val)), int(m.capacite_carburant(k))]
 		var bas: bool = k in ["eau", "vivres"] and m.jours_de(k) < 1.0
 		l.modulate = C_ROUGE if val <= 0.5 else (C_ACCENT if bas else Color.WHITE)
 	_chips.pieces[0].text = "%d" % (m.composants.size() + m.pieces_stock.size())
