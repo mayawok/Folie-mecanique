@@ -80,20 +80,19 @@ func _draw() -> void:
 	var cy := h * 0.5
 	var ouv := absf(_ouv)
 	var sens := 1.0 if _ouv >= 0.0 else -1.0
-	# chevrons du côté non choisi : s'effacent
-	var repos := 1.0 - ouv
-	if texte == "":
-		_paire(w * 0.17, cy, h, -1.0, Color(C_FLECHE, 0.9 * a * (repos if _ouv > 0.0 else 1.0)))
-		_paire(w * 0.83, cy, h, 1.0, Color(C_FLECHE, 0.9 * a * (repos if _ouv < 0.0 else 1.0)))
-	# chevrons du sens choisi : s'étirent sur tout le bouton et défilent
+	# chevrons fixes : seulement au repos, supprimés dès que les chevrons mobiles sont activés
+	if texte == "" and ouv <= 0.02:
+		_paire(w * 0.17, cy, h, -1.0, Color(C_FLECHE, 0.9 * a))
+		_paire(w * 0.83, cy, h, 1.0, Color(C_FLECHE, 0.9 * a))
+	# chevrons mobiles : répartis sur toute la largeur utile (marge égale des deux côtés), ils défilent dans le sens choisi
 	if ouv > 0.02:
 		var n := 6
-		var pas := (w - h * 0.7) / float(n)
+		var marge := h * 0.42
 		for i in n:
-			var k := fposmod(float(i) + _t * 1.8 * sens, float(n))
-			var x0 := lerpf(w * 0.5, h * 0.35 + (k + 0.5) * pas, ouv)
-			var al := (0.25 + 0.75 * (k / float(n) if sens > 0.0 else 1.0 - k / float(n))) * ouv * a
-			_chevron(x0, cy, h * 0.3, sens, Color(C_FLECHE, al), h * 0.075)
+			var k := fposmod(float(i) + _t * 1.8 * sens, float(n)) / float(n)   # 0…1 le long du bouton
+			var x := lerpf(w * 0.5, lerpf(marge, w - marge, k), ouv)
+			var al := sin(k * PI) * ouv * a   # apparaît et disparaît en douceur aux extrémités : rien ne dépasse
+			_chevron(x, cy, h * 0.3, sens, Color(C_FLECHE, al), h * 0.075)
 	# témoin de frein à main au centre : ouvert (gris) ou serré (rouge) ; s'efface quand on glisse
 	var serre := etat == "halte"
 	var col := (C_ROUGE if serre else C_GRIS)
