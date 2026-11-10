@@ -199,6 +199,7 @@ func _dessiner_monde(c: CanvasItem) -> void:
 					var pf := _px(b.fenetre(g.slot))
 					c.draw_circle(pf, ppm * 1.8, Color(1.0, 0.55, 0.2, 0.12 * fl))
 					c.draw_circle(pf, ppm * 0.7, Color(1.0, 0.7, 0.3, 0.35 * fl))
+	_dessiner_halte(c)
 	# Voyageurs au bord de la route
 	for v in m.monde.pnj:
 		var pv := Vector2(terrain.ecran_x(v.x), _sy(v.x))
@@ -255,6 +256,67 @@ func _dessiner_tempete(c: CanvasItem) -> void:
 			var y := fposmod(float(i) * 97.3, size.y)
 			var x := fposmod(float(i) * 211.7 - _temps * (700.0 + float(i % 5) * 160.0), size.x + 240.0) - 120.0
 			c.draw_line(Vector2(x, y), Vector2(x + 70.0, y + 9.0), Color(0.95, 0.85, 0.62, 0.4 * tp), 2.0)
+
+# Halte dans la nature (DEC-161) : l'équipage descend peu à peu, plante des tentes, allume un feu (bivouac) ;
+# en surveillance, les hommes se postent autour des véhicules, armes pointées, et les mécaniciens travaillent aux moteurs.
+# Les mitrailleurs restent dans leurs véhicules (le dessin de bord les montre déjà).
+func _dessiner_halte(c: CanvasItem) -> void:
+	var H: Dictionary = m.halte
+	if H.is_empty() or m.convoi.is_empty():
+		return
+	var k := clampf(float(H.t) / maxf(1.0, float(m.H().montage_s)), 0.0, 1.0)
+	var xq: float = INF
+	var xt: float = -INF
+	var n_hommes := 0
+	for v in m.convoi:
+		if v.actif():
+			xq = minf(xq, _rx(v))
+			xt = maxf(xt, _rx(v) + v.longueur)
+			n_hommes += maxi(0, v.equipage_vivant() - (1 if v.armes.size() > 0 else 0))
+	if not is_finite(xq):
+		return
+	n_hommes = mini(n_hommes, 10)
+	var bas := 1.6   # le camp se tient juste devant la route, côté spectateur
+	if String(H.mode) == "bivouac":
+		var n_tentes := int(ceil(float(maxi(1, n_hommes / 2)) * k))
+		for i in n_tentes:   # petites tentes de toile kaki
+			var xt0: float = xq + 2.0 + i * 4.2
+			var p0 := Vector2(terrain.ecran_x(xt0), _sy(xt0) + bas * ppm)
+			var mont := clampf(k * float(maxi(1, n_tentes)) - i, 0.2, 1.0)
+			var h := 1.3 * mont * ppm
+			c.draw_colored_polygon(PackedVector2Array([p0, p0 + Vector2(2.4 * ppm, 0), p0 + Vector2(1.2 * ppm, -h)]), Color("#6B6A48"))
+			c.draw_line(p0 + Vector2(1.2 * ppm, 0), p0 + Vector2(1.2 * ppm, -h), Color("#2E2B22"), maxf(1.0, 0.05 * ppm))
+			c.draw_colored_polygon(PackedVector2Array([p0 + Vector2(0.95 * ppm, 0), p0 + Vector2(1.45 * ppm, 0), p0 + Vector2(1.2 * ppm, -h * 0.55)]), Color("#2A281E"))
+		if bool(H.pret):   # feu de camp au milieu
+			var xf: float = (xq + xt) * 0.5
+			var pf := Vector2(terrain.ecran_x(xf), _sy(xf) + (bas + 0.4) * ppm)
+			var fl := 0.8 + 0.2 * sin(_temps * 14.0)
+			c.draw_circle(pf, 3.0 * ppm, Color(1.0, 0.55, 0.2, 0.1 * fl))
+			for j in 3:
+				var dx := (j - 1) * 0.22 * ppm
+				c.draw_colored_polygon(PackedVector2Array([pf + Vector2(dx - 0.2 * ppm, 0), pf + Vector2(dx + 0.2 * ppm, 0), pf + Vector2(dx + sin(_temps * 9.0 + j) * 0.08 * ppm, -(0.7 + 0.2 * sin(_temps * 11.0 + j)) * ppm * fl)]), Color(1.0, 0.6 + 0.2 * j * 0.5, 0.15))
+			c.draw_line(pf + Vector2(-0.5, 0.1) * ppm, pf + Vector2(0.5, -0.05) * ppm, Color("#3A2A1A"), maxf(2.0, 0.1 * ppm))
+		for i in int(n_hommes * k):   # hommes autour du feu ou qui portent le matériel
+			var xh: float = xq + 1.0 + float(i) * (xt - xq - 2.0) / maxf(1.0, n_hommes)
+			var ph := Vector2(terrain.ecran_x(xh), _sy(xh) + (bas + 0.6) * ppm)
+			Silhouette.dessiner(c, ph, ppm, "survivant", {"phase": _temps * 7.0 if not bool(H.pret) else 0.0, "miroir": i % 2 == 1, "peau": i + 2})
+	else:   # surveillance : tous aux aguets, les mécaniciens au travail
+		var i := 0
+		for v in m.convoi:
+			if not v.actif():
+				continue
+			var xm: float = _rx(v) + v.longueur * 0.8
+			var pm := Vector2(terrain.ecran_x(xm), _sy(xm) + 0.3 * ppm)
+			if int(v.profil.get("mecaniciens", 0)) > 0 or i == 0:
+				Silhouette.dessiner(c, pm, ppm, "survivant", {"phase": 0.0, "miroir": true, "peau": i + 5})
+				if fposmod(_temps + i, 1.4) < 0.15:   # étincelle de clé ou de soudure
+					c.draw_circle(pm + Vector2(-0.5 * ppm, -1.0 * ppm), 0.12 * ppm, Color(1.0, 0.85, 0.4))
+			i += 1
+		for j in n_hommes:
+			var xg: float = xq - 1.5 + float(j) * (xt - xq + 3.0) / maxf(1.0, n_hommes - 1)
+			var pg := Vector2(terrain.ecran_x(xg), _sy(xg) + bas * ppm)
+			Silhouette.dessiner(c, pg, ppm, "tireur", {"phase": 0.0, "miroir": j % 2 == 0, "peau": j + 1, "bras": "vise" if fposmod(_temps * 0.5 + j, 4.0) < 2.5 else ""})
+
 
 # Oiseau rare (DEV-004) : il traverse le ciel de droite à gauche en battant des ailes, avec un halo discret qui attire l'œil
 func _dessiner_oiseau(c: CanvasItem) -> void:

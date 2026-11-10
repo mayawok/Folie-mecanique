@@ -341,14 +341,7 @@
           "ep": 0.045
         }
       ],
-      "equipage": [
-        {
-          "x": 4.39,
-          "y": 2.62,
-          "role": "tireur",
-          "h": 0.42
-        }
-      ],
+      "equipage": [{"x": 4.39, "y": 2.62, "role": "tireur", "h": 0.42}, {"x": 5.3, "y": 1.6, "role": "conducteur", "h": 0.5, "_note": "DEC-165 : conducteur visible à la vitre"}, {"x": 4.8, "y": 1.6, "role": "tireur", "h": 0.5, "_note": "DEC-165 : passager qui tire par la fenêtre"}],
       "art": "berliet",
       "_note_art": "Dessiné par l'art (BerlietDessin, data/berliet.json). Cotes pour le châssis court ; VehiculeDessin les décale si le châssis est long. 'formes' : repli si l'art manque."
     },

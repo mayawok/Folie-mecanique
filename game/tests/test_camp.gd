@@ -186,5 +186,18 @@ func _init() -> void:
 	ok(autre_x >= 0 and not ConstructionLibre.fixe_berliet(gb, "essieu", autre_x), "Berliet : essieux arrière libres")
 	ok(not ConstructionLibre.fixe_berliet(gb, "cases", gb.cases), "Berliet : châssis d'origine complet")
 	ok(ConstructionLibre.fixe_berliet(gb, "cases", gb.cases.slice(1)), "Berliet : case d'origine retirée refusée")
+	# Gazogène (DEC-158)
+	var gw := ConstructionLibre.convertir(Assemblage.de_type("citroen_t23"), "citroen_t23")
+	var s0: Dictionary = ConstructionLibre.analyser(gw).stats
+	var gg := {}
+	for y in range(0, 18):
+		for x in range(0, 48):
+			if gg.is_empty():
+				gg = ConstructionLibre.poser(gw, "greffe_gazogene", Vector2i(x, y))
+	ok(not gg.is_empty(), "gazogène : se pose sur le camion")
+	if not gg.is_empty():
+		var s1: Dictionary = ConstructionLibre.analyser(gg).stats
+		ok(bool(s1.gazogene) and float(s1.conso) < float(s0.conso) * 0.5, "gazogène : consomme peu de carburant (%.2f → %.2f)" % [float(s0.conso), float(s1.conso)])
+		ok(float(s1.vitesse) <= float(s0.vitesse), "gazogène : moins de puissance")
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)

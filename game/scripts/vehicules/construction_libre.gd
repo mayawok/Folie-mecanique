@@ -1146,6 +1146,15 @@ static func analyser(a: Dictionary) -> Dictionary:
 		conso *= 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)
 		_defaut(defauts, "moteurs", "%d moteurs couplés : rendement ×%.2f, consommation ×%.1f" % [n_moteurs,
 			pow(float(MM.rendement), n_moteurs - 1), 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)], n_moteurs > 2)
+	# Gazogène (DEC-158) : le moteur brûle le gaz de bois ou de charbon ; il perd de la puissance mais consomme peu de carburant.
+	# Pour l'instant monté sur tous les moteurs ; la règle « essence seulement » viendra avec les deux carburants (DEC-094).
+	var gazo: Array = pieces.filter(func(q): return q.fiche.has("gazogene"))
+	var gazogene := not gazo.is_empty() and n_moteurs > 0
+	if gazogene:
+		var G: Dictionary = gazo[0].fiche.gazogene
+		puissance *= float(G.puissance)
+		conso *= float(G.conso)
+		_defaut(defauts, "gazogene", "Gazogène : puissance ×%.2f, carburant ×%.2f (brûle du bois ou du charbon)" % [float(G.puissance), float(G.conso)], false)
 	# Phares (DEC-048) : la dynamo prend un peu de puissance au moteur
 	puissance = maxf(0.0, puissance - ch_phares)
 	var tonnes := M / 1000.0
@@ -1225,7 +1234,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 	var roles := roles_de(a)
 	var stats := {"blindage": blindage_somme / maxf(1.0, cases.size()) + plaques * float(PL.blindage) + blindage_coques + blindage_greffes + blindage_toles + blindage_base, "remorque": remorque(a),
 		"reservoir": float(RL.reservoir_base) + float(RL.reservoir_par_case) * cases.size() + reservoir_plus, "piques": piques, "metal": int(round(metal)),
-		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "pv": pv, "poids_kg": M, "vitesse": v,
+		"equipage": sieges, "places_troupes": troupes, "ouvert": ouvert, "armes": armes, "conso": conso, "gazogene": gazogene, "pv": pv, "poids_kg": M, "vitesse": v,
 		"precision": precision, "immobile": immobile, "phares": phares, "classe": classe, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
 		"infirmiers": roles.count("infirmier")}
@@ -1833,6 +1842,13 @@ static func _formes_greffe(formes: Array, dessin: String, r: Rect2) -> void:
 			formes.append({"ligne": [[x0, y0 + h * 0.9], [x0 + w * 0.92, y0 + h * 0.4]], "ep": 0.05, "c": "#B9B2A0", "z": 3})
 			formes.append({"ligne": [[x0, y0 + h * 0.1], [x0 + w * 0.92, y0 + h * 0.4]], "ep": 0.05, "c": "#B9B2A0", "z": 3})
 			formes.append({"pts": _poly_cercle(x0 + w * 0.95, y0 + h * 0.4, 0.06, 8), "c": "sombre", "z": 3})
+		"gazogene":   # cuve cylindrique du gazogène, couvercle, tuyau et filtre (DEC-158)
+			formes.append({"pts": [[x0 + w * 0.08, y0], [x0 + w * 0.62, y0], [x0 + w * 0.62, y0 + h * 0.88], [x0 + w * 0.08, y0 + h * 0.88]], "c": "#4A4A44", "z": 3})
+			formes.append({"pts": [[x0 + w * 0.02, y0 + h * 0.88], [x0 + w * 0.68, y0 + h * 0.88], [x0 + w * 0.6, y0 + h], [x0 + w * 0.1, y0 + h]], "c": "#2E2E2A", "z": 3})
+			for k in 3:
+				formes.append({"ligne": [[x0 + w * 0.08, y0 + h * (0.25 + 0.22 * k)], [x0 + w * 0.62, y0 + h * (0.25 + 0.22 * k)]], "ep": 0.02, "c": "#7A3A1E", "z": 3})
+			formes.append({"ligne": [[x0 + w * 0.62, y0 + h * 0.7], [x0 + w * 0.95, y0 + h * 0.7], [x0 + w * 0.95, y0 + h * 0.15]], "ep": 0.05, "c": "#8A8A80", "z": 3})
+			formes.append({"pts": [[x0 + w * 0.78, y0], [x0 + w * 1.0, y0], [x0 + w * 1.0, y0 + h * 0.3], [x0 + w * 0.78, y0 + h * 0.3]], "c": "#6A5238", "z": 3})
 		"drapeau":   # mât et fanion
 			formes.append({"ligne": [[x0 + w * 0.2, y0], [x0 + w * 0.2, y0 + h]], "ep": 0.03, "c": "#B9B2A0", "z": 3})
 			formes.append({"pts": [[x0 + w * 0.2, y0 + h], [x0 + w * 1.0, y0 + h * 0.82], [x0 + w * 0.2, y0 + h * 0.62]], "c": "#9A2F2F", "z": 3})
