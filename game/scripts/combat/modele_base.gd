@@ -93,6 +93,9 @@ class Veh extends RefCounted:
 	var troupes: Array = []       # pv des soldats assis sur les bancs (DEC-063)
 	var allie := false            # convoi allié croisé sur la route (DEC-218) : ne tire pas, on ne lui tire pas dessus
 	var salue := false
+	var feu := 0.0                # secondes de combustion restantes (cocktail Molotov, réservoir qui explose, DEC-220)
+	var feu_dps := 0.0
+	var faction := ""             # id de faction (couleur de l'ennemi, DEC-221)
 	var principal := false        # camion de l'expédition (Berliet) : gardé du début à la fin, ni abandonné ni démonté (DEC-139)
 	var roues_perdues: Array = [] # indices des roues arrachées (DEC-080) : chacune ralentit, elles reviennent à la réparation
 
@@ -374,6 +377,13 @@ func creer_depuis_assemblage(a: Dictionary, camp: String, x: float, type := "", 
 	for i in (int(v.profil.equipage) if equipage < 0 else equipage):
 		v.equipage.append(float(D.equipage_pv))
 		v.noms.append(_nom_survivant())
+	if camp == "ennemi" and D.feu.jets.has(v.type):   # pillards : cocktails Molotov et lances explosives (DEC-220)
+		var wid: String = String(D.feu.jets[v.type])
+		var pid := "a%d" % v.armes.size()
+		v.profil = v.profil.duplicate()   # le profil peut être partagé : on n'y touche pas en place
+		v.profil.armes = v.profil.armes + [wid]
+		v.pieces[pid] = {"id": pid, "nom": D.armes[wid].nom, "pv": float(D.armes[wid].pv), "max": float(D.armes[wid].pv)}
+		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.6, float(D.armes[wid].cadence)), "idx": v.armes.size()})
 	return v
 
 # (Re)construit un véhicule à partir d'un assemblage. etats : famille -> état 0..1 des pièces montées

@@ -35,6 +35,7 @@ Textes et boutons du HUD, fluidité des villes et de la ville pillée, scènes d
 2. **Lot C : carte branchée au jeu** : **fait pour l'essentiel** (DEC-216) : 13 villes fixes, voyage par les routes, décor par zone, +3 niveaux hors Armorique. **Reste** : décor complet par région, tempêtes de désert, rumeurs qui annoncent le danger, voyage de plusieurs étapes d'un coup.
 3. **Lot D : factions, réputation, rangs, aide** : **fait** (DEC-217). **Reste** : portières du Berliet (DEV-021), convois alliés ou ennemis sur la route, autres actes de réputation.
 4. **Lot E : la route** : **fait** (DEC-218) : voyage de plusieurs étapes, convois alliés et hostiles, rumeurs, tempêtes de désert. **Reste** : décor complet par région (DEV-008), zones habitées calmes (DEV-007).
+5. **Lot F : combat vivant** : **fait** (DEC-219 à 222) : béliers et harceleurs, Molotov, lances explosives, feu et explosions, couleurs de faction, 10 véhicules à noms réels, équilibrage de base. **Non vérifié sur iPhone** : fanion et teinte de faction, flammes, harcèlement par derrière, lisibilité des explosions. Barre des boutons du Kit : 19 types de véhicules (peut déborder).
 4. Gelé jusqu'à la fin du Kit : train, centrale, gazogène, caches, boss, lot motos et side-cars.
 
 ## Décisions ouvertes

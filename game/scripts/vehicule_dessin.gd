@@ -40,6 +40,8 @@ var _rafale := 0
 var _t_rafale := 0.0
 var _fumee := []            # {pos, age}
 var _teinte := Color.OLIVE
+var faction_couleur := Color(0, 0, 0, 0)   # couleur de la faction de l'ennemi : caisse teintée et fanion (DEC-221) ; alpha 0 = aucune
+const COULEUR_BANDITS := Color("#8C8C8C")
 var _voile := Color.WHITE    # peinture de bande (DEC-080) : ton posé sur les visuels dessinés
 var plat := false           # éditeur de grille : le véhicule reste droit, vrai à la case près (DEC-081)
 var _ass := 0.0             # assiette statique d'un véhicule penché (pente de la ligne de sol dans son repère, DEC-081)
@@ -93,6 +95,33 @@ func configurer_art(cfg: Dictionary) -> void:
 	for e in f.get("equipage", []):
 		e.x = float(e.x) + dx
 	configurer_d(f)
+
+
+# Couleur de faction : la caisse prend la teinte de la faction et un fanion flotte sur le toit (DEC-221)
+func fixer_faction(c: Color) -> void:
+	if faction_couleur == c:
+		return
+	faction_couleur = c
+	if not D.is_empty():
+		var base := Color(donnees().teintes.pillards)
+		_teinte = base.lerp(c, 0.5) if c.a > 0.0 else base
+		queue_redraw()
+
+
+func _fanion() -> void:
+	if faction_couleur.a <= 0.0 or D.is_empty():
+		return
+	var H: float = float(D.hauteur)
+	var xp: float = float(D.longueur) * 0.7
+	var ph: float = float(Time.get_ticks_msec()) * 0.008 + xp
+	var pied := _c(Vector2(xp, H - 0.12))
+	var haut := _c(Vector2(xp, H + 0.5))
+	draw_line(pied, haut, Color(0.12, 0.1, 0.08), maxf(1.5, ppm * 0.03))
+	var sens: float = -1.0 if not miroir else 1.0   # le fanion flotte vers l'arrière
+	var l: float = ppm * 0.55
+	var pts := PackedVector2Array([haut, haut + Vector2(sens * l, ppm * (0.08 + 0.05 * sin(ph))), haut + Vector2(sens * l * 0.3, ppm * 0.26)])
+	draw_colored_polygon(pts, Color(faction_couleur, 1.0))
+	draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.5), 1.0)
 
 
 # Dessin à partir d'une description directe (atelier : une pièce seule, découpée dans un véhicule).
@@ -264,6 +293,7 @@ func _draw() -> void:
 	_formes(2)
 	_formes(3)   # coques de donneur (DEC-067)
 	_armes()
+	_fanion()
 
 
 # Berliet : l'art posé dans le repère de la caisse (suspension, assiette, sens), puis le tireur dans la trappe et l'arme

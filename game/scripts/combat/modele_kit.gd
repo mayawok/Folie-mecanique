@@ -8,7 +8,9 @@ const KIT_ZONES := ["sable", "terre", "cailloux", "eau"]
 const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux": "Cailloux", "eau": "Eau"}
 # Véhicules d'apparition : id d'assemblage -> libellé court
 const KIT_VEHICULES := {"bmw_r75": "Moto side-car", "moto_bmw": "Moto", "willys_mb": "Jeep", "citroen_traction": "Voiture",
-	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman"}
+	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman",
+	"moto_zundapp": "Zündapp KS 750", "moto_harley": "Harley WLA", "moto_gnome": "Gnome & Rhône", "peugeot_202": "Peugeot 202", "juvaquatre": "Juvaquatre",
+	"kubelwagen": "Kübelwagen", "citroen_h": "Citroën Type H", "opel_blitz": "Opel Blitz", "gmc_cckw": "GMC CCKW", "laffly_s15": "Laffly S15"}
 
 var kit_zone := "terre"
 var kit_lieu := "kerbrume"     # lieu de la carte où se trouve le convoi (Mode créatif seulement, non sauvegardé)

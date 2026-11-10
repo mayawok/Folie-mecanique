@@ -107,5 +107,36 @@ func _init() -> void:
 	m._choc(a, cible2, 2.0, "avant", "avant", true)
 	ok(p1 - float(cible2.pieces.moteur.pv) > p1 - float(cible1.pieces.moteur.pv), "lame : le bélier fait plus de dégâts")
 
+	# 7) Béliers et harceleurs (DEC-219) : le lourd charge, le léger contourne et revient par derrière
+	var sur := 0
+	var derriere := 0
+	var essais_h := 4
+	for i in essais_h:
+		m = CombatModele.new(100 + i, {"bac_a_sable": true})
+		var g := ConstructionLibre.voiture("moyen")
+		g.nom = "Essai"
+		m.construire_grille(0, g)
+		m.ordre_marche("avancer")
+		m.kit_apparaitre("ennemi", {"type": "moto_bmw"})
+		var mo = m.ennemis.back()
+		ok(m.role(mo) == "harceleur" or i > 0, "moto : rôle harceleur")
+		for k in int(22.0 / CombatModele.DT):
+			m.avancer()
+			if mo.mode == "harcele":
+				break
+		if mo.mode == "harcele":
+			derriere += 1
+			ok(mo.x < m._queue().x or i > 0, "harceleur : il est passé derrière nous")
+		elif not mo.actif():
+			sur += 1
+	ok(derriere + sur >= essais_h - 1, "motos : contournent ou se font faucher (%d + %d)" % [derriere, sur])
+	m = jeu()
+	m.kit_apparaitre("ennemi", {"type": "m3_half_track"})
+	var lourd = m.ennemis.back()
+	ok(m.role(lourd) == "belier", "plus lourd que nous : bélier")
+	var x0: float = lourd.x
+	marche(m, 10.0)
+	ok(lourd.x < x0 - 20.0 or chocs(m) > 0, "le bélier ne s'arrête pas : il charge")
+
 	print("Échecs : %d" % echecs)
 	quit(1 if echecs > 0 else 0)

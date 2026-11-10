@@ -41,6 +41,14 @@ func _evenement(e: Dictionary) -> void:
 			_etincelles.append({"p": pc, "age": 0.0, "gros": true})
 			_explosions.append({"p": pc, "age": 0.0, "taille": 0.5 if e.fort else 0.3})
 			_son("sfx_impact_blindage", 0.0)
+		"explosion":   # obus, cocktail Molotov, lance explosive, réservoir (DEC-220)
+			var pe := Vector2(float(e.x), float(e.y))
+			_explosions.append({"p": pe, "age": 0.0, "taille": float(e.taille)})
+			if e.feu:
+				_explosions.append({"p": pe + Vector2(0.3, 0.2), "age": 0.3, "taille": float(e.taille) * 0.6})
+			_etincelles.append({"p": pe, "age": 0.0, "gros": true})
+			if float(e.taille) >= 2.0:
+				_son("sfx_explosion", -3.0)
 		"esquive":
 			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": false})
 		"meute":
@@ -463,6 +471,10 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var arc: float
 		if pr.classe == "mortier":
 			arc = 0.35 * dist
+		elif pr.classe == "incendiaire":
+			arc = 0.3 * dist   # bouteille lancée à la main : arc haut
+		elif pr.classe == "lance":
+			arc = 0.12 * dist
 		else:
 			var v0: float = {"canon": 700.0, "fusil": 820.0, "flamme": 30.0}.get(pr.classe, 760.0)
 			var tv: float = dist / v0
@@ -477,6 +489,16 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var tk: float = maxf(0.0, tt - 0.07 * k)
 				var pk := _px(pr.a.lerp(pr.b, tk) + Vector2(0, sin(PI * tk) * arc))
 				c.draw_circle(pk, ppm * (0.18 + 0.35 * tk), Color(1.0, 0.45 + 0.1 * k, 0.1, 0.75 - 0.15 * k))
+		elif pr.classe == "incendiaire":   # bouteille qui tourne, traînée de flammes
+			for k in 3:
+				var tk2: float = maxf(0.0, tt - 0.05 * k)
+				var pk2 := _px(pr.a.lerp(pr.b, tk2) + Vector2(0, sin(PI * tk2) * arc))
+				c.draw_circle(pk2, maxf(3.0, ppm * (0.16 - 0.03 * k)), Color(1.0, 0.5 + 0.15 * k, 0.1, 0.9 - 0.25 * k))
+			c.draw_circle(sa, maxf(2.5, ppm * 0.08), Color(0.35, 0.6, 0.35))
+		elif pr.classe == "lance":   # hampe de bois et pointe qui rougeoie
+			c.draw_line(sb, sa, Color(0.45, 0.32, 0.18), maxf(2.5, ppm * 0.06))
+			c.draw_circle(sa, maxf(4.0, ppm * 0.12), Color(1.0, 0.55, 0.15))
+			c.draw_circle(sa, maxf(2.0, ppm * 0.06), Color(1.0, 0.95, 0.6))
 		elif pr.classe == "canon":
 			c.draw_line(sb, sa, Color(0.8, 0.8, 0.75, 0.35), maxf(3.0, ppm * 0.14))
 			c.draw_line(sb.lerp(sa, 0.4), sa, Color(1.0, 0.75, 0.3, 0.95), maxf(4.0, ppm * 0.12))
@@ -516,6 +538,18 @@ func dessiner_fx(c: CanvasItem) -> void:
 		c.draw_set_transform(_px(w.p), -w.p.x / w.r, Vector2.ONE)
 		c.draw_texture_rect(tex, Rect2(-rp, -rp, 2.0 * rp, 2.0 * rp), false, Color(1, 1, 1, clampf(6.0 - w.age, 0.0, 1.0)))
 		c.draw_set_transform(Vector2.ZERO)
+	for v in m.convoi + m.ennemis + m.epaves:   # véhicules en feu : flammes qui dansent et fumée (DEC-220)
+		if v.feu <= 0.0:
+			continue
+		var pf: Vector2 = _px(_centre_veh(v))
+		var amp: float = clampf(v.feu / 3.0, 0.3, 1.0)
+		for k in 4:
+			var ph: float = _temps * 9.0 + k * 1.7 + float(v.uid)
+			var off := Vector2((k - 1.5) * ppm * 0.45 + sin(ph) * ppm * 0.08, -ppm * (0.2 + 0.15 * absf(sin(ph * 0.7))))
+			var hf: float = ppm * (0.35 + 0.18 * sin(ph * 1.3)) * amp
+			c.draw_circle(pf + off, hf, Color(1.0, 0.42 + 0.2 * sin(ph), 0.1, 0.75))
+			c.draw_circle(pf + off + Vector2(0, -hf * 0.3), hf * 0.55, Color(1.0, 0.85, 0.3, 0.8))
+			c.draw_circle(pf + off + Vector2(sin(ph) * ppm * 0.2, -ppm * (0.9 + 0.3 * absf(sin(ph * 0.5)))), hf * 0.9, Color(0.14, 0.13, 0.12, 0.35 * amp))
 	for x in _explosions:
 		var p := _px(x.p)
 		var k: float = x.age / 1.4

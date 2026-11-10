@@ -168,12 +168,18 @@ func _synchroniser() -> void:
 			n.type = v.type
 			n.ppm = ppm
 			n.ennemi = v.camp == "ennemi"
-			n.miroir = v.camp == "ennemi" and not v.mode in ["poursuite", "convoi"]   # les poursuivants roulent dans notre sens (DEC-077)
+			n.miroir = v.camp == "ennemi" and not v.mode in ["poursuite", "convoi", "harcele"]   # les poursuivants roulent dans notre sens (DEC-077)
 			n.sol = Terrain.bosses
 			couche.add_child(n)
 			noeuds[v.uid] = n
 		elif n.type != v.type:   # véhicule transformé à l'atelier (moto -> side-car)
 			n.configurer(v.type)
+		if v.camp == "ennemi":
+			n.fixer_faction(_couleur_faction(v))
+			var m2: bool = not v.mode in ["poursuite", "convoi", "harcele"]
+			if n.miroir != m2:
+				n.miroir = m2   # le harceleur repasse dans notre sens une fois derrière nous
+				n.queue_redraw()
 		if v.type == "berliet_gdr" and v.camp == "joueur" and n.art_config != m.berliet_config:
 			n.configurer_art(m.berliet_config)   # pièces du camion de l'expédition (DEC-136, 139)
 		if v.principal:
@@ -299,3 +305,14 @@ func _action_icone(ic: Dictionary) -> void:
 	if m.ordres.marche != "halte":
 		m.ordre_marche("halte")
 	m.ordre_reparer(ic.uid, true, ic.piece)
+
+
+# Couleur de la faction d'un ennemi (carte du monde) ; pillards sans bannière en gris ; aucune pour un ennemi du Kit (DEC-221)
+func _couleur_faction(v) -> Color:
+	var f: String = String(v.faction)
+	if f == "":
+		return Color(0, 0, 0, 0)
+	if f == "bandits":
+		return VehiculeDessin.COULEUR_BANDITS
+	var F: Dictionary = CarteMonde.donnees().factions
+	return Color(String(F[f].couleur)) if F.has(f) else Color(0, 0, 0, 0)

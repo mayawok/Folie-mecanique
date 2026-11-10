@@ -245,8 +245,48 @@ func _impact(p: Dictionary) -> void:
 		else:
 			_toucher_batiment(w, cible, p.visee)
 			reel = true
+	var wx: Dictionary = p.w
+	if cible is Veh and p.touche and reel and wx.has("feu"):   # cocktail Molotov : le véhicule prend feu
+		cible.feu = maxf(cible.feu, float(wx.feu))
+		cible.feu_dps = float(wx.feu_dps)
+		if cible.camp == "joueur":
+			log_(Textes.t("feu.001", [cible.nom]), "alerte")
+	if wx.has("explosion") or wx.has("feu") or p.classe in ["canon", "mortier"]:
+		evt({"t": "explosion", "x": p.b.x, "y": maxf(p.b.y, 0.2), "taille": float(wx.get("explosion", 0.9 if wx.has("feu") else 0.8)), "feu": wx.has("feu")})
 	evt({"t": "impact", "x": p.b.x, "y": p.b.y, "touche": p.touche, "reel": reel, "classe": p.classe,
 		"ricoche": p.ricoche, "uid": p.cible, "sur_joueur": cible is Veh and cible.camp == "joueur"})
+
+# Véhicules en feu : perte de PV par seconde sur le moteur, la carrosserie et l'équipage ; l'épave brûle un moment (DEC-220)
+func _feux(dt: float) -> void:
+	var F: Dictionary = donnees().feu
+	for v in convoi + ennemis + epaves:
+		if v.feu <= 0.0:
+			continue
+		v.feu = maxf(0.0, v.feu - dt)
+		if v.statut == "epave" or v.pieces.chassis.pv <= 0.0:
+			continue
+		var d: float = v.feu_dps * dt * (float(F.degats_ennemi) if v.camp == "ennemi" else 1.0)
+		var cible: String = "moteur" if rng.randf() < 0.5 else "chassis"
+		v.pieces[cible].pv = maxf(0.0, v.pieces[cible].pv - d)
+		_blesser_equipage(v, d * float(F.equipage))
+		if v.pieces.chassis.pv <= 0.0:
+			_detruire(v)
+		elif v.equipage_vivant() == 0 and v.actif():
+			_neutraliser(v)
+
+
+# Un véhicule qui explose : souffle sur les voisins à quelques mètres (DEC-220)
+func _explosion_epave(v: Veh) -> void:
+	var F: Dictionary = donnees().feu
+	if rng.randf() > float(F.explosion_carburant):
+		return
+	var c: float = v.x + v.longueur * 0.5
+	evt({"t": "explosion", "x": c, "y": 0.8, "taille": 3.4, "feu": true})
+	var souffle := {"degats": float(F.degats), "penetration": 20.0, "classe": "mortier"}
+	for o in convoi + ennemis:
+		if o != v and o.statut != "epave" and absf(o.x + o.longueur * 0.5 - c) < float(F.rayon) + (v.longueur + o.longueur) * 0.25:
+			_toucher_vehicule(null, souffle, o, "libre")
+
 
 func _zone(v: Veh, visee: String) -> String:
 	var Z: Dictionary = donnees().zones
@@ -450,6 +490,9 @@ func _detruire(v: Veh) -> void:
 	v.butin = _butin_vehicule(v, 0.4)
 	_sortir_du_combat(v)
 	evt({"t": "epave", "uid": v.uid})
+	v.feu = float(donnees().feu.epave_feu)
+	v.feu_dps = 0.0
+	_explosion_epave(v)
 	if v.camp == "joueur":
 		log_(Textes.t("tir.008", [v.nom]), "alerte")
 	else:

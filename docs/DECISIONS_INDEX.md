@@ -18,7 +18,7 @@ Le journal complet et chronologique est [`DECISIONS.md`](DECISIONS.md). Cet inde
 - **Échec et reprise** : DEC-055, 173, 189.
 
 ## Convoi, combat, ordres
-- **Combat** : DEC-018 (remplacé par le temps réel), 046 à 054, 063, 064, 077, 113, 174.
+- **Combat** : DEC-018 (remplacé par le temps réel), 046 à 054, 063, 064, 077, 113, 174, 215, 219, 220.
 - **Ordres** : DEC-160 (un seul bouton de marche), **DEC-186** (réordonner les vignettes) précisant DEC-177 ; DEC-168.
 - **Halte et nuit** : DEC-137, 161, 164, 191, 162.
 - **Fouille, butin, épaves** : DEC-060, 181, 182, 188, 192.

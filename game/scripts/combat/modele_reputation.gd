@@ -82,6 +82,14 @@ func rep_faction_ici() -> String:
 	return String(monde.secteurs[monde.secteur].get("fac", ""))
 
 
+# Faction qui attaque dans ce secteur : la faction locale si elle ne nous aime pas, sinon des pillards sans bannière (DEC-221)
+func rep_faction_ennemie() -> String:
+	var fac := rep_faction_ici()
+	if fac == "":
+		return "bandits"
+	return fac if String(rep_palier(fac).id) in ["hostile", "mefiant", "neutre"] else "bandits"
+
+
 func rep_prix_mult(fac: String) -> float:
 	return float(rep_palier(fac).prix)
 

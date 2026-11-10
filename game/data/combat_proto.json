@@ -114,7 +114,9 @@
    "pv": 30,
    "vitesse": 45
   },
-  "lance_flammes": {
+  "molotov": {"nom": "Cocktail Molotov", "classe": "incendiaire", "degats": 6, "penetration": 4, "cadence": 3.2, "portee": 24, "precision": 0.55, "munitions": 1, "pv": 5, "vitesse": 22, "feu": 6.0, "feu_dps": 4.0},
+    "lance_explosive": {"nom": "Lance \u00e0 pointe explosive", "classe": "lance", "degats": 24, "penetration": 30, "cadence": 3.8, "portee": 30, "precision": 0.5, "munitions": 1, "pv": 5, "vitesse": 34, "explosion": 2.4},
+    "lance_flammes": {
    "nom": "Lance-flammes",
    "classe": "flamme",
    "degats": 16,
@@ -148,6 +150,7 @@
   "visee_chance": 0.65,
   "visee_precision": 0.8
  },
+ "feu": {"_note": "DEC-220 : incendies et explosions. Un v\u00e9hicule en feu perd des PV par seconde ; une \u00e9pave peut exploser (r\u00e9servoir) et blesser les voisins.", "explosion_carburant": 0.5, "rayon": 5.0, "degats": 12, "epave_feu": 10.0, "equipage": 0.25, "degats_ennemi": 1.5, "jets": {"moto_bmw": "molotov", "moto_zundapp": "molotov", "moto_harley": "molotov", "moto_gnome": "lance_explosive", "juvaquatre": "molotov", "kubelwagen": "lance_explosive"}},
  "effets": {"_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75", "roue_perdue": 0.75, "roues_tombent": 0.6,
   "roulement_bas": 0.7,
   "moteur_bas": 0.7,
@@ -363,7 +366,7 @@
  "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
  "route": {"_note": "Convois croisés sur la route selon la réputation (DEC-187, DEC-218). Valeurs à régler en essai.", "proba_convoi": 0.14, "types_allie": ["citroen_t23", "willys_mb"], "types_hostile": ["citroen_t23", "m3_half_track", "citroen_traction"], "salut_rep": 1, "cadeau_l": 10},
  "region": {"_note": "Difficulté forcée hors de la région de la quête principale (DEC-172, DEC-216). malus = niveaux de rencontre ajoutés ; quete_depart = région de la quête au début de la partie.", "malus": 3, "quete_depart": "armorique"},
- "choc": {"_note": "Chocs entre véhicules (DEC-215). Dégâts = k × masse du frappeur (t) × vitesse relative (m/s) × lame. Valeurs à régler en essai.", "k": 6.0, "vitesse_min": 1.5, "elan": 2.0, "contact": 1.2, "delai": 1.5, "recul": 4.0, "esquive_moto": 0.667, "proba_ennemi": 0.35, "part_frappeur": 0.6, "penetration": 60, "equipage": 0.15, "lame_absorbe": 0.5, "fort": 120},
+ "choc": {"_note": "Chocs entre véhicules (DEC-215). Dégâts = k × masse du frappeur (t) × vitesse relative (m/s) × lame. Valeurs à régler en essai.", "k": 6.0, "vitesse_min": 1.5, "elan": 2.0, "contact": 1.2, "delai": 1.5, "recul": 4.0, "esquive_moto": 0.667, "proba_ennemi": 0.35, "part_frappeur": 0.6, "penetration": 60, "equipage": 0.15, "lame_absorbe": 0.5, "fort": 120, "seuil_belier": 0.85, "charge": 1.15, "distance_esquive": 18.0, "esquive_leger": 0.4, "harcele_min": 16.0, "harcele_max": 26.0},
  "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
  "rencontres": {
   "intervalle": [
@@ -372,6 +375,13 @@
   ],
   "palier_m": 400,
   "liste": [
+   {"niveau_min": 0, "niveau_max": 2, "poids": 3, "vehicules": ["moto_gnome", "moto_harley"], "mode": "approche"},
+   {"niveau_min": 1, "niveau_max": 4, "poids": 3, "vehicules": ["moto_zundapp", "moto_gnome"], "mode": "approche"},
+   {"niveau_min": 1, "niveau_max": 5, "poids": 3, "vehicules": ["peugeot_202", "juvaquatre"], "mode": "approche"},
+   {"niveau_min": 2, "niveau_max": 6, "poids": 2, "vehicules": ["kubelwagen", "moto_zundapp"], "mode": "approche"},
+   {"niveau_min": 2, "niveau_max": 7, "poids": 2, "vehicules": ["opel_blitz", "kubelwagen"], "mode": "approche"},
+   {"niveau_min": 3, "niveau_max": 99, "poids": 2, "vehicules": ["gmc_cckw", "citroen_h"], "mode": "approche"},
+   {"niveau_min": 2, "niveau_max": 6, "poids": 2, "vehicules": ["laffly_s15", "peugeot_202"], "mode": "approche"},
    {"niveau_min": 1, "niveau_max": 4, "poids": 2, "vehicules": ["bmw_r75", "moto_bmw"], "mode": "poursuite", "abordeurs": 1, "types": ["lame"]},
    {"niveau_min": 2, "niveau_max": 7, "poids": 3, "vehicules": ["citroen_traction", "bmw_r75"], "mode": "poursuite", "abordeurs": 2, "types": ["lame", "bombe"]},
    {"niveau_min": 4, "niveau_max": 7, "poids": 2, "vehicules": ["willys_mb", "citroen_traction"], "mode": "poursuite", "abordeurs": 3, "types": ["bombe", "lame"]},

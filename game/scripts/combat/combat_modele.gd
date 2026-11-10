@@ -475,7 +475,9 @@ func avancer(dt := DT) -> void:
 	_ia_ennemis(dt)
 	_ia_poursuite(dt)
 	_ia_face(dt)
+	_ia_comportements(dt)
 	_chocs(dt)
+	_feux(dt)
 	_abordages(dt)
 	for v in convoi.duplicate():
 		if v.actif():
@@ -625,12 +627,7 @@ func _marche(dt: float) -> void:
 func _ia_ennemis(dt: float) -> void:
 	for e in ennemis:
 		e.vitesse_act = 0.0
-		if e.actif() and e.mode == "approche" and e.mobile():
-			var stand: float = e.profil.get("standoff", 32.0)
-			if e.x - x_tete > stand:
-				e.x -= e.vitesse() * dt
-				e.vitesse_act = e.vitesse()
-		elif e.actif() and e.mode == "convoi" and e.mobile():
+		if e.actif() and e.mode == "convoi" and e.mobile():
 			var vc := kit_vitesse_convoi(e)   # roule dans notre sens (Kit) : à nous de le rattraper
 			e.x += vc * dt
 			e.vitesse_act = vc
@@ -683,6 +680,7 @@ func _rencontres() -> void:
 		var xp: float = xq - float(AB().depart_arriere)
 		for t in choix.get("vehicules", []):
 			var e := creer_vehicule(t, "ennemi", xp)
+			e.faction = rep_faction_ennemie()
 			preparer_poursuivant(e, choix)
 			ennemis.append(e)
 			xp -= e.longueur + r.randf_range(6.0, 14.0)
@@ -693,6 +691,7 @@ func _rencontres() -> void:
 	for t in choix.get("vehicules", []):
 		var e := creer_vehicule(t, "ennemi", x)
 		e.mode = choix.get("mode", "approche")
+		e.faction = rep_faction_ennemie()
 		ennemis.append(e)
 		x += e.longueur + r.randf_range(5.0, 12.0)
 	for bt in choix.get("batiments", []):
