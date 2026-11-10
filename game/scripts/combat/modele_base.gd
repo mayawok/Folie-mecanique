@@ -452,7 +452,9 @@ func appliquer_valeurs_berliet(v: Veh) -> void:
 	var V := BerlietConfig.valeurs(berliet_config)
 	var base_vit := float(v.profil.get("vitesse_assemblage", v.profil.vitesse))
 	v.profil["vitesse_assemblage"] = base_vit
-	v.profil.vitesse = base_vit * float(V.vitesse_route) * (1.0 + float(V.bonus_puissance))
+	v.profil.vitesse = base_vit * float(V.vitesse_route) * (1.0 + float(V.bonus_puissance)) * float(V.lame_vitesse)
+	v.profil["lame_choc"] = float(V.lame_choc)   # lame avant (DEC-212) : multiplicateur de dégâts quand on enfonce un obstacle
+	v.profil["lame_pv"] = int(V.lame_pv)
 	v.profil["tout_terrain"] = float(V.tout_terrain)
 	v.profil["charge_t"] = float(V.charge_t)
 	v.profil["gazole_l"] = float(V.gazole_l)

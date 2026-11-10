@@ -8,7 +8,7 @@ signal ferme
 
 const PANNEAU_L := 470.0
 const ORDRE := [["chassis", "Châssis"], ["pneu_av", "Pneus avant"], ["pneu_ar", "Pneus arrière"],
-	["echappement", "Échappement"], ["reservoir", "Réservoir"], ["module", "Module arrière"]]
+	["echappement", "Échappement"], ["reservoir", "Réservoir"], ["module", "Module arrière"], ["lame", "Lame avant"]]
 
 var config := BerlietConfig.defaut()
 var modele = null         # CombatModele : si fourni, les choix s'appliquent au camion de l'expédition (DEC-139)

@@ -153,5 +153,20 @@ func _init() -> void:
 	ok(m2.berliet_config.chassis == "long" and m2.berliet_config.module == "citerne" and m2.berliet_config.pneu_ar == "chaines",
 		"sauvegarde : pièces du Berliet gardées")
 	ok(absf(cam2.longueur - cam.longueur) < 0.01, "sauvegarde : longueur gardée")
+	# Lames avant (DEC-212)
+	ok(BerlietConfig.options("lame").size() == 6, "lame : aucune + 5 niveaux")
+	var lc := BerlietConfig.defaut()
+	var lg0 := BerlietConfig.longueur_m(lc)
+	ok(BerlietConfig.regler(lc, "lame", 5) and BerlietConfig.longueur_m(lc) > lg0, "lame : le bélier allonge le camion")
+	ok(float(BerlietConfig.valeurs(lc).lame_choc) > 3.0, "lame : le bélier frappe fort")
+	ok(not BerlietConfig.regler(lc, "lame", 6), "lame : niveau inconnu refusé")
+	var vieux := BerlietConfig.defaut()
+	vieux.erase("lame")
+	ok(BerlietConfig.valide(vieux), "lame : ancienne sauvegarde sans lame acceptée")
+	var dl := BerlietDessin.new()
+	for n in range(6):
+		dl.config.lame = n
+		dl.dessiner()   # hors arbre : vérifie seulement que chaque niveau se dessine sans erreur de script
+	dl.free()
 	print("Échecs : %d" % echecs)
 	quit(1 if echecs > 0 else 0)

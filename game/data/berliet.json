@@ -52,6 +52,17 @@
     "citerne_eau": {"nom": "Citerne d'eau potable", "base": "", "litres": 3000},
     "munitions": {"nom": "Caisses de munitions", "base": ""}
   },
+  "lame": {"_note": "Lames avant pour enfoncer les obstacles (DEC-212), dessinées par le code. avancee = longueur devant le pare-chocs (u), haut = hauteur au-dessus du sol (u). Valeurs de jeu provisoires, à régler en essai.",
+    "avant": 2154.0,
+    "niveaux": [
+      {"nom": "Aucune", "avancee": 0.0, "haut": 0.0, "poids_kg": 0, "pv": 0, "choc": 1.0, "vitesse": 1.0},
+      {"nom": "Pare-buffle", "avancee": 70.0, "haut": 230.0, "poids_kg": 80, "pv": 20, "choc": 1.3, "vitesse": 1.0},
+      {"nom": "Bouclier de tôle", "avancee": 110.0, "haut": 270.0, "poids_kg": 220, "pv": 45, "choc": 1.7, "vitesse": 0.98},
+      {"nom": "Chasse-pierres", "avancee": 190.0, "haut": 250.0, "poids_kg": 400, "pv": 70, "choc": 2.2, "vitesse": 0.96},
+      {"nom": "Étrave blindée", "avancee": 250.0, "haut": 330.0, "poids_kg": 650, "pv": 110, "choc": 2.8, "vitesse": 0.93},
+      {"nom": "Bélier de rails", "avancee": 340.0, "haut": 360.0, "poids_kg": 950, "pv": 160, "choc": 3.5, "vitesse": 0.9}
+    ]
+  },
   "ancrages": {
     "_note": "Points de vie de l'équipage, en u (même repère). portes : x au sol ; toit : x et y du toit au droit de la trappe ; feu : x du feu de camp (derrière le camion).",
     "porte_avant": 1795.0,
@@ -60,5 +71,5 @@
     "moteur": 2020.0,
     "feu": -560.0
   },
-  "defaut": {"chassis": "court", "pneu_av": "route", "pneu_ar": "route", "echappement": 0, "reservoir": 0, "module": "plateau"}
+  "defaut": {"chassis": "court", "pneu_av": "route", "pneu_ar": "route", "echappement": 0, "reservoir": 0, "module": "plateau", "lame": 0}
 }

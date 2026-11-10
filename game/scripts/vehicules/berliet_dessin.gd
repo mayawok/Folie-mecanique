@@ -76,6 +76,10 @@ func dessiner() -> void:
 	for c in BerlietConfig.calques(config):
 		var dl := dc if String(c.id) in ["cabine", "trappe", "echappement"] else dch
 		match String(c.id):
+			"lame":
+				_tr(sec + dch, 0.0)
+				_lame()
+				_tr0()
 			"module":
 				_tr(sec + dch - Vector2(0, module_leve * ppm), 0.0)
 				_module()
@@ -211,6 +215,58 @@ func _module() -> void:
 
 
 # Tablier avant (protège la cabine)
+# Lames avant (DEC-212) : de plus en plus grosses, comme le chasse-pierres d'une locomotive. Repère : u, sol en bas.
+func _lame() -> void:
+	var n := int(config.get("lame", 0))
+	if n <= 0:
+		return
+	var L := BerlietConfig.lame(config)
+	var x0 := float(BerlietConfig.donnees().lame.avant) - 30.0   # fixée sur les longerons, sous le pare-chocs
+	var x1 := x0 + 30.0 + float(L.avancee)
+	var s := BerlietConfig.sol()
+	var yb := s - 12.0                 # bas : frôle le sol
+	var yh := s - float(L.haut)
+	match n:
+		1:   # pare-buffle : tubes cintrés
+			for k2 in range(4):
+				var y := lerpf(yh, yb, k2 / 3.0)
+				_ligne_u(Vector2(x0, y), Vector2(x1, y + 10.0), ACIER_C, 14.0)
+			_ligne_u(Vector2(x1, yh + 10.0), Vector2(x1, yb), ACIER, 18.0)
+			_ligne_u(Vector2(x1 - 30.0, yh), Vector2(x1 - 30.0, yb), ACIER, 14.0)
+		2:   # bouclier de tôle rivetée, légèrement incliné
+			_poly_u([Vector2(x0, yh), Vector2(x1 - 30.0, yh), Vector2(x1, yb), Vector2(x0, yb)], ACIER)
+			_rivets(x0 + 10.0, x1 - 40.0, yh + 20.0, 34.0)
+			_rivets(x0 + 10.0, x1 - 10.0, yb - 20.0, 34.0)
+		3:   # chasse-pierres : grille en V de barres vers le sol
+			_poly_u([Vector2(x0, yh), Vector2(x0 + 40.0, yh), Vector2(x1, yb), Vector2(x0, yb)], NOIR)
+			for k2 in range(7):
+				var t := k2 / 6.0
+				_ligne_u(Vector2(x0 + 10.0, lerpf(yh, yb, t)), Vector2(lerpf(x0 + 40.0, x1, t), lerpf(yh, yb, t)), ACIER_C, 12.0)
+			_ligne_u(Vector2(x0 + 40.0, yh), Vector2(x1, yb), ACIER, 20.0)
+		4:   # étrave blindée : coin d'acier épais, renfort central
+			_poly_u([Vector2(x0, yh), Vector2(x0 + 70.0, yh), Vector2(x1, s - 120.0), Vector2(x1 - 40.0, yb), Vector2(x0, yb)], ACIER)
+			_ligne_u(Vector2(x0 + 70.0, yh), Vector2(x1, s - 120.0), ACIER_C, 16.0)
+			_ligne_u(Vector2(x0 + 20.0, (yh + yb) / 2.0), Vector2(x1 - 20.0, (yh + yb) / 2.0 + 30.0), ROUILLE, 10.0)
+			_rivets(x0 + 15.0, x1 - 60.0, yb - 18.0, 30.0)
+		_:   # bélier de rails : rails soudés en éventail, gros sabot d'acier rouillé
+			_poly_u([Vector2(x0, yh), Vector2(x0 + 90.0, yh), Vector2(x1, s - 140.0), Vector2(x1, s - 60.0), Vector2(x1 - 60.0, yb), Vector2(x0, yb)], ROUILLE)
+			for k2 in range(5):
+				var t := k2 / 4.0
+				_ligne_u(Vector2(x0, lerpf(yh + 10.0, yb - 10.0, t)), Vector2(x1 - 5.0, lerpf(s - 140.0, s - 60.0, t)), ACIER, 18.0)
+			_rect_u(x1 - 30.0, s - 150.0, x1 + 10.0, s - 50.0, ACIER)
+			_rivets(x0 + 15.0, x1 - 40.0, yh + 18.0, 30.0)
+
+
+func _poly_u(pts: Array, col: Color) -> void:
+	var q := PackedVector2Array()
+	for u in pts:
+		q.append(p(u))
+	ci.draw_colored_polygon(q, _c(col))
+	var f := q.duplicate()
+	f.append(q[0])
+	ci.draw_polyline(f, _c(NOIR), maxf(1.0, 3.0 * k()))
+
+
 func _tablier(x1: float, r: float) -> void:
 	_rect_u(x1 - 22.0, r - 260.0, x1, r - 26.0, ACIER)
 	for y in [r - 240.0, r - 150.0, r - 60.0]:

@@ -6,7 +6,7 @@ class_name BerlietConfig
 extends RefCounted
 
 const CHEMIN := "res://data/berliet.json"
-const CLES := ["chassis", "pneu_av", "pneu_ar", "echappement", "reservoir", "module"]
+const CLES := ["chassis", "pneu_av", "pneu_ar", "echappement", "reservoir", "module", "lame"]
 
 static var _d := {}
 
@@ -22,6 +22,7 @@ static func defaut() -> Dictionary:
 	var c: Dictionary = donnees().defaut.duplicate()
 	c.echappement = int(c.echappement)
 	c.reservoir = int(c.reservoir)
+	c.lame = int(c.get("lame", 0))
 	return c
 
 
@@ -39,6 +40,8 @@ static func options(cle: String) -> Array:
 			return range(D.reservoir.niveaux.size())
 		"module":
 			return D.modules.keys()
+		"lame":
+			return range(D.lame.niveaux.size())
 	return []
 
 
@@ -56,6 +59,8 @@ static func libelle(cle: String, v) -> String:
 			return "%d. %s" % [int(v) + 1, D.reservoir.niveaux[int(v)].nom]
 		"module":
 			return String(D.modules[v].nom)
+		"lame":
+			return "%d. %s" % [int(v), D.lame.niveaux[int(v)].nom] if int(v) > 0 else String(D.lame.niveaux[0].nom)
 	return str(v)
 
 
@@ -76,6 +81,8 @@ static func regler(c: Dictionary, cle: String, v) -> bool:
 
 static func valide(c: Dictionary) -> bool:
 	for k in CLES:
+		if not c.has(k) and k == "lame":
+			continue   # anciennes sauvegardes : pas de lame
 		if not c.has(k):
 			return false
 		var trouve := false
@@ -125,6 +132,7 @@ static func calques(c: Dictionary) -> Array:
 	for m in moyeux(c):
 		res.append({"id": "roue", "image": m.image, "x": m.x, "y": m.y, "e": m.e, "ancre": "centre"})
 	var K: Dictionary = D.cabine
+	res.append({"id": "lame"})   # dessinée par le code (BerlietDessin), sous la cabine, devant le pare-chocs
 	res.append({"id": "cabine", "image": image(K.image), "x": float(K.x), "y": float(K.y), "e": float(K.echelle) / r, "ancre": "hg"})
 	var T: Dictionary = D.trappe
 	res.append({"id": "trappe", "image": image(T.image), "x": float(T.x), "y": float(T.y), "e": float(T.echelle) / r, "ancre": "trappe",
@@ -161,7 +169,13 @@ static func x_arriere(c: Dictionary) -> float:
 
 static func longueur_m(c: Dictionary) -> float:
 	# les deux châssis finissent au même endroit (calés sur l'essieu avant) : pare-chocs avant à 2154 u
-	return (2154.0 - x_arriere(c)) / ppm_art()
+	return (2154.0 + lame(c).avancee - x_arriere(c)) / ppm_art()
+
+
+# Lame avant choisie (DEC-212) : {nom, avancee, haut, poids_kg, pv, choc, vitesse}
+static func lame(c: Dictionary) -> Dictionary:
+	var n: Array = donnees().lame.niveaux
+	return n[clampi(int(c.get("lame", 0)), 0, n.size() - 1)]
 
 
 # Ancrages de l'équipage en mètres dans le repère du camion (x depuis u = 0, y vers le haut depuis le sol)
@@ -196,4 +210,8 @@ static func valeurs(c: Dictionary) -> Dictionary:
 		"vitesse_route": minf(float(pa.vitesse_route), float(pr.vitesse_route)),
 		"tout_terrain": (float(pa.tout_terrain) + 2.0 * float(pr.tout_terrain)) / 3.0,
 		"pv_roues": (float(pa.pv) + float(pr.pv)) / 2.0,
+		"lame_choc": float(lame(c).choc),
+		"lame_pv": int(lame(c).pv),
+		"lame_poids_kg": int(lame(c).poids_kg),
+		"lame_vitesse": float(lame(c).vitesse),
 	}
