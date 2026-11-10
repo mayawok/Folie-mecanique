@@ -33,7 +33,7 @@
       "nom": "La Raffinerie Noire", "chef": "Aurèle Castagne, le Baron du Brut", "faction": "Raffineurs du Sud",
       "monte_charge_s": 8.0, "hauteur_m": 9.0, "trone_s": 12.0,
       "repliques": ["Un convoi indépendant… chez moi.", "Ici, chaque litre qui coule m'appartient.", "Tu veux passer ? Montre-moi ce que vaut ta ferraille.", "Ouvrez l'arène !"],
-      "arene": {"distance_m": 45.0, "vehicules": ["m4_sherman", "m3_halftrack", "m3_halftrack"], "pv_boss": 1.6},
+      "arene": {"distance_m": 45.0, "vehicules": ["m4_sherman", "m3_half_track", "m3_half_track"], "pv_boss": 1.6},
       "recompense": {"fuel_l": 300, "ammo": 200, "metal": 80}},
     "pillee": {
       "habitants": 120, "cadavres": 24,
