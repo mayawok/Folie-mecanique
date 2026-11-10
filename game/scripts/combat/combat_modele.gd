@@ -593,6 +593,7 @@ func _marche(dt: float) -> void:
 			blocage = Textes.t("modele.036")
 		else:
 			var pente: float = Terrain.pente(x_tete)
+			vmax *= float(donnees().equilibrage.get("rythme_vitesse", 1.0))   # conduite plus vive (DEC-229)
 			vmax *= clampf(1.0 - 2.4 * pente, 0.55, 1.3)   # montée : plus lent ; descente : plus vite
 			vmax *= facteur_vitesse_meteo() * facteur_vitesse_mines() * float(regime_donnees().vitesse)
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax

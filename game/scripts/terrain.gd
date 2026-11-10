@@ -41,9 +41,13 @@ var nuit := 0.0         # 0 = plein jour, 1 = pleine nuit
 var ancre_x := 0.0      # abscisse écran (px) qui correspond à camera_x
 
 
-# Collines : grandes ondulations (jusqu'à 15° de pente) ; le véhicule les suit en s'inclinant
+# Route lisse (DEC-229) : longues ondulations douces, pente de quelques degrés au plus (avant : jusqu'à 15°)
+static func _base(x: float) -> float:
+	return 1.3 * sin(x / 60.0) + 0.45 * sin(x / 23.0 + 1.0) + 0.06 * sin(x / 8.0 + 2.0)
+
+
 static func relief(x: float) -> float:
-	var h := 3.4 * sin(x / 46.0) + 2.0 * sin(x / 19.0 + 1.0) + 0.7 * sin(x / 8.0 + 2.0) - 3.4 * sin(0.0)
+	var h := _base(x)
 	for p in plats:
 		var w := _poids_plat(p, x)
 		if w > 0.0:
@@ -57,8 +61,7 @@ static var plats: Array = []
 
 static func aplanir(x0: float, x1: float) -> void:
 	plats = [[x0, x1, 0.0]]
-	var h := 3.4 * sin(x0 / 46.0) + 2.0 * sin(x0 / 19.0 + 1.0) + 0.7 * sin(x0 / 8.0 + 2.0)
-	plats[0][2] = h
+	plats[0][2] = _base(x0)
 
 static func aplanir_effacer() -> void:
 	plats = []

@@ -107,9 +107,20 @@ func _camera(delta: float) -> void:
 	var gauche: float = _rx(m.convoi.back()) if not m.convoi.is_empty() else _rtete() - 20.0
 	var droite := _rtete() + 20.0
 	var plafond := 62.0
+	# Caméra centrée sur notre camion (DEC-229) : en route on cadre serré autour de la tête ; seuls les ennemis proches
+	# (devant ou derrière) élargissent le cadre, d'où un dézoom quand ils arrivent.
+	var combat := false
+	var tete := _rtete()
 	for e in m.ennemis:
-		if e.actif() and e.x - m.x_tete < 85.0:
+		if not e.actif() or e.allie:
+			continue
+		if e.x - m.x_tete < 62.0 and e.x + e.longueur > m.x_tete - 48.0:
+			combat = true
 			droite = maxf(droite, _rx(e) + e.longueur + 3.0)
+			gauche = minf(gauche, _rx(e) - 3.0)
+	gauche = maxf(gauche, tete - (42.0 if combat else 22.0))
+	if not combat:
+		droite = tete + 12.0
 	for b in m.batiments:
 		var proche: bool = b.x - m.x_tete < 85.0 and b.x + b.longueur > gauche - 40.0
 		if ((b.actif() or b.ami) and b.x - m.x_tete < 85.0) or (b.garnison.size() > 0 and proche):
