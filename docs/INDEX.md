@@ -32,7 +32,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 
 -   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION` ; propositions en attente de validation : `docs/lore/communautes-ferroviaires.md`
 -   Registre des documents : `docs/DOCUMENT_REGISTRY.md` ; questions ouvertes : `docs/OPEN_QUESTIONS.md`
--   **Ce jeu-ci** : vision `docs/design/VISION.md`, scénario `docs/scenario/` (ouverture : `OUVERTURE.md` ; proposition : `mission-liberation-camp-travailleurs.md`)
+-   **Ce jeu-ci** : vision `archive/docs_design/VISION_2026-11-10.md` (archivé), scénario `docs/scenario/` (ouverture : `OUVERTURE.md` ; proposition : `mission-liberation-camp-travailleurs.md`)
 -   État courant et priorités : `STATE.md` (racine)
 -   Règles structurées : `data/rules/regles_canoniques.json` (v1.9, sans les sections de gestion de base)
 -   Catalogue véhicules et tables de systèmes : `data/master/*.csv`

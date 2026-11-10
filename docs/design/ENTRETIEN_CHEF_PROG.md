@@ -23,3 +23,18 @@ Questions posées par Claude (chef programmeur) au porteur de projet pour cadrer
 - Difficulté forcée (Q2) : à quoi correspond « la région de la quête » tant que la quête principale n'existe pas (Q6) ? Valeur provisoire à fixer dans le Kit.
 - Le Kit exclut-il « Carte du monde → jeu » (DEV-009) alors que la carte branchée est la priorité n°2 de code ?
 - `claude/VISION.md` est ancien (chef de communauté, base, paysage, 10 véhicules) : à réaligner sur la Bible et sur les DEC-091 à 102.
+
+## Série 2 (10/11, DEC-177 à 185)
+
+| # | Question | Réponse |
+|---|---|---|
+| 13 | Ordres tactiques : lesquels, comment ? | Glisser les véhicules depuis leur image en bas de l'écran. |
+| 14 | Que garde-t-on au retour au checkpoint ? | À définir plus tard. |
+| 15 | Région sûre pour tester la difficulté forcée ? | Réglage libre dans le Kit. |
+| 16 | Sort de VISION.md ? | Archivé. |
+| 17 | Importance de l'équipage ? | Entre les deux (quelques clés nommés, le reste générique). |
+| 18 | Véhicule détruit ? | Épave récupérable pas systématiquement, au prix de beaucoup de ressources. |
+| 19 | Source de l'équipement ? | Fouille, missions, achat : équilibre des trois. |
+| 20 | Durée de session ? | Libre, sauvegarde partout. |
+| 21 | Factions ? | Réputation par faction ; l'amitié avec l'une peut rendre ennemi de l'autre. |
+| 22 | Priorité audio ? | Sons de moteurs et d'armes. |

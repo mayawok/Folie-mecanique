@@ -237,3 +237,10 @@ Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son
 3. Retour au dernier checkpoint (DEC-173) : que garde-t-on (équipement, véhicules, ressources) et que perd-on (cargaison, mission) ?
 4. Le Kit exclut le branchement de la carte (DEV-009) mais celui-ci est la priorité n°2 de code : ordre exact ?
 5. `claude/VISION.md` est ancien : le réaligner sur la Bible et DEC-091 à 102 ?
+
+## OQ-034 — Suites de l'entretien 2 (10/11)
+
+1. Glisser depuis l'image du véhicule : quels gestes (vers l'avant/l'arrière du convoi, vers une cible, vers l'extérieur pour éclaireur) ?
+2. Retour au checkpoint (DEC-173) : ce qui est gardé ou perdu reste à définir.
+3. Réputation (DEC-184) : quelles paires de factions sont rivales, quels paliers (accueil, prix, missions, hostilité) ?
+4. Épaves (DEC-181) : quel coût en ressources, et quelle probabilité de récupération ?

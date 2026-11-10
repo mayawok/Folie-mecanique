@@ -201,3 +201,12 @@
 | 2026-11-10 | DEC-174 | **Combat : ordres tactiques seulement**, pas de conduite ni de tir directs | Entretien du 10/11. À concilier avec DEC-160 : OQ-033. |
 | 2026-11-10 | DEC-175 | **Méthode : gros lots espacés**, livrés en un bloc ; le créateur vérifie sur iPhone après chaque gros lot ; démo (contenu) à décider plus tard ; achat d'un Mac non décidé | Entretien du 10/11. |
 | 2026-11-10 | DEC-176 | **Ordre de code** : 1) Berliet dans le convoi (DEV-020 à 022) ; 2) carte fixe branchée au jeu (DEV-006 à 009) ; 3) essence/gazole par moteur et factions de la Bible (DEC-094, DEC-098) | Entretien du 10/11. |
+| 2026-11-10 | DEC-177 | **Ordres par glisser** : le joueur ordonne en faisant glisser les véhicules depuis leur image en bas de l'écran (pas de menu). Précise DEC-174 et DEC-160 | Entretien 2 du 10/11. Gestes exacts à définir (OQ-034). |
+| 2026-11-10 | DEC-178 | **Région sûre réglable dans le Kit** : curseur « région de quête » modifiable, pour tester la difficulté forcée (DEC-172) avant que la quête principale existe | Entretien 2. |
+| 2026-11-10 | DEC-179 | **`VISION.md` archivé** (`archive/docs_design/VISION_2026-11-10.md`) ; `STATE.md` et la Bible tiennent lieu de vision | Entretien 2. |
+| 2026-11-10 | DEC-180 | **Équipage « entre les deux »** : quelques personnages clés nommés, le reste générique avec rôles | Entretien 2. |
+| 2026-11-10 | DEC-181 | **Véhicule détruit : épave récupérable, pas systématiquement, et au prix de beaucoup de ressources** | Entretien 2. |
+| 2026-11-10 | DEC-182 | **Équipement : fouille/pillage, récompenses des maires et achat en ville, à parts équilibrées** | Entretien 2. |
+| 2026-11-10 | DEC-183 | **Session libre, sauvegarde partout** (pas de durée cible) | Entretien 2. |
+| 2026-11-10 | DEC-184 | **Réputation par faction** : les actes changent les relations ; l'amitié avec une faction peut rendre ennemi d'une autre | Entretien 2. Faction et règles exactes : OQ-034. |
+| 2026-11-10 | DEC-185 | **Priorité audio : sons de moteurs et d'armes** (ElevenLabs) ; le reste plus tard | Entretien 2. |
