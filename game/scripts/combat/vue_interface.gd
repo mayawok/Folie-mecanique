@@ -857,11 +857,14 @@ func _maj_interface() -> void:
 		var inf := ""
 		if _carte_sel >= 0:
 			var ss: Dictionary = w.secteurs[_carte_sel]
-			inf = "%s\n%s : %s\nDifficulté : niveau %d sur 7\nDistance : environ %d m de route calme" % [ss.nom, MondeJeu.FACTIONS[ss.faction], {"ami": "alliée", "neutre": "neutre", "hostile": "hostile"}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
+			inf = "%s\n%s : %s\nDifficulté : niveau %d sur 7\nDistance : environ %d m de route calme" % [ss.nom, ss.faction_nom, {"ami": "alliée", "neutre": "neutre", "hostile": "hostile"}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
 		else:
 			inf = "Touchez un secteur pour le choisir.\nLes anneaux vont du vert (calme) au rouge (dangereux). La couleur du centre est la faction."
 		_lbl_carte_info.text = Textes.t("vue_interface.033", [sct.nom, inf])
-		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur
+		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur or not w.est_voisin(w.secteur, _carte_sel)
+		if _carte_sel >= 0 and _carte_sel != w.secteur and not w.est_voisin(w.secteur, _carte_sel):
+			var et: int = w.prochaine_etape(_carte_sel)
+			_lbl_carte_info.text += "\nPas de route directe" + (" : passez d'abord par %s." % w.secteurs[et].nom if et >= 0 else ".")
 	if _btn_camo != null:
 		_btn_camo.text = Textes.t("vue_interface.034") if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:

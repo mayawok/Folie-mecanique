@@ -260,7 +260,9 @@ func kit_regler_region_quete(id: String) -> bool:
 
 # Difficulté forcée (DEC-172) : niveau de rencontre ajouté tant que le convoi est hors de la région de la quête principale
 func malus_hors_region() -> int:
-	if not kit_actif() or kit_region_quete == "":
+	if not kit_actif():
+		return super()   # partie normale : région de la quête principale (monde.gd)
+	if kit_region_quete == "":
 		return 0
 	var c := kit_region_courante()
 	return kit_malus_region if (c != "" and c != kit_region_quete) else 0

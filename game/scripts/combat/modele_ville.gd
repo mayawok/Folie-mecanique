@@ -366,18 +366,18 @@ func ville_bloque_marche() -> bool:
 # --- Sorties ---------------------------------------------------------------------------------
 const CARDINAUX := ["l'est", "le sud-est", "le sud", "le sud-ouest", "l'ouest", "le nord-ouest", "le nord", "le nord-est"]
 
-# Les secteurs voisins les plus proches : [{id, porte, secteur, ville, niveau, distance_m}]
+# Les villes voisines, une porte par route de la carte (DEC-216) : [{id, porte, secteur, ville, niveau, distance_m, route}]
 func ville_sorties() -> Array:
 	var ici: Vector2 = monde.secteurs[monde.secteur].pos
-	var autres: Array = monde.secteurs.filter(func(s): return int(s.id) != monde.secteur)
-	autres.sort_custom(func(a, b): return ici.distance_to(a.pos) < ici.distance_to(b.pos))
 	var res := []
-	for s in autres.slice(0, int(VD().sorties)):
+	for v in monde.voisins_secteur(monde.secteur):
+		var s: Dictionary = monde.secteurs[int(v.id)]
 		var d: Vector2 = s.pos - ici
 		var oct := int(round(fposmod(atan2(d.y, d.x), TAU) / (TAU / 8.0))) % 8   # y de la carte vers le bas = sud
 		var connue := bool(s.get("ville_connue", false))
 		res.append({"id": int(s.id), "porte": "Porte vers " + CARDINAUX[oct], "secteur": s.nom, "ville": String(s.get("ville", "")) if connue else "",
-			"niveau": int(s.niveau), "distance_m": int(250.0 + ici.distance_to(s.pos) * 900.0)})
+			"niveau": int(s.niveau), "distance_m": int(250.0 + ici.distance_to(s.pos) * 900.0), "route": String(v.route.get("nom", ""))})
+	res.sort_custom(func(a, b): return int(a.distance_m) < int(b.distance_m))
 	# Demi-tour (DEC-168) : la porte qui ramène vers l'ancienne destination est toujours proposée
 	var p: int = monde.secteur_prec
 	if p >= 0 and p != monde.secteur and res.filter(func(e): return int(e.id) == p).is_empty():

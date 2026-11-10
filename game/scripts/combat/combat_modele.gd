@@ -283,7 +283,7 @@ func sauver() -> Dictionary:
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "regime": regime, "recus": recus.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
-		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
+		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true), "carte": 2, "region_quete": w.region_quete}}
 
 # --- Eau et vivres (DEC-148) ------------------------------------------------------------------
 var _alerte_ravit := {}   # alertes déjà données : {"eau_bas": true, "eau_vide": true, ...}
@@ -389,13 +389,16 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m._prochain_x = m.x_tete + 80.0
 	m.rng.state = int(d.rng)
 	var w: Dictionary = d.monde
-	m.monde.secteur = int(w.secteur)
-	m.monde.secteur_prec = int(w.get("secteur_prec", -1))   # absent des anciennes sauvegardes
+	var carte_fixe: bool = int(w.get("carte", 1)) >= 2   # anciennes sauvegardes : carte aléatoire d'avant DEC-216, le convoi repart de Kerbrume
+	if carte_fixe:
+		m.monde.secteur = int(w.secteur)
+		m.monde.secteur_prec = int(w.get("secteur_prec", -1))   # absent des anciennes sauvegardes
+		m.monde.region_quete = String(w.get("region_quete", m.monde.region_quete))
 	m.monde.x_entree = float(w.x_entree)
 	m.monde.heure = float(w.heure)
 	m.monde.jour = int(w.jour)
 	m.monde.trajet = {}
-	if not w.trajet.is_empty():
+	if carte_fixe and not w.trajet.is_empty():
 		m.monde.trajet = {"dest": int(w.trajet.dest), "reste": float(w.trajet.reste), "total": float(w.trajet.total)}
 		m._prochain_x = INF
 	m.monde.quete = {}
@@ -408,7 +411,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	for k in ["eau", "vivres"]:   # sauvegardes d'avant le 08/11 (DEC-148) : réserve de départ
 		if not m.stocks.has(k) or not d.stocks.has(k):
 			m.stocks[k] = float(donnees().stocks_depart[k]) if not m.bac_a_sable else 99999.0
-	m.ville_charger(d.get("villes", {}))
+	m.ville_charger(d.get("villes", {}) if carte_fixe else {})
 	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
 	m.log_(Textes.t("modele.017") if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")

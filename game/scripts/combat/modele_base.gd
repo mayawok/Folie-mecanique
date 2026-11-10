@@ -442,7 +442,7 @@ func carburant_manquant() -> String:
 
 # Niveau de rencontre ajouté hors de la région de la quête principale (DEC-172) ; redéfini par le Kit (modele_kit.gd)
 func malus_hors_region() -> int:
-	return 0
+	return monde.malus_region()
 
 # Valeurs de jeu du Berliet GDR (DEV-022) : le profil de l'assemblage reste la base ; pneus, échappement, réservoir et châssis
 # la modulent. Idempotent : appelée à chaque changement de pièce et à chaque reconstruction de l'assemblage.

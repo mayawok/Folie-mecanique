@@ -32,7 +32,7 @@ Textes et boutons du HUD, fluidité des villes et de la ville pillée, scènes d
 0. **Lot A fait (10/11)** : Kit → groupes sur mesure, région de la quête, équilibrage en direct (DEV-037).
 
 1. **Lot B : fondations** : **fait** : essence et gazole avec capacité (DEC-207), textes fr/en pour le journal et le HUD (DEC-208, 209), découpage de `vue_interface.gd` et `construction_libre.gd` (DEC-210). **Reste, repris plus tard** : textes de l'éditeur de grille, des menus et des données ; découpage de `editeur_grille.gd`.
-2. **Lot C : carte branchée au jeu**, décor par région, difficulté forcée (DEV-039).
+2. **Lot C : carte branchée au jeu** : **fait pour l'essentiel** (DEC-216) : 13 villes fixes, voyage par les routes, décor par zone, +3 niveaux hors Armorique. **Reste** : décor complet par région, tempêtes de désert, rumeurs qui annoncent le danger, voyage de plusieurs étapes d'un coup.
 3. **Lot D : factions et réputation, ordres par vignettes, bulles d'aide**, puis halte et portières du Berliet (DEV-040).
 4. Gelé jusqu'à la fin du Kit : train, centrale, gazogène, caches, boss, lot motos et side-cars.
 

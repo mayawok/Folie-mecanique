@@ -248,7 +248,7 @@ class MondeJeuCouleurs:
 
 class CarteMap extends Control:
 	var vue
-	var tex: Texture2D = load("res://assets/carte/carte_fond.png")
+	var tex: Texture2D = load(String(CarteMonde.donnees().get("image", "res://assets/carte/carte_fond.png")))
 
 	func _zone() -> Rect2:
 		var t := tex.get_size()
@@ -284,8 +284,14 @@ class CarteMap extends Control:
 			cible = w.trajet.dest
 		elif vue._carte_sel >= 0:
 			cible = vue._carte_sel
-		if cible >= 0 and cible != w.secteur:
-			draw_dashed_line(_pt(cour), _pt(w.secteurs[cible]), Color(1, 0.9, 0.5, 0.9), 4.0, 14.0)
+		for v in w.voisins_secteur(w.secteur):   # routes ouvertes depuis la ville actuelle
+			draw_line(_pt(cour), _pt(w.secteurs[int(v.id)]), Color(1, 1, 1, 0.35), 3.0)
+		if cible >= 0 and cible != w.secteur:   # itinéraire par les routes de la carte, étape par étape
+			var iti: Array = CarteMonde.chemin(String(cour.lieu), String(w.secteurs[cible].lieu))
+			if iti.size() < 2:
+				iti = [String(cour.lieu), String(w.secteurs[cible].lieu)]
+			for k2 in range(iti.size() - 1):
+				draw_dashed_line(_pt(w.secteurs[w.indice_lieu(String(iti[k2]))]), _pt(w.secteurs[w.indice_lieu(String(iti[k2 + 1]))]), Color(1, 0.9, 0.5, 0.9), 4.0, 14.0)
 		for s in w.secteurs:
 			var p := _pt(s)
 			var dif: float = clampf(float(s.niveau) / 7.0, 0.0, 1.0)
@@ -298,9 +304,9 @@ class CarteMap extends Control:
 				draw_arc(p, 28.0, 0.0, TAU, 32, Color.WHITE, 3.0)
 			if s.id == w.secteur:
 				draw_colored_polygon(PackedVector2Array([p + Vector2(0, -44), p + Vector2(10, -28), p + Vector2(-10, -28)]), Color.WHITE)
-			draw_string(f, p + Vector2(-80, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 26, Color(0, 0, 0, 0.9))
-			draw_string(f, p + Vector2(-81, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 160, 26, Color("#F6F0DC"))
-			draw_string(f, p + Vector2(-20, 4), str(s.faction), HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(0.05, 0.05, 0.05))
+			draw_string(f, p + Vector2(-130, 46), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 260, 26, Color(0, 0, 0, 0.9))
+			draw_string(f, p + Vector2(-131, 45), s.nom, HORIZONTAL_ALIGNMENT_CENTER, 260, 26, Color("#F6F0DC"))
+			draw_string(f, p + Vector2(-20, 4), {"ami": "+", "neutre": "~", "hostile": "!"}[MondeJeu.ATTITUDE[s.faction]], HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(0.05, 0.05, 0.05))
 			if bool(s.get("ville_connue", false)):   # ville inscrite sur la carte (DEC-142) : petite enceinte et son nom
 				var q := p + Vector2(26, -34)
 				draw_rect(Rect2(q, Vector2(26, 16)), Color("#3A2E24"))

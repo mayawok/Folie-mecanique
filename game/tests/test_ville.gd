@@ -29,7 +29,7 @@ func _init() -> void:
 	m.monde._assaut_t = 1.0e9
 	ok(m.ville_active() and m.ville_phase() == "approche", "une ville attend sur la route au départ")
 	var nom := String(m.ville.nom)
-	ok(D.noms.has(nom), "nom tiré de la liste : %s" % nom)
+	ok(nom == "Kerbrume", "la première ville est Kerbrume, nom fixe de la carte : %s" % nom)
 	var x0 := float(m.ville.x0)
 	ok(absf(Terrain.relief(x0 + 40.0) - Terrain.relief(x0 + 110.0)) < 0.01, "la ville est plate")
 	# Approche : on avance, le convoi freine seul et s'arrête devant la porte
@@ -94,7 +94,7 @@ func _init() -> void:
 	var so_r: Array = m.ville_sorties()
 	ok(not so_r.filter(func(e): return bool(e.get("retour", false))).is_empty(), "porte du retour vers l'ancienne destination")
 	m.monde.secteur_prec = -1
-	ok(so.size() == int(D.sorties), "%d sorties proposées : %s" % [so.size(), ", ".join(so.map(func(o): return "%s (%s)" % [o.porte, o.secteur]))])
+	ok(so.size() == m.monde.voisins_secteur(m.monde.secteur).size() and so.size() >= 2, "%d sorties proposées : %s" % [so.size(), ", ".join(so.map(func(o): return "%s (%s)" % [o.porte, o.secteur]))])
 	var dest := int(so[1].id)
 	ok(m.ville_partir(dest), "départ demandé")
 	ok(m.monde.en_transit() and int(m.monde.trajet.dest) == dest, "la route suivante mène au secteur choisi")

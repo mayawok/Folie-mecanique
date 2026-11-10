@@ -10,6 +10,8 @@ const CREPUSCULE := 0.62
 const AUBE := 0.95
 const FACTIONS := {1: "Faction 1", 2: "Faction 2", 3: "Faction 3"}
 const ATTITUDE := {1: "ami", 2: "neutre", 3: "hostile"}   # relation du joueur avec chaque faction
+# Attitude de départ envers chaque faction de la carte (provisoire, remplacée par la réputation au lot D)
+const ATTITUDE_FACTION := {"FAC-003": "ami", "FAC-001": "neutre", "FAC-004": "neutre", "FAC-005": "neutre", "FAC-006": "neutre", "FAC-002": "hostile", "FAC-007": "hostile"}
 const PREFIXES := ["Fort-", "Mont-", "Val-", "Port-", "Pont-", "Croix-", "Sainte-", "Haut-", "", ""]
 const RACINES := ["Cendre", "Verdun", "Brume", "Sable", "Rouille", "Lorne", "Marne", "Orme", "Fer", "Gris", "Acier", "Corbeau", "Épave", "Vigie"]
 
@@ -46,6 +48,7 @@ class Pieton:
 var m                          # CombatModele
 var secteurs: Array = []       # {id, nom, pos: Vector2 (0..1), niveau, faction}
 var secteur := 0               # secteur actuel
+var region_quete := ""          # région de la quête principale : hors de celle-ci, la difficulté est forcée (DEC-172)
 var secteur_prec := -1         # secteur d'où l'on vient : sortie « retour » des villes (DEC-168)
 var x_entree := 0.0            # abscisse d'entrée dans le secteur
 var trajet := {}               # {dest, reste, total} : zone calme entre deux secteurs
@@ -74,34 +77,63 @@ func _init(modele) -> void:
 
 # --- Carte -----------------------------------------------------------------
 
+# Carte fixe (DEV-039, DEC-216) : un secteur par ville-étape de la carte du monde (carte_monde.json), identique à chaque partie.
+# Le convoi part de Kerbrume ; on ne voyage que de ville en ville par les routes de la carte.
 func _generer_carte() -> void:
-	var r := RandomNumberGenerator.new()
-	r.seed = m.graine * 31 + 7
-	var noms := {}
-	for i in 12:
-		var col := i % 4
-		var lig := i / 4
-		var pos := Vector2(0.12 + 0.25 * col + r.randf_range(-0.07, 0.07), 0.2 + 0.3 * lig + r.randf_range(-0.07, 0.07))
-		var nom := ""
-		while nom == "" or noms.has(nom):
-			nom = PREFIXES[r.randi() % PREFIXES.size()] + RACINES[r.randi() % RACINES.size()]
-		noms[nom] = true
-		secteurs.append({"id": i, "nom": nom, "pos": pos, "niveau": 0, "faction": 1 + r.randi() % 3})
-	# Départ : le secteur le plus au sud-ouest
-	var depart := 0
-	var d_min := INF
+	secteurs = []
+	for l in CarteMonde.villes():
+		var fac: String = String(l.get("faction", ""))
+		var att: String = ATTITUDE_FACTION.get(fac, "neutre")
+		secteurs.append({"id": secteurs.size(), "lieu": String(l.id), "nom": String(l.nom), "pos": CarteMonde.pos(String(l.id)),
+			"niveau": int(l.get("niveau", 0)), "faction": ATTITUDE.keys()[ATTITUDE.values().find(att)], "fac": fac,
+			"faction_nom": String(CarteMonde.donnees().factions.get(fac, {}).get("nom", "Sans faction")),
+			"region": String(l.get("region", "")), "zone": String(l.get("zone", "terre")),
+			"ville": String(l.nom), "maire": String(l.get("maire", "Morel"))})
+	secteur = indice_lieu("kerbrume")
+	region_quete = String(CombatModele.donnees().get("region", {}).get("quete_depart", "armorique"))
+	Terrain.zone = String(secteurs[secteur].zone)
+
+
+func indice_lieu(id: String) -> int:
 	for s in secteurs:
-		var d: float = s.pos.distance_to(Vector2(0.1, 0.85))
-		if d < d_min:
-			d_min = d
-			depart = s.id
-	secteur = depart
-	for s in secteurs:
-		var dd: float = s.pos.distance_to(secteurs[depart].pos)
-		s.niveau = clampi(int(round(dd * 8.0 + r.randf_range(-0.7, 0.7))), 0, 7)
-	secteurs[depart].niveau = 0
-	secteurs[depart].faction = 1
-	secteurs[depart].nom = "Les Cendres"
+		if String(s.lieu) == id:
+			return int(s.id)
+	return 0
+
+
+# Secteurs joignables en une étape par une route de la carte : [{id, route}]
+func voisins_secteur(id: int) -> Array:
+	var res := []
+	for v in CarteMonde.voisins(String(secteurs[id].lieu)):
+		if String(CarteMonde.lieu(String(v.id)).get("type", "")) == "ville":
+			res.append({"id": indice_lieu(String(v.id)), "route": v.route})
+	return res
+
+
+func est_voisin(a: int, b: int) -> bool:
+	return not voisins_secteur(a).filter(func(v): return int(v.id) == b).is_empty()
+
+
+# Prochaine étape pour aller de la ville actuelle à une ville lointaine (-1 si inaccessible)
+func prochaine_etape(vers: int) -> int:
+	var ch: Array = CarteMonde.chemin(String(secteurs[secteur].lieu), String(secteurs[vers].lieu))
+	if ch.size() < 2:
+		return -1
+	return indice_lieu(String(ch[1]))
+
+
+# --- Régions et difficulté forcée (DEC-172, DEC-216) ---
+func region_courante() -> String:
+	if en_transit() and float(trajet.reste) < float(trajet.total) * 0.5:
+		return String(secteurs[int(trajet.dest)].region)
+	return String(secteurs[secteur].region)
+
+
+# Niveau de rencontre ajouté tant que le convoi est hors de la région de la quête principale
+func malus_region() -> int:
+	if region_quete == "":
+		return 0
+	return int(CombatModele.donnees().get("region", {}).get("malus", 3)) if region_courante() != region_quete else 0
 
 
 func niveau_a(x: float) -> int:
@@ -121,11 +153,14 @@ func distance_secteur(id: int) -> float:
 func choisir_destination(id: int) -> bool:
 	if id < 0 or id >= secteurs.size() or id == secteur or (en_transit() and trajet.dest == id):
 		return false
+	if not est_voisin(secteur, id):   # carte fixe : on ne quitte une ville que par une de ses routes
+		return false
 	var total := 250.0 + distance_secteur(id) * 900.0
 	trajet = {"dest": id, "reste": total, "total": total}
+	Terrain.zone = String(secteurs[secteur].zone)
 	m._prochain_x = INF
 	var route := "de route" if m.mission_active() else "de route calme"   # en mission, la route est dangereuse (DEC-146)
-	m.log_(Textes.t("monde.001", [secteurs[id].nom, FACTIONS[secteurs[id].faction], secteurs[id].niveau, int(total), route]), "info")
+	m.log_(Textes.t("monde.001", [secteurs[id].nom, secteurs[id].faction_nom, secteurs[id].niveau, int(total), route]), "info")
 	m.evt({"t": "cap"})
 	return true
 
@@ -300,7 +335,8 @@ func _cap(dt: float) -> void:
 		trajet = {}
 		m._prochain_x = m.x_tete + 90.0
 		var s: Dictionary = secteurs[secteur]
-		m.log_(Textes.t("monde.007", [s.nom, FACTIONS[s.faction], ATTITUDE[s.faction], s.niveau]), "ok")
+		m.log_(Textes.t("monde.007", [s.nom, s.faction_nom, ATTITUDE[s.faction], s.niveau]), "ok")
+		Terrain.zone = String(s.zone)   # le décor suit la région (DEV-008)
 		m.evt({"t": "secteur"})
 		if m.mission_en_route():   # mission du maire : la ville de destination est au bout de l'étape (DEC-146)
 			m.ville_creer(m.x_tete + float(m.MD().ville_arrivee_m))
@@ -624,7 +660,7 @@ func generer(choix: Dictionary, x: float, r: RandomNumberGenerator) -> float:
 			var e = m.creer_vehicule("citroen_traction", "ennemi", b.x + b.longueur + 6.0)
 			e.mode = "barrage"
 			m.ennemis.append(e)
-		m.log_(Textes.t("monde.010", [b.nom, Textes.t("monde.010a") if ami else Textes.t("monde.010b"), FACTIONS[s.faction], int(b.x - m.x_tete)]), "ok" if ami else "alerte")
+		m.log_(Textes.t("monde.010", [b.nom, Textes.t("monde.010a") if ami else Textes.t("monde.010b"), s.faction_nom, int(b.x - m.x_tete)]), "ok" if ami else "alerte")
 		return b.x + b.longueur + 10.0
 	if choix.has("pietons"):
 		var k: String = choix.pietons[0]

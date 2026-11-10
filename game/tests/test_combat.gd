@@ -234,11 +234,11 @@ func _init() -> void:
 	# --- Carte, secteurs et zone calme
 	var mc2 := CombatModele.new(51)
 	var w1 := mc2.monde
-	verifier(w1.secteurs.size() == 12 and w1.secteurs[w1.secteur].niveau == 0, "12 secteurs, départ au niveau 0 (%s)" % w1.secteurs[w1.secteur].nom)
+	verifier(w1.secteurs.size() == 13 and w1.secteurs[w1.secteur].lieu == "kerbrume", "13 secteurs fixes, départ à Kerbrume (%s)" % w1.secteurs[w1.secteur].nom)
 	var autre := 0
-	for sct in w1.secteurs:
-		if sct.niveau >= 3:
-			autre = sct.id
+	for vs in w1.voisins_secteur(w1.secteur):
+		if w1.secteurs[int(vs.id)].niveau >= 3:
+			autre = int(vs.id)
 	verifier(w1.choisir_destination(autre) and w1.en_transit(), "choisir un secteur lance un trajet calme")
 	mc2.ordre_marche("avancer")
 	mc2.stocks.gazole = 1.0e5
