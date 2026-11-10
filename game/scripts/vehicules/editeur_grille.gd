@@ -339,7 +339,9 @@ func _placer_apercu(b := {}) -> void:
 	if berliet:
 		_apercu_art.ppm = _apercu.ppm
 		_apercu_art.type = "berliet_gdr"
-		_apercu_art.configurer_art(m.berliet_config if m != null and "berliet_config" in m else BerlietConfig.defaut())
+		var bcfg: Dictionary = m.berliet_config if m != null and "berliet_config" in m else BerlietConfig.defaut()
+		_apercu_art.configurer_art(bcfg)
+		_apercu_art.art_montage = ConstructionLibre.montage_berliet(source, bcfg)   # cabine, châssis et roues posés élément par élément (DEC-211)
 		_apercu_art.custom_minimum_size = Vector2(_apercu_art.D.longueur, _apercu_art.D.hauteur) * _apercu_art.ppm
 		_apercu_art.size = _apercu_art.custom_minimum_size
 		var x_cab := float(source.berliet.essieu_av) * ConstructionLibre.C   # roue avant de l'art sur l'essieu avant de la grille

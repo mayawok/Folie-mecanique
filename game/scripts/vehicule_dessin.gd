@@ -46,6 +46,7 @@ var _ass := 0.0             # assiette statique d'un véhicule penché (pente de
 var _piv := Vector2.ZERO    # point de contact autour duquel il pivote (m)
 var art_config := {}         # véhicule dessiné par l'art (Berliet, DEC-136) : pièces choisies ; vide = formes du code
 var _art: BerlietDessin = null
+var art_montage := {}        # Berliet monté par éléments dans la grille (DEC-211) : voir BerlietDessin.montage
 var module_leve := 0.0       # Berliet : cargaison suspendue au pont roulant (mission, DEC-145)
 var roues_perdues: Array = []   # indices des roues arrachées en combat (DEC-080) : on ne les dessine plus
 
@@ -284,6 +285,7 @@ func _dessiner_art() -> void:
 	_art.angle_roues = dist / 0.5
 	_art.teinte = _voile
 	_art.module_leve = module_leve
+	_art.montage = art_montage
 	_art.dessiner()
 	draw_set_transform(_decal)
 	if equipage and not equipage_dehors:

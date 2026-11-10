@@ -16,6 +16,10 @@ var roues_visibles := true   # faux : épave posée sur le châssis
 var ci: CanvasItem = self    # surface de dessin : le véhicule du convoi (VehiculeDessin) dessine le Berliet sur lui-même
 var base := Transform2D.IDENTITY   # repère du camion sur cette surface (assiette, sens, suspension)
 var module_leve := 0.0       # m : cargaison suspendue au-dessus de sa place (pont roulant de l'atelier, mission DEC-145)
+# Montage par éléments (grille 2D, DEC-211) : vide = camion d'un bloc. Sinon {"cabine_du", "chassis_du" (décalages en u),
+# "roues": [{x (u), cote "av"/"ar"}]} : cabine (avec trappe et échappement), châssis (avec réservoir et module) et chaque roue
+# sont posés là où sont leurs éléments dans la grille.
+var montage := {}
 
 static var _tex := {}
 
@@ -66,14 +70,23 @@ func _draw() -> void:
 func dessiner() -> void:
 	_tr0()
 	var sec := Vector2(0, secousse)
+	var dc := Vector2(float(montage.get("cabine_du", 0.0)) * k(), 0.0)
+	var dch := Vector2(float(montage.get("chassis_du", 0.0)) * k(), 0.0)
+	var roues_faites := false
 	for c in BerlietConfig.calques(config):
+		var dl := dc if String(c.id) in ["cabine", "trappe", "echappement"] else dch
 		match String(c.id):
 			"module":
-				_tr(sec - Vector2(0, module_leve * ppm), 0.0)
+				_tr(sec + dch - Vector2(0, module_leve * ppm), 0.0)
 				_module()
 				_tr0()
 			"roue":
 				if not roues_visibles:
+					continue
+				if montage.has("roues"):
+					if not roues_faites:
+						roues_faites = true
+						_roues_montees()
 					continue
 				var t := texture(c.image)
 				var taille := Vector2(t.get_width(), t.get_height()) * float(c.e) * k()
@@ -84,7 +97,7 @@ func dessiner() -> void:
 				var t := texture(c.image)
 				var e: float = float(c.e) * k()
 				var piv: Vector2 = c.pivot
-				var o := pu(c.x, c.y) + piv * e + sec
+				var o := pu(c.x, c.y) + piv * e + sec + dl
 				_tr(o, float(c.ouverture) * trappe)
 				ci.draw_texture_rect(t, Rect2(-piv * e, Vector2(t.get_width(), t.get_height()) * e), false, teinte)
 				_tr0()
@@ -95,8 +108,22 @@ func dessiner() -> void:
 				if c.ancre == "bd":
 					hg -= taille
 				var s := Vector2.ZERO if c.id == "chassis" else sec
-				ci.draw_texture_rect(t, Rect2(p(hg) + s, taille * k()), false, teinte)
+				ci.draw_texture_rect(t, Rect2(p(hg) + s + dl, taille * k()), false, teinte)
 	ci.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+# Roues montées sur les essieux de la grille : pneu avant ou arrière selon le côté
+func _roues_montees() -> void:
+	var par_cote := {}
+	for mo in BerlietConfig.moyeux(config):
+		par_cote[String(mo.cote)] = mo
+	for r in montage.roues:
+		var mo: Dictionary = par_cote.get(String(r.cote), par_cote.values()[0])
+		var t := texture(mo.image)
+		var taille := Vector2(t.get_width(), t.get_height()) * float(mo.e) * k()
+		_tr(pu(float(r.x), float(mo.y)), angle_roues)
+		ci.draw_texture_rect(t, Rect2(-taille / 2.0, taille), false, teinte)
+		_tr0()
 
 
 # --- Modules arrière (code) --------------------------------------------------------------------------------

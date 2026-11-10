@@ -1525,14 +1525,47 @@ static func convertir(a: Dictionary, type: String) -> Dictionary:
 		for e in b.essieux:
 			xav = maxi(xav, int(e.x))   # l'avant est à droite : c'est l'essieu le plus à droite
 		var fixes := []
+		var cab_dx := 0
 		for p in b.pieces:
 			if Assemblage.piece(String(p.piece)).get("famille", "") == "cabine":
 				fixes.append(String(p.piece))
-		b.berliet = {"essieu_av": xav, "fixes": fixes}
+				cab_dx = int(p.pos[0]) - xav
+		var ch_x0 := 999
+		for c in b.get("cases", []):
+			ch_x0 = mini(ch_x0, int(c[0]))
+		# Repères d'origine (DEC-211) : cabine et arrière du châssis par rapport à l'essieu avant, pour poser chaque élément de l'art
+		b.berliet = {"essieu_av": xav, "fixes": fixes, "cab_dx": cab_dx, "ch_dx": ch_x0 - xav}
 	return b
 
 
 # Berliet (DEC-167) : la pièce, la case ou l'essieu est-il fixe ? (hors mode créatif)
+# Berliet monté par éléments (DEC-211) : où poser la cabine, le châssis et chaque roue de l'art d'après la grille.
+# Réponse en u de l'art (BerlietDessin.montage) ; repère : le moyeu avant de l'art sur l'essieu avant de la grille.
+static func montage_berliet(a: Dictionary, config: Dictionary) -> Dictionary:
+	if not a.has("berliet"):
+		return {}
+	var u_av := 0.0
+	for mo in BerlietConfig.moyeux(config):
+		if String(mo.cote) == "av":
+			u_av = float(mo.x)
+	var upc := C * BerlietConfig.ppm_art()   # u par cellule
+	var xav := int(a.berliet.essieu_av)
+	var cab_x := xav + int(a.berliet.get("cab_dx", 0))
+	for p in a.get("pieces", []):
+		if Assemblage.piece(String(p.piece)).get("famille", "") == "cabine":
+			cab_x = int(p.pos[0])
+	var ch_x := 999
+	for c in a.get("cases", []):
+		ch_x = mini(ch_x, int(c[0]))
+	if ch_x == 999:
+		ch_x = xav + int(a.berliet.get("ch_dx", 0))
+	var roues := []
+	for e in a.get("essieux", []):
+		roues.append({"x": u_av + float(int(e.x) - xav) * upc, "cote": "av" if int(e.x) == xav else "ar"})
+	return {"cabine_du": float(cab_x - xav - int(a.berliet.get("cab_dx", 0))) * upc,
+		"chassis_du": float(ch_x - xav - int(a.berliet.get("ch_dx", ch_x - xav))) * upc, "roues": roues}
+
+
 static func fixe_berliet(a: Dictionary, quoi: String, val) -> bool:
 	if not a.has("berliet"):
 		return false

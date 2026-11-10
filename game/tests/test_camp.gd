@@ -177,6 +177,13 @@ func _init() -> void:
 	# Berliet dans la grille (DEC-167)
 	var gb := ConstructionLibre.convertir(Assemblage.de_type("berliet_gdr"), "berliet_gdr")
 	ok(gb.has("berliet"), "Berliet : grille marquée")
+	var mb := ConstructionLibre.montage_berliet(gb, BerlietConfig.defaut())
+	ok(mb.roues.size() == gb.essieux.size(), "Berliet monté : une roue dessinée par essieu de la grille")
+	ok(absf(float(mb.cabine_du)) < 0.01 and absf(float(mb.chassis_du)) < 0.01, "Berliet monté : cabine et châssis à leur place d'origine")
+	var gb_mont: Dictionary = gb.duplicate(true)
+	gb_mont.essieux[0].x = int(gb_mont.essieux[0].x) - 2
+	var mb_mont := ConstructionLibre.montage_berliet(gb_mont, BerlietConfig.defaut())
+	ok(absf(float(mb_mont.roues[0].x) - float(mb.roues[0].x) + 2.0 * ConstructionLibre.C * BerlietConfig.ppm_art()) < 0.01 or gb_mont.essieux[0].x == gb_mont.berliet.essieu_av, "Berliet monté : une roue arrière suit son essieu déplacé")
 	ok(not gb.berliet.fixes.is_empty() and ConstructionLibre.fixe_berliet(gb, "piece", gb.berliet.fixes[0]), "Berliet : cabine fixe")
 	ok(ConstructionLibre.fixe_berliet(gb, "essieu", gb.berliet.essieu_av), "Berliet : essieu avant fixe")
 	var autre_x := -1
@@ -189,8 +196,8 @@ func _init() -> void:
 	for c_b in gb.cases:
 		xmin_b = mini(xmin_b, int(c_b[0]))
 	ok(xmin_b >= 8, "Berliet : de la place derrière le camion (%d cases)" % xmin_b)
-	var gb2 := ConstructionLibre.deplacer(gb, 2, 0)
-	ok(not gb2.is_empty() and int(gb2.berliet.essieu_av) == int(gb.berliet.essieu_av) + 2, "Berliet : l'essieu avant fixe suit le déplacement")
+	var gbx := ConstructionLibre.deplacer(gb, 2, 0)
+	ok(not gbx.is_empty() and int(gbx.berliet.essieu_av) == int(gb.berliet.essieu_av) + 2, "Berliet : l'essieu avant fixe suit le déplacement")
 	ok(ConstructionLibre.fixe_berliet(gb, "cases", gb.cases.slice(1)), "Berliet : case d'origine retirée refusée")
 	# Gazogène (DEC-158)
 	var gw := ConstructionLibre.convertir(Assemblage.de_type("citroen_t23"), "citroen_t23")
