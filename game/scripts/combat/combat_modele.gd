@@ -469,6 +469,8 @@ func avancer(dt := DT) -> void:
 	_soins(dt)
 	_ia_ennemis(dt)
 	_ia_poursuite(dt)
+	_ia_face(dt)
+	_chocs(dt)
 	_abordages(dt)
 	for v in convoi.duplicate():
 		if v.actif():
@@ -588,7 +590,7 @@ func _marche(dt: float) -> void:
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax
 			if vit > 0.0:
 				for e in ennemis:
-					if e.actif() and e.mode != "poursuite" and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
+					if e.actif() and not voie_libre(e) and not (conduite() == "eperonner" and ordres.marche == "avancer") and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
 						vit = 0.0
 						blocage = Textes.t("modele.037")
 						break

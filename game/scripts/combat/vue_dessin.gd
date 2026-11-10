@@ -35,6 +35,13 @@ func _evenement(e: Dictionary) -> void:
 				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe in ["canon", "mortier"]})
 				if e.classe in ["canon", "mortier"]:
 					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
+		"choc":   # éperonnage (DEC-215)
+			var pc := Vector2(float(e.x), 0.8)
+			_etincelles.append({"p": pc, "age": 0.0, "gros": true})
+			_explosions.append({"p": pc, "age": 0.0, "taille": 0.5 if e.fort else 0.3})
+			_son("sfx_impact_blindage", 0.0)
+		"esquive":
+			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": false})
 		"meute":
 			_son("sfx_meute", -3.0)
 		"pillards":

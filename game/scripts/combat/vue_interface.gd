@@ -139,6 +139,8 @@ func _construire_elements() -> void:
 		func(): return m.ordres.marche, func(v): m.ordre_marche(v), 200.0)
 	_rangee(ord, "Visée", [["Libre", "libre"], ["Roues", "roulement"], ["Armes", "armement"], ["Châssis", "chassis"]],
 		func(): return m.ordres.visee, func(v): m.ordre_visee(v), 150.0)
+	_rangee(ord, "Conduite", [["Éviter / doubler", "eviter"], ["Éperonner", "eperonner"]],
+		func(): return m.conduite(), func(v): m.ordre_conduite(v), 260.0)
 	var hd := HBoxContainer.new()
 	ord.add_child(hd)
 	_bouton("Demi-tour du convoi", func(): _demi_tour(), hd, 330)

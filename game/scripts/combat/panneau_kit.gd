@@ -99,7 +99,7 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_titre(v, "Groupe sur mesure")
 	_rangee(v, CombatModele.KIT_VEHICULES.keys().map(func(k): return [CombatModele.KIT_VEHICULES[k], k]), func(k): _groupe.type = k; _maj())
 	_rangee(v, [["−", -1], ["+", 1]], func(d): _groupe.n = clampi(int(_groupe.n) + int(d), 1, 8); _maj())
-	_rangee(v, [["À l'approche", "approche"], ["Convoi devant", "convoi"], ["Poursuite", "poursuite"]], func(k): _groupe.mode = k; _maj())
+	_rangee(v, [["À l'approche", "approche"], ["Convoi devant", "convoi"], ["En face", "face"], ["Poursuite", "poursuite"]], func(k): _groupe.mode = k; _maj())
 	_lbl_groupe = Label.new()
 	_lbl_groupe.add_theme_font_size_override("font_size", 24)
 	v.add_child(_lbl_groupe)
@@ -148,7 +148,7 @@ func _maj() -> void:
 	for i in _vals.size():
 		var val: float = m.kit_reglage_valeur(i)
 		_vals[i].text = ("%d" if val >= 10.0 or CombatModele.KIT_REGLAGES[i].pas >= 1.0 else "%.2f") % val
-	_lbl_groupe.text = "%d × %s · %s" % [int(_groupe.n), CombatModele.KIT_VEHICULES[_groupe.type], {"approche": "à l'approche", "convoi": "convoi devant", "poursuite": "poursuite"}[_groupe.mode]]
+	_lbl_groupe.text = "%d × %s · %s" % [int(_groupe.n), CombatModele.KIT_VEHICULES[_groupe.type], {"approche": "à l'approche", "convoi": "convoi devant", "face": "en face", "poursuite": "poursuite"}[_groupe.mode]]
 	var rq: Dictionary = CarteMonde.region(m.kit_region_quete)
 	var rc: Dictionary = CarteMonde.region(m.kit_region_courante())
 	_lbl_region.text = "Quête : %s · Convoi : %s%s" % [rq.get("nom", "aucune"), rc.get("nom", "?"),

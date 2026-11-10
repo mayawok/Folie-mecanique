@@ -2,7 +2,7 @@
 # Chaîne : modele_base <- modele_tir <- modele_terrain <- modele_mines <- modele_meteo <- modele_abordage <- modele_kit <- modele_atelier <- combat_modele.
 # Sert à fabriquer à la main le monde, les décors et les rencontres avant d'écrire un chapitre : zone, heure, météo,
 # route calme (aucune rencontre automatique) et apparitions à la demande. Actif seulement en Mode créatif (bac_a_sable).
-extends "res://scripts/combat/modele_abordage.gd"
+extends "res://scripts/combat/modele_choc.gd"
 
 const KIT_ZONES := ["sable", "terre", "cailloux", "eau"]
 const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux": "Cailloux", "eau": "Eau"}
@@ -87,6 +87,17 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 				ennemis.append(e)
 				xe += e.longueur + 6.0
 			log_("Kit : un convoi de %d véhicules roule devant, à %d m." % [types.size(), int(x - x_tete)], "info")
+		"face":   # convoi qui vient en face sur l'autre voie (DEC-215) : il nous croise, ou nous fonce dessus
+			var types: Array = p.get("types", ["citroen_t23", "willys_mb"])
+			var xf := x
+			for t in types:
+				var e := creer_vehicule(String(t), "ennemi", xf)
+				e.mode = "face"
+				if p.has("eperonne"):
+					_intention[e.uid] = bool(p.eperonne)
+				ennemis.append(e)
+				xf += e.longueur + 6.0
+			log_("Kit : un convoi de %d véhicules arrive en face, à %d m." % [types.size(), int(x - x_tete)], "info")
 		"poursuite":
 			var types: Array = p.get("types", ["bmw_r75", "citroen_traction"])
 			var xp := _kit_x_arriere()
@@ -139,6 +150,8 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 			match mode:
 				"poursuite":
 					return kit_apparaitre("poursuite", {"types": types, "abordeurs": int(p.get("abordeurs", 2))})
+				"face":
+					return kit_apparaitre("face", {"types": types})
 				"convoi":
 					return kit_apparaitre("convoi_devant", {"types": types, "vitesse": float(p.get("vitesse", 4.5))})
 				_:
