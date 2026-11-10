@@ -10,7 +10,7 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 
 | Chemin | Domaine | Description | Statut | Subordonné à | Dernière vérification | Contradiction connue |
 |---|---|---|---|---|---|---|
-| [`archive/docs_design/VISION_2026-11-10.md` (archivé)](../docs/design/VISION.md) | Conception | Vision du jeu ; bloc de recentrage du 06/11 en tête | en cours | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | Passages périmés archivés (DEC-105) ; reste à relire le reste de « Décidé » |
+| [`archive/docs_design/VISION_2026-11-10.md` (archivé)](../archive/docs_design/VISION_2026-11-10.md) | Conception | Vision du jeu ; bloc de recentrage du 06/11 en tête | archivé | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | Passages périmés archivés (DEC-105) ; reste à relire le reste de « Décidé » |
 | [`docs/design/CONVOI.md`](../docs/design/CONVOI.md) | Conception | Mode convoi : ordres, combat, monde, architecture du code | à revoir | `archive/docs_design/VISION_2026-11-10.md` (archivé) | 2026-11-06 | Décrit l'ouverture caisse de pièces et moto, les factions 1-2-3 et des éléments à réexaminer (DEC-092) |
 | [`docs/design/ESSAIS.md`](../docs/design/ESSAIS.md) | Conception | Fiche des sessions d'essai (à remplir par le porteur de projet) | en cours | `archive/docs_design/VISION_2026-11-10.md` (archivé) | 2026-11-06 | — |
 | [`docs/scenario/OUVERTURE.md`](../docs/scenario/OUVERTURE.md) | Scénario | Idée de cinématique d'ouverture et points à trancher | en cours | `archive/docs_design/VISION_2026-11-10.md` (archivé) | 2026-11-06 | — |
