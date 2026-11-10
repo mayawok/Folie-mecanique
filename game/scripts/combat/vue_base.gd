@@ -124,6 +124,7 @@ var _lbl_journal: Array = []
 var _n_journal := -1
 var _btn_pause: Button
 var _btns_vitesse := []
+var _btn_regime: Button
 var _voile_fin: ColorRect
 var _fin_son := false
 var _ui_noeuds: Array = []       # éléments d'interface (décalés hors des bords, DEC-056)

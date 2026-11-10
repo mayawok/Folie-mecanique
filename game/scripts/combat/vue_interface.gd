@@ -78,10 +78,10 @@ func _construire_elements() -> void:
 	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 150)
 	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
-	for v in [1, 2, 3]:
-		var b := _bouton("x%d" % v, func(): vitesse_sim = v, hb, 60)
-		b.toggle_mode = true
-		_btns_vitesse.append(b)
+	# Un seul bouton de vitesse : chaque toucher passe de x1 à x2, x3, puis revient à x1
+	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, hb, 70)
+	_btns_vitesse.append(bv)
+	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), hb, 190)   # 5 régimes moteur, un toucher change
 	_lbl_quete = _label("", self, 28, C_ACCENT)
 	_lbl_quete.position = Vector2(30, 164)
 	_lbl_quete.add_theme_constant_override("outline_size", 6)
@@ -1021,8 +1021,8 @@ func _maj_interface() -> void:
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
 	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.fini
 	_btn_pause.text = "Pause"
-	for i in _btns_vitesse.size():
-		_btns_vitesse[i].set_pressed_no_signal(vitesse_sim == i + 1)
+	_btns_vitesse[0].text = "x%d" % vitesse_sim
+	_btn_regime.text = "Moteur %d/5 · %s" % [m.regime, m.regime_donnees().nom]
 	for t in _toggles:
 		t.btn.set_pressed_no_signal(t.getter.call() == t.valeur)
 	# Journal

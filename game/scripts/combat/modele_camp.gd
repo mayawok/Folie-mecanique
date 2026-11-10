@@ -107,7 +107,7 @@ func _pannes() -> void:
 		for v in convoi:
 			if v.statut != "actif" or v.remorque():
 				continue
-			for pn in FiabiliteVehicule.tirer_pannes(grille_de(v.uid), 1.0, graine * 7919 + _km_pannes * 131 + v.uid):
+			for pn in FiabiliteVehicule.tirer_pannes(grille_de(v.uid), float(regime_donnees().usure), graine * 7919 + _km_pannes * 131 + v.uid):
 				appliquer_panne(v, String(pn.organe))
 
 

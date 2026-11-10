@@ -199,6 +199,18 @@ func _init() -> void:
 		var s1: Dictionary = ConstructionLibre.analyser(gg).stats
 		ok(bool(s1.gazogene) and float(s1.conso) < float(s0.conso) * 0.5, "gazogène : consomme peu de carburant (%.2f → %.2f)" % [float(s0.conso), float(s1.conso)])
 		ok(float(s1.vitesse) <= float(s0.vitesse), "gazogène : moins de puissance")
+	# Régimes moteur (5 niveaux)
+	var tr := _neuf(3)
+	var mr: CombatModele = tr[0]
+	ok(mr.regime == 3 and absf(float(mr.regime_donnees().vitesse) - 1.0) < 0.001, "régime : normal par défaut")
+	for i in 5:
+		mr.regime_suivant()
+	ok(mr.regime == 3, "régime : 5 niveaux, retour au point de départ")
+	mr.regime = 1
+	var vr := float(mr.regime_donnees().vitesse)
+	mr.regime = 5
+	ok(float(mr.regime_donnees().vitesse) > vr and float(mr.regime_donnees().conso) > 1.5 and float(mr.regime_donnees().usure) > 2.0, "régime maximum : plus vite, plus de carburant, plus d'usure")
+	ok(mr.sauver().regime == 5, "régime : sauvegardé")
 	# Bouton de marche (design du 10/11) : le geste est transmis et les chevrons s'étirent
 	var bm := BoutonMarche.new()
 	bm.size = Vector2(420, 112)

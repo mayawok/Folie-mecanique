@@ -350,6 +350,12 @@
    }
   }
  },
+ "regime": [
+  {"nom": "Ralenti", "vitesse": 0.55, "conso": 0.45, "usure": 0.4},
+  {"nom": "Économe", "vitesse": 0.8, "conso": 0.75, "usure": 0.7},
+  {"nom": "Normal", "vitesse": 1.0, "conso": 1.0, "usure": 1.0},
+  {"nom": "Forcé", "vitesse": 1.2, "conso": 1.4, "usure": 1.6},
+  {"nom": "Maximum", "vitesse": 1.4, "conso": 1.9, "usure": 2.6}],
  "halte": {"_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.", "montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0},
  "oiseau": {"_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).", "delai_min_s": 900.0, "delai_max_s": 2400.0, "duree_s": 9.0, "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."},
  "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},

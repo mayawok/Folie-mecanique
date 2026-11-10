@@ -228,6 +228,17 @@ var composants: Array = []        # {kind, classe, nom, etat}
 var ordres := {"marche": "halte", "cible": "proche", "visee": "libre", "fouille": "auto"}
 var x_tete := 0.0                 # bord avant du premier véhicule
 var x_tete_prev := 0.0
+var regime := 3                 # régime moteur du convoi, 1 (ralenti) à 5 (maximum) ; table dans combat_proto.json → regime
+
+func regime_donnees() -> Dictionary:
+	var T: Array = donnees().get("regime", [])
+	return T[clampi(regime, 1, maxi(1, T.size())) - 1] if not T.is_empty() else {"nom": "Normal", "vitesse": 1.0, "conso": 1.0, "usure": 1.0}
+
+
+func regime_suivant() -> void:
+	regime = regime % maxi(1, donnees().get("regime", []).size()) + 1
+	log_("Régime moteur : %s." % regime_donnees().nom, "info")
+
 var vitesse_convoi := 0.0
 var blocage := ""                 # raison pour laquelle le convoi n'avance pas
 var fouille_en_cours := {}
