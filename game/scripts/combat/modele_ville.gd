@@ -442,7 +442,7 @@ func ville_reparer() -> bool:
 # Marché : un lot d'eau ou de vivres contre du métal (DEC-148)
 func ville_prix_lot(k: String) -> int:
 	var Mc: Dictionary = VD().marche
-	return int(Mc.lot) * int(Mc.prix_metal[k])
+	return int(round(float(int(Mc.lot) * int(Mc.prix_metal[k])) * rep_prix_mult(rep_faction_ici())))   # selon la réputation (DEC-217)
 
 
 func ville_acheter(k: String) -> bool:
@@ -460,7 +460,8 @@ func ville_acheter(k: String) -> bool:
 
 
 func ville_texte_maire() -> String:
-	return "M. %s, maire de %s, vous reçoit dans son bureau, sous le portrait jauni d'un président dont plus personne ne se souvient.\n\n« Ici, la porte ouvre à qui ne tire pas. Restez le temps qu'il faut. Pour le travail, revenez plus tard : je n'ai rien pour vous aujourd'hui. »" % [ville.maire, ville.nom]
+	var acc := rep_accueil(rep_faction_ici())   # accueil selon la réputation (DEC-217)
+	return (acc + "\n\n" if acc != "" else "") + "M. %s, maire de %s, vous reçoit dans son bureau, sous le portrait jauni d'un président dont plus personne ne se souvient.\n\n« Ici, la porte ouvre à qui ne tire pas. Restez le temps qu'il faut. Pour le travail, revenez plus tard : je n'ai rien pour vous aujourd'hui. »" % [ville.maire, ville.nom]
 
 
 # --- Sauvegarde ------------------------------------------------------------------------------

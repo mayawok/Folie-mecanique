@@ -127,6 +127,7 @@ func _ouvrir_carte() -> void:
 	pause = true
 	_carte_sel = -1
 	_voile_carte.visible = true
+	_aide("002")
 	_carte_ctl.queue_redraw()
 
 func _fermer_carte() -> void:
@@ -362,6 +363,7 @@ func _basculer_rep() -> void:
 
 func selectionner(uid: int) -> void:
 	selection = uid
+	_aide("001")
 	_bande_on = true
 
 func _demi_tour() -> void:

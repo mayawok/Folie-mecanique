@@ -678,18 +678,28 @@ func _maj_interface() -> void:
 		sig += str(v.uid) + ","
 	if sig != _cartes_sig:
 		_cartes_sig = sig
+		var anciennes := {}   # les vignettes existantes sont gardées et déplacées : un glissement en cours continue (DEC-186)
 		for ch in _boite_cartes.get_children():
-			ch.queue_free()
+			anciennes[(ch as Carte).uid] = ch
 		var ordre: Array = m.convoi.duplicate()
 		ordre.reverse()
+		var rang := 0
 		for v in ordre:
-			var cte := Carte.new()
-			cte.vue = self
-			cte.uid = v.uid
-			cte.flat = true
-			cte.custom_minimum_size = Vector2(270, 96)
-			cte.pressed.connect(func(): selectionner(v.uid))
-			_boite_cartes.add_child(cte)
+			var cte: Carte = anciennes.get(v.uid)
+			if cte == null:
+				cte = Carte.new()
+				cte.vue = self
+				cte.uid = v.uid
+				cte.flat = true
+				cte.custom_minimum_size = Vector2(270, 96)
+				cte.pressed.connect(func(): if not cte.glisse: selectionner(v.uid))
+				_boite_cartes.add_child(cte)
+			else:
+				anciennes.erase(v.uid)
+			_boite_cartes.move_child(cte, rang)
+			rang += 1
+		for uid_perdu in anciennes:
+			anciennes[uid_perdu].queue_free()
 		if m.trouver(selection) == null or not (m.trouver(selection) in m.convoi):
 			selection = m.convoi[0].uid if not m.convoi.is_empty() else 0
 	for ch in _boite_cartes.get_children():
@@ -860,11 +870,11 @@ func _maj_interface() -> void:
 			inf = "%s\n%s : %s\nDifficulté : niveau %d sur 7\nDistance : environ %d m de route calme" % [ss.nom, ss.faction_nom, {"ami": "alliée", "neutre": "neutre", "hostile": "hostile"}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
 		else:
 			inf = "Touchez un secteur pour le choisir.\nLes anneaux vont du vert (calme) au rouge (dangereux). La couleur du centre est la faction."
-		_lbl_carte_info.text = Textes.t("vue_interface.033", [sct.nom, inf])
-		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur or not w.est_voisin(w.secteur, _carte_sel)
 		if _carte_sel >= 0 and _carte_sel != w.secteur and not w.est_voisin(w.secteur, _carte_sel):
 			var et: int = w.prochaine_etape(_carte_sel)
-			_lbl_carte_info.text += "\nPas de route directe" + (" : passez d'abord par %s." % w.secteurs[et].nom if et >= 0 else ".")
+			inf += "\nPas de route directe" + (" : passez d'abord par %s." % w.secteurs[et].nom if et >= 0 else ".")
+		_lbl_carte_info.text = Textes.t("vue_interface.033", [sct.nom, inf]) + "\n\n" + _texte_reputation(_carte_sel if _carte_sel >= 0 else w.secteur)
+		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur or not w.est_voisin(w.secteur, _carte_sel)
 	if _btn_camo != null:
 		_btn_camo.text = Textes.t("vue_interface.034") if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:
@@ -887,6 +897,16 @@ func _installer_kit() -> void:
 	_kit.offset_bottom = -(BARRE_H + 10)
 	_kit.visible = false
 	add_child(_kit)
+
+
+# Réputation auprès des factions : celle de la ville choisie en premier (DEC-184, DEC-217)
+func _texte_reputation(sid: int) -> String:
+	var fac := String(m.monde.secteurs[sid].fac)
+	var l := Textes.t("rep.007") + " :\n"
+	for f in m.rep_factions():
+		var p: Dictionary = m.rep_palier(f)
+		l += "%s%s : %s (%+d)\n" % ["> " if f == fac else "   ", m.rep_nom(f), String(p.nom), int(round(m.rep_valeur(f)))]
+	return l
 
 
 # Vitrine du Berliet GDR (pièces interchangeables et halte de l'équipage), ouverte depuis le Kit ; le jeu est en pause

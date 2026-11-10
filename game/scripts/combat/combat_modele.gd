@@ -283,7 +283,7 @@ func sauver() -> Dictionary:
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "regime": regime, "recus": recus.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
-		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true), "carte": 2, "region_quete": w.region_quete}}
+		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true), "carte": 2, "region_quete": w.region_quete}, "reputation": rep_sauver()}
 
 # --- Eau et vivres (DEC-148) ------------------------------------------------------------------
 var _alerte_ravit := {}   # alertes déjà données : {"eau_bas": true, "eau_vide": true, ...}
@@ -412,6 +412,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 		if not m.stocks.has(k) or not d.stocks.has(k):
 			m.stocks[k] = float(donnees().stocks_depart[k]) if not m.bac_a_sable else 99999.0
 	m.ville_charger(d.get("villes", {}) if carte_fixe else {})
+	m.rep_charger(d.get("reputation", {}))
 	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
 	m.log_(Textes.t("modele.017") if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")

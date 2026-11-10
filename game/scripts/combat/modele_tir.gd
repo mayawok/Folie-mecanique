@@ -1,5 +1,5 @@
 # Couche 1 du modèle : tir, projectiles, dégâts, destruction, réparation.
-extends "res://scripts/combat/modele_base.gd"
+extends "res://scripts/combat/modele_reputation.gd"
 
 
 # --- Ordres ----------------------------------------------------------------
@@ -394,6 +394,8 @@ func _toucher_batiment(w: Dictionary, b: Bat, visee: String) -> String:
 			t.pv = 0.0
 	if b.actif() and (b.pv <= 0.0 or b.tireurs_vivants() == 0):
 		b.statut = "neutralise"
+		if b.type in ["camp_ami", "camp_fortifie"] and b.fac != "":
+			rep_acte("camp_detruit", String(b.type), b.fac, Textes.t("rep.004", [b.nom]))
 		ennemis_detruits += 1
 		b.butin.composants = []
 		log_(Textes.t("tir.006", [b.nom]), "ok")

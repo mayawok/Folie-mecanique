@@ -103,6 +103,9 @@ var _audio_ok := false
 var _marche_prec := "halte"
 var _toggles := []              # {btn, getter, valeur}
 var _cartes_sig := ""
+var _bulle_aide: PanelContainer = null   # bulle d'aide discrète (DEC-194)
+var _bulle_aide_lbl: Label = null
+var _bulle_aide_id := 0
 var _boite_cartes: HBoxContainer
 var _bande_actions: PanelContainer
 var _bande_on := false          # menu du véhicule : visible seulement après un toucher sur un véhicule
@@ -192,6 +195,27 @@ class Horloge extends Control:
 class Carte extends Button:
 	var vue: ConvoiVue
 	var uid := 0
+	var glisse := false      # la vignette a été glissée : ce n'est pas un toucher (DEC-186)
+	var _appui := false
+	var _depart_x := 0.0
+
+	# Glisser la vignette à droite (vers l'avant du convoi) ou à gauche (vers l'arrière) change son rang (DEC-186)
+	func _gui_input(e: InputEvent) -> void:
+		if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
+			_appui = e.pressed
+			if e.pressed:
+				glisse = false
+				_depart_x = get_global_mouse_position().x
+		elif e is InputEventMouseMotion and _appui:
+			var dx := get_global_mouse_position().x - _depart_x
+			if absf(dx) > 24.0:
+				glisse = true
+			if absf(dx) > size.x * 0.55:
+				if dx > 0.0:
+					vue.m.monter(uid)
+				else:
+					vue.m.descendre(uid)
+				_depart_x += (size.x + 12.0) * signf(dx)
 
 	func _draw() -> void:
 		var v = vue.m.trouver(uid)
@@ -224,6 +248,45 @@ class Carte extends Button:
 			col2 = ConvoiVue.C_ORANGE
 		if txt != "":
 			draw_string(f, Vector2(size.x - 16 - 150, 80), txt, HORIZONTAL_ALIGNMENT_RIGHT, 150, 22, col2)
+
+# Bulle d'aide à la première utilisation d'une fonction (DEC-194) : une seule fois, discrète, disparaît seule
+func _aide(cle: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var txt := Aide.prendre(cle)
+	if txt == "":
+		return
+	if _bulle_aide == null:
+		_bulle_aide = PanelContainer.new()
+		_bulle_aide.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var fond := StyleBoxFlat.new()
+		fond.bg_color = Color(0.07, 0.075, 0.08, 0.86)
+		fond.border_color = C_ACCENT
+		fond.set_border_width_all(2)
+		fond.set_corner_radius_all(16)
+		fond.set_content_margin_all(16)
+		_bulle_aide.add_theme_stylebox_override("panel", fond)
+		_bulle_aide_lbl = Label.new()
+		_bulle_aide_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_bulle_aide_lbl.custom_minimum_size = Vector2(720, 0)
+		_bulle_aide_lbl.add_theme_font_size_override("font_size", 26)
+		_bulle_aide_lbl.add_theme_color_override("font_color", C_TEXTE)
+		_bulle_aide_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_bulle_aide.add_child(_bulle_aide_lbl)
+		add_child(_bulle_aide)
+		_bulle_aide.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_bulle_aide.offset_top = 110.0
+	_bulle_aide_lbl.text = txt
+	_bulle_aide.visible = true
+	_bulle_aide.size = Vector2.ZERO
+	_bulle_aide.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_bulle_aide.offset_top = 110.0
+	_bulle_aide_id += 1
+	var mon_id := _bulle_aide_id
+	get_tree().create_timer(9.0).timeout.connect(func():
+		if is_instance_valid(_bulle_aide) and mon_id == _bulle_aide_id:
+			_bulle_aide.visible = false)
+
 
 static func couleur_etat(q: float) -> Color:
 	if q > 0.66:

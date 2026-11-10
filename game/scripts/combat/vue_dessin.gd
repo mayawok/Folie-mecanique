@@ -36,6 +36,7 @@ func _evenement(e: Dictionary) -> void:
 				if e.classe in ["canon", "mortier"]:
 					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
 		"choc":   # éperonnage (DEC-215)
+			_aide("008")
 			var pc := Vector2(float(e.x), 0.8)
 			_etincelles.append({"p": pc, "age": 0.0, "gros": true})
 			_explosions.append({"p": pc, "age": 0.0, "taille": 0.5 if e.fort else 0.3})
@@ -56,6 +57,7 @@ func _evenement(e: Dictionary) -> void:
 				"porte":
 					_son("sfx_atelier", -8.0)
 				"dedans":
+					_aide("004")
 					_ville_onglet = "accueil"
 					_ville_ferme = false
 					_dial_sig = ""
@@ -66,6 +68,7 @@ func _evenement(e: Dictionary) -> void:
 			var so := get_node_or_null("/root/Son")
 			match String(e.etat):
 				"chargement":
+					_aide("005")
 					_son("sfx_atelier", -4.0)
 				"rassemblement":
 					if so and _audio_ok:
@@ -101,8 +104,13 @@ func _evenement(e: Dictionary) -> void:
 			_son("sfx_radio", -4.0)
 		"poste":
 			_son("sfx_radio", -6.0)
+		"halte":
+			_aide("003")
+		"reputation":
+			_aide("006")
 		"contact":
 			if e.ennemi:
+				_aide("007")
 				if _temps - _t_son.voix > 25.0:
 					_t_son.voix = _temps
 					var so := get_node_or_null("/root/Son")

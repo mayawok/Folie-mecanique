@@ -166,6 +166,7 @@ class Veh extends RefCounted:
 
 class Bat extends RefCounted:
 	var uid := 0
+	var fac := ""                 # faction propriétaire (id de la carte) : réputation (DEC-217)
 	var type := ""
 	var nom := ""
 	var x := 0.0

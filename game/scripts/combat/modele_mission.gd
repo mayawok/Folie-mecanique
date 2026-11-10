@@ -35,7 +35,7 @@ func mission_offres() -> Array:
 	if not ville_dedans() or mission_active():
 		return []
 	var so: Array = ville_sorties()
-	if so.is_empty():
+	if so.is_empty() or not rep_missions_ok(rep_faction_ici()):   # une faction hostile ne confie rien (DEC-217)
 		return []
 	var dest: Dictionary = so[0]
 	var r := RandomNumberGenerator.new()
@@ -125,7 +125,7 @@ func mission_accepter(t: String) -> bool:
 	if offre.is_empty() or vp == null:
 		return false
 	mission = {"type": t, "dest": int(offre.dest), "dest_nom": String(offre.dest_nom), "origine": String(ville.nom), "escorte": [],
-		"module_avant": String(berliet_config.module), "phase": "prep", "vagues": 0, "plan": mission_plan(t, int(offre.dest)).vagues}
+		"fac_origine": rep_faction_ici(), "module_avant": String(berliet_config.module), "phase": "prep", "vagues": 0, "plan": mission_plan(t, int(offre.dest)).vagues}
 	mission_bilan = {}
 	BerlietConfig.regler(berliet_config, "module", String(MD().types[t].module))
 	_berliet_longueur()
@@ -250,6 +250,7 @@ func mission_echouer(raison: String) -> void:
 	if not mission_active():
 		return
 	mission_bilan = {"ok": false, "titre": "Mission échouée", "texte": raison}
+	rep_acte("mission_echec", "origine", String(mission.get("fac_origine", "")), Textes.t("rep.005"))
 	mission = {}
 	log_(raison, "alerte")
 	evt({"t": "mission", "etat": "echec"})
@@ -261,7 +262,10 @@ func _mission_arrivee() -> void:
 		return
 	var M := MD()
 	var T: Dictionary = M.types[mission.type]
-	var rc: Dictionary = T.recompense
+	var rc: Dictionary = T.recompense.duplicate()
+	var fac_dest := rep_faction_ici()
+	for k in rc:   # la réputation de la ville de destination ajuste la récompense (DEC-217)
+		rc[k] = int(round(float(rc[k]) * rep_recompense_mult(fac_dest)))
 	var r := RandomNumberGenerator.new()
 	r.seed = graine * 131 + int(mission.dest) * 17 + int(temps)
 	for k in rc:
@@ -280,6 +284,8 @@ func _mission_arrivee() -> void:
 	mission_bilan = {"ok": true, "titre": "Livraison à %s" % ville.nom,
 		"texte": "« %s ! Vous êtes attendus depuis l'aube. » Le maire de %s vous remet : %s.\n\nLes hommes de %s restent ici ; on ne revoit jamais ceux qui s'éloignent." % [
 			String(T.nom), ville.nom, texte_recompense(rc), mission.origine]}
+	rep_acte("mission_livree", "destination", fac_dest, Textes.t("rep.006"))
+	rep_acte("mission_livree", "origine", String(mission.get("fac_origine", "")), "")
 	mission = {}
 	log_(Textes.t("mission.003", [ville.nom, texte_recompense(rc)]), "ok")
 	evt({"t": "mission", "etat": "livree"})

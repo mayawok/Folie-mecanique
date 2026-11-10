@@ -10,8 +10,6 @@ const CREPUSCULE := 0.62
 const AUBE := 0.95
 const FACTIONS := {1: "Faction 1", 2: "Faction 2", 3: "Faction 3"}
 const ATTITUDE := {1: "ami", 2: "neutre", 3: "hostile"}   # relation du joueur avec chaque faction
-# Attitude de départ envers chaque faction de la carte (provisoire, remplacée par la réputation au lot D)
-const ATTITUDE_FACTION := {"FAC-003": "ami", "FAC-001": "neutre", "FAC-004": "neutre", "FAC-005": "neutre", "FAC-006": "neutre", "FAC-002": "hostile", "FAC-007": "hostile"}
 const PREFIXES := ["Fort-", "Mont-", "Val-", "Port-", "Pont-", "Croix-", "Sainte-", "Haut-", "", ""]
 const RACINES := ["Cendre", "Verdun", "Brume", "Sable", "Rouille", "Lorne", "Marne", "Orme", "Fer", "Gris", "Acier", "Corbeau", "Épave", "Vigie"]
 
@@ -83,15 +81,21 @@ func _generer_carte() -> void:
 	secteurs = []
 	for l in CarteMonde.villes():
 		var fac: String = String(l.get("faction", ""))
-		var att: String = ATTITUDE_FACTION.get(fac, "neutre")
 		secteurs.append({"id": secteurs.size(), "lieu": String(l.id), "nom": String(l.nom), "pos": CarteMonde.pos(String(l.id)),
-			"niveau": int(l.get("niveau", 0)), "faction": ATTITUDE.keys()[ATTITUDE.values().find(att)], "fac": fac,
+			"niveau": int(l.get("niveau", 0)), "faction": 2, "fac": fac,
 			"faction_nom": String(CarteMonde.donnees().factions.get(fac, {}).get("nom", "Sans faction")),
 			"region": String(l.get("region", "")), "zone": String(l.get("zone", "terre")),
 			"ville": String(l.nom), "maire": String(l.get("maire", "Morel"))})
 	secteur = indice_lieu("kerbrume")
 	region_quete = String(CombatModele.donnees().get("region", {}).get("quete_depart", "armorique"))
 	Terrain.zone = String(secteurs[secteur].zone)
+	maj_attitudes()
+
+
+# L'attitude d'un secteur suit la réputation de sa faction (DEC-217) : 1 ami, 2 neutre, 3 hostile
+func maj_attitudes() -> void:
+	for s in secteurs:
+		s["faction"] = int(m.rep_attitude(String(s.fac)))
 
 
 func indice_lieu(id: String) -> int:
@@ -655,6 +659,7 @@ func generer(choix: Dictionary, x: float, r: RandomNumberGenerator) -> float:
 		var b = m.creer_batiment(type, x + 180.0)   # visible de loin : annoncé bien avant l'arrivée
 		b.ami = ami
 		b.faction = s.faction
+		b.fac = String(s.fac)   # faction propriétaire (réputation : DEC-217)
 		m.batiments.append(b)
 		if not ami and type == "camp_fortifie" and niv >= 3:
 			var e = m.creer_vehicule("citroen_traction", "ennemi", b.x + b.longueur + 6.0)
