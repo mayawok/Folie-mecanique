@@ -118,7 +118,8 @@
    "zone": "terre",
    "repere": "Rennes (Bretagne)",
    "maire": "Le Goff",
-   "note": "Ville de granit des familles du Réseau des Marées. Point de départ conseillé : calme, marché aux épaves."
+   "note": "Ville de granit des familles du Réseau des Marées. Point de départ conseillé : calme, marché aux épaves.",
+   "region": "armorique"
   },
   {
    "id": "pertuis",
@@ -133,7 +134,8 @@
    "zone": "terre",
    "repere": "La Rochelle",
    "maire": "Guérin",
-   "note": "Port à moitié ensablé ; on y lit les marées et on y répare les coques."
+   "note": "Port à moitié ensablé ; on y lit les marées et on y répare les coques.",
+   "region": "pertuis"
   },
   {
    "id": "estuaire",
@@ -148,7 +150,8 @@
    "zone": "terre",
    "repere": "Le Havre",
    "maire": "Lemaire",
-   "note": "Grand port de l'estuaire ; les Compagnies y achètent le carburant raffiné."
+   "note": "Grand port de l'estuaire ; les Compagnies y achètent le carburant raffiné.",
+   "region": "estuaire"
   },
   {
    "id": "capitale",
@@ -163,7 +166,8 @@
    "zone": "cailloux",
    "repere": "Paris",
    "maire": "Vasseur",
-   "note": "Secteurs discontinus, gravats et sable ; quartiers tenus par des groupes organisés."
+   "note": "Secteurs discontinus, gravats et sable ; quartiers tenus par des groupes organisés.",
+   "region": "ile_capitale"
   },
   {
    "id": "puits",
@@ -178,7 +182,8 @@
    "zone": "terre",
    "repere": "Brie (Seine-et-Marne)",
    "maire": "Marceau",
-   "note": "Siège des Compagnies de l'Est : registres, quotas, puits gardés."
+   "note": "Siège des Compagnies de l'Est : registres, quotas, puits gardés.",
+   "region": "ile_capitale"
   },
   {
    "id": "corons",
@@ -193,7 +198,8 @@
    "zone": "cailloux",
    "repere": "Lille (Nord)",
    "maire": "Delattre",
-   "note": "Ville de mineurs et de récupérateurs au bord des vieux champs de bataille."
+   "note": "Ville de mineurs et de récupérateurs au bord des vieux champs de bataille.",
+   "region": "pays_noir"
   },
   {
    "id": "rhin",
@@ -208,7 +214,8 @@
    "zone": "cailloux",
    "repere": "Strasbourg (Alsace)",
    "maire": "Kieffer",
-   "note": "Avant-poste de l'Est au-delà du no man's land. Fin de partie."
+   "note": "Avant-poste de l'Est au-delà du no man's land. Fin de partie.",
+   "region": "marche_est"
   },
   {
    "id": "loire",
@@ -223,7 +230,8 @@
    "zone": "sable",
    "repere": "Orléans",
    "maire": "Bertin",
-   "note": "Dernier pont debout sur la Loire ; péage officieux, atelier réputé."
+   "note": "Dernier pont debout sur la Loire ; péage officieux, atelier réputé.",
+   "region": "beauce_loire"
   },
   {
    "id": "chais",
@@ -238,7 +246,8 @@
    "zone": "terre",
    "repere": "Bordeaux",
    "maire": "Vautrin",
-   "note": "Capitale des familles raffineuses ; dépôts et transporteurs."
+   "note": "Capitale des familles raffineuses ; dépôts et transporteurs.",
+   "region": "landes"
   },
   {
    "id": "terminus",
@@ -253,7 +262,8 @@
    "zone": "terre",
    "repere": "Clermont (Massif central)",
    "maire": "Fabre",
-   "note": "Bout de la voie ferrée ; communautés ferroviaires et éleveurs des Hautes-Terres."
+   "note": "Bout de la voie ferrée ; communautés ferroviaires et éleveurs des Hautes-Terres.",
+   "region": "hautes_terres"
   },
   {
    "id": "confluent",
@@ -268,7 +278,8 @@
    "zone": "cailloux",
    "repere": "Lyon",
    "maire": "Morel",
-   "note": "Carrefour des routes du sud et de l'est ; grand marché de pièces."
+   "note": "Carrefour des routes du sud et de l'est ; grand marché de pièces.",
+   "region": "confluent"
   },
   {
    "id": "massalie",
@@ -283,7 +294,8 @@
    "zone": "sable",
    "repere": "Marseille",
    "maire": "Salvat",
-   "note": "Port et raffineries de l'étang ; trains de citernes vers le nord."
+   "note": "Port et raffineries de l'étang ; trains de citernes vers le nord.",
+   "region": "provence"
   },
   {
    "id": "combes",
@@ -298,7 +310,8 @@
    "zone": "cailloux",
    "repere": "Alpes",
    "maire": "Rochaix",
-   "note": "Village fortifié de montagne ; sources d'eau et troupeaux, accès gardés."
+   "note": "Village fortifié de montagne ; sources d'eau et troupeaux, accès gardés.",
+   "region": "alpes"
   },
   {
    "id": "p_brie",
@@ -848,6 +861,130 @@
    "danger": 5,
    "zone": "cailloux",
    "nom": "Piste des gorges"
+  }
+ ],
+ "regions_doc": "Régions (10/11) : chaque région a son thème de décor. Un point de la carte appartient à la région de la ville-étape la plus proche. Ajouter une région = une entrée, sans code.",
+ "regions": [
+  {
+   "id": "armorique",
+   "nom": "Armorique",
+   "theme": "Côte bretonne : landes, granit, phares éteints, bateaux échoués",
+   "decor": "terre",
+   "couleur": "#5B7A8C",
+   "villes": [
+    "kerbrume"
+   ]
+  },
+  {
+   "id": "pertuis",
+   "nom": "Pertuis",
+   "theme": "Marais et grèves : vasières, digues, marées folles",
+   "decor": "terre",
+   "couleur": "#6E8C7A",
+   "villes": [
+    "pertuis"
+   ]
+  },
+  {
+   "id": "estuaire",
+   "nom": "Estuaire",
+   "theme": "Bocage brûlé et ports en ruine de la Manche",
+   "decor": "terre",
+   "couleur": "#7A8466",
+   "villes": [
+    "estuaire"
+   ]
+  },
+  {
+   "id": "pays_noir",
+   "nom": "Pays Noir",
+   "theme": "Mines de charbon, terrils, grande centrale électrique, arcs et lumières",
+   "decor": "cailloux",
+   "couleur": "#4A4A52",
+   "villes": [
+    "corons"
+   ]
+  },
+  {
+   "id": "ile_capitale",
+   "nom": "Île-Capitale",
+   "theme": "Ruines urbaines de l'ancienne capitale et champs de pétrole de Brie",
+   "decor": "cailloux",
+   "couleur": "#8A7A6A",
+   "villes": [
+    "capitale",
+    "puits"
+   ]
+  },
+  {
+   "id": "marche_est",
+   "nom": "Marche de l'Est",
+   "theme": "Front figé : tranchées, bunkers, neige sale, fer",
+   "decor": "cailloux",
+   "couleur": "#7A8A9A",
+   "villes": [
+    "rhin"
+   ]
+  },
+  {
+   "id": "beauce_loire",
+   "nom": "Beauce-Loire",
+   "theme": "Désert de Beauce : dunes de poussière, silos, ponts effondrés",
+   "decor": "sable",
+   "couleur": "#C9A86A",
+   "villes": [
+    "loire"
+   ]
+  },
+  {
+   "id": "landes",
+   "nom": "Landes",
+   "theme": "Dunes, pins morts, derricks et raffineries des Raffineurs",
+   "decor": "sable",
+   "couleur": "#B08850",
+   "villes": [
+    "chais"
+   ]
+  },
+  {
+   "id": "hautes_terres",
+   "nom": "Hautes-Terres",
+   "theme": "Plateaux volcaniques, viaducs et voies ferrées",
+   "decor": "cailloux",
+   "couleur": "#7A6A5A",
+   "villes": [
+    "terminus"
+   ]
+  },
+  {
+   "id": "confluent",
+   "nom": "Confluent",
+   "theme": "Vallée industrielle du Rhône : usines, barrages, écluses",
+   "decor": "cailloux",
+   "couleur": "#8A6A6A",
+   "villes": [
+    "confluent"
+   ]
+  },
+  {
+   "id": "provence",
+   "nom": "Provence",
+   "theme": "Garrigue brûlée, étangs salés, raffineries de l'Étang",
+   "decor": "sable",
+   "couleur": "#C99060",
+   "villes": [
+    "massalie"
+   ]
+  },
+  {
+   "id": "alpes",
+   "nom": "Alpes",
+   "theme": "Neige et glace, cols, forts de montagne",
+   "decor": "neige",
+   "couleur": "#D8DCE0",
+   "villes": [
+    "combes"
+   ]
   }
  ]
 }

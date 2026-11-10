@@ -194,3 +194,4 @@
 | 2026-11-10 | DEC-167 | **Berliet dans la grille 2D** : affiché avec son vrai dessin ; châssis, cabine, sièges et essieu avant fixes ; tout le reste personnalisable | Réponse à OQ-032. |
 | 2026-11-10 | DEC-168 | **Demi-tour** : plus de bouton ; on fait demi-tour en ville en choisissant la sortie qui ramène vers l'ancienne destination | Réponse à OQ-032. |
 | 2026-11-10 | DEC-169 | **Le repaire du boss est tenu par les Raffineurs du Sud** (FAC-002) | Réponse à OQ-031. |
+| 2026-11-10 | DEC-170 | **Un thème de décor par région.** 12 régions sur la carte du monde, une par ville-étape (Île-Capitale en compte deux) : Armorique, Pertuis, Estuaire, Pays Noir (centrale électrique), Île-Capitale, Marche de l'Est, Beauce-Loire, Landes, Hautes-Terres, Confluent, Provence, Alpes. Un point appartient à la région de la ville-étape la plus proche | Demande du porteur de projet. Données : `carte_monde.json` → `regions`. Le décor de la route suivra la région (DEV-008). |

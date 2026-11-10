@@ -114,3 +114,26 @@ static func lieu_proche(p: Vector2, rayon: float) -> String:
 			d_min = d
 			meilleur = String(l.id)
 	return meilleur
+
+
+# --- Régions (10/11) : thème de décor par région ; un point appartient à la région de la ville-étape la plus proche
+static func regions() -> Array:
+	return donnees().get("regions", [])
+
+
+static func region(id: String) -> Dictionary:
+	for r in regions():
+		if String(r.id) == id:
+			return r
+	return {}
+
+
+static func region_a(p: Vector2) -> Dictionary:
+	var best := ""
+	var dmin := INF
+	for v in villes():
+		var d := p.distance_squared_to(Vector2(v.pos[0], v.pos[1]))
+		if d < dmin and v.has("region"):
+			dmin = d
+			best = String(v.region)
+	return region(best)

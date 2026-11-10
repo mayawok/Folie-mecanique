@@ -9,12 +9,12 @@ signal ferme
 
 const PANNEAU_L := 470.0
 const RESSOURCES := ["petrole", "raffinerie", "gaz", "mine", "eau", "depot", "epaves"]
-const COUCHES := [["villes", "Villes"], ["routes", "Routes"], ["ressources", "Ressources"], ["sites", "Sites"],
+const COUCHES := [["regions", "Régions"], ["villes", "Villes"], ["routes", "Routes"], ["ressources", "Ressources"], ["sites", "Sites"],
 	["factions", "Factions"], ["dangers", "Dangers"], ["legende", "Légende"]]
 
 var modele = null          # CombatModele (Mode créatif) ; sans modèle, la carte se consulte sans voyage
 var sel := ""              # lieu choisi
-var couches := {"villes": true, "routes": true, "ressources": true, "sites": true, "factions": true, "dangers": false, "legende": true}
+var couches := {"regions": true, "villes": true, "routes": true, "ressources": true, "sites": true, "factions": true, "dangers": false, "legende": true}
 var zoom := 1.0
 var decalage := Vector2.ZERO
 var itineraire: Array = []
@@ -263,6 +263,9 @@ static func texte_lieu(id: String, iti: Array = []) -> String:
 	lignes.append("Zone de décor : %s" % CombatModele.KIT_ZONES_NOMS.get(String(l.get("zone", "")), String(l.get("zone", "?"))))
 	if l.has("repere"):
 		lignes.append("Repère réel : %s" % l.repere)
+	var RG := CarteMonde.region_a(Vector2(l.pos[0], l.pos[1]))
+	if not RG.is_empty():
+		lignes.append("Région : %s — %s" % [RG.nom, RG.theme])
 	if l.has("maire"):
 		lignes.append("Maire : M. %s" % l.maire)
 	if String(l.get("batiment", "")) != "":
@@ -290,6 +293,40 @@ static func texte_lieu(id: String, iti: Array = []) -> String:
 
 
 # --- Dessin ------------------------------------------------------------------------------------
+# Régions : teinte de chaque région (ville-étape la plus proche) et nom au centre de ses villes
+var _regions_cache := {}
+
+func _regions(r: Rect2, f: Font) -> void:
+	var n := 48
+	if _regions_cache.is_empty():
+		for i in n:
+			for j in n:
+				_regions_cache[Vector2i(i, j)] = String(CarteMonde.region_a(Vector2((i + 0.5) / n, (j + 0.5) / n)).get("id", ""))
+	var cw := r.size / float(n)
+	for k in _regions_cache:
+		var R := CarteMonde.region(_regions_cache[k])
+		if R.is_empty():
+			continue
+		var c := Color(String(R.couleur))
+		c.a = 0.22
+		draw_rect(Rect2(r.position + Vector2(k.x, k.y) * cw, cw + Vector2.ONE), c)
+		for d in [Vector2i(1, 0), Vector2i(0, 1)]:   # frontière
+			if _regions_cache.get(k + d, _regions_cache[k]) != _regions_cache[k]:
+				var a := r.position + Vector2(k + d) * cw
+				var b := a + (Vector2(0, cw.y) if d.x == 1 else Vector2(cw.x, 0))
+				draw_line(a, b, Color(0.1, 0.08, 0.06, 0.6), 1.5)
+	for R in CarteMonde.regions():
+		var c0 := Vector2.ZERO
+		for vid in R.villes:
+			c0 += CarteMonde.pos(String(vid))
+		c0 /= maxf(1.0, R.villes.size())
+		var p := _ecran(c0) + Vector2(0, 30)
+		var t := String(R.nom).to_upper()
+		var tz := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15)
+		draw_string_outline(f, p - Vector2(tz.x * 0.5, 0), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, 4, Color(0, 0, 0, 0.8))
+		draw_string(f, p - Vector2(tz.x * 0.5, 0), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(String(R.couleur)).lightened(0.35))
+
+
 func _draw() -> void:
 	var D := CarteMonde.donnees()
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.05, 0.05))
@@ -301,6 +338,8 @@ func _draw() -> void:
 	var surligne := {}
 	for i in maxi(0, itineraire.size() - 1):
 		surligne[_cle(itineraire[i], itineraire[i + 1])] = true
+	if couches.regions:
+		_regions(r, f)
 	# Routes
 	if couches.routes:
 		for rt in CarteMonde.routes():
