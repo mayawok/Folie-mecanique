@@ -185,6 +185,12 @@ func _init() -> void:
 			autre_x = int(e.x)
 	ok(autre_x >= 0 and not ConstructionLibre.fixe_berliet(gb, "essieu", autre_x), "Berliet : essieux arrière libres")
 	ok(not ConstructionLibre.fixe_berliet(gb, "cases", gb.cases), "Berliet : châssis d'origine complet")
+	var xmin_b := 999
+	for c_b in gb.cases:
+		xmin_b = mini(xmin_b, int(c_b[0]))
+	ok(xmin_b >= 8, "Berliet : de la place derrière le camion (%d cases)" % xmin_b)
+	var gb2 := ConstructionLibre.deplacer(gb, 2, 0)
+	ok(not gb2.is_empty() and int(gb2.berliet.essieu_av) == int(gb.berliet.essieu_av) + 2, "Berliet : l'essieu avant fixe suit le déplacement")
 	ok(ConstructionLibre.fixe_berliet(gb, "cases", gb.cases.slice(1)), "Berliet : case d'origine retirée refusée")
 	# Gazogène (DEC-158)
 	var gw := ConstructionLibre.convertir(Assemblage.de_type("citroen_t23"), "citroen_t23")

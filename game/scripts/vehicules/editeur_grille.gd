@@ -298,6 +298,8 @@ func _ajuster_vue() -> void:
 	if x1 <= x0:
 		x0 = G.x / 2
 		x1 = x0
+	if a.has("berliet"):   # Berliet : on montre la place derrière le camion pour y ajouter des modules (DEC-167)
+		x0 = maxi(0, x0 - 12)
 	var w := clampi(x1 - x0 + 4, int(mini_v[0]), G.x)
 	var h := clampi(y1 + 3, int(mini_v[1]), G.y)
 	var cx := (x0 + x1) / 2
@@ -550,7 +552,7 @@ func _verrou_berliet() -> bool:
 
 
 func _appuyer(cell: Vector2i) -> void:
-	if _verrou_berliet():   # Berliet (DEC-167) : châssis, cabine, sièges et essieu avant ne bougent pas
+	if _verrou_berliet() and onglet != "vehicule":   # Berliet (DEC-167) : châssis, cabine, sièges et essieu avant ne bougent pas
 		var ipb := ConstructionLibre.piece_en(a, cell)
 		if ipb >= 0 and ConstructionLibre.fixe_berliet(a, "piece", a.pieces[ipb].piece) and onglet != "coque":
 			_dire("Berliet : la cabine et les sièges sont fixes.")

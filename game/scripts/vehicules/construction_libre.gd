@@ -53,6 +53,8 @@ static func deplacer(a: Dictionary, dx: int, dy: int) -> Dictionary:
 		p.pos = [int(p.pos[0]) + dx, int(p.pos[1]) + dy]
 		if p.pos[0] < 0 or p.pos[1] < 0 or p.pos[0] + int(em[0]) > G.x or p.pos[1] + int(em[1]) > G.y:
 			return {}
+	if b.has("berliet"):   # l'essieu avant fixe du Berliet suit le véhicule
+		b.berliet.essieu_av = int(b.berliet.essieu_av) + dx
 	if b.has("plateforme"):
 		b.plateforme.x = int(b.plateforme.x) + dx
 		b.plateforme.y = int(b.plateforme.y) + dy
@@ -1507,9 +1509,20 @@ static func convertir(a: Dictionary, type: String) -> Dictionary:
 	b.plaques = int(a.get("plaques", 0))
 	# Berliet GDR (DEC-167) : châssis, cabine et sièges, essieu avant fixes ; le reste se personnalise
 	if String(a.get("chassis", "")) == "chassis_berliet_gdr":
-		var xav := 1000
+		# Place derrière le camion pour ajouter des modules et des remorques : on avance le véhicule dans la grille (DEC-167)
+		var xmax_c := 0
+		for c in b.get("cases", []):
+			xmax_c = maxi(xmax_c, int(c[0]))
+		for q in b.get("pieces", []):
+			xmax_c = maxi(xmax_c, int(q.pos[0]) + int(q.get("emprise", Assemblage.piece(String(q.piece)).get("emprise", [1, 1]))[0]))
+		var decal := clampi(taille().x - 3 - xmax_c, 0, 14)
+		if decal > 0:
+			var bd := deplacer(b, decal, 0)
+			if not bd.is_empty():
+				b = bd
+		var xav := -1
 		for e in b.essieux:
-			xav = mini(xav, int(e.x))
+			xav = maxi(xav, int(e.x))   # l'avant est à droite : c'est l'essieu le plus à droite
 		var fixes := []
 		for p in b.pieces:
 			if Assemblage.piece(String(p.piece)).get("famille", "") == "cabine":
