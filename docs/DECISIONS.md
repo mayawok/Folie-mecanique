@@ -229,3 +229,4 @@
 | 2026-11-10 | DEC-202 | **Cinématique d'ouverture : après le Kit et le chapitre 1** | Entretien 3 du 10/11. |
 | 2026-11-10 | DEC-203 | **Mode créatif du jeu final : verrouillé jusqu'à un jalon** à fixer (déblocage après un chapitre) | Entretien 3 du 10/11. |
 | 2026-11-10 | DEC-204 | **Pas de date cible** pour la démo ou la sortie ; **retours : quelques proches** (TestFlight plus tard) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-205 | **Valeurs de jeu du Berliet branchées sur le combat** (DEV-022) : la vitesse est celle de l'assemblage × vitesse des pneus × (1 + bonus d'échappement) ; les points de vie du roulement suivent les pneus (blindés +60 %) ; charge du châssis et litres du réservoir lus dans le profil (`charge_t`, `gazole_l`). Les valeurs restent celles du journal provisoire de `berliet.json`. La capacité du réservoir ne limite pas encore le stock de carburant (OQ-036) | Lot du 10/11 ; test `test_berliet.gd`. |

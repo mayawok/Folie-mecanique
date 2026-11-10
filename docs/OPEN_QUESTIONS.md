@@ -252,3 +252,7 @@ Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son
 3. **Noms de véhicules (DEC-197)** : liste des marques encore actives à déguiser ; vérification juridique avant publication.
 4. **Jalon de déblocage du Mode créatif (DEC-203)** : après quel chapitre ?
 5. Restent de OQ-034 : retour au checkpoint (ce qu'on garde), paires de factions rivales et paliers de réputation, coût et probabilité des épaves.
+
+## OQ-036 — Capacité du réservoir (10/11)
+
+Le carburant est un stock unique du convoi. Le réservoir du Berliet (120 à 560 L) n'en limite pas encore le montant, car des récompenses de 150 à 300 L seraient perdues (missions, Baron). DEC-190 veut un carburant contraignant. Choix : plafonner au réservoir + citerne du module ; ou laisser le surplus dans des jerrycans qui se vident en premier.

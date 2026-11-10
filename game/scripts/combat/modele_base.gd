@@ -392,12 +392,33 @@ func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") 
 		v.pieces[id] = {"id": id, "nom": NOMS[id], "pv": pv * float(etats.get(id, 1.0)), "max": pv}
 	if v.chenille:
 		v.pieces.roulement.nom = "Chenilles"
+	appliquer_valeurs_berliet(v)
 	for i in p.armes.size():
 		var wid: String = p.armes[i]
 		var w: Dictionary = D.armes[wid]
 		var pid := "a%d" % i
 		v.pieces[pid] = {"id": pid, "nom": w.nom, "pv": float(w.pv) * float(etats.get("arme", 1.0)), "max": float(w.pv)}
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.4, float(w.cadence)), "idx": i})
+
+# Valeurs de jeu du Berliet GDR (DEV-022) : le profil de l'assemblage reste la base ; pneus, échappement, réservoir et châssis
+# la modulent. Idempotent : appelée à chaque changement de pièce et à chaque reconstruction de l'assemblage.
+func appliquer_valeurs_berliet(v: Veh) -> void:
+	if v.type != "berliet_gdr":
+		return
+	var V := BerlietConfig.valeurs(berliet_config)
+	var base_vit := float(v.profil.get("vitesse_assemblage", v.profil.vitesse))
+	v.profil["vitesse_assemblage"] = base_vit
+	v.profil.vitesse = base_vit * float(V.vitesse_route) * (1.0 + float(V.bonus_puissance))
+	v.profil["tout_terrain"] = float(V.tout_terrain)
+	v.profil["charge_t"] = float(V.charge_t)
+	v.profil["gazole_l"] = float(V.gazole_l)
+	if v.pieces.has("roulement"):
+		var r: Dictionary = v.pieces.roulement
+		var base_max := float(v.profil.get("roulement_pv_assemblage", r.max))
+		v.profil["roulement_pv_assemblage"] = base_max
+		var rat: float = float(r.pv) / maxf(1.0, float(r.max))
+		r.max = base_max * float(V.pv_roues)
+		r.pv = r.max * rat
 
 const PRENOMS := ["Pierre", "Marie", "Jules", "Léa", "Hugo", "Inès", "Louis", "Camille", "Noé", "Alice", "Paul", "Jeanne", "Marc", "Élise", "Théo", "Sarah", "Émile", "Clara", "Victor", "Nina"]
 const INITIALES := "BCDFGLMPRSTV"

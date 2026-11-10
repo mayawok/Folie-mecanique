@@ -70,6 +70,7 @@ func _appliquer_berliet() -> void:
 	for v in convoi:
 		if v.type == "berliet_gdr":
 			v.longueur = BerlietConfig.longueur_m(berliet_config)
+			appliquer_valeurs_berliet(v)   # pneus, échappement, réservoir, châssis (DEV-022)
 
 
 
