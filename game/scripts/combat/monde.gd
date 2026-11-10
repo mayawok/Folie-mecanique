@@ -125,7 +125,7 @@ func choisir_destination(id: int) -> bool:
 	trajet = {"dest": id, "reste": total, "total": total}
 	m._prochain_x = INF
 	var route := "de route" if m.mission_active() else "de route calme"   # en mission, la route est dangereuse (DEC-146)
-	m.log_("Cap sur %s (%s, niveau %d) : %d m %s." % [secteurs[id].nom, FACTIONS[secteurs[id].faction], secteurs[id].niveau, int(total), route], "info")
+	m.log_(Textes.t("monde.001", [secteurs[id].nom, FACTIONS[secteurs[id].faction], secteurs[id].niveau, int(total), route]), "info")
 	m.evt({"t": "cap"})
 	return true
 
@@ -204,9 +204,9 @@ func ordre_nuit() -> bool:
 		if b.statut == "neutralise" and (b.garnison.size() > 0 or m._en_route(b) > 0):
 			b.barricade_cible = true
 	if n == 0:
-		m.log_("Aucun bâtiment à portée : approchez-vous d'une ruine ou d'une église.", "alerte")
+		m.log_(Textes.t("monde.002"), "alerte")
 		return false
-	m.log_("L'équipage s'abrite et barricade le bâtiment pour la nuit.", "info")
+	m.log_(Textes.t("monde.003"), "info")
 	return true
 
 
@@ -273,9 +273,9 @@ func _horloge(dt: float) -> void:
 	if heure >= CREPUSCULE and not _crep_fait:
 		_crep_fait = true
 		if m.ville_protegee() or m.ville_calme():
-			m.log_("La nuit tombe. Derrière les murs, le convoi ne risque rien.", "info")
+			m.log_(Textes.t("monde.004"), "info")
 		else:
-			m.log_("La nuit tombe. Abritez-vous dans un bâtiment : les rôdeurs sortent.", "alerte")
+			m.log_(Textes.t("monde.005"), "alerte")
 		m.evt({"t": "nuit_tombe"})
 	if heure >= AUBE and not _aube_fait:
 		_aube_fait = true
@@ -285,7 +285,7 @@ func _horloge(dt: float) -> void:
 				if g.pv > 0.0:
 					g.pv = 20.0
 					soignes += 1
-		m.log_("Le jour se lève.%s" % (" Les survivants ont repris des forces." if soignes > 0 else ""), "ok")
+		m.log_(Textes.t("monde.006", [(Textes.t("monde.006a") if soignes > 0 else "")]), "ok")
 		m.evt({"t": "aube"})
 
 
@@ -300,7 +300,7 @@ func _cap(dt: float) -> void:
 		trajet = {}
 		m._prochain_x = m.x_tete + 90.0
 		var s: Dictionary = secteurs[secteur]
-		m.log_("Vous entrez à %s : %s (%s), niveau %d." % [s.nom, FACTIONS[s.faction], ATTITUDE[s.faction], s.niveau], "ok")
+		m.log_(Textes.t("monde.007", [s.nom, FACTIONS[s.faction], ATTITUDE[s.faction], s.niveau]), "ok")
 		m.evt({"t": "secteur"})
 		if m.mission_en_route():   # mission du maire : la ville de destination est au bout de l'étape (DEC-146)
 			m.ville_creer(m.x_tete + float(m.MD().ville_arrivee_m))
@@ -456,7 +456,7 @@ func toucher_pieton(p: Pieton, w: Dictionary) -> void:
 		p.statut = "mort"
 		p.mort_t = 0.0
 		if p.camp == "joueur":
-			m.log_("Un soldat est tombé.", "alerte")
+			m.log_(Textes.t("monde.008"), "alerte")
 			m.evt({"t": "mort", "x": p.x, "animal": false})
 			return
 		m.ennemis_detruits += 1
@@ -582,7 +582,7 @@ func _assauts(dt: float) -> void:
 	var n: int = 2 + m.rng.randi() % 2 + mini(2, niv / 2)
 	for i in n:
 		creer_pieton("loup" if loups else "pillard", x0 + (i * 3.0) * (1.0 if devant else -1.0))
-	m.log_("Des %s rôdent dans la nuit !" % ("loups" if loups else "pillards à pied"), "alerte")
+	m.log_(Textes.t("monde.009", [("loups" if loups else "pillards à pied")]), "alerte")
 	m.evt({"t": "meute" if loups else "pillards"})
 
 
@@ -624,7 +624,7 @@ func generer(choix: Dictionary, x: float, r: RandomNumberGenerator) -> float:
 			var e = m.creer_vehicule("citroen_traction", "ennemi", b.x + b.longueur + 6.0)
 			e.mode = "barrage"
 			m.ennemis.append(e)
-		m.log_("%s %s (%s) droit devant, à %d m." % [b.nom, "allié" if ami else "hostile", FACTIONS[s.faction], int(b.x - m.x_tete)], "ok" if ami else "alerte")
+		m.log_(Textes.t("monde.010", [b.nom, Textes.t("monde.010a") if ami else Textes.t("monde.010b"), FACTIONS[s.faction], int(b.x - m.x_tete)]), "ok" if ami else "alerte")
 		return b.x + b.longueur + 10.0
 	if choix.has("pietons"):
 		var k: String = choix.pietons[0]
@@ -641,7 +641,7 @@ func generer(choix: Dictionary, x: float, r: RandomNumberGenerator) -> float:
 		pnj.append({"uid": _uid, "x": x + 12.0, "type": types[idx % types.size()], "nom": offres[idx].get("nom", "Voyageur"),
 			"offre": idx, "statut": "attend", "peau": r.randi() % 4})
 		x += 14.0
-		m.log_("Un voyageur vous attend au bord de la route.", "info")
+		m.log_(Textes.t("monde.011"), "info")
 	return x
 
 
@@ -691,9 +691,9 @@ func repondre(accepte: bool) -> void:
 			m._recruter_survivant()
 		if o.has("quete"):
 			quete = {"titre": o.titre, "abattre": int(o.quete.abattre), "depart": m.ennemis_detruits, "recompense": o.quete.recompense}
-		m.log_("Marché conclu : %s." % o.titre, "ok")
+		m.log_(Textes.t("monde.012", [o.titre]), "ok")
 	else:
-		m.log_("Vous déclinez l'offre de %s." % v.nom, "info")
+		m.log_(Textes.t("monde.013", [v.nom]), "info")
 	v.statut = "parti"
 	dialogue = {}
 	m._dire_lore()
@@ -705,7 +705,7 @@ func _quete() -> void:
 	if m.ennemis_detruits - quete.depart >= quete.abattre:
 		for k in quete.recompense:
 			m.stocks[k] += quete.recompense[k]
-		m.log_("Quête accomplie : %s. Récompense reçue." % quete.titre, "ok")
+		m.log_(Textes.t("monde.014", [quete.titre]), "ok")
 		m.evt({"t": "quete"})
 		quete = {}
 
@@ -729,7 +729,7 @@ func camp_action(id: String) -> bool:
 		if a.id == id:
 			for k in a.prend:
 				if m.stocks[k] < a.prend[k]:
-					m.log_("Pas assez de %s." % k, "alerte")
+					m.log_(Textes.t("monde.015", [Textes.t("res." + k)]), "alerte")
 					return false
 			for k in a.prend:
 				m.stocks[k] -= a.prend[k]
@@ -747,7 +747,7 @@ func camp_action(id: String) -> bool:
 						if v.equipage[i] > 0.0:
 							v.equipage[i] = float(m.donnees().equipage_pv)
 				repos_t = 60.0
-			m.log_("Camp allié : %s." % a.txt, "ok")
+			m.log_(Textes.t("monde.016", [a.txt]), "ok")
 			return true
 	return false
 

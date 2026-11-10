@@ -237,7 +237,7 @@ func regime_donnees() -> Dictionary:
 
 func regime_suivant() -> void:
 	regime = regime % maxi(1, donnees().get("regime", []).size()) + 1
-	log_("Régime moteur : %s." % regime_donnees().nom, "info")
+	log_(Textes.t("base.001", [regime_donnees().nom]), "info")
 
 var vitesse_convoi := 0.0
 var blocage := ""                 # raison pour laquelle le convoi n'avance pas

@@ -18,6 +18,14 @@ func _init() -> void:
 	fr.sort()
 	en.sort()
 	ok(fr == en, "fr et en ont exactement les mêmes clés (%d)" % fr.size())
+	# Mêmes valeurs à insérer dans les deux langues (%s, %d…), sinon le jeu plante ou affiche un trou
+	var mal: Array = []
+	var re := RegEx.new()
+	re.compile("%[sd]")
+	for k in D.fr:
+		if re.search_all(String(D.fr[k])).size() != re.search_all(String(D.en[k])).size():
+			mal.append(k)
+	ok(mal.is_empty(), "mêmes valeurs à insérer en fr et en anglais %s" % str(mal))
 	Textes.langue = "fr"
 	ok(Textes.t("res.gazole") == "Gazole", "français : Gazole")
 	Textes.langue = "en"

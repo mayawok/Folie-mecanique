@@ -72,7 +72,7 @@ func _champs() -> void:
 		return
 	if c.dist <= float(mines_cfg().alerte_m) and not _champs_annonces.has(c.id):
 		_champs_annonces[c.id] = true
-		log_("Champ de mines à %d m. Le convoi s'arrête avant d'y entrer." % int(c.dist), "alerte")
+		log_(Textes.t("mines.001", [int(c.dist)]), "alerte")
 		evt({"t": "champ_mines"})
 
 
@@ -107,7 +107,7 @@ func _mines(dt: float) -> void:
 				evt({"t": "mine", "x": mn.x, "uid": -1})
 				if float(equip_demin.fleau_pv) <= 0.0:
 					equip_demin.fleau_pv = 0.0
-					log_("Le fléau est hors d'usage.", "alerte")
+					log_(Textes.t("mines.002"), "alerte")
 					break
 	super(dt)
 
@@ -152,7 +152,7 @@ func ordre_deminer(moyen: String) -> bool:
 		return false
 	var c := champ_devant()
 	demin = {"champ": c.id, "moyen": moyen, "t": 0.0}
-	log_("Déminage au %s." % ("détecteur de métaux" if moyen == "detecteur" else "chien"), "info")
+	log_(Textes.t("mines.003", [("détecteur de métaux" if moyen == "detecteur" else "chien")]), "info")
 	return true
 
 
@@ -161,7 +161,7 @@ func ordre_traverser() -> bool:
 		return false
 	champ_traverse = true
 	demin = {}
-	log_("Traversée à l'aveugle : chaque mine touchée est un désastre.", "alerte")
+	log_(Textes.t("mines.004"), "alerte")
 	return true
 
 
@@ -174,13 +174,13 @@ func _demin(dt: float) -> void:
 	var restantes := mines.filter(func(mn): return int(mn.get("champ", 0)) == demin.champ)
 	if restantes.is_empty():
 		demin = {}
-		log_("Champ de mines déminé : la route est libre.", "ok")
+		log_(Textes.t("mines.005"), "ok")
 		return
 	if menace():
 		return   # un démineur à pied est exposé : on attend que la menace passe
 	if stocks.ammo < 1.0 or not _equipe_arme():
 		demin = {}
-		log_("Déminage interrompu : plus de quoi faire sauter les mines.", "alerte")
+		log_(Textes.t("mines.006"), "alerte")
 		return
 	var C := mines_cfg()
 	demin.t += dt
@@ -195,7 +195,7 @@ func _demin(dt: float) -> void:
 	mines.erase(cible)
 	if demin.moyen == "detecteur" and rng_mines.randf() < float(C.recupere):
 		stocks.metal += float(donnees().embuscade.mine_cout)   # mine désamorcée, réutilisable en embuscade
-		log_("Une mine est désamorcée et récupérée.", "ok")
+		log_(Textes.t("mines.007"), "ok")
 		return
 	stocks.ammo -= 1.0
 	evt({"t": "mine", "x": cible.x, "uid": -1})
@@ -204,9 +204,9 @@ func _demin(dt: float) -> void:
 		if int(equip_demin.chien_pv) <= 0:
 			equip_demin.chien_pv = 0
 			demin = {}
-			log_("Le chien est tué par une explosion. On ne le reverra pas.", "alerte")
+			log_(Textes.t("mines.008"), "alerte")
 		else:
-			log_("Le chien est blessé par un éclat.", "alerte")
+			log_(Textes.t("mines.009"), "alerte")
 
 
 # --- Trouvailles : moyens de déminage dans le butin -------------------------------------
@@ -228,5 +228,5 @@ func _recolter(c) -> void:
 		equip_demin.fleau_pv = float(C.fleau_pv)
 		trouve.append("un fléau à chaînes (monté sur chenilles)")
 	if not trouve.is_empty():
-		log_("Trouvé : %s." % ", ".join(trouve), "ok")
+		log_(Textes.t("mines.010", [", ".join(trouve)]), "ok")
 		evt({"t": "pieces"})

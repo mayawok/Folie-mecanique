@@ -133,7 +133,7 @@ func mission_accepter(t: String) -> bool:
 	ville.t = 0.0
 	x_tete = float(ville.x0) + float(MD().pos_atelier_m)   # le camion est à l'atelier
 	_replacer(true)
-	log_("Mission acceptée : %s pour %s." % [String(MD().types[t].nom).to_lower(), mission.dest_nom], "ok")
+	log_(Textes.t("mission.001", [String(MD().types[t].nom).to_lower(), mission.dest_nom]), "ok")
 	evt({"t": "mission", "etat": "chargement"})
 	return true
 
@@ -189,7 +189,7 @@ func _rassembler() -> void:
 			convoi.append(e)
 	_replacer(true)
 	var et := String(MD().escorte_texte)
-	log_("%s rejoignent le convoi." % (et.left(1).to_upper() + et.substr(1)), "ok")
+	log_(Textes.t("mission.002", [(et.left(1).to_upper() + et.substr(1))]), "ok")
 	evt({"t": "mission", "etat": "rassemblement"})
 
 
@@ -281,7 +281,7 @@ func _mission_arrivee() -> void:
 		"texte": "« %s ! Vous êtes attendus depuis l'aube. » Le maire de %s vous remet : %s.\n\nLes hommes de %s restent ici ; on ne revoit jamais ceux qui s'éloignent." % [
 			String(T.nom), ville.nom, texte_recompense(rc), mission.origine]}
 	mission = {}
-	log_("Cargaison livrée à %s : %s." % [ville.nom, texte_recompense(rc)], "ok")
+	log_(Textes.t("mission.003", [ville.nom, texte_recompense(rc)]), "ok")
 	evt({"t": "mission", "etat": "livree"})
 
 
@@ -292,7 +292,7 @@ func ville_poursuite() -> bool:
 	var P: Dictionary = VD().variantes.pillee
 	evenement = {"type": "pillage", "ville": String(ville.nom), "phase": "attente", "pillards": [], "butin": P.butin.duplicate()}
 	ville.phase = "depart"
-	log_("En route ! Le convoi traverse %s à toute allure." % ville.nom, "alerte")
+	log_(Textes.t("mission.004", [ville.nom]), "alerte")
 	evt({"t": "pillage", "etat": "poursuite"})
 	return true
 
@@ -319,7 +319,7 @@ func _evenement() -> void:
 			evenement.pillards.append(e.uid)
 			x += e.longueur + 6.0
 		evenement.phase = "chasse"
-		log_("Le convoi des pillards est en vue, %d m devant. Rattrapez-le !" % int(P.pillards_devant_m), "alerte")
+		log_(Textes.t("mission.005", [int(P.pillards_devant_m)]), "alerte")
 		evt({"t": "contact", "ennemi": true})
 		return
 	var restants := ennemis.filter(func(e): return evenement.pillards.has(e.uid) and e.actif())
@@ -327,7 +327,7 @@ func _evenement() -> void:
 		for k in evenement.butin:
 			stocks[k] = float(stocks.get(k, 0.0)) + float(evenement.butin[k])
 		mission_bilan = {"ok": true, "titre": "Réserves reprises", "texte": "Le convoi des pillards est détruit. Vous récupérez les réserves de %s : %s." % [evenement.ville, texte_recompense(evenement.butin)]}
-		log_("Pillards détruits : vous récupérez %s." % texte_recompense(evenement.butin), "ok")
+		log_(Textes.t("mission.006", [texte_recompense(evenement.butin)]), "ok")
 		evenement = {}
 		evt({"t": "pillage", "etat": "reussi"})
 		return
@@ -336,7 +336,7 @@ func _evenement() -> void:
 		devant = minf(devant, e.x - x_tete)
 	if devant > float(P.pillards_perdus_m):
 		mission_bilan = {"ok": false, "titre": "Pillards perdus", "texte": "Le convoi des pillards a disparu dans le no man's land avec les réserves de %s." % evenement.ville}
-		log_("Les pillards ont disparu dans le no man's land.", "alerte")
+		log_(Textes.t("mission.007"), "alerte")
 		ennemis = ennemis.filter(func(e): return not evenement.pillards.has(e.uid))
 		evenement = {}
 		evt({"t": "pillage", "etat": "perdu"})

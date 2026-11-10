@@ -60,7 +60,7 @@ func assembler(uid: int, a: Dictionary) -> bool:
 		return false
 	var err := Assemblage.valider(a)
 	if not err.is_empty():
-		log_("Ça ne roule pas : %s." % err[0].texte, "alerte")
+		log_(Textes.t("atelier.001", [err[0].texte]), "alerte")
 		return false
 	var v = trouver(uid) if uid != 0 else null
 	if uid != 0 and not (v is Veh and convoi.has(v)):
@@ -69,7 +69,7 @@ func assembler(uid: int, a: Dictionary) -> bool:
 	var deja := int(v.assemblage.get("plaques", 0)) if v != null else 0
 	var cout_plaques: float = maxf(0.0, float(int(a.get("plaques", 0)) - deja)) * float(Assemblage.catalogue().regles.plaque.metal)
 	if stocks.metal < cout_plaques:
-		log_("Il faut %d métal pour les plaques de blindage." % int(cout_plaques), "alerte")
+		log_(Textes.t("atelier.002", [int(cout_plaques)]), "alerte")
 		return false
 	# Pièces disponibles avec leur état : celles du véhicule d'abord (elles restent montées), puis la réserve
 	var dispo := []
@@ -86,7 +86,7 @@ func assembler(uid: int, a: Dictionary) -> bool:
 				k = i
 				break
 		if k < 0:
-			log_("Il manque : %s." % Assemblage.piece(id).get("nom", id), "alerte")
+			log_(Textes.t("atelier.003", [Assemblage.piece(id).get("nom", id)]), "alerte")
 			return false
 		montees.append(dispo[k])
 		dispo.remove_at(k)
@@ -130,7 +130,7 @@ func assembler(uid: int, a: Dictionary) -> bool:
 		v.noms.append(_nom_survivant())
 		reserve_survivants -= 1
 	_replacer(true)
-	log_("%s assemblé%s." % [v.nom, "" if v.armes.is_empty() else ", arme montée"], "ok")
+	log_(Textes.t("atelier.004", [v.nom, "" if v.armes.is_empty() else Textes.t("atelier.004a")]), "ok")
 	evt({"t": "assemble", "uid": v.uid})
 	return true
 
@@ -175,7 +175,7 @@ func ordre_demonter(uid: int) -> bool:
 		log_(r, "alerte")
 		return false
 	travaux = {"uid": uid, "reste": float(donnees().demontage.duree_s), "total": float(donnees().demontage.duree_s)}
-	log_("Démontage de %s commencé." % trouver(uid).nom, "info")
+	log_(Textes.t("atelier.005", [trouver(uid).nom]), "info")
 	return true
 
 
@@ -185,7 +185,7 @@ func _travaux(dt: float) -> void:
 	var v = trouver(travaux.uid)
 	if not (v is Veh) or not convoi.has(v) or v.garage == 0 or menace():
 		travaux = {}
-		log_("Démontage interrompu.", "alerte")
+		log_(Textes.t("atelier.006"), "alerte")
 		return
 	travaux.reste -= dt
 	if travaux.reste <= 0.0:
@@ -207,7 +207,7 @@ func _terminer_demontage(v: Veh) -> void:
 		b.garage.erase(v.uid)
 	convoi.erase(v)
 	_replacer()
-	log_("%s démonté : %d pièces en réserve, +%d métal." % [v.nom, res.pieces.size() + 1, int(res.metal)], "ok")
+	log_(Textes.t("atelier.007", [v.nom, res.pieces.size() + 1, int(res.metal)]), "ok")
 	evt({"t": "demonte", "uid": v.uid})
 
 
@@ -236,7 +236,7 @@ func choix_ouverture() -> Dictionary:
 	if not ouverture_en_cours():
 		if ouverture and not calme_ouverture() and not _fin_annoncee:
 			_fin_annoncee = true
-			log_("Des moteurs grondent au loin. Vous n'êtes plus seuls sur la route.", "alerte")
+			log_(Textes.t("atelier.008"), "alerte")
 		return {}
 	var e: Dictionary = ouv().etapes[etape_ouverture]
 	etape_ouverture += 1
@@ -331,11 +331,11 @@ func construire_grille(uid: int, a: Dictionary) -> bool:
 	if not bac_a_sable:
 		var cout := cout_grille(uid, a)
 		if stocks.metal < cout:
-			log_("Il faut %d métal (vous en avez %d)." % [int(ceil(cout)), int(stocks.metal)], "alerte")
+			log_(Textes.t("atelier.009", [int(ceil(cout)), int(stocks.metal)]), "alerte")
 			return false
 		var manque := Assemblage.manquantes(a, Assemblage.ids(avant) + ids_stock())
 		if not manque.is_empty():
-			log_("Il manque : %s." % Assemblage.piece(manque[0]).get("nom", manque[0]), "alerte")
+			log_(Textes.t("atelier.003", [Assemblage.piece(manque[0]).get("nom", manque[0])]), "alerte")
 			return false
 		var reste := Assemblage.compter(Assemblage.ids(a))
 		for id in Assemblage.ids(avant):   # pièces du véhicule : réutilisées d'abord, sinon rangées en réserve
@@ -375,6 +375,6 @@ func construire_grille(uid: int, a: Dictionary) -> bool:
 	_replacer(true)
 	v.x_prev = v.x
 	var p: Dictionary = v.profil
-	log_("%s construit%s." % [v.nom, "" if float(p.vitesse) > 0.0 else " : il ne roule pas (%s)" % p.get("immobile", "")], "ok" if float(p.vitesse) > 0.0 else "alerte")
+	log_(Textes.t("atelier.010", [v.nom, "" if float(p.vitesse) > 0.0 else Textes.t("atelier.010a", [p.get("immobile", "")])]), "ok" if float(p.vitesse) > 0.0 else "alerte")
 	evt({"t": "assemble", "uid": v.uid})
 	return true

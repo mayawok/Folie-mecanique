@@ -152,7 +152,7 @@ func _maj() -> void:
 	ctx2.metal = float(ctx.get("metal", 0.0)) - _metal   # le métal déjà engagé n'est plus disponible
 	_apercu.configurer(FormeAssemblage.enregistrer(a))
 	_ajuster()
-	_bilan.text = "Coût cumulé : %d métal · durée : %s · lieu : %s" % [int(_metal), _duree_txt(_duree), String(BaseVehicule.regles().niveaux_lieu[str(BaseVehicule.niveau_effectif(ctx))])]
+	_bilan.text = Textes.t("ecran_transformation.001", [int(_metal), _duree_txt(_duree), String(BaseVehicule.regles().niveaux_lieu[str(BaseVehicule.niveau_effectif(ctx))])])
 	for ch in _rangee.get_children():
 		ch.queue_free()
 	for o in TransformationBase.ONGLETS:

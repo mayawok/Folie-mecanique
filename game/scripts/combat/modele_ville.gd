@@ -138,7 +138,7 @@ func kit_ville(variante := "standard") -> bool:
 		xt = maxf(xt, v.x + v.longueur)
 	var ok := ville_creer(xt + float(VD().kit_distance_m), variante)
 	if ok:
-		log_("Kit : %s à %d m." % [ville.nom, int(float(ville.x0) - x_tete)], "info")
+		log_(Textes.t("ville.001", [ville.nom, int(float(ville.x0) - x_tete)]), "info")
 	return ok
 
 
@@ -156,9 +156,9 @@ func _ville(dt: float) -> void:
 			if not ville.annoncee and x0 - x_tete < float(D.annonce_m):
 				ville.annoncee = true
 				if ville_pillee():
-					log_("De la fumée noire au-dessus de %s. Les portes sont enfoncées." % ville.nom, "alerte")
+					log_(Textes.t("ville.002", [ville.nom]), "alerte")
 				else:
-					log_("Les murs de %s en vue. Le convoi ralentira devant la porte." % ville.nom, "ok")
+					log_(Textes.t("ville.003", [ville.nom]), "ok")
 				evt({"t": "ville", "etat": "annonce"})
 			if ville_pillee() and x_tete >= x0 - 6.0:   # personne pour ouvrir : on entre au pas (DEC-151)
 				ville.phase = "entree"
@@ -170,7 +170,7 @@ func _ville(dt: float) -> void:
 				ville.t = 0.0
 				ordres.marche = "halte"
 				_ville_securiser()
-				log_("Les gardes de %s ouvrent la grande porte." % ville.nom, "info")
+				log_(Textes.t("ville.004", [ville.nom]), "info")
 				evt({"t": "ville", "etat": "porte"})
 		"ouverture":
 			ville.t += dt
@@ -185,7 +185,7 @@ func _ville(dt: float) -> void:
 				if ville_repaire():   # le Berliet monte sur le monte-charge (DEC-166)
 					ville.phase = "monte_charge"
 					ville.t = 0.0
-					log_("Le Berliet est poussé sur un monte-charge. Les chaînes grincent.", "alerte")
+					log_(Textes.t("ville.005"), "alerte")
 					evt({"t": "ville", "etat": "monte_charge"})
 				else:
 					ville.phase = "dedans"
@@ -204,7 +204,7 @@ func _ville(dt: float) -> void:
 				var R: Dictionary = RP().recompense
 				for k in R:
 					stocks[k] = float(stocks.get(k, 0.0)) + float(R[k])
-				log_("Le Baron est tombé. Ses hommes ouvrent les cuves : carburant, munitions et métal pour le convoi.", "ok")
+				log_(Textes.t("ville.006"), "ok")
 				ville.phase = "dedans"
 				ville.vaincu = true
 				evt({"t": "ville", "etat": "victoire"})
@@ -214,7 +214,7 @@ func _ville(dt: float) -> void:
 			elif x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
 				ville.phase = "ouverture_s"
 				ville.t = 0.0
-				log_("La porte de sortie s'ouvre.", "info")
+				log_(Textes.t("ville.007"), "info")
 				evt({"t": "ville", "etat": "porte"})
 		"ouverture_s":
 			ville.t += dt
@@ -225,7 +225,7 @@ func _ville(dt: float) -> void:
 			if _queue_x() > x1 + 4.0:
 				ville.phase = "fin"
 				ordres.marche = "avancer"
-				log_("Le convoi a quitté %s. Bonne route." % ville.nom, "info")
+				log_(Textes.t("ville.008", [ville.nom]), "info")
 				evt({"t": "ville", "etat": "sortie"})
 		"fin":
 			if not ville_pillee():
@@ -253,7 +253,7 @@ func _repaire_arene() -> void:
 				e.pieces[pid].pv = e.pieces[pid].max
 		ennemis.append(e)
 		i += 1
-	log_("« Ouvrez l'arène ! » Le Baron du Brut et sa garde foncent sur le convoi.", "alerte")
+	log_(Textes.t("ville.009"), "alerte")
 	evt({"t": "ville", "etat": "arene"})
 
 
@@ -288,11 +288,11 @@ func _ville_arrivee() -> void:
 	var neuve := not bool(s.get("ville_connue", false))
 	s["ville_connue"] = true
 	if neuve:
-		log_("%s est inscrite sur la carte. Point de reprise." % ville.nom, "ok")
+		log_(Textes.t("ville.010", [ville.nom]), "ok")
 	if ville_pillee():
-		log_("%s brûle. Des corps dans les rues, des survivants qui appellent à l'aide." % ville.nom, "alerte")
+		log_(Textes.t("ville.011", [ville.nom]), "alerte")
 	else:
-		log_("Bienvenue à %s. Le convoi est à l'abri derrière les murs." % ville.nom, "ok")
+		log_(Textes.t("ville.012", [ville.nom]), "ok")
 	evt({"t": "ville", "etat": "dedans", "nouvelle": neuve})
 	_mission_arrivee()
 
@@ -323,22 +323,22 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 			blocage = "" if ville_dedans() else ("Préparatifs du départ." if ville_phase() in ["chargement", "rassemblement"] else "Ouverture de la porte.")
 			return 0.0
 		"monte_charge", "trone":
-			blocage = "Au repaire du Baron."
+			blocage = Textes.t("ville.013")
 			return 0.0
 		"arene":   # on manœuvre librement entre les murs de l'arène
 			if (vit > 0.0 and x_tete >= float(ville.x1) - 5.0) or (vit < 0.0 and _queue_x() <= float(ville.x0) + 2.0):
 				return 0.0
 			return vit
 		"entree":
-			blocage = "Entrée dans %s." % ville.nom
+			blocage = Textes.t("ville.014", [ville.nom])
 			return _rouler_vers(float(ville.x_arret), lente, mini)
 		"depart":
-			blocage = "Le convoi gagne la porte de sortie."
+			blocage = Textes.t("ville.015")
 			if ville_pillee():   # poursuite : on accélère dans la ville (DEC-151)
 				return minf(vmax, float(D.variantes.pillee.vitesse_poursuite))
 			return _rouler_vers(float(ville.x1) - float(D.arret_avant_porte_m), lente, mini)
 		"sortie":
-			blocage = "Sortie de %s." % ville.nom
+			blocage = Textes.t("ville.016", [ville.nom])
 			return minf(vmax, float(D.variantes.pillee.vitesse_poursuite)) if ville_pillee() else lente
 		"fin":
 			if vit < 0.0 and _queue_x() <= float(ville.x1) + 4.0 and not ville_pillee():
@@ -358,7 +358,7 @@ func ville_bloque_marche() -> bool:
 	if ville_phase() in PHASES_FORCEES:
 		return true
 	if ville_dedans():
-		log_("Le convoi est garé dans %s : demandez à repartir et choisissez votre sortie." % ville.nom, "info")
+		log_(Textes.t("ville.017", [ville.nom]), "info")
 		return true
 	return false
 
@@ -396,7 +396,7 @@ func ville_partir(dest: int) -> bool:
 		return false
 	ville.dest = dest
 	ville.phase = "depart"
-	log_("Le convoi se met en route vers la sortie.", "info")
+	log_(Textes.t("ville.018"), "info")
 	evt({"t": "ville", "etat": "depart"})
 	return true
 
@@ -426,7 +426,7 @@ func ville_reparer() -> bool:
 		return false
 	var cout := ville_cout_reparation()
 	if not bac_a_sable and stocks.metal < cout:
-		log_("Le mécanicien demande %d métal." % cout, "alerte")
+		log_(Textes.t("ville.019", [cout]), "alerte")
 		return false
 	if not bac_a_sable:
 		stocks.metal -= cout
@@ -434,7 +434,7 @@ func ville_reparer() -> bool:
 		for pid in v.pieces:
 			v.pieces[pid].pv = v.pieces[pid].max
 		v.roues_perdues.clear()
-	log_("Le mécanicien a remis le convoi en état (%d métal)." % (0 if bac_a_sable else cout), "ok")
+	log_(Textes.t("ville.020", [(0 if bac_a_sable else cout)]), "ok")
 	evt({"t": "repare"})
 	return true
 
@@ -450,12 +450,12 @@ func ville_acheter(k: String) -> bool:
 		return false
 	var prix := ville_prix_lot(k)
 	if not bac_a_sable and stocks.metal < prix:
-		log_("Pas assez de métal (%d demandé)." % prix, "alerte")
+		log_(Textes.t("ville.021", [prix]), "alerte")
 		return false
 	if not bac_a_sable:
 		stocks.metal -= prix
 	stocks[k] = float(stocks.get(k, 0.0)) + float(VD().marche.lot)
-	log_("Marché : %d %s pour %d métal." % [int(VD().marche.lot), "bidons d'eau" if k == "eau" else "caisses de vivres", prix], "ok")
+	log_(Textes.t("ville.022", [int(VD().marche.lot), Textes.t("lot." + k), prix]), "ok")
 	return true
 
 
@@ -505,7 +505,7 @@ func ville_deposer(res: Dictionary) -> bool:
 	for k in res:
 		stocks[k] = float(stocks[k]) - float(res[k])
 	recus.append({"secteur": monde.secteur, "ville": String(ville.nom), "res": res.duplicate()})
-	log_("Dépôt à %s : reçu tamponné." % ville.nom, "ok")
+	log_(Textes.t("ville.023", [ville.nom]), "ok")
 	return true
 
 
@@ -517,6 +517,6 @@ func ville_retirer() -> bool:
 		var f := 1.0 if int(r.secteur) == monde.secteur else 1.0 - perte
 		for k in r.res:
 			stocks[k] = float(stocks.get(k, 0.0)) + floorf(float(r.res[k]) * f)
-	log_("Reçus présentés : %d. Les dépôts d'autres villes perdent %d %%." % [recus.size(), int(perte * 100.0)], "ok")
+	log_(Textes.t("ville.024", [recus.size(), int(perte * 100.0)]), "ok")
 	recus.clear()
 	return true

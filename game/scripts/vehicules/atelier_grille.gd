@@ -66,13 +66,13 @@ func _ready() -> void:
 		add_child(n)
 		it.noeud = n
 	_btn_ok = Button.new()
-	_btn_ok.text = "Démarrer"
+	_btn_ok.text = Textes.t("atelier_grille.001")
 	_btn_ok.custom_minimum_size = Vector2(300, 90)
 	_btn_ok.pressed.connect(_terminer)
 	add_child(_btn_ok)
 	if uid != 0:
 		_btn_plus_tard = Button.new()
-		_btn_plus_tard.text = "Plus tard"
+		_btn_plus_tard.text = Textes.t("atelier_grille.002")
 		_btn_plus_tard.custom_minimum_size = Vector2(240, 90)
 		_btn_plus_tard.pressed.connect(func():
 			ferme.emit(false)

@@ -53,7 +53,7 @@ func _ia_poursuite(dt: float) -> void:
 				"x0": e.x + e.longueur * 0.5, "x": e.x + e.longueur * 0.5, "pv": float(AB().pv_abordeur), "cd": 0.0})
 			P.restants = int(P.restants) - 1
 			P.cd = float(AB().delai_saut)
-			log_("Abordage ! Un pillard saute sur %s%s." % [c.nom, " avec une lance explosive" if type == "bombe" else ""], "alerte")
+			log_(Textes.t("abordage.001", [c.nom, Textes.t("abordage.001a") if type == "bombe" else ""]), "alerte")
 
 
 func _veh_uid(uid: int):
@@ -93,7 +93,7 @@ func _abordages(dt: float) -> void:
 				_neutraliser(v)
 		if float(ab.pv) <= 0.0:
 			abordeurs.erase(ab)
-			log_("%s : le pillard est repoussé." % v.nom, "ok")
+			log_(Textes.t("abordage.002", [v.nom]), "ok")
 
 
 func _exploser(ab: Dictionary, v: Veh) -> void:
@@ -103,4 +103,4 @@ func _exploser(ab: Dictionary, v: Veh) -> void:
 	_toucher_vehicule(null, w, v, "", zone if v.pieces.has(zone) else "")
 	_blesser_equipage(v, float(A.bombe_equipage))
 	evt({"t": "impact", "x": float(ab.x), "y": 1.4, "touche": true, "reel": true, "classe": "canon", "ricoche": false, "uid": v.uid, "sur_joueur": v.camp == "joueur"})
-	log_("%s : la lance explosive a sauté contre le véhicule." % v.nom, "alerte")
+	log_(Textes.t("abordage.003", [v.nom]), "alerte")

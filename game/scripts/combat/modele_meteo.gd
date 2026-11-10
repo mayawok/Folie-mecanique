@@ -36,7 +36,7 @@ func _meteo(dt: float) -> void:
 		var d: Array = C.duree
 		var delai := rng_meteo.randf_range(a[0], a[1])
 		tempete = {"phase": "annonce", "reste": delai, "duree": rng_meteo.randf_range(d[0], d[1])}
-		log_("Tempête de sable dans %d s : un mur de sable approche. Abritez-vous." % int(delai), "alerte")
+		log_(Textes.t("meteo.001", [int(delai)]), "alerte")
 		evt({"t": "tempete_annonce"})
 		return
 	tempete.reste -= dt
@@ -44,7 +44,7 @@ func _meteo(dt: float) -> void:
 		if tempete.reste <= 0.0:
 			tempete = {"phase": "active", "reste": tempete.duree, "duree": tempete.duree}
 			_usure_t = 0.0
-			log_("La tempête de sable éclate.", "alerte")
+			log_(Textes.t("meteo.002"), "alerte")
 			evt({"t": "tempete_debut"})
 		return
 	_effets_tempete(dt)
@@ -52,7 +52,7 @@ func _meteo(dt: float) -> void:
 		tempete = {}
 		var iv: Array = C.intervalle
 		_tempete_t = rng_meteo.randf_range(iv[0], iv[1])
-		log_("La tempête de sable s'apaise. Reprenez la route quand l'équipage a rembarqué.", "ok")
+		log_(Textes.t("meteo.003"), "ok")
 		evt({"t": "tempete_fin"})
 
 

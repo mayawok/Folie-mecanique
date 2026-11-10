@@ -29,7 +29,7 @@ func _init(g := 1, options := {}) -> void:
 			pieces_stock.append({"piece": id, "etat": 1.0})
 		monde = MondeJeu.new(self)
 		_prochain_x = 120.0
-		log_("Une caisse de pièces au bord de la route. Assemblez la moto.", "info")
+		log_(Textes.t("modele.001"), "info")
 		return
 	stocks = D.stocks_depart.duplicate()
 	for t in D.depart:
@@ -50,9 +50,9 @@ func _init(g := 1, options := {}) -> void:
 		for k in ["gazole", "essence", "ammo", "metal", "eau", "vivres"]:
 			if stocks.has(k):
 				stocks[k] = 99999.0
-		log_("Mode créatif : toutes les pièces, sans limite. Touchez un véhicule puis « Grille ».", "info")
+		log_(Textes.t("modele.002"), "info")
 		return
-	log_("Le Berliet et son équipage reprennent la route du no man's land.", "info")
+	log_(Textes.t("modele.003"), "info")
 	villes_on = bool(options.get("villes", false))
 	if villes_on:
 		ville_creer(x_tete + float(VD().apparition_depart_m))
@@ -111,10 +111,10 @@ func ordre_reparer(uid: int, actif: bool, piece := "") -> bool:
 		v.reparation = false
 		return true
 	if ordres.marche != "halte":
-		log_("Réparation impossible en mouvement : ordonnez Halte.", "alerte")
+		log_(Textes.t("modele.004"), "alerte")
 		return false
 	if not _mecanicien_possible(v):
-		log_("Aucun mécanicien à portée : approchez le convoi.", "alerte")
+		log_(Textes.t("modele.005"), "alerte")
 		return false
 	v.reparation = true
 	v.rep_piece = piece
@@ -146,14 +146,14 @@ func rejoindre(uid: int) -> bool:
 		a.cd = 1.0
 	convoi.append(v)
 	_replacer()
-	log_("%s rejoint le convoi." % v.nom, "ok")
+	log_(Textes.t("modele.006", [v.nom]), "ok")
 	evt({"t": "rejoint", "uid": v.uid})
 	return true
 
 func _dire_lore() -> void:
 	if not _lore_dit:
 		_lore_dit = true
-		log_("On ne revoit jamais ceux qui s'éloignent.", "info")
+		log_(Textes.t("modele.007"), "info")
 
 func liste_survivants() -> Array:
 	var res := []
@@ -185,14 +185,14 @@ func affecter(de_uid: int, idx: int, vers_uid: int) -> bool:
 	if not (a is Veh and b is Veh) or not convoi.has(a) or not convoi.has(b) or a == b:
 		return false
 	if ordres.marche != "halte":
-		log_("Arrêtez le convoi pour changer d'affectation.", "alerte")
+		log_(Textes.t("modele.008"), "alerte")
 		return false
 	_aligner_noms(a)
 	_aligner_noms(b)
 	if idx < 0 or idx >= a.equipage.size() or a.equipage[idx] <= 0.0:
 		return false
 	if b.equipage.size() >= int(b.profil.equipage) or not b.actif():
-		log_("%s n'a pas de place libre." % b.nom, "alerte")
+		log_(Textes.t("modele.009", [b.nom]), "alerte")
 		return false
 	var pv: float = a.equipage[idx]
 	var nom: String = a.noms[idx]
@@ -200,21 +200,21 @@ func affecter(de_uid: int, idx: int, vers_uid: int) -> bool:
 	a.noms.remove_at(idx)
 	b.equipage.append(pv)
 	b.noms.append(nom)
-	log_("%s passe dans %s." % [nom, b.nom], "info")
+	log_(Textes.t("modele.010", [nom, b.nom]), "info")
 	return true
 
 
 # --- Demi-tour : le convoi repart dans l'autre sens ---------------------------------
 func ordre_demi_tour() -> bool:
 	if ville_protegee():
-		log_("Demi-tour impossible dans l'enceinte d'une ville.", "alerte")
+		log_(Textes.t("modele.011"), "alerte")
 		return false
 	if menace() or not transits.is_empty() or monde.en_transit() and false:
-		log_("Demi-tour impossible : des ennemis sont trop proches.", "alerte")
+		log_(Textes.t("modele.012"), "alerte")
 		return false
 	for v in convoi:
 		if v.garage != 0:
-			log_("Sortez les véhicules du garage avant le demi-tour.", "alerte")
+			log_(Textes.t("modele.013"), "alerte")
 			return false
 	var arriere := INF
 	for v in convoi:
@@ -250,7 +250,7 @@ func ordre_demi_tour() -> bool:
 		_ville_retirer()   # la ville qu'on laisse derrière ne se retrouve pas sur cette route
 	if mission_en_route():
 		mission_echouer("Vous avez fait demi-tour : la cargaison n'arrivera pas à %s." % mission.dest_nom)
-	log_("Demi-tour : le convoi repart dans l'autre sens.", "info")
+	log_(Textes.t("modele.014"), "info")
 	evt({"t": "demitour"})
 	return true
 
@@ -314,7 +314,6 @@ func _ravitaillement(dt: float) -> void:
 	for k in ["eau", "vivres"]:
 		var avant := float(stocks.get(k, 0.0))
 		stocks[k] = maxf(0.0, avant - float(R[k + "_jour"]) * n * dt / MondeJeu.JOUR_S)
-		var nom := "d'eau" if k == "eau" else "de vivres"
 		if stocks[k] <= 0.0:
 			var perte := float(R.soif_pv_s if k == "eau" else R.faim_pv_s) * dt
 			for v in convoi:
@@ -323,12 +322,12 @@ func _ravitaillement(dt: float) -> void:
 						v.equipage[i] = maxf(float(R.pv_min), float(v.equipage[i]) - perte)
 			if not _alerte_ravit.has(k + "_vide"):
 				_alerte_ravit[k + "_vide"] = true
-				log_("Plus %s : l'équipage s'affaiblit. Achetez-en en ville ou trouvez-en sur la route." % nom, "alerte")
+				log_(Textes.t("modele.015", [Textes.t("res.de." + k)]), "alerte")
 				evt({"t": "ravitaillement", "k": k, "etat": "vide"})
 		elif jours_de(k) < float(R.alerte_jours):
 			if not _alerte_ravit.has(k + "_bas"):
 				_alerte_ravit[k + "_bas"] = true
-				log_("Il reste moins d'un jour %s." % nom, "alerte")
+				log_(Textes.t("modele.016", [Textes.t("res.de." + k)]), "alerte")
 		else:
 			_alerte_ravit.erase(k + "_bas")
 			_alerte_ravit.erase(k + "_vide")
@@ -412,7 +411,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.ville_charger(d.get("villes", {}))
 	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
-	m.log_("Partie reprise." if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")
+	m.log_(Textes.t("modele.017") if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")
 	return m
 
 func monter(uid: int) -> void:
@@ -437,10 +436,10 @@ func abandonner(uid: int) -> void:
 		var v: Veh = convoi[i]
 		if v.uid == uid:
 			if convoi.size() <= 1:
-				log_("Impossible d'abandonner le dernier véhicule.", "alerte")
+				log_(Textes.t("modele.018"), "alerte")
 				return
 			if v.principal:
-				log_("Le %s est le camion de l'expédition : on ne l'abandonne pas." % v.nom, "alerte")
+				log_(Textes.t("modele.019", [v.nom]), "alerte")
 				return
 			convoi.remove_at(i)
 			reserve_survivants += v.troupes_vivantes()   # les soldats des bancs suivent le convoi
@@ -450,7 +449,7 @@ func abandonner(uid: int) -> void:
 			v.reparation = false
 			v.butin = _butin_vehicule(v, 0.9)
 			epaves.append(v)
-			log_("%s abandonné : ses pièces peuvent être récupérées." % v.nom, "alerte")
+			log_(Textes.t("modele.020", [v.nom]), "alerte")
 			return
 
 
@@ -503,7 +502,7 @@ func avancer(dt := DT) -> void:
 			vivants += 1
 	if vivants == 0:
 		fini = true
-		log_("Le convoi est anéanti. Distance parcourue : %d m." % int(distance_max), "alerte")
+		log_(Textes.t("modele.021", [int(distance_max)]), "alerte")
 
 # Infirmier (DEC-050) : soigne lentement les blessés de son véhicule, jamais au-delà de la santé de départ
 func _soins(dt: float) -> void:
@@ -526,11 +525,11 @@ func ordre_troupes(uid: int) -> bool:
 		if ordres.marche != "halte":
 			ordre_marche("halte")   # le convoi s'arrête pour laisser descendre les soldats
 		var n := monde.debarquer_troupes(v)
-		log_("%d soldat%s de %s débarque%s." % [n, "s" if n > 1 else "", v.nom, "nt" if n > 1 else ""], "info")
+		log_(Textes.t("modele.022p" if n > 1 else "modele.022", [n, v.nom]), "info")
 		return n > 0
 	if monde.troupes_dehors(uid) > 0:
 		monde.rappeler_troupes(uid)
-		log_("Les soldats de %s regagnent leur véhicule." % v.nom, "info")
+		log_(Textes.t("modele.023", [v.nom]), "info")
 		return true
 	return false
 
@@ -554,34 +553,34 @@ func _marche(dt: float) -> void:
 			cache = cache or v.camo_voulu
 			au_garage = au_garage or v.garage != 0
 		if camp_actif():
-			blocage = "Camp de réparation en cours."
+			blocage = Textes.t("modele.024")
 		elif sans_tracteur:
-			blocage = "Une remorque est en tête : mettez un véhicule à moteur devant elle."
+			blocage = Textes.t("modele.025")
 		elif not transits.is_empty():
-			blocage = "Équipages en déplacement."
+			blocage = Textes.t("modele.026")
 		elif monde.troupes_dehors() > 0:
-			blocage = "Des soldats sont à terre : ils regagnent leurs véhicules."
+			blocage = Textes.t("modele.027")
 		elif sans_equipage:
-			blocage = "Un véhicule n'a plus d'équipage : rembarquez-le avant de repartir."
+			blocage = Textes.t("modele.028")
 		elif not monde.dialogue.is_empty():
-			blocage = "Un voyageur vous parle."
+			blocage = Textes.t("modele.029")
 		elif au_garage:
-			blocage = "Un véhicule est au garage : sortez-le avant de repartir."
+			blocage = Textes.t("modele.030")
 		elif cache:
-			blocage = "Un véhicule est camouflé : découvrez-le avant de repartir."
+			blocage = Textes.t("modele.031")
 		elif actifs.any(func(v): return float(v.profil.vitesse) <= 0.0):
 			var v0 = actifs.filter(func(v): return float(v.profil.vitesse) <= 0.0)[0]
-			blocage = "%s ne roule pas : %s. Ouvrez sa grille." % [v0.nom, v0.profil.get("immobile", "conception à revoir")]
+			blocage = Textes.t("modele.032", [v0.nom, v0.profil.get("immobile", "conception à revoir")])
 		elif immobilise:
-			blocage = "Un véhicule est immobilisé : réparez-le ou abandonnez-le."
+			blocage = Textes.t("modele.033")
 		elif not carburant_manquant().is_empty():
 			blocage = Textes.t("carb.panne", [carburant_manquant()])
 		elif not fouille_en_cours.is_empty():
-			blocage = "Fouille en cours."
+			blocage = Textes.t("modele.034")
 		elif champ_bloque():
-			blocage = "Champ de mines devant : déminez, faites demi-tour ou traversez."
+			blocage = Textes.t("modele.035")
 		elif not demin.is_empty():
-			blocage = "Déminage en cours."
+			blocage = Textes.t("modele.036")
 		else:
 			var pente: float = Terrain.pente(x_tete)
 			vmax *= clampf(1.0 - 2.4 * pente, 0.55, 1.3)   # montée : plus lent ; descente : plus vite
@@ -591,7 +590,7 @@ func _marche(dt: float) -> void:
 				for e in ennemis:
 					if e.actif() and e.mode != "poursuite" and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
 						vit = 0.0
-						blocage = "La route est barrée par un véhicule ennemi."
+						blocage = Textes.t("modele.037")
 						break
 	var vmax_ville := 0.0
 	for v in actifs:
@@ -677,7 +676,7 @@ func _rencontres() -> void:
 			preparer_poursuivant(e, choix)
 			ennemis.append(e)
 			xp -= e.longueur + r.randf_range(6.0, 14.0)
-		log_("Des véhicules vous rattrapent par l'arrière !", "alerte")
+		log_(Textes.t("modele.038"), "alerte")
 		evt({"t": "contact", "ennemi": true})
 		_prochain_x = x_tete + r.randf_range(R.intervalle[0], R.intervalle[1])
 		return
@@ -759,5 +758,5 @@ func kit_aller(id: String) -> bool:
 		kit_ville()
 	elif String(l.get("batiment", "")) != "":
 		kit_apparaitre("batiment", {"type": String(l.batiment)})
-	log_("Kit : le convoi se rend à %s." % l.nom, "info")
+	log_(Textes.t("modele.039", [l.nom]), "info")
 	return true

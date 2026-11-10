@@ -40,13 +40,13 @@ func ordre_garer(uid: int) -> bool:
 		return false
 	var b = abri_garage()
 	if b == null:
-		log_("Aucun hangar ni grange à portée avec une place libre.", "alerte")
+		log_(Textes.t("terrain.001"), "alerte")
 		return false
 	v.garage = b.uid
 	v.camo_voulu = false
 	v.camoufle = false
 	b.garage.append(uid)
-	log_("%s rentre dans %s : à l'abri et en réparation." % [v.nom, b.nom], "ok")
+	log_(Textes.t("terrain.002", [v.nom, b.nom]), "ok")
 	evt({"t": "garage", "uid": b.uid})
 	return true
 
@@ -58,7 +58,7 @@ func ordre_sortir(uid: int) -> bool:
 	if b is Bat:
 		b.garage.erase(uid)
 	v.garage = 0
-	log_("%s sort du garage." % v.nom, "info")
+	log_(Textes.t("terrain.003", [v.nom]), "info")
 	return true
 
 func _garage(dt: float) -> void:
@@ -89,7 +89,7 @@ func _garage(dt: float) -> void:
 					complet = false
 			if complet and not v.get_meta("repare_dit", false):
 				v.set_meta("repare_dit", true)
-				log_("%s est remis en état." % v.nom, "ok")
+				log_(Textes.t("terrain.004", [v.nom]), "ok")
 
 
 # --- Embuscade : garnison, mines, camouflage -------------------------------
@@ -118,7 +118,7 @@ func ordre_debarquer(uid: int) -> bool:
 		return false
 	var b = _refuge_pour(v)
 	if b == null:
-		log_("Aucun bâtiment à portée pour s'abriter (ruine, ferme, église...).", "alerte")
+		log_(Textes.t("terrain.005"), "alerte")
 		return false
 	var libres: int = FENETRES[b.type].size() - b.garnison.size() - _en_route(b)
 	var pvs := []
@@ -137,7 +137,7 @@ func ordre_debarquer(uid: int) -> bool:
 	v.noms = noms_r
 	var T: float = ecart(v.x, v.longueur, b.x, b.longueur) / donnees().embuscade.vitesse_marche + 1.0
 	transits.append({"mode": "debarque", "veh": uid, "bat": b.uid, "pvs": pvs, "noms": noms_p, "restant": T, "T": T})
-	log_("L'équipage de %s rejoint %s." % [v.nom, b.nom], "info")
+	log_(Textes.t("terrain.006", [v.nom, b.nom]), "info")
 	return true
 
 func ordre_rembarquer(uid: int) -> bool:
@@ -161,7 +161,7 @@ func ordre_rembarquer(uid: int) -> bool:
 			transits.append({"mode": "rembarque", "veh": uid, "bat": b.uid, "pvs": sortants, "noms": noms_s, "restant": T, "T": T})
 			fait = true
 	if fait:
-		log_("L'équipage de %s regagne son véhicule." % v.nom, "info")
+		log_(Textes.t("terrain.007", [v.nom]), "info")
 	return fait
 
 func a_garnison(uid: int) -> bool:
@@ -196,7 +196,7 @@ func _transits(dt: float) -> void:
 				for i in t.pvs.size():
 					var pv: float = t.pvs[i]
 					b.garnison.append({"nom": t.noms[i], "pv": pv, "cd": rng.randf_range(0.5, 1.5), "veh": t.veh, "premier": true, "garde": true, "slot": _slot_libre(b)})
-				log_("%d survivant(s) se postent dans %s et attendent l'ennemi." % [t.pvs.size(), b.nom], "ok")
+				log_(Textes.t("terrain.008", [t.pvs.size(), b.nom]), "ok")
 				evt({"t": "poste", "uid": b.uid})
 			else:
 				var v = trouver(t.veh)
@@ -210,7 +210,7 @@ func _transits(dt: float) -> void:
 				_aligner_noms(v)
 				v.equipage.append_array(t.pvs)
 				v.noms.append_array(t.noms)
-				log_("L'équipage de %s a rembarqué." % v.nom, "ok")
+				log_(Textes.t("terrain.009", [v.nom]), "ok")
 	transits = en_cours
 
 func ordre_camoufler(uid: int, actif: bool) -> bool:
@@ -224,7 +224,7 @@ func ordre_camoufler(uid: int, actif: bool) -> bool:
 		v.camoufle = false
 		v.camo_t = 0.0
 	else:
-		log_("%s est camouflé sous des filets et des branchages..." % v.nom, "info")
+		log_(Textes.t("terrain.010", [v.nom]), "info")
 	return true
 
 func _camouflage(dt: float) -> void:
@@ -234,7 +234,7 @@ func _camouflage(dt: float) -> void:
 			v.camo_t += dt
 			if v.camo_t >= S:
 				v.camoufle = true
-				log_("%s est invisible de la route." % v.nom, "ok")
+				log_(Textes.t("terrain.011", [v.nom]), "ok")
 
 func ordre_mines(n := 3) -> bool:
 	var E: Dictionary = donnees().embuscade
@@ -247,12 +247,12 @@ func ordre_mines(n := 3) -> bool:
 		return false
 	var cout: float = E.mine_cout * n
 	if stocks.metal < cout:
-		log_("Il faut %d métal pour poser %d mines." % [int(cout), n], "alerte")
+		log_(Textes.t("terrain.012", [int(cout), n]), "alerte")
 		return false
 	stocks.metal -= cout
 	for i in n:
 		mines.append({"x": x_tete + E.mine_dist + i * 9.0 + rng.randf_range(0.0, 3.0), "arme_t": temps + 6.0 + i * 3.0, "armee": false})
-	log_("%d mines posées sur la route devant le convoi : ne les franchissez pas." % n, "ok")
+	log_(Textes.t("terrain.013", [n]), "ok")
 	evt({"t": "mines"})
 	return true
 
@@ -287,7 +287,7 @@ func _sauter_sur_mine(v: Veh, mn: Dictionary) -> void:
 			evt({"t": "casse", "uid": v.uid, "piece": k})
 	_blesser_equipage(v, 8.0)
 	evt({"t": "mine", "x": mn.x, "uid": v.uid})
-	log_("Une mine explose sous %s !" % v.nom, "ok" if v.camp == "ennemi" else "alerte")
+	log_(Textes.t("terrain.014", [v.nom]), "ok" if v.camp == "ennemi" else "alerte")
 	if v.pieces.chassis.pv <= 0.0:
 		_detruire(v)
 	elif v.equipage_vivant() == 0 and v.actif():
@@ -419,7 +419,7 @@ func _fouiller(dt: float) -> void:
 	else:
 		if menace():
 			fouille_en_cours = {}
-			log_("Fouille interrompue.", "alerte")
+			log_(Textes.t("terrain.015"), "alerte")
 			return
 		fouille_en_cours.restant -= dt
 		if fouille_en_cours.restant <= 0.0:
@@ -451,7 +451,7 @@ func _recolter(c) -> void:
 		evt({"t": "pieces"})
 		if ouverture:   # au bord de la route : on s'arrête pour assembler
 			ordres.marche = "halte"
-			log_("De quoi bricoler ! Touchez « Assembler ».", "ok")
+			log_(Textes.t("terrain.016"), "ok")
 	# Les pièces ne se prennent que sur les épaves détruites ; un véhicule entier se répare
 	var comps: Array = c.butin.composants if (c is Bat or c.statut == "epave") else []
 	for comp in comps:

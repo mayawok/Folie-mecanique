@@ -59,7 +59,7 @@ func _meilleure_reserve(famille: String) -> String:
 # Établit le camp : le convoi s'arrête, le véhicule est immobilisé jusqu'à la fin des travaux.
 func camp_etablir(uid: int, op: String, params: Dictionary) -> bool:
 	if camp_actif():
-		log_("Un camp est déjà installé.", "alerte")
+		log_(Textes.t("camp.001"), "alerte")
 		return false
 	var r := raison_grille(uid)
 	if r != "":
@@ -67,7 +67,7 @@ func camp_etablir(uid: int, op: String, params: Dictionary) -> bool:
 		return false
 	var v = trouver(uid)
 	if not ennemis.filter(func(e): return e.actif()).is_empty():
-		log_("Impossible d'établir un camp avec des ennemis en vue.", "alerte")
+		log_(Textes.t("camp.002"), "alerte")
 		return false
 	var meca := maxi(1, int(v.profil.get("mecaniciens", 0)))
 	var d := CampReparation.demarrer(op, params, grille_de(uid), pieces_stock, {"niveau": 0, "atelier_mobile": false}, meca, monde.niveau_a(x_tete), graine * 31 + int(temps))
@@ -76,7 +76,7 @@ func camp_etablir(uid: int, op: String, params: Dictionary) -> bool:
 		return false
 	camp_rep = {"uid": uid, "camp": d.camp, "ennemis": []}
 	ordres.marche = "halte"
-	log_("%s : camp établi, %d min de travaux. Défendez-le." % [v.nom, int(ceil(float(d.camp.duree_s) / 60.0))], "alerte")
+	log_(Textes.t("camp.003", [v.nom, int(ceil(float(d.camp.duree_s) / 60.0))]), "alerte")
 	evt({"t": "camp", "uid": uid, "etat": "etabli"})
 	return true
 
@@ -84,7 +84,7 @@ func camp_etablir(uid: int, op: String, params: Dictionary) -> bool:
 func camp_interrompre() -> void:
 	if camp_actif():
 		camp_rep.camp = CampReparation.interrompre(camp_rep.camp)
-		log_("Travaux interrompus : le véhicule reste immobilisé.", "info")
+		log_(Textes.t("camp.004"), "info")
 
 
 func camp_reprendre() -> void:
@@ -151,7 +151,7 @@ func _camp_attaque(force: float) -> void:
 		e.mode = "approche"
 		ennemis.append(e)
 		camp_rep.ennemis.append(e.uid)
-	log_("Attaque sur le camp ! %d véhicule(s) ennemi(s)." % n, "alerte")
+	log_(Textes.t("camp.005", [n]), "alerte")
 	evt({"t": "contact", "ennemi": true})
 
 
@@ -174,7 +174,7 @@ func _camp_terminer() -> void:
 			v.roues_perdues.clear()
 		elif op == "changer_moteur":
 			v.pieces.moteur.pv = v.pieces.moteur.max * clampf(_etat_moteur(fin.a), 0.1, 1.0)
-		log_("%s : réparation terminée, le convoi peut repartir." % v.nom, "ok")
+		log_(Textes.t("camp.006", [v.nom]), "ok")
 	evt({"t": "camp", "uid": uid, "etat": "termine"})
 	camp_rep = {}
 
@@ -206,7 +206,7 @@ func transformation_contexte(uid: int) -> Dictionary:
 # rien ne change si le métal manque ou si la grille est refusée.
 func transformer(uid: int, a: Dictionary, metal: float, duree_s: float) -> bool:
 	if not bac_a_sable and float(stocks.metal) < metal:
-		log_("Il faut %d métal (vous en avez %d)." % [int(ceil(metal)), int(stocks.metal)], "alerte")
+		log_(Textes.t("atelier.009", [int(ceil(metal)), int(stocks.metal)]), "alerte")
 		return false
 	var avant := float(stocks.metal)
 	if not construire_grille(uid, a):
@@ -215,7 +215,7 @@ func transformer(uid: int, a: Dictionary, metal: float, duree_s: float) -> bool:
 		var deja := avant - float(stocks.metal)
 		stocks.metal = maxf(0.0, float(stocks.metal) - maxf(0.0, metal - deja))
 	var v = trouver(uid)
-	log_("%s transformé : %d min de travaux." % [v.nom if v != null else "Véhicule", int(ceil(duree_s / 60.0))], "info")
+	log_(Textes.t("camp.007", [v.nom if v != null else "Véhicule", int(ceil(duree_s / 60.0))]), "info")
 	return true
 
 
@@ -246,7 +246,7 @@ func halte_bivouac(passer_la_nuit := false) -> bool:
 		return false
 	ordres.marche = "halte"
 	halte = {"mode": "bivouac", "t": 0.0, "pret": false, "nuit": passer_la_nuit}
-	log_("Halte : l'équipage descend et monte le camp. Les mitrailleurs restent à leur poste.", "info")
+	log_(Textes.t("camp.008"), "info")
 	evt({"t": "halte", "mode": "bivouac"})
 	return true
 
@@ -261,7 +261,7 @@ func halte_garde() -> bool:
 	for v in convoi:
 		if v.actif():
 			v.reparation = true   # les mécaniciens travaillent, les autres restent aux aguets
-	log_("Halte : tout le monde aux aguets, les mécaniciens réparent.", "info")
+	log_(Textes.t("camp.009"), "info")
 	return true
 
 
@@ -269,7 +269,7 @@ func halte_lever() -> void:
 	if halte.is_empty():
 		return
 	halte = {}
-	log_("On lève le camp.", "info")
+	log_(Textes.t("camp.010"), "info")
 
 
 # Repos de nuit au bivouac monté : la nuit passe plus vite (comme à l'abri)
@@ -286,7 +286,7 @@ func _halte(dt: float) -> void:
 	halte.t += dt
 	if not halte.pret and halte.t >= float(H().montage_s):
 		halte.pret = true
-		log_("Le camp est monté : tentes dressées, feu allumé.", "ok")
+		log_(Textes.t("camp.011"), "ok")
 	if halte.mode == "bivouac" and not ennemis.filter(func(e): return e.actif()).is_empty() and bool(halte.pret):
 		halte.nuit = false   # alerte : personne ne dort
 	if _eclaireurs_t > 0.0:
@@ -297,12 +297,12 @@ func _halte(dt: float) -> void:
 
 func envoyer_eclaireurs() -> bool:
 	if ordres.marche != "halte" or halte.is_empty():
-		log_("Les éclaireurs partent seulement pendant une halte.", "alerte")
+		log_(Textes.t("camp.012"), "alerte")
 		return false
 	if _eclaireurs_t > 0.0:
 		return false
 	_eclaireurs_t = float(H().eclaireurs_s)
-	log_("Deux éclaireurs partent à pied reconnaître le secteur.", "info")
+	log_(Textes.t("camp.013"), "info")
 	return true
 
 
@@ -332,16 +332,16 @@ func _eclaireurs_rapport() -> void:
 # Cache (DEC-157) : on enterre une part des réserves ici ; au retour, elle a pu être pillée (tirage à graine fixe).
 func cache_creer(res: Dictionary) -> bool:
 	if ordres.marche != "halte":
-		log_("Arrêtez le convoi pour faire une cache.", "alerte")
+		log_(Textes.t("camp.014"), "alerte")
 		return false
 	for k in res:
 		if float(stocks.get(k, 0.0)) < float(res[k]):
-			log_("Pas assez de réserves pour cette cache.", "alerte")
+			log_(Textes.t("camp.015"), "alerte")
 			return false
 	for k in res:
 		stocks[k] = float(stocks[k]) - float(res[k])
 	caches.append({"x": x_tete, "res": res.duplicate(), "pillee": null})
-	log_("Cache enterrée au kilomètre %d." % int(x_tete / 1000.0), "ok")
+	log_(Textes.t("camp.016", [int(x_tete / 1000.0)]), "ok")
 	return true
 
 
@@ -361,9 +361,9 @@ func cache_reprendre() -> bool:
 	rr.seed = graine * 4243 + int(c.x)
 	caches.remove_at(i)
 	if rr.randf() < float(H().cache_pillage):
-		log_("La cache a été fouillée : il ne reste rien.", "alerte")
+		log_(Textes.t("camp.017"), "alerte")
 		return true
 	for k in c.res:
 		stocks[k] = float(stocks.get(k, 0.0)) + float(c.res[k])
-	log_("Cache retrouvée intacte.", "ok")
+	log_(Textes.t("camp.018"), "ok")
 	return true

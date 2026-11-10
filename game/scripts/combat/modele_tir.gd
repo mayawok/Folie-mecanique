@@ -34,7 +34,7 @@ func _armes_vehicule(v: Veh, dt: float) -> void:
 			if stocks.ammo < w.munitions:
 				if not _alerte_muni:
 					_alerte_muni = true
-					log_("Plus de munitions : récupérez-en sur les épaves.", "alerte")
+					log_(Textes.t("tir.001"), "alerte")
 				a.cd = 0.0
 				continue
 		if w.classe == "mortier" and absf(v.vitesse_act) > 0.3:
@@ -303,7 +303,7 @@ func _toucher_vehicule(att, w: Dictionary, v: Veh, visee: String, zone_imposee :
 	if avant > 0.0 and p.pv <= 0.0 and zone != "chassis":
 		evt({"t": "casse", "uid": v.uid, "piece": zone})
 		if v.camp == "joueur":
-			log_("%s : %s détruit(e)." % [v.nom, p.nom], "alerte")
+			log_(Textes.t("tir.002", [v.nom, p.nom]), "alerte")
 	if v.pieces.chassis.pv <= 0.0:
 		_detruire(v)
 	elif v.equipage_vivant() == 0 and v.actif():
@@ -335,7 +335,7 @@ func _perdre_roues(v: Veh) -> void:
 		var L: float = float(D.longueur)
 		evt({"t": "roue_perdue", "uid": v.uid, "x": v.x + (L - rx if v.camp == "ennemi" and v.mode != "poursuite" else rx), "r": float(roues[i].r), "sens": -1.0 if v.camp == "joueur" or v.mode == "poursuite" else 1.0})
 		if v.camp == "joueur":
-			log_("%s perd une roue !" % v.nom, "alerte")
+			log_(Textes.t("tir.003", [v.nom]), "alerte")
 
 
 func _remonter_roues(v: Veh) -> void:   # roues remontées au fil de la réparation
@@ -359,11 +359,11 @@ func _blesser_equipage(v: Veh, d: float) -> void:
 		var j := -1 - i
 		v.troupes[j] = maxf(0.0, v.troupes[j] - d)
 		if v.troupes[j] <= 0.0 and v.camp == "joueur":
-			log_("%s : un soldat est tombé sur son banc." % v.nom, "alerte")
+			log_(Textes.t("tir.004", [v.nom]), "alerte")
 		return
 	v.equipage[i] = maxf(0.0, v.equipage[i] - d)
 	if v.equipage[i] <= 0.0 and v.camp == "joueur":
-		log_("%s : un membre d'équipage est hors de combat." % v.nom, "alerte")
+		log_(Textes.t("tir.005", [v.nom]), "alerte")
 
 func _toucher_batiment(w: Dictionary, b: Bat, visee: String) -> String:
 	if b.statut == "neutralise":   # ruine : abri éventuel de la garnison
@@ -396,7 +396,7 @@ func _toucher_batiment(w: Dictionary, b: Bat, visee: String) -> String:
 		b.statut = "neutralise"
 		ennemis_detruits += 1
 		b.butin.composants = []
-		log_("%s neutralisé : fouillez-le pour récupérer le butin." % b.nom, "ok")
+		log_(Textes.t("tir.006", [b.nom]), "ok")
 		evt({"t": "epave", "uid": b.uid})
 	return zone
 
@@ -405,7 +405,7 @@ func _blesser_garnison(b: Bat, d: float) -> void:
 		if g.pv > 0.0:
 			g.pv = maxf(0.0, g.pv - d)
 			if g.pv <= 0.0:
-				log_("Un survivant est hors de combat dans %s." % b.nom, "alerte")
+				log_(Textes.t("tir.007", [b.nom]), "alerte")
 			return
 
 func _blesser_tireur(b: Bat, d: float) -> void:
@@ -449,10 +449,10 @@ func _detruire(v: Veh) -> void:
 	_sortir_du_combat(v)
 	evt({"t": "epave", "uid": v.uid})
 	if v.camp == "joueur":
-		log_("%s est détruit !" % v.nom, "alerte")
+		log_(Textes.t("tir.008", [v.nom]), "alerte")
 	else:
 		ennemis_detruits += 1
-		log_("%s ennemi détruit." % v.nom, "ok")
+		log_(Textes.t("tir.009", [v.nom]), "ok")
 
 func _neutraliser(v: Veh) -> void:
 	v.statut = "abandonne"
@@ -460,10 +460,10 @@ func _neutraliser(v: Veh) -> void:
 	_sortir_du_combat(v)
 	evt({"t": "epave", "uid": v.uid})
 	if v.camp == "joueur":
-		log_("L'équipage de %s est hors de combat : le véhicule est perdu." % v.nom, "alerte")
+		log_(Textes.t("tir.010", [v.nom]), "alerte")
 	else:
 		ennemis_detruits += 1
-		log_("%s ennemi neutralisé : réparable et récupérable." % v.nom, "ok")
+		log_(Textes.t("tir.011", [v.nom]), "ok")
 
 func _sortir_du_combat(v: Veh) -> void:
 	v.x_prev = v.x
@@ -534,7 +534,7 @@ func _reparer(dt: float) -> void:
 			v.reparation = false
 			v.rep_acc = 0.0
 			v.rep_piece = ""
-			log_("%s : réparations terminées." % v.nom, "ok")
+			log_(Textes.t("tir.012", [v.nom]), "ok")
 			evt({"t": "repare", "uid": v.uid})
 			continue
 		var p: Dictionary = v.pieces[id]
@@ -548,20 +548,20 @@ func _reparer(dt: float) -> void:
 				var c: Dictionary = composants[idx]
 				composants.remove_at(idx)
 				p.pv = maxf(1.0, c.etat * p.max)
-				log_("%s : %s remplacé(e) par une pièce récupérée." % [v.nom, p.nom], "ok")
+				log_(Textes.t("tir.013", [v.nom, p.nom]), "ok")
 			elif stocks.metal >= R.metal_bricolage:
 				stocks.metal -= R.metal_bricolage
 				p.pv = R.etat_bricolage * p.max
-				log_("%s : %s rafistolé(e) avec du métal." % [v.nom, p.nom], "info")
+				log_(Textes.t("tir.014", [v.nom, p.nom]), "info")
 			else:
 				v.reparation = false
-				log_("%s : ni pièce de rechange, ni assez de métal pour %s." % [v.nom, p.nom], "alerte")
+				log_(Textes.t("tir.015", [v.nom, p.nom]), "alerte")
 		else:
 			var gain: float = R.pv_par_s * dt
 			var cout: float = gain * R.metal_par_pv
 			if stocks.metal < cout:
 				v.reparation = false
-				log_("Plus de métal pour réparer %s." % v.nom, "alerte")
+				log_(Textes.t("tir.016", [v.nom]), "alerte")
 			else:
 				stocks.metal -= cout
 				p.pv = minf(p.max, p.pv + gain)
