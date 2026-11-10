@@ -1336,7 +1336,7 @@ func _fantome_liaison(c: Control, x: int, lid: String) -> void:
 		x_min = mini(x_min, int(q[0]))
 		x_max = maxi(x_max, int(q[0]) + 1)
 	var formes := []
-	ConstructionLibre._formes_liaison(formes, String(Assemblage.piece(lid).get("dessin", "lames")), (float(x) + 0.5) * K,
+	ConstructionLibreDessin._formes_liaison(formes, String(Assemblage.piece(lid).get("dessin", "lames")), (float(x) + 0.5) * K,
 		float(ConstructionLibre.y_essieu(a, x)) * K, _y_axe(ex) * K, float(x) + 0.5 < float(x_min + x_max) * 0.5)
 	_mini_formes(c, Rect2(_px(0, G.y), Vector2(G.x, G.y) * _cell), formes, Rect2(0.0, 0.0, float(G.x) * K, float(G.y) * K))
 
@@ -1701,7 +1701,7 @@ func _mini_roue(c: Control, r: Rect2, id: String) -> void:
 
 func _mini_liaison(c: Control, r: Rect2, dessin: String) -> void:
 	var formes := []
-	ConstructionLibre._formes_liaison(formes, dessin, 0.65, 1.0, 0.35, true)
+	ConstructionLibreDessin._formes_liaison(formes, dessin, 0.65, 1.0, 0.35, true)
 	_mini_formes(c, r, formes, Rect2(0.0, 0.1, 2.2, 1.0))
 
 

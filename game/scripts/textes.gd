@@ -17,7 +17,8 @@ static func donnees() -> Dictionary:
 
 static func langue_active() -> String:
 	if langue == "":
-		langue = OS.get_locale_language()
+		# Sans écran (tests, CI) : français, pour que les vérifications de texte restent stables
+		langue = "fr" if DisplayServer.get_name() == "headless" else OS.get_locale_language()
 	return langue if donnees().has(langue) else "fr"
 
 

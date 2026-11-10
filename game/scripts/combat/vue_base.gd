@@ -1,5 +1,5 @@
 # Couche 0 de la vue du convoi : constantes, état de la vue, petites classes d'interface, outils.
-# Chaîne : vue_base <- vue_dessin <- vue_interface <- convoi_vue (ConvoiVue).
+# Chaîne : vue_base <- vue_dessin <- vue_ville <- vue_interface <- convoi_vue (ConvoiVue).
 extends Control
 
 const SOL_Y := 700.0

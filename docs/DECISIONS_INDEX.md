@@ -3,7 +3,7 @@
 Le journal complet et chronologique est [`DECISIONS.md`](DECISIONS.md). Cet index les regroupe par thème, avec les décisions **remplacées** signalées. En cas de conflit, la plus récente l'emporte, puis la Bible du lore (DEC-091).
 
 ## Cadre, méthode, production
-- **Moteur et méthode** : DEC-001, 002, 031 à 033, 042, 073, 084, 090, 119, 175, 176. Test Godot : DEC-042 ; économie de crédits : DEC-175.
+- **Moteur et méthode** : DEC-001, 210 (découpage du code), 002, 031 à 033, 042, 073, 084, 090, 119, 175, 176. Test Godot : DEC-042 ; économie de crédits : DEC-175.
 - **Cible et publication** : DEC-056 (iPhone 14 Pro Max et plus, paysage), DEC-155 (paysage forcé), DEC-195 à 198, 204. Modèle économique : **DEC-104** (démo + déblocage) remplace DEC-004 et DEC-012 ; prix visé DEC-198.
 - **Langues, tutoriel, sauvegarde** : DEC-193 à 195, 208 (textes fr/en).
 - **Art et audio** : DEC-020, 021, 023, 024, 066, 084 à 090, 138, 153, 185, 201, 202.
