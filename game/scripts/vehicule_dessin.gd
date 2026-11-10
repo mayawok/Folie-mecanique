@@ -108,6 +108,29 @@ func fixer_faction(c: Color) -> void:
 		queue_redraw()
 
 
+# Pots d'échappement à flamme (DEC-224) : la flamme grandit avec la vitesse et crache par à-coups
+func _pots() -> void:
+	if not equipage or D.is_empty() or not D.has("pots"):
+		return
+	var t: float = float(Time.get_ticks_msec()) * 0.001
+	var puiss: float = clampf(absf(vitesse) / 5.0, 0.0, 1.0)
+	for i in D.pots.size():
+		var p: Dictionary = D.pots[i]
+		var ph: float = t * 17.0 + i * 2.3 + float(p.x) * 5.0
+		var raté: float = 1.0 + (0.9 if fposmod(t * 1.3 + i * 0.37, 1.0) > 0.9 else 0.0)   # retour de flamme
+		var l: float = (0.25 + 0.75 * puiss) * (0.8 + 0.25 * sin(ph) + 0.15 * sin(ph * 2.7)) * raté
+		var w: float = 0.09 + 0.07 * puiss
+		var dir := Vector2(float(p.dx), float(p.dy)).normalized()
+		var perp := Vector2(-dir.y, dir.x)
+		var base := Vector2(float(p.x), float(p.y))
+		for k in 3:
+			var kl: float = l * [1.0, 0.68, 0.38][k]
+			var kw: float = w * [1.0, 0.7, 0.4][k]
+			var col: Color = [Color(1.0, 0.4, 0.08, 0.85), Color(1.0, 0.78, 0.2, 0.92), Color(1.0, 0.97, 0.7, 0.95)][k]
+			var pts := PackedVector2Array([_c(base + perp * kw), _c(base + dir * kl * 0.55 + perp * kw * 1.15), _c(base + dir * kl), _c(base + dir * kl * 0.55 - perp * kw * 1.15), _c(base - perp * kw)])
+			draw_colored_polygon(pts, col)
+
+
 func _fanion() -> void:
 	if faction_couleur.a <= 0.0 or D.is_empty():
 		return
@@ -293,6 +316,7 @@ func _draw() -> void:
 	_formes(2)
 	_formes(3)   # coques de donneur (DEC-067)
 	_armes()
+	_pots()
 	_fanion()
 
 

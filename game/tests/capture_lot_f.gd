@@ -35,12 +35,12 @@ func _process(_d: float) -> bool:
 		var i := 0
 		for t in types:
 			var e = m.creer_vehicule(t, "ennemi", x)
-			e.mode = "barrage"
+			e.mode = "barrage"; e.vitesse_act = 5.0
 			e.faction = String(facs[i % facs.size()]) if i < 9 else "bandits"
 			m.ennemis.append(e)
 			x += e.longueur + 1.2
 			i += 1
-		m.ennemis[3].feu = 30.0
+		m.ennemis[3].feu = 0.0
 		m.ennemis[3].feu_dps = 0.0
 		m.ordre_marche("arret")
 	if frame == 40:

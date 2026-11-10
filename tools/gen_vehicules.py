@@ -71,6 +71,50 @@ def camion(nom, L, H, cab, essieux, fiche, benne="toile"):
                          {"x": 1.4, "y": 1.15, "role": "passager", "debout": True}]}
 
 
+def rehausser(f, lr, lf, r_old, r_new, pots):
+    """Châssis surélevé façon tout-terrain (DEC-224) : la caisse monte de lr m à l'arrière et lf m à l'avant (assiette cabrée),
+    les roues passent de r_old à r_new, les passages de roues suivent, et des pots d'échappement à flamme sont ajoutés.
+    pots : liste de (x, dy, dx_flamme, dy_flamme) ; x depuis l'arrière, dy au-dessus du bas de caisse arrière."""
+    L = f["longueur"]
+    lift = lambda x: lr + (lf - lr) * min(max(x / L, 0.0), 1.0)
+    d = r_new - r_old
+    nouv = []
+    for o in f["formes"]:
+        o = json.loads(json.dumps(o))
+        if "arc" in o and abs(o["arc"][1] - r_old) < 1e-6:   # passage de roue : recentré sur la grosse roue
+            a = o["arc"]
+            o["arc"] = [a[0], r_new, round(a[2] + d, 3)] + a[3:]
+            nouv.append(o)
+            continue
+        for k in ("pts", "ligne"):
+            if k in o:
+                o[k] = [[p[0], round(p[1] + lift(p[0]), 3)] for p in o[k]]
+        nouv.append(o)
+    # bas de caisse relevé : jupe sombre qui ferme le vide sous la caisse, sinon on verrait à travers
+    nouv.insert(0, {"pts": [[0.5, 0.3], [L - 0.5, 0.3], [L - 0.5, round(0.45 + lift(L - 0.5), 3)], [0.5, round(0.45 + lift(0.5), 3)]], "c": "sombre", "z": 0})   # dessous : châssis et transmission
+    for w in f["roues"]:
+        w["r"] = r_new
+    for a in f.get("armes", []):
+        a["y"] = round(a["y"] + lift(a["x"]), 3)
+    for e in f.get("equipage", []):
+        e["y"] = round(e["y"] + lift(e["x"]), 3)
+    f["hauteur"] = round(f["hauteur"] + max(lr, lf), 2)
+    f["pots"] = []
+    for (x, dy, fx, fy) in pots:
+        y = round(0.38 + lift(x) + dy, 3)
+        nx = round(x + 0.9 * (1 if fx < 0 else 0.0), 3) if fy == 0 else x
+        if fy == 0:   # pot horizontal : tuyau épais sous la caisse, bout évasé
+            nouv.append({"ligne": [[nx, y], [x, y]], "ep": 0.09, "c": "metal", "z": 2})
+            nouv.append({"pts": [[x + 0.02, y - 0.08], [x - 0.1, y - 0.14], [x - 0.1, y + 0.14], [x + 0.02, y + 0.08]], "c": "sombre", "z": 2})
+        else:         # pot vertical derrière la cabine
+            nouv.append({"ligne": [[x, y], [x, y + 1.0]], "ep": 0.09, "c": "metal", "z": 2})
+            nouv.append({"pts": [[x - 0.08, y + 1.0], [x + 0.08, y + 1.0], [x + 0.14, y + 1.12], [x - 0.14, y + 1.12]], "c": "sombre", "z": 2})
+            y = y + 1.1
+        f["pots"].append({"x": round(x - (0.1 if fy == 0 else 0.0), 3), "y": round(y, 3), "dx": fx, "dy": fy})
+    f["formes"] = nouv
+    return f
+
+
 def S(poids, pv, blind, res, grille, vmax, charge, pds_roul, pv_roul, ch, conso, pv_mot, sieges, ouvert, style):
     return dict(poids=poids, pv=pv, blind=blind, res=res, grille=grille, vmax=vmax, charge=charge, pds_roul=pds_roul, pv_roul=pv_roul,
                 ch=ch, conso=conso, pv_mot=pv_mot, sieges=sieges, ouvert=ouvert, style=style)
@@ -113,6 +157,18 @@ V = {
     "gmc_cckw": (cckw, S(4500, 120, 5, 35, [27, 10], 5.2, 4000, 290, 58, 90, 3.2, 52, 2, False, "camion"), None),
     "laffly_s15": (laffly, S(3600, 100, 4, 28, [23, 10], 4.8, 3200, 230, 52, 70, 2.8, 45, 2, False, "camion"), None),
 }
+
+# Voitures et camions surélevés, gros pneus tout-terrain, pots à flamme (DEC-224). Motos inchangées.
+for vid, (lr, lf, r_old, r_new, pots) in {
+    "peugeot_202": (0.35, 0.2, 0.34, 0.46, [(0.35, 0.05, -1, 0)]),
+    "juvaquatre": (0.35, 0.2, 0.34, 0.46, [(0.3, 0.05, -1, 0), (0.55, 0.2, -1, 0)]),
+    "kubelwagen": (0.3, 0.18, 0.34, 0.45, [(0.3, 0.05, -1, 0)]),
+    "citroen_h": (0.35, 0.2, 0.34, 0.46, [(0.4, 0.05, -1, 0)]),
+    "opel_blitz": (0.4, 0.25, 0.47, 0.62, [(0.4, 0.2, -1, 0)]),
+    "gmc_cckw": (0.4, 0.25, 0.47, 0.62, [(0.4, 0.2, -1, 0), (0.7, 0.34, -1, 0)]),
+    "laffly_s15": (0.4, 0.25, 0.47, 0.62, [(3.0, 0.0, -0.5, 1)]),
+}.items():
+    rehausser(V[vid][0], lr, lf, r_old, r_new, pots)
 
 pieces = charger("pieces.json")
 ass = charger("assemblages.json")
