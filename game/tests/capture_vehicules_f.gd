@@ -14,15 +14,17 @@ func _initialize() -> void:
 	fond.color = Color("#6d6a5a")
 	fond.size = Vector2(1600, 900)
 	root.add_child(fond)
-	var types := ["peugeot_202", "juvaquatre", "kubelwagen", "citroen_h", "opel_blitz", "gmc_cckw", "laffly_s15", "moto_zundapp"]
+	var types := ["peugeot_202", "juvaquatre", "kubelwagen", "citroen_h", "opel_blitz", "gmc_cckw", "laffly_s15", "moto_zundapp", "moto_harley", "moto_gnome"]
 	var x := 10.0
 	var y := 20.0
 	for t in types:
 		var v := VehiculeDessin.new()
 		v.type = t
-		v.ppm = 52.0
+		v.ppm = 46.0
 		v.ennemi = true
 		v.vitesse = 5.0
+		if t == "gmc_cckw" or t == "peugeot_202":
+			v.fixer_faction(Color("#B03A2E"))
 		v.configurer(t)
 		if x + v.size.x > 1590:
 			x = 10.0

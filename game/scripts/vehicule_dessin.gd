@@ -105,6 +105,8 @@ func fixer_faction(c: Color) -> void:
 	if not D.is_empty():
 		var base := Color(donnees().teintes.pillards)
 		_teinte = base.lerp(c, 0.5) if c.a > 0.0 else base
+		if D.get("sprite", false):   # carrosserie dessinée : la couleur de faction se pose en voile léger
+			_voile = Color.WHITE.lerp(c.lightened(0.2), 0.32) if c.a > 0.0 else Color.WHITE
 		queue_redraw()
 
 
@@ -363,7 +365,12 @@ func _formes(z: int) -> void:
 			draw_polyline(pts, c.darkened(0.45), maxf(1.0, ppm * 0.025), true)
 		elif f.has("sprite"):
 			var q: Array = f.r
-			_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0, float(f.get("opac", 1.0)), bool(f.get("miroir", false)), f.get("uv", []))
+			if f.has("lr"):   # caisse relevée : plus haut à l'arrière (lr) qu'à l'avant (lf), l'image s'incline (DEC-225)
+				var lr: float = float(f.lr)
+				var lf: float = float(f.get("lf", lr))
+				_quad(_tex(String(f.sprite)), _c(Vector2(q[0], q[1] + q[3] + lr)), _c(Vector2(q[0] + q[2], q[1] + q[3] + lf)), _c(Vector2(q[0], q[1] + lr)), Color(_voile, float(f.get("opac", 1.0))), bool(f.get("miroir", false)), f.get("uv", []))
+			else:
+				_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0, float(f.get("opac", 1.0)), bool(f.get("miroir", false)), f.get("uv", []))
 		elif f.has("cercle"):
 			var k: Array = f.cercle
 			draw_circle(_c(Vector2(k[0], k[1])), k[2] * ppm, c)
