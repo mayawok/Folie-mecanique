@@ -88,9 +88,9 @@ func _init() -> void:
 	var t3 := _neuf(3)
 	var m3: CombatModele = t3[0]
 	m3.pieces_stock.append({"piece": "moteur_4cyl_moyen", "etat": 0.8})
-	var bm_e3 := m3.creer_vehicule("citroen_traction", "ennemi", m3.x_tete + 80.0)
-	bm_e3.mode = "approche"
-	m3.ennemis.append(bm_e3)
+	var e3 := m3.creer_vehicule("citroen_traction", "ennemi", m3.x_tete + 80.0)
+	e3.mode = "approche"
+	m3.ennemis.append(e3)
 	ok(not m3.camp_etablir(m3.convoi[0].uid, "changer_moteur", {"moteur": "moteur_4cyl_moyen"}), "pas de camp avec un ennemi en vue")
 	# Pannes en route (DEV-019) : déterministes, jamais destructrices, absentes sans l'option
 	var t4 := _neuf(9)
@@ -199,26 +199,26 @@ func _init() -> void:
 		var s1: Dictionary = ConstructionLibre.analyser(gg).stats
 		ok(bool(s1.gazogene) and float(s1.conso) < float(s0.conso) * 0.5, "gazogène : consomme peu de carburant (%.2f → %.2f)" % [float(s0.conso), float(s1.conso)])
 		ok(float(s1.vitesse) <= float(s0.vitesse), "gazogène : moins de puissance")
-	# Bouton de marche (design du 10/11) : le geste est bien transmis et les chevrons s'étirent
+	# Bouton de marche (design du 10/11) : le geste est transmis et les chevrons s'étirent
 	var bm := BoutonMarche.new()
 	bm.size = Vector2(420, 112)
 	var recu := []
 	bm.geste.connect(func(dx): recu.append(dx))
-	var bm_e1 := InputEventMouseButton.new()
-	bm_e1.button_index = MOUSE_BUTTON_LEFT
-	bm_e1.pressed = true
-	bm_e1.position = Vector2(100, 50)
-	bm._gui_input(bm_e1)
-	var bm_e2 := InputEventMouseMotion.new()
-	bm_e2.position = Vector2(180, 50)
-	bm._gui_input(bm_e2)
+	var bm_a := InputEventMouseButton.new()
+	bm_a.button_index = MOUSE_BUTTON_LEFT
+	bm_a.pressed = true
+	bm_a.position = Vector2(100, 50)
+	bm._gui_input(bm_a)
+	var bm_b := InputEventMouseMotion.new()
+	bm_b.position = Vector2(180, 50)
+	bm._gui_input(bm_b)
 	bm._process(0.5)
 	ok(bm._ouv > 0.5, "bouton de marche : glisser à droite étire les chevrons vers la droite")
-	var bm_e3 := InputEventMouseButton.new()
-	bm_e3.button_index = MOUSE_BUTTON_LEFT
-	bm_e3.pressed = false
-	bm_e3.position = Vector2(180, 50)
-	bm._gui_input(bm_e3)
+	var bm_c := InputEventMouseButton.new()
+	bm_c.button_index = MOUSE_BUTTON_LEFT
+	bm_c.pressed = false
+	bm_c.position = Vector2(180, 50)
+	bm._gui_input(bm_c)
 	ok(recu.size() == 1 and absf(float(recu[0]) - 80.0) < 0.01, "bouton de marche : geste transmis (+80 px)")
 	bm.etat = "recul"
 	for i in 20:
