@@ -283,7 +283,7 @@ func sauver() -> Dictionary:
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "regime": regime, "recus": recus.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
-		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true), "carte": 2, "region_quete": w.region_quete}, "reputation": rep_sauver()}
+		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true), "carte": 2, "region_quete": w.region_quete, "plan": w.plan.duplicate()}, "reputation": rep_sauver()}
 
 # --- Eau et vivres (DEC-148) ------------------------------------------------------------------
 var _alerte_ravit := {}   # alertes déjà données : {"eau_bas": true, "eau_vide": true, ...}
@@ -394,6 +394,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 		m.monde.secteur = int(w.secteur)
 		m.monde.secteur_prec = int(w.get("secteur_prec", -1))   # absent des anciennes sauvegardes
 		m.monde.region_quete = String(w.get("region_quete", m.monde.region_quete))
+		m.monde.plan = Array(w.get("plan", [])).map(func(i): return int(i))
 	m.monde.x_entree = float(w.x_entree)
 	m.monde.heure = float(w.heure)
 	m.monde.jour = int(w.jour)
@@ -652,6 +653,9 @@ func _rencontres() -> void:
 	var scripte := choix_ouverture()
 	var r := RandomNumberGenerator.new()
 	r.seed = graine * 7919 + _n_rencontres
+	if scripte.is_empty() and not ouverture and _n_rencontres > 1 and rencontre_convoi(r, x_tete + 120.0):   # convoi allié ou hostile (DEC-218)
+		_prochain_x = x_tete + 160.0 + r.randf_range(R.intervalle[0], R.intervalle[1])
+		return
 	var niveau: int = monde.niveau_a(_prochain_x)
 	var liste := []
 	var total := 0.0
@@ -728,7 +732,7 @@ func _rencontres() -> void:
 		batiments.append(b)
 		x = b.x + b.longueur
 	x = monde.generer(choix, x, r)
-	var hostile := not ennemis.is_empty() or batiments.any(func(b): return b.actif()) or monde.vivants() > 0
+	var hostile := not ennemis.filter(func(e): return not e.allie).is_empty() or batiments.any(func(b): return b.actif()) or monde.vivants() > 0
 	evt({"t": "contact", "ennemi": hostile})
 	log_("%s à %d m." % ["Contact" if hostile else "Du nouveau", int(debut - x_tete)], "info")
 	var iv: Array = ouv().intervalle if ouverture_en_cours() else R.intervalle

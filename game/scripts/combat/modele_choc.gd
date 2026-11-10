@@ -37,6 +37,8 @@ func est_moto(v: Veh) -> bool:
 
 
 func eperonne(e: Veh) -> bool:
+	if e.allie:
+		return false
 	if not _intention.has(e.uid):
 		_intention[e.uid] = rng.randf() < float(CH().proba_ennemi)
 	return bool(_intention[e.uid])
@@ -67,8 +69,9 @@ func _chocs(dt: float) -> void:
 	if t == null:
 		return
 	var ct := float(C.contact)
+	_saluts()
 	for e in ennemis:
-		if not e.actif() or float(_cd_choc.get(e.uid, 0.0)) > 0.0:
+		if not e.actif() or e.allie or float(_cd_choc.get(e.uid, 0.0)) > 0.0:
 			continue
 		var avant: float = t.x + t.longueur
 		# 1) Devant nous : on rentre dedans (ordre), ou un véhicule d'en face nous fonce dessus
@@ -159,3 +162,55 @@ func _ia_face(dt: float) -> void:
 		if e.actif() and e.mode == "face" and e.mobile():
 			e.x -= e.vitesse() * dt
 			e.vitesse_act = e.vitesse()
+
+
+# --- Convois croisés sur la route (DEC-187, DEC-218) -------------------------------------------------
+# Selon la réputation de la faction du secteur : un convoi allié (marchands, il ne tire pas, il vous salue et peut vous
+# passer un bidon), un convoi hostile (armé, il fonce sur vous) ou rien de particulier. Valeurs : bloc « route » de combat_proto.json.
+func RT() -> Dictionary:
+	return donnees().route
+
+
+func rencontre_convoi(r: RandomNumberGenerator, x: float) -> bool:
+	if monde.niveau_a(x) < 1 or r.randf() > float(RT().proba_convoi):
+		return false
+	var fac := rep_faction_ici()
+	var pal := String(rep_palier(fac).id)
+	var allie_p: float = {"allie": 0.85, "amical": 0.7, "neutre": 0.3, "mefiant": 0.1, "hostile": 0.0}[pal]
+	var est_allie := r.randf() < float(allie_p)
+	var types: Array = RT().types_allie if est_allie else RT().types_hostile
+	var xe := x
+	for t in types:
+		var e := creer_vehicule(String(t), "ennemi", xe)
+		e.mode = "face"
+		e.allie = est_allie
+		if est_allie:
+			e.armes = []
+		else:
+			_intention[e.uid] = true
+		e.profil["fac"] = fac
+		ennemis.append(e)
+		xe += e.longueur + 6.0
+	var nom := rep_nom(fac)
+	log_(Textes.t("route.001" if est_allie else "route.002", [nom]), "info" if est_allie else "alerte")
+	evt({"t": "contact", "ennemi": not est_allie})
+	return true
+
+
+# Le convoi allié nous a croisés : salut, réputation, et un bidon s'il nous apprécie
+func _saluts() -> void:
+	var q = _queue()
+	if q == null:
+		return
+	for e in ennemis:
+		if e.allie and e.actif() and not e.salue and e.x + e.longueur < q.x:
+			e.salue = true
+			var fac := String(e.profil.get("fac", ""))
+			rep_changer(fac, float(RT().salut_rep), "")
+			var pal := String(rep_palier(fac).id)
+			if pal in ["amical", "allie"]:
+				var t := "gazole" if rng.randf() < 0.5 else "essence"
+				stocks[t] = float(stocks.get(t, 0.0)) + float(RT().cadeau_l)
+				log_(Textes.t("route.003", [rep_nom(fac), int(RT().cadeau_l), Textes.t("carb." + t)]), "ok")
+			else:
+				log_(Textes.t("route.004", [rep_nom(fac)]), "info")

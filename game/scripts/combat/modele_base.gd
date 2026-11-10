@@ -91,6 +91,8 @@ class Veh extends RefCounted:
 	var butin_pris := false
 	var assemblage := {}          # châssis + pièces placées (DEC-029)
 	var troupes: Array = []       # pv des soldats assis sur les bancs (DEC-063)
+	var allie := false            # convoi allié croisé sur la route (DEC-218) : ne tire pas, on ne lui tire pas dessus
+	var salue := false
 	var principal := false        # camion de l'expédition (Berliet) : gardé du début à la fin, ni abandonné ni démonté (DEC-139)
 	var roues_perdues: Array = [] # indices des roues arrachées (DEC-080) : chacune ralentit, elles reviennent à la réparation
 

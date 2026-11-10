@@ -46,6 +46,7 @@ class Pieton:
 var m                          # CombatModele
 var secteurs: Array = []       # {id, nom, pos: Vector2 (0..1), niveau, faction}
 var secteur := 0               # secteur actuel
+var plan: Array = []              # étapes suivantes d'un voyage de plusieurs villes (traversées sans s'arrêter)
 var region_quete := ""          # région de la quête principale : hors de celle-ci, la difficulté est forcée (DEC-172)
 var secteur_prec := -1         # secteur d'où l'on vient : sortie « retour » des villes (DEC-168)
 var x_entree := 0.0            # abscisse d'entrée dans le secteur
@@ -96,6 +97,17 @@ func _generer_carte() -> void:
 func maj_attitudes() -> void:
 	for s in secteurs:
 		s["faction"] = int(m.rep_attitude(String(s.fac)))
+
+
+# Indice diffus sur ce qui attend à une destination (rumeur, ambiance), sans chiffre ni avertissement (DEC-172)
+func rumeur(sid: int) -> String:
+	var niv: int = int(secteurs[sid].niveau) + (m.malus_hors_region() if String(secteurs[sid].region) != region_quete and region_quete != "" else 0)
+	var bande := clampi(niv / 2, 0, 3)
+	var cle := "rumeur.%03d" % (bande * 3 + 1 + (sid + niv) % 3)
+	var txt := Textes.t(cle, [secteurs[sid].nom])
+	if region_quete != "" and String(secteurs[sid].region) != region_quete:
+		txt += " " + Textes.t("rumeur.%03d" % (13 + sid % 3))   # hors de votre région : l'ambiance change
+	return txt
 
 
 func indice_lieu(id: String) -> int:
@@ -155,16 +167,25 @@ func distance_secteur(id: int) -> float:
 
 
 func choisir_destination(id: int) -> bool:
-	if id < 0 or id >= secteurs.size() or id == secteur or (en_transit() and trajet.dest == id):
+	if id < 0 or id >= secteurs.size() or id == secteur or (en_transit() and (trajet.dest == id or plan.has(id))):
 		return false
-	if not est_voisin(secteur, id):   # carte fixe : on ne quitte une ville que par une de ses routes
-		return false
+	var suivant := id
+	plan = []
+	if not est_voisin(secteur, id):   # carte fixe : on quitte une ville par une de ses routes ; plus loin, voyage de plusieurs étapes (DEC-218)
+		var ch: Array = CarteMonde.chemin(String(secteurs[secteur].lieu), String(secteurs[id].lieu))
+		if ch.size() < 3:
+			return false
+		suivant = indice_lieu(String(ch[1]))
+		for k in range(2, ch.size()):
+			plan.append(indice_lieu(String(ch[k])))
+	id = suivant
 	var total := 250.0 + distance_secteur(id) * 900.0
 	trajet = {"dest": id, "reste": total, "total": total}
 	Terrain.zone = String(secteurs[secteur].zone)
 	m._prochain_x = INF
 	var route := "de route" if m.mission_active() else "de route calme"   # en mission, la route est dangereuse (DEC-146)
 	m.log_(Textes.t("monde.001", [secteurs[id].nom, secteurs[id].faction_nom, secteurs[id].niveau, int(total), route]), "info")
+	m.log_(rumeur(id), "info")   # indice diffus de ce qui attend (DEC-172)
 	m.evt({"t": "cap"})
 	return true
 
@@ -339,6 +360,16 @@ func _cap(dt: float) -> void:
 		trajet = {}
 		m._prochain_x = m.x_tete + 90.0
 		var s: Dictionary = secteurs[secteur]
+		if not plan.is_empty() and not m.mission_active():   # étape intermédiaire : on traverse la ville sans s'arrêter (DEC-218)
+			var suite: int = plan.pop_front()
+			var reste := plan.duplicate()
+			m.log_(Textes.t("monde.020", [s.nom, secteurs[suite].nom]), "info")
+			Terrain.zone = String(s.zone)
+			if choisir_destination(suite):
+				plan = reste
+				return
+			plan = []
+		plan = []
 		m.log_(Textes.t("monde.007", [s.nom, s.faction_nom, ATTITUDE[s.faction], s.niveau]), "ok")
 		Terrain.zone = String(s.zone)   # le décor suit la région (DEV-008)
 		m.evt({"t": "secteur"})
@@ -445,7 +476,7 @@ func _cible_troupe(p: Pieton):
 				g_min = g
 				meilleur = q
 	for e in m.ennemis:
-		if e.actif():
+		if e.actif() and not e.allie:
 			var g2: float = CombatModele.ecart(p.x, p.longueur, e.x, e.longueur)
 			if g2 <= p.portee and g2 < g_min:
 				g_min = g2

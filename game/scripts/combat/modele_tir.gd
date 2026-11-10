@@ -14,7 +14,7 @@ func _mecanicien_possible(v: Veh) -> bool:
 
 # --- Tir -------------------------------------------------------------------
 func _armes_vehicule(v: Veh, dt: float) -> void:
-	if v.equipage_vivant() == 0 or v.camoufle or v.garage != 0:
+	if v.equipage_vivant() == 0 or v.camoufle or v.garage != 0 or v.allie:
 		return
 	if equipage_dehors(v) > 0:
 		return   # l'équipage est descendu réparer : plus personne aux armes (DEC-064)
@@ -106,7 +106,7 @@ func _choisir_cible(att, w: Dictionary):
 	var meilleur = null
 	var score_min := INF
 	for e in ennemis:
-		if not e.actif():
+		if not e.actif() or e.allie:
 			continue
 		if w.classe in ["mitrailleuse", "flamme"] and e.profil.blindage > 25.0:
 			continue   # la mitrailleuse ne perce pas un blindé : on économise les munitions

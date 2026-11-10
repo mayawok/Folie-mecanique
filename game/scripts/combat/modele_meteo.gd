@@ -26,6 +26,8 @@ func _meteo(dt: float) -> void:
 	if tempete.is_empty():
 		if calme_ouverture() or en_kit or (kit_calme and bac_a_sable) or ville_protegee() or ville_calme():
 			return
+		if not (bac_a_sable or String(Terrain.zone) in C.get("zones", [Terrain.zone])):
+			return   # pas de tempête de sable hors des déserts (DEV-006, DEC-218)
 		_tempete_t -= dt
 		if _tempete_t > 0.0:
 			return

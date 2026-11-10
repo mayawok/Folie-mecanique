@@ -30,7 +30,7 @@ func _init() -> void:
 	for s in wa.secteurs:
 		if int(s.id) != wa.secteur and not wa.est_voisin(wa.secteur, int(s.id)):
 			lointain = int(s.id)
-	ok(lointain >= 0 and not wa.choisir_destination(lointain), "une ville sans route directe ne peut pas être choisie")
+	ok(lointain >= 0, "il existe des villes sans route directe depuis Kerbrume")
 	ok(wa.prochaine_etape(lointain) >= 0 and wa.est_voisin(wa.secteur, wa.prochaine_etape(lointain)), "la prochaine étape vers une ville lointaine est une ville voisine")
 	var voisins := wa.voisins_secteur(wa.secteur)
 	ok(voisins.size() >= 2, "Kerbrume a %d routes" % voisins.size())

@@ -872,9 +872,11 @@ func _maj_interface() -> void:
 			inf = "Touchez un secteur pour le choisir.\nLes anneaux vont du vert (calme) au rouge (dangereux). La couleur du centre est la faction."
 		if _carte_sel >= 0 and _carte_sel != w.secteur and not w.est_voisin(w.secteur, _carte_sel):
 			var et: int = w.prochaine_etape(_carte_sel)
-			inf += "\nPas de route directe" + (" : passez d'abord par %s." % w.secteurs[et].nom if et >= 0 else ".")
+			var nb: int = CarteMonde.chemin(String(w.secteurs[w.secteur].lieu), String(w.secteurs[_carte_sel].lieu)).size() - 1
+			inf += "\nPas de route directe : voyage en %d étapes, par %s." % [nb, w.secteurs[et].nom] if et >= 0 else "\nAucune route."
 		_lbl_carte_info.text = Textes.t("vue_interface.033", [sct.nom, inf]) + "\n\n" + _texte_reputation(_carte_sel if _carte_sel >= 0 else w.secteur)
-		_btn_partir.disabled = _carte_sel < 0 or _carte_sel == w.secteur or not w.est_voisin(w.secteur, _carte_sel)
+		var chemin_ok: bool = _carte_sel >= 0 and _carte_sel != w.secteur and CarteMonde.chemin(String(w.secteurs[w.secteur].lieu), String(w.secteurs[_carte_sel].lieu)).size() >= 2
+		_btn_partir.disabled = not chemin_ok or m.mission_active()
 	if _btn_camo != null:
 		_btn_camo.text = Textes.t("vue_interface.034") if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
 	if m.fini:
