@@ -44,6 +44,9 @@ func _armes_vehicule(v: Veh, dt: float) -> void:
 		if cible == null:
 			a.cd = 0.0
 			continue
+		if w.classe == "piege":
+			_poser_piege(v, a, w)
+			continue
 		_tirer(v, a, w, cible)
 
 func _armes_batiment(b: Bat, dt: float) -> void:
@@ -99,6 +102,16 @@ func _choisir_cible(att, w: Dictionary):
 			if r <= 0.0:
 				return cands[i]
 		return cands[cands.size() - 1]
+	if w.classe == "piege":   # on ne jette les pièges que devant un poursuivant, derrière nous
+		var proche = null
+		var g_min := INF
+		for e in ennemis:
+			if e.actif() and not e.allie and e.x + e.longueur <= att.x + 1.0:
+				var g := ecart(att.x, att.longueur, e.x, e.longueur)
+				if g <= w.portee and g < g_min:
+					g_min = g
+					proche = e
+		return proche
 	if w.classe != "canon":
 		var pp = monde.pieton_proche(att.x, att.longueur, w.portee)
 		if pp != null:
@@ -155,6 +168,10 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	if visee != "libre":
 		chance *= Z.visee_precision
 	var bonus := 1.0
+	if joueur and not garde and w.classe in ["incendiaire", "lance"]:   # on triche un peu : nos objets lancés visent mieux et frappent plus fort
+		var EQ: Dictionary = donnees().equilibrage
+		chance = minf(0.95, chance * float(EQ.joueur_jet_precision))
+		bonus *= float(EQ.joueur_jet_degats)
 	if garde and a.get("premier", false):
 		chance = minf(0.95, chance * 1.4)   # l'embuscade surprend l'ennemi : première salve redoutable
 		bonus = 2.0
@@ -193,6 +210,35 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 		"t": 0.0, "T": maxf(0.12, origine.distance_to(point) / w.vitesse), "touche": touche, "zone": zone,
 		"ricoche": ricoche, "visee": visee, "bonus": bonus})
 	evt({"t": "tir", "de": att.uid, "vers": cible.uid, "classe": w.classe, "touche": touche, "zone": zone, "x0": origine.x})
+
+# Chausse-trappes (DEC-228) : jetées derrière le véhicule, elles crèvent les pneus de ceux qui roulent dessus (toujours efficaces).
+func _poser_piege(v: Veh, a: Dictionary, w: Dictionary) -> void:
+	stocks.ammo -= w.munitions
+	_alerte_muni = false
+	a.cd = float(w.cadence) * rng.randf_range(0.9, 1.1)
+	pieges.append({"x": v.x - 1.5, "charges": int(w.charges), "t": float(w.duree), "touches": []})
+	evt({"t": "piege", "x": v.x - 1.5})
+
+
+func _pieges(dt: float) -> void:
+	var E: Dictionary = donnees().effets
+	for e in ennemis:
+		e.crevaison = maxf(0.0, e.crevaison - dt)
+	for p in pieges:
+		p.t -= dt
+		for e in ennemis:
+			if p.charges <= 0:
+				break
+			if not e.actif() or e.allie or p.touches.has(e.uid):
+				continue
+			if e.x <= p.x and p.x <= e.x + e.longueur:
+				p.touches.append(e.uid)
+				p.charges -= 1
+				e.crevaison = float(E.crevaison_duree)
+				log_(Textes.t("piege.001", [e.nom]), "info")
+				evt({"t": "crevaison", "uid": e.uid, "x": p.x})
+	pieges = pieges.filter(func(p): return p.charges > 0 and p.t > 0.0)
+
 
 func _bouche(att, a: Dictionary) -> Vector2:
 	if att is MondeJeu.Pieton:

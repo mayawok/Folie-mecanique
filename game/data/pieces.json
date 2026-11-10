@@ -1191,6 +1191,17 @@
       ],
       "metal": 1
     },
+    "arme_chausse_trappes": {
+      "famille": "arme",
+      "nom": "Lanceur de chausse-trappes",
+      "arme": "chausse_trappes",
+      "poids_kg": 20,
+      "emprise": [
+        2,
+        1
+      ],
+      "metal": 1
+    },
     "phares": {
       "famille": "equipement",
       "nom": "Phares",

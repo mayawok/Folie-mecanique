@@ -40,6 +40,8 @@ func _ia_poursuite(dt: float) -> void:
 		var d: float = voulu - e.x
 		var vmax: float = maxf(e.vitesse() * float(AB().vitesse_poursuite), absf(vitesse_convoi) + float(AB().avance_poursuite))   # pied au plancher : ils gagnent toujours du terrain
 		var v := clampf(vitesse_convoi + d * 0.8, -vmax * 0.5, vmax)
+		if e.crevaison > 0.0:
+			v *= float(donnees().effets.crevaison_facteur)
 		e.x += v * dt
 		e.vitesse_act = v
 		var P: Dictionary = _pours.get(e.uid, {"restants": int(AB().abordeurs_defaut), "types": ["lame"], "cd": 0.0})

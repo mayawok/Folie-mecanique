@@ -97,6 +97,7 @@ class Veh extends RefCounted:
 	var feu_dps := 0.0
 	var faction := ""             # id de faction (couleur de l'ennemi, DEC-221)
 	var principal := false        # camion de l'expédition (Berliet) : gardé du début à la fin, ni abandonné ni démonté (DEC-139)
+	var crevaison := 0.0   # secondes de pneus crevés (chausse-trappes) : l'ennemi ralentit
 	var roues_perdues: Array = [] # indices des roues arrachées (DEC-080) : chacune ralentit, elles reviennent à la réparation
 
 	func remorque() -> bool:
@@ -148,6 +149,8 @@ class Veh extends RefCounted:
 		elif ratio("suspension") < E.seuil_bas:
 			f *= E.suspension_bas
 		f *= pow(float(E.get("roue_perdue", 0.75)), roues_perdues.size())
+		if crevaison > 0.0:
+			f *= float(E.get("crevaison_facteur", 0.35))
 		return f
 
 	func vitesse() -> float:
@@ -256,6 +259,7 @@ var _uid := 1
 var _prochain_x := 130.0
 var _n_rencontres := 0
 var _alerte_muni := false
+var pieges: Array = []            # chausse-trappes posées sur la route : {x, charges, t, touches}
 var projectiles: Array = []       # balles et obus en vol : {a, b, t, T, touche, zone, ...}
 var mines: Array = []             # {x, arme_t, armee}
 var transits: Array = []          # équipages en marche vers un bâtiment ou un véhicule

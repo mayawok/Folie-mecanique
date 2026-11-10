@@ -223,7 +223,9 @@ func _ia_comportements(dt: float) -> void:
 				var voulu: float = q.x - float(_dist_harcele.get(e.uid, 20.0)) - e.longueur
 				var d2: float = voulu - e.x
 				var vmax: float = maxf(e.vitesse(), absf(vitesse_convoi) + 3.0)
-				var v := clampf(vitesse_convoi + d2 * 0.8, -vmax * 0.5, vmax)
+				var v := clampf(vitesse_convoi + clampf(d2 * 0.8, -4.0, 4.0), -vmax * 0.5, vmax)   # il se cale sur notre vitesse
+				if e.crevaison > 0.0:
+					v *= float(donnees().effets.crevaison_facteur)   # pneus crevés : il décroche
 				e.x += v * dt
 				e.vitesse_act = v
 

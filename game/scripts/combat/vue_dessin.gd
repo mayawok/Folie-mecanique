@@ -49,6 +49,10 @@ func _evenement(e: Dictionary) -> void:
 			_etincelles.append({"p": pe, "age": 0.0, "gros": true})
 			if float(e.taille) >= 2.0:
 				_son("sfx_explosion", -3.0)
+		"crevaison":
+			_etincelles.append({"p": Vector2(float(e.x), 0.2), "age": 0.0, "gros": true})
+			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": true})
+			_son("sfx_impact_blindage", -6.0)
 		"esquive":
 			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": false})
 		"meute":
@@ -426,6 +430,11 @@ func dessiner_fx(c: CanvasItem) -> void:
 		c.draw_rect(Rect2(pm + Vector2(-0.35, -0.12) * ppm, Vector2(0.7, 0.2) * ppm), Color("#3A3A32"))
 		if mn.armee and fmod(_temps, 1.0) < 0.2:
 			c.draw_circle(pm + Vector2(0, -0.15 * ppm), maxf(2.0, ppm * 0.07), C_ROUGE)
+	for pg in m.pieges:   # chausse-trappes : petites pointes sur la route
+		var pp2 := _px(Vector2(pg.x, 0.0))
+		for k in 3:
+			var o := Vector2((k - 1) * 0.4, 0.0) * ppm
+			c.draw_colored_polygon(PackedVector2Array([pp2 + o + Vector2(-0.15, 0.02) * ppm, pp2 + o + Vector2(0.15, 0.02) * ppm, pp2 + o + Vector2(0.0, -0.3) * ppm]), Color("#B8B8B0"))
 	# Équipages en marche vers un bâtiment ou un véhicule
 	for t in m.transits:
 		var vv = m.trouver(t.veh)

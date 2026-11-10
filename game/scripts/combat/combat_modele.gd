@@ -478,6 +478,7 @@ func avancer(dt := DT) -> void:
 	_ia_comportements(dt)
 	_chocs(dt)
 	_feux(dt)
+	_pieges(dt)
 	_abordages(dt)
 	for v in convoi.duplicate():
 		if v.actif():

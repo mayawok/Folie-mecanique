@@ -115,6 +115,7 @@
    "vitesse": 45
   },
   "molotov": {"nom": "Cocktail Molotov", "classe": "incendiaire", "degats": 6, "penetration": 4, "cadence": 3.2, "portee": 24, "precision": 0.55, "munitions": 1, "pv": 5, "vitesse": 22, "feu": 6.0, "feu_dps": 4.0},
+    "chausse_trappes": {"nom": "Chausse-trappes", "classe": "piege", "degats": 0, "penetration": 0, "cadence": 2.2, "portee": 32, "precision": 1.0, "munitions": 1, "pv": 5, "vitesse": 0, "charges": 3, "duree": 45.0},
     "lance_explosive": {"nom": "Lance \u00e0 pointe explosive", "classe": "lance", "degats": 24, "penetration": 30, "cadence": 3.8, "portee": 30, "precision": 0.5, "munitions": 1, "pv": 5, "vitesse": 34, "explosion": 2.4},
     "lance_flammes": {
    "nom": "Lance-flammes",
@@ -151,7 +152,7 @@
   "visee_precision": 0.8
  },
  "feu": {"_note": "DEC-220 : incendies et explosions. Un v\u00e9hicule en feu perd des PV par seconde ; une \u00e9pave peut exploser (r\u00e9servoir) et blesser les voisins.", "explosion_carburant": 0.5, "rayon": 5.0, "degats": 12, "epave_feu": 10.0, "equipage": 0.25, "degats_ennemi": 1.5, "jets": {"moto_bmw": "molotov", "moto_zundapp": "molotov", "moto_harley": "molotov", "moto_gnome": "lance_explosive", "juvaquatre": "molotov", "kubelwagen": "lance_explosive"}},
- "effets": {"_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75", "roue_perdue": 0.75, "roues_tombent": 0.6,
+ "effets": {"crevaison_facteur": 0.35, "crevaison_duree": 9.0, "_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75", "roue_perdue": 0.75, "roues_tombent": 0.6,
   "roulement_bas": 0.7,
   "moteur_bas": 0.7,
   "suspension_bas": 0.8,
@@ -363,7 +364,7 @@
  "halte": {"_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.", "montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0},
  "oiseau": {"_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).", "delai_min_s": 900.0, "delai_max_s": 2400.0, "duree_s": 9.0, "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."},
  "carburants": {"_note": "Deux carburants (DEC-094, DEC-190). Capacité par carburant = réservoirs des véhicules qui le brûlent + citerne du module + bidons (jerrycans, DEC-206).", "bidons_l": 100, "citerne_l": 3000},
- "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
+ "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "joueur_jet_precision": 1.35, "joueur_jet_degats": 1.5, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
  "route": {"_note": "Convois croisés sur la route selon la réputation (DEC-187, DEC-218). Valeurs à régler en essai.", "proba_convoi": 0.14, "types_allie": ["citroen_t23", "willys_mb"], "types_hostile": ["citroen_t23", "m3_half_track", "citroen_traction"], "salut_rep": 1, "cadeau_l": 10},
  "region": {"_note": "Difficulté forcée hors de la région de la quête principale (DEC-172, DEC-216). malus = niveaux de rencontre ajoutés ; quete_depart = région de la quête au début de la partie.", "malus": 3, "quete_depart": "armorique"},
  "choc": {"_note": "Chocs entre véhicules (DEC-215). Dégâts = k × masse du frappeur (t) × vitesse relative (m/s) × lame. Valeurs à régler en essai.", "k": 6.0, "vitesse_min": 1.5, "elan": 2.0, "contact": 1.2, "delai": 1.5, "recul": 4.0, "esquive_moto": 0.667, "proba_ennemi": 0.35, "part_frappeur": 0.6, "penetration": 60, "equipage": 0.15, "lame_absorbe": 0.5, "fort": 120, "seuil_belier": 0.85, "charge": 1.15, "distance_esquive": 18.0, "esquive_leger": 0.4, "harcele_min": 16.0, "harcele_max": 26.0},

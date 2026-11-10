@@ -97,5 +97,22 @@ func _init() -> void:
 	vd.fixer_faction(Color("#B03A2E"))
 	ok(vd.faction_couleur.a > 0.0 and vd._teinte != Color(VehiculeDessin.donnees().teintes.pillards), "la caisse prend la teinte de la faction")
 
+	# 8) Chausse-trappes (DEC-228) : posées derrière nous, elles crèvent les pneus d'un poursuivant et le font décrocher
+	var m3 := jeu(9)
+	var ch: CombatModele.Veh = m3.convoi[0]
+	ok(m3.donnees().armes.has("chausse_trappes") and m3.donnees().equilibrage.joueur_jet_degats > 1.0, "chausse-trappes et bonus de jet présents")
+	m3.pieges.append({"x": ch.x - 10.0, "charges": 2, "t": 30.0, "touches": []})
+	var pour := m3.creer_vehicule("peugeot_202", "ennemi", ch.x - 20.0)
+	pour.mode = "harcele"
+	m3.ennemis.append(pour)
+	var v0 := pour.vitesse()
+	for i in 600:
+		pour.x += 0.1
+		m3._pieges(0.016)
+	ok(pour.crevaison > 0.0 or m3.pieges.is_empty(), "le poursuivant qui roule dessus a les pneus crevés")
+	ok(pour.vitesse() < v0 or pour.crevaison <= 0.0, "pneus crevés : il ralentit")
+	m3._pieges(20.0)
+	ok(pour.crevaison == 0.0, "la crevaison finit par passer")
+
 	print("Échecs : %d" % echecs)
 	quit(1 if echecs > 0 else 0)
