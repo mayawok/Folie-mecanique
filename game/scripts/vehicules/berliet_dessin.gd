@@ -222,39 +222,12 @@ func _lame() -> void:
 		return
 	var L := BerlietConfig.lame(config)
 	var x0 := float(BerlietConfig.donnees().lame.avant) - 30.0   # fixée sur les longerons, sous le pare-chocs
-	var x1 := x0 + 30.0 + float(L.avancee)
 	var s := BerlietConfig.sol()
 	var yb := s - 12.0                 # bas : frôle le sol
-	var yh := s - float(L.haut)
-	match n:
-		1:   # pare-buffle : tubes cintrés
-			for k2 in range(4):
-				var y := lerpf(yh, yb, k2 / 3.0)
-				_ligne_u(Vector2(x0, y), Vector2(x1, y + 10.0), ACIER_C, 14.0)
-			_ligne_u(Vector2(x1, yh + 10.0), Vector2(x1, yb), ACIER, 18.0)
-			_ligne_u(Vector2(x1 - 30.0, yh), Vector2(x1 - 30.0, yb), ACIER, 14.0)
-		2:   # bouclier de tôle rivetée, légèrement incliné
-			_poly_u([Vector2(x0, yh), Vector2(x1 - 30.0, yh), Vector2(x1, yb), Vector2(x0, yb)], ACIER)
-			_rivets(x0 + 10.0, x1 - 40.0, yh + 20.0, 34.0)
-			_rivets(x0 + 10.0, x1 - 10.0, yb - 20.0, 34.0)
-		3:   # chasse-pierres : grille en V de barres vers le sol
-			_poly_u([Vector2(x0, yh), Vector2(x0 + 40.0, yh), Vector2(x1, yb), Vector2(x0, yb)], NOIR)
-			for k2 in range(7):
-				var t := k2 / 6.0
-				_ligne_u(Vector2(x0 + 10.0, lerpf(yh, yb, t)), Vector2(lerpf(x0 + 40.0, x1, t), lerpf(yh, yb, t)), ACIER_C, 12.0)
-			_ligne_u(Vector2(x0 + 40.0, yh), Vector2(x1, yb), ACIER, 20.0)
-		4:   # étrave blindée : coin d'acier épais, renfort central
-			_poly_u([Vector2(x0, yh), Vector2(x0 + 70.0, yh), Vector2(x1, s - 120.0), Vector2(x1 - 40.0, yb), Vector2(x0, yb)], ACIER)
-			_ligne_u(Vector2(x0 + 70.0, yh), Vector2(x1, s - 120.0), ACIER_C, 16.0)
-			_ligne_u(Vector2(x0 + 20.0, (yh + yb) / 2.0), Vector2(x1 - 20.0, (yh + yb) / 2.0 + 30.0), ROUILLE, 10.0)
-			_rivets(x0 + 15.0, x1 - 60.0, yb - 18.0, 30.0)
-		_:   # bélier de rails : rails soudés en éventail, gros sabot d'acier rouillé
-			_poly_u([Vector2(x0, yh), Vector2(x0 + 90.0, yh), Vector2(x1, s - 140.0), Vector2(x1, s - 60.0), Vector2(x1 - 60.0, yb), Vector2(x0, yb)], ROUILLE)
-			for k2 in range(5):
-				var t := k2 / 4.0
-				_ligne_u(Vector2(x0, lerpf(yh + 10.0, yb - 10.0, t)), Vector2(x1 - 5.0, lerpf(s - 140.0, s - 60.0, t)), ACIER, 18.0)
-			_rect_u(x1 - 30.0, s - 150.0, x1 + 10.0, s - 50.0, ACIER)
-			_rivets(x0 + 15.0, x1 - 40.0, yh + 18.0, 30.0)
+	var t := texture(BerlietConfig.image(String(L.image)))   # planche ChatGPT du 10/11, calée à gauche sur les longerons
+	var h := float(L.haut)
+	var w := h * t.get_width() / float(t.get_height())
+	ci.draw_texture_rect(t, Rect2(p(Vector2(x0, yb - h)), Vector2(w, h) * k()), false, teinte)
 
 
 func _poly_u(pts: Array, col: Color) -> void:
