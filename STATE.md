@@ -27,12 +27,14 @@ Mis à jour : 2026-11-10. Résumé court, par thème. Journal complet : [`docs/D
 
 Textes et boutons du HUD, fluidité des villes et de la ville pillée, scènes de mission, portrait couché (DEC-155), icône et chargement (DEC-156), bouton de marche.
 
-## Prochains lots (ordre : DEC-176)
+## Prochains lots (ordre validé : DEC-206)
 
-1. **Berliet dans le convoi** : fait pour le dessin et les valeurs ; reste la halte animée dans le jeu (DEC-161, DEV-020) et les portières (DEV-021).
-2. **Carte fixe branchée au jeu** (DEV-006 à 009, DEC-172 : difficulté forcée).
-3. **Essence et gazole par moteur, factions de la Bible** (DEC-094, 098, 184).
-4. Ensuite : décor par région, ordres par vignettes, lot motos et side-cars (DEC-201), bulles d'aide, textes traduisibles.
+0. **Lot A fait (10/11)** : Kit → groupes sur mesure, région de la quête, équilibrage en direct (DEV-037).
+
+1. **Lot B : fondations** : textes traduisibles fr/en, essence et gazole séparés (migration de sauvegarde, OQ-036), découpage de `construction_libre.gd` et `vue_interface.gd` (DEV-038).
+2. **Lot C : carte branchée au jeu**, décor par région, difficulté forcée (DEV-039).
+3. **Lot D : factions et réputation, ordres par vignettes, bulles d'aide**, puis halte et portières du Berliet (DEV-040).
+4. Gelé jusqu'à la fin du Kit : train, centrale, gazogène, caches, boss, lot motos et side-cars.
 
 ## Décisions ouvertes
 

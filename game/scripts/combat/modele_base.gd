@@ -400,6 +400,10 @@ func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") 
 		v.pieces[pid] = {"id": pid, "nom": w.nom, "pv": float(w.pv) * float(etats.get("arme", 1.0)), "max": float(w.pv)}
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.4, float(w.cadence)), "idx": i})
 
+# Niveau de rencontre ajouté hors de la région de la quête principale (DEC-172) ; redéfini par le Kit (modele_kit.gd)
+func malus_hors_region() -> int:
+	return 0
+
 # Valeurs de jeu du Berliet GDR (DEV-022) : le profil de l'assemblage reste la base ; pneus, échappement, réservoir et châssis
 # la modulent. Idempotent : appelée à chaque changement de pièce et à chaque reconstruction de l'assemblage.
 func appliquer_valeurs_berliet(v: Veh) -> void:

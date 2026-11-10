@@ -32,6 +32,10 @@ var _etat: Label
 var _son: Callable
 var _ouvrir_berliet: Callable
 var _ouvrir_carte: Callable
+var _vals: Array = []          # étiquettes de valeur des réglages en direct
+var _lbl_region: Label
+var _groupe := {"type": "moto_bmw", "n": 3, "mode": "approche"}
+var _lbl_groupe: Label
 
 
 static func tout_le_catalogue() -> Array:
@@ -92,6 +96,29 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_bouton(v, "Ville devant (enceinte, porte, mairie)", func(): m.kit_ville())
 	_bouton(v, "Ville pillée devant (événement : poursuite)", func(): m.kit_ville("pillee"))
 	_bouton(v, "Repaire du Baron devant (boss des Raffineurs)", func(): m.kit_ville("repaire"))
+	_titre(v, "Groupe sur mesure")
+	_rangee(v, CombatModele.KIT_VEHICULES.keys().map(func(k): return [CombatModele.KIT_VEHICULES[k], k]), func(k): _groupe.type = k; _maj())
+	_rangee(v, [["−", -1], ["+", 1]], func(d): _groupe.n = clampi(int(_groupe.n) + int(d), 1, 8); _maj())
+	_rangee(v, [["À l'approche", "approche"], ["Convoi devant", "convoi"], ["Poursuite", "poursuite"]], func(k): _groupe.mode = k; _maj())
+	_lbl_groupe = Label.new()
+	_lbl_groupe.add_theme_font_size_override("font_size", 24)
+	v.add_child(_lbl_groupe)
+	_bouton(v, "Lancer le groupe", func(): _lancer_groupe())
+	_titre(v, "Région de la quête (difficulté forcée)")
+	_lbl_region = Label.new()
+	_lbl_region.add_theme_font_size_override("font_size", 24)
+	v.add_child(_lbl_region)
+	var regs := [["Aucune", ""]]
+	for R in CarteMonde.regions():
+		regs.append([String(R.nom), String(R.id)])
+	_rangee(v, regs, func(id): m.kit_regler_region_quete(String(id)); _maj())
+	_titre(v, "Équilibrage en direct")
+	for i in CombatModele.KIT_REGLAGES.size():
+		_reglage(v, i)
+	_bouton(v, "Copier les réglages (à me coller dans le chat)", func():
+		DisplayServer.clipboard_set(m.kit_reglages_texte())
+		_etat.text = m.kit_reglages_texte())
+	_bouton(v, "Réinitialiser les réglages", func(): m.kit_reglages_reinitialiser(); _maj())
 	_titre(v, "Divers")
 	_rangee(v, DIVERS.map(func(e): return [e[0], e]), func(e): _lancer(e))
 	_maj()
@@ -100,6 +127,12 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 
 static func KIT_ZONES_LIBELLES() -> Array:
 	return ["sable", "terre", "cailloux", "eau"].map(func(z): return [CombatModele.KIT_ZONES_NOMS[z], z])
+
+
+func _lancer_groupe() -> void:
+	var p: Dictionary = _groupe.duplicate()
+	p["vitesse"] = _vitesse_convoi
+	m.kit_apparaitre("groupe", p)
 
 
 func _lancer(e: Array) -> void:
@@ -112,6 +145,36 @@ func _lancer(e: Array) -> void:
 func _maj() -> void:
 	_btn_calme.text = "Route calme : OUI (rien n'arrive seul)" if m.kit_calme else "Route calme : NON (rencontres normales)"
 	_etat.text = "Zone : %s" % CombatModele.KIT_ZONES_NOMS.get(m.kit_zone, m.kit_zone)
+	for i in _vals.size():
+		var val: float = m.kit_reglage_valeur(i)
+		_vals[i].text = ("%d" if val >= 10.0 or CombatModele.KIT_REGLAGES[i].pas >= 1.0 else "%.2f") % val
+	_lbl_groupe.text = "%d × %s · %s" % [int(_groupe.n), CombatModele.KIT_VEHICULES[_groupe.type], {"approche": "à l'approche", "convoi": "convoi devant", "poursuite": "poursuite"}[_groupe.mode]]
+	var rq: Dictionary = CarteMonde.region(m.kit_region_quete)
+	var rc: Dictionary = CarteMonde.region(m.kit_region_courante())
+	_lbl_region.text = "Quête : %s · Convoi : %s%s" % [rq.get("nom", "aucune"), rc.get("nom", "?"),
+		(" · HORS RÉGION (+%d niveaux)" % m.malus_hors_region()) if m.malus_hors_region() > 0 else ""]
+
+
+# Réglage en direct : libellé, bouton −, valeur, bouton +
+func _reglage(parent: Control, i: int) -> void:
+	var R: Dictionary = CombatModele.KIT_REGLAGES[i]
+	var l := Label.new()
+	l.text = String(R.nom)
+	l.add_theme_font_size_override("font_size", 24)
+	parent.add_child(l)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	parent.add_child(h)
+	var moins := _bouton(h, "−", func(): m.kit_reglage_pas(i, -1); _maj())
+	moins.custom_minimum_size = Vector2(90, 56)
+	var val := Label.new()
+	val.custom_minimum_size = Vector2(120, 0)
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	val.add_theme_font_size_override("font_size", 28)
+	h.add_child(val)
+	_vals.append(val)
+	var plus := _bouton(h, "+", func(): m.kit_reglage_pas(i, 1); _maj())
+	plus.custom_minimum_size = Vector2(90, 56)
 
 
 func _titre(parent: Control, t: String) -> void:

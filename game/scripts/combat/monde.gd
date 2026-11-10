@@ -107,7 +107,7 @@ func _generer_carte() -> void:
 func niveau_a(x: float) -> int:
 	var R: Dictionary = CombatModele.donnees().rencontres
 	var bonus := 5 if m.bac_a_sable else 0   # bac à sable : les chars arrivent vite (DEC-053)
-	return int(secteurs[secteur].niveau) + bonus + int(maxf(0.0, x - x_entree) / R.palier_m)
+	return int(secteurs[secteur].niveau) + bonus + m.malus_hors_region() + int(maxf(0.0, x - x_entree) / R.palier_m)
 
 
 func en_transit() -> bool:

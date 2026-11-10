@@ -729,8 +729,6 @@ func _nettoyer() -> void:
 
 
 # --- Kit : carte du monde de conception (DEC-154) ----------------------------------------------
-# Lieu de la carte où se trouve le convoi (Mode créatif seulement, non sauvegardé)
-var kit_lieu := "kerbrume"
 
 # Se rendre directement à un lieu de la carte : la zone de décor suit le lieu ; une ville-étape est posée juste devant
 # (avec son nom, son maire et son niveau) ; un lieu d'intérêt fait apparaître son bâtiment s'il en a un.

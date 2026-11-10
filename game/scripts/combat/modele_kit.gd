@@ -11,6 +11,7 @@ const KIT_VEHICULES := {"bmw_r75": "Moto side-car", "moto_bmw": "Moto", "willys_
 	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman"}
 
 var kit_zone := "terre"
+var kit_lieu := "kerbrume"     # lieu de la carte où se trouve le convoi (Mode créatif seulement, non sauvegardé)
 var kit_distance := 90.0       # distance d'apparition devant (ou derrière) le convoi, en mètres
 var _kit_convois := {}         # uid d'un véhicule de convoi ennemi -> vitesse imposée (m/s)
 
@@ -71,7 +72,7 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 	var x := _kit_x_devant()
 	match genre:
 		"ennemi":
-			var e := creer_vehicule(String(p.get("type", "citroen_traction")), "ennemi", x)
+			var e := creer_vehicule(String(p.get("type", "citroen_traction")), "ennemi", x + float(p.get("dx", 0.0)))
 			e.mode = "approche"
 			ennemis.append(e)
 			log_("Kit : %s ennemi à %d m." % [e.nom, int(x - x_tete)], "info")
@@ -125,6 +126,27 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 			f.butin = _butin_vehicule(f, 0.6)
 			epaves.append(f)
 			log_("Kit : épave de %s à %d m." % [f.nom, int(x - x_tete)], "info")
+		"groupe":
+			# Groupe sur mesure (lot A) : n véhicules du même type, à l'approche, en convoi devant ou en poursuite
+			var n := clampi(int(p.get("n", 3)), 1, 8)
+			var t := String(p.get("type", "moto_bmw"))
+			var mode := String(p.get("mode", "approche"))
+			if not KIT_VEHICULES.has(t):
+				return false
+			var types := []
+			for i in n:
+				types.append(t)
+			match mode:
+				"poursuite":
+					return kit_apparaitre("poursuite", {"types": types, "abordeurs": int(p.get("abordeurs", 2))})
+				"convoi":
+					return kit_apparaitre("convoi_devant", {"types": types, "vitesse": float(p.get("vitesse", 4.5))})
+				_:
+					var dx := 0.0
+					for i in n:
+						kit_apparaitre("ennemi", {"type": t, "dx": dx})
+						dx += 7.0
+			log_("Kit : groupe de %d x %s." % [n, KIT_VEHICULES[t]], "info")
 		_:
 			return false
 	return true
@@ -133,3 +155,99 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 # Vitesse d'un véhicule de convoi ennemi (plafonnée par sa propre vitesse)
 func kit_vitesse_convoi(e) -> float:
 	return minf(e.vitesse(), float(_kit_convois.get(e.uid, 4.5)))
+
+
+# --- Réglages d'équilibrage en direct et région de quête (lot A, DEC-171, DEC-172, DEC-178) ----------
+# Chaque réglage : clé, libellé, pas, bornes. Les valeurs vivent dans combat_proto.json (donnees()) : on les change en mémoire
+# pour la session, puis « Copier » donne le texte à reporter dans le fichier.
+const KIT_REGLAGES := [
+	{"cle": "equilibrage.ennemi_degats_subis", "nom": "Dégâts subis par les ennemis ×", "pas": 0.1, "min": 0.3, "max": 4.0},
+	{"cle": "equilibrage.ennemi_degats_infliges", "nom": "Dégâts infligés par les ennemis ×", "pas": 0.1, "min": 0.1, "max": 3.0},
+	{"cle": "equilibrage.ennemi_precision", "nom": "Précision des ennemis ×", "pas": 0.05, "min": 0.2, "max": 1.5},
+	{"cle": "rencontres.intervalle", "nom": "Délai moyen entre rencontres (m)", "pas": 20.0, "min": 30.0, "max": 600.0},
+	{"cle": "kit.malus_region", "nom": "Niveau en plus hors région de quête", "pas": 1.0, "min": 0.0, "max": 7.0},
+]
+
+var kit_region_quete := ""      # id de région (carte_monde.json) ; vide = pas de région de quête (aucun malus)
+var kit_malus_region := 3       # niveau de rencontre ajouté hors de la région de quête (difficulté forcée)
+static var _kit_defauts := {}   # valeurs d'origine, mémorisées au premier réglage
+
+
+func kit_reglage_valeur(i: int) -> float:
+	var k: String = KIT_REGLAGES[i].cle
+	match k:
+		"kit.malus_region":
+			return float(kit_malus_region)
+		"rencontres.intervalle":
+			var iv: Array = donnees().rencontres.intervalle
+			return (float(iv[0]) + float(iv[1])) * 0.5
+		_:
+			return float(donnees().equilibrage[k.get_slice(".", 1)])
+
+
+# Change un réglage d'un pas (sens = +1 ou -1). Vrai si la valeur a bougé.
+func kit_reglage_pas(i: int, sens: int) -> bool:
+	if not kit_actif() or i < 0 or i >= KIT_REGLAGES.size():
+		return false
+	var R: Dictionary = KIT_REGLAGES[i]
+	_kit_memoriser_defauts()
+	var avant := kit_reglage_valeur(i)
+	var apres := clampf(snappedf(avant + float(R.pas) * sens, float(R.pas) / 10.0), float(R.min), float(R.max))
+	if is_equal_approx(avant, apres):
+		return false
+	match String(R.cle):
+		"kit.malus_region":
+			kit_malus_region = int(apres)
+		"rencontres.intervalle":
+			var iv: Array = donnees().rencontres.intervalle
+			var f := apres / maxf(1.0, avant)
+			donnees().rencontres.intervalle = [float(iv[0]) * f, float(iv[1]) * f]
+		_:
+			donnees().equilibrage[String(R.cle).get_slice(".", 1)] = apres
+	return true
+
+
+func _kit_memoriser_defauts() -> void:
+	if _kit_defauts.is_empty():
+		_kit_defauts = {"equilibrage": donnees().equilibrage.duplicate(true), "intervalle": donnees().rencontres.intervalle.duplicate()}
+
+
+func kit_reglages_reinitialiser() -> void:
+	if not _kit_defauts.is_empty():
+		for k in _kit_defauts.equilibrage:
+			donnees().equilibrage[k] = _kit_defauts.equilibrage[k]
+		donnees().rencontres.intervalle = _kit_defauts.intervalle.duplicate()
+	kit_malus_region = 3
+
+
+# Texte JSON à reporter dans combat_proto.json
+func kit_reglages_texte() -> String:
+	var eq := {}
+	for k in ["ennemi_degats_subis", "ennemi_degats_infliges", "ennemi_precision"]:
+		eq[k] = snappedf(float(donnees().equilibrage[k]), 0.01)
+	var iv: Array = donnees().rencontres.intervalle
+	return JSON.stringify({"equilibrage": eq, "rencontres_intervalle": [roundi(float(iv[0])), roundi(float(iv[1]))],
+		"malus_hors_region": kit_malus_region, "region_quete": kit_region_quete}, "  ")
+
+
+# Région où se trouve le convoi dans le Kit (d'après le dernier lieu visité sur la carte)
+func kit_region_courante() -> String:
+	var l := CarteMonde.lieu(kit_lieu)
+	if l.is_empty():
+		return ""
+	return String(CarteMonde.region_a(Vector2(l.pos[0], l.pos[1])).get("id", ""))
+
+
+func kit_regler_region_quete(id: String) -> bool:
+	if id != "" and CarteMonde.region(id).is_empty():
+		return false
+	kit_region_quete = id
+	return true
+
+
+# Difficulté forcée (DEC-172) : niveau de rencontre ajouté tant que le convoi est hors de la région de la quête principale
+func malus_hors_region() -> int:
+	if not kit_actif() or kit_region_quete == "":
+		return 0
+	var c := kit_region_courante()
+	return kit_malus_region if (c != "" and c != kit_region_quete) else 0
