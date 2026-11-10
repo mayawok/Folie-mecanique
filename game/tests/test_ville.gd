@@ -110,5 +110,22 @@ func _init() -> void:
 	# Kit
 	var mk := CombatModele.new(3, {"bac_a_sable": true})
 	ok(mk.kit_ville() and mk.ville_phase() == "approche", "Kit : une ville devant")
+	# Repaire du Baron (DEC-166) : monte-charge, trône, arène, victoire
+	var mr := CombatModele.new(5, {"bac_a_sable": true, "villes": true})
+	ok(mr.kit_ville("repaire") and mr.ville_repaire(), "repaire : posé devant")
+	mr.ordre_marche("avancer")
+	var sr := _jusqua(mr, func(): return mr.ville_phase() == "monte_charge", 300.0)
+	ok(mr.ville_phase() == "monte_charge", "repaire : le Berliet monte (%d s)" % int(sr))
+	_jusqua(mr, func(): return mr.ville_phase() == "trone", 20.0)
+	ok(mr.repaire_levee() > 1.0 and mr.repaire_replique() != "", "repaire : le Baron parle à l'étage")
+	_jusqua(mr, func(): return mr.ville_phase() == "arene", 20.0)
+	var arene: Array = mr.ennemis.filter(func(e): return e.actif() and e.get_meta("arene", false))
+	ok(mr.ville_phase() == "arene" and arene.size() >= 1, "repaire : arène ouverte (%d ennemis)" % arene.size())
+	var f0 := float(mr.stocks.fuel_l)
+	for e in arene:
+		e.pieces.chassis.pv = 0.0
+		e.statut = "epave"
+	mr.avancer()
+	ok(mr.ville_dedans() and float(mr.stocks.fuel_l) > f0, "repaire : victoire et butin")
 	print("Villes : %d échec(s)." % echecs)
 	quit(1 if echecs > 0 else 0)

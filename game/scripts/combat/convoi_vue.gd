@@ -149,6 +149,11 @@ func _camera(delta: float) -> void:
 	cam_h = lerpf(cam_h, Terrain.sol(centre) * 0.6 + Terrain.sol(_rtete()) * 0.4 - 0.5, 1.0 - exp(-3.0 * delta))
 	terrain.sol_y = SOL_Y + cam_h * ppm
 
+func _vehicule_monte():
+	var vp = m.vehicule_principal()
+	return vp if vp != null else (m.convoi[0] if not m.convoi.is_empty() else null)
+
+
 func _synchroniser() -> void:
 	var vus := {}
 	for v in m.convoi + m.ennemis + m.epaves:
@@ -201,6 +206,8 @@ func _synchroniser() -> void:
 		var cxv: float = x + v.longueur * 0.5
 		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
 		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y)
+		if v.camp == "joueur" and m.ville_repaire() and v == _vehicule_monte():   # monte-charge du repaire (DEC-166)
+			n.position.y -= m.repaire_levee() * ppm
 		n.rotation = -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
 		n.visible = v.garage == 0
 	for b in m.batiments:

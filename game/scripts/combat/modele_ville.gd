@@ -9,8 +9,8 @@ extends "res://scripts/combat/modele_camp.gd"
 
 # Phases : approche, ouverture, entree, dedans, depart, ouverture_s, sortie, fin
 # chargement et rassemblement : scènes de départ en mission (modele_mission.gd, DEC-145)
-const PHASES_FORCEES := ["ouverture", "entree", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
-const PHASES_PROTEGEES := ["ouverture", "entree", "dedans", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
+const PHASES_FORCEES := ["monte_charge", "trone", "ouverture", "entree", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
+const PHASES_PROTEGEES := ["monte_charge", "trone", "ouverture", "entree", "dedans", "depart", "ouverture_s", "sortie", "chargement", "rassemblement"]
 
 static var _vdata := {}
 
@@ -32,6 +32,14 @@ func ville_active() -> bool:
 
 func ville_phase() -> String:
 	return String(ville.get("phase", ""))
+
+
+func ville_repaire() -> bool:
+	return String(ville.get("variante", "standard")) == "repaire"
+
+
+func RP() -> Dictionary:
+	return VD().variantes.repaire
 
 
 func ville_pillee() -> bool:
@@ -79,6 +87,9 @@ func ville_creer(x0: float, variante := "standard") -> bool:
 	var L := float(D.longueur_m)
 	ville = {"nom": s.ville, "maire": s.maire, "secteur": monde.secteur, "x0": x0, "x1": x0 + L, "phase": "approche", "t": 0.0,
 		"porte_e": 0.0, "porte_s": 0.0, "x_arret": 0.0, "dest": -1, "graine": r.randi() % 100000, "annoncee": false, "variante": variante}
+	if variante == "repaire":   # repaire du boss (DEC-166) : nom et chef propres
+		ville.nom = String(RP().nom)
+		ville.maire = String(RP().chef)
 	if variante == "pillee":   # portes enfoncées, grandes ouvertes (DEC-151)
 		ville.porte_e = 1.0
 		ville.porte_s = 1.0
@@ -171,8 +182,32 @@ func _ville(dt: float) -> void:
 			if _queue_x() > x0 + 3.0 and not ville_pillee():
 				ville.porte_e = maxf(0.0, float(ville.porte_e) - dt / float(D.porte_s))   # la porte se referme derrière nous
 			if x_tete >= float(ville.x_arret) - 0.05 and (float(ville.porte_e) <= 0.0 or ville_pillee()):
+				if ville_repaire():   # le Berliet monte sur le monte-charge (DEC-166)
+					ville.phase = "monte_charge"
+					ville.t = 0.0
+					log_("Le Berliet est poussé sur un monte-charge. Les chaînes grincent.", "alerte")
+					evt({"t": "ville", "etat": "monte_charge"})
+				else:
+					ville.phase = "dedans"
+					_ville_arrivee()
+		"monte_charge":
+			ville.t += dt
+			if float(ville.t) >= float(RP().monte_charge_s):
+				ville.phase = "trone"
+				ville.t = 0.0
+		"trone":
+			ville.t += dt
+			if float(ville.t) >= float(RP().trone_s):
+				_repaire_arene()
+		"arene":
+			if ennemis.filter(func(e): return e.actif() and e.get_meta("arene", false)).is_empty():
+				var R: Dictionary = RP().recompense
+				for k in R:
+					stocks[k] = float(stocks.get(k, 0.0)) + float(R[k])
+				log_("Le Baron est tombé. Ses hommes ouvrent les cuves : carburant, munitions et métal pour le convoi.", "ok")
 				ville.phase = "dedans"
-				_ville_arrivee()
+				ville.vaincu = true
+				evt({"t": "ville", "etat": "victoire"})
 		"depart":
 			if ville_pillee() and x_tete >= x1 - float(D.arret_avant_porte_m) - 0.05:
 				ville.phase = "sortie"   # porte de sortie enfoncée : on file
@@ -197,6 +232,47 @@ func _ville(dt: float) -> void:
 				ville.porte_s = maxf(0.0, float(ville.porte_s) - dt / float(D.porte_s))
 			if x_tete > x1 + 260.0 or x_tete < x0 - 400.0:
 				_ville_retirer()
+
+
+# Arène du repaire : le Baron et sa garde surgissent devant le convoi ; le convoi peut manœuvrer et combattre
+func _repaire_arene() -> void:
+	var A: Dictionary = RP().arene
+	ville.phase = "arene"
+	ordres.marche = "halte"
+	var x := x_tete + float(A.distance_m)
+	var i := 0
+	for t in A.vehicules:
+		var e = creer_vehicule(String(t), "ennemi", x + i * 9.0)
+		if e == null:
+			continue
+		e.set_meta("arene", true)
+		if i == 0:   # le Baron : son char, plus solide
+			e.nom = "Char du Baron"
+			for pid in e.pieces:
+				e.pieces[pid].max = float(e.pieces[pid].max) * float(A.pv_boss)
+				e.pieces[pid].pv = e.pieces[pid].max
+		ennemis.append(e)
+		i += 1
+	log_("« Ouvrez l'arène ! » Le Baron du Brut et sa garde foncent sur le convoi.", "alerte")
+	evt({"t": "ville", "etat": "arene"})
+
+
+# Hauteur du monte-charge en mètres (0 en bas, hauteur_m à l'étage du trône), lue par la vue
+func repaire_levee() -> float:
+	match ville_phase():
+		"monte_charge":
+			var k := clampf(float(ville.t) / float(RP().monte_charge_s), 0.0, 1.0)
+			return float(RP().hauteur_m) * k * k * (3.0 - 2.0 * k)
+		"trone":
+			return float(RP().hauteur_m)
+	return 0.0
+
+
+func repaire_replique() -> String:
+	if ville_phase() != "trone":
+		return ""
+	var R: Array = RP().repliques
+	return String(R[clampi(int(float(ville.t) / (float(RP().trone_s) / R.size())), 0, R.size() - 1)])
 
 
 # Dans l'enceinte : rien ne peut arriver
@@ -246,6 +322,13 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 		"ouverture", "ouverture_s", "dedans", "chargement", "rassemblement":
 			blocage = "" if ville_dedans() else ("Préparatifs du départ." if ville_phase() in ["chargement", "rassemblement"] else "Ouverture de la porte.")
 			return 0.0
+		"monte_charge", "trone":
+			blocage = "Au repaire du Baron."
+			return 0.0
+		"arene":   # on manœuvre librement entre les murs de l'arène
+			if (vit > 0.0 and x_tete >= float(ville.x1) - 5.0) or (vit < 0.0 and _queue_x() <= float(ville.x0) + 2.0):
+				return 0.0
+			return vit
 		"entree":
 			blocage = "Entrée dans %s." % ville.nom
 			return _rouler_vers(float(ville.x_arret), lente, mini)

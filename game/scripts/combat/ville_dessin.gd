@@ -20,6 +20,7 @@ var _gens: Array = []
 var _corps: Array = []      # ville pillée (DEC-151)
 var _feux: Array = []
 var _pillee := false
+var _repaire := false        # repaire du Baron (DEC-166)
 var _style_bulle: StyleBoxFlat
 var _f: Font
 
@@ -73,6 +74,8 @@ func _c(c: Color, loin := 0.0) -> Color:
 	var r := c.lerp(Color(0.72, 0.66, 0.58), loin)
 	if _pillee:   # suie et brûlures
 		r = r.darkened(0.32).lerp(Color(0.35, 0.18, 0.1), 0.12)
+	elif _repaire:   # repaire : tôles noircies de pétrole, lueur rouge
+		r = r.darkened(0.5).lerp(Color(0.3, 0.08, 0.05), 0.18)
 	return r.lerp(Color(0.09, 0.11, 0.19), 0.68 * _nuit)
 
 
@@ -134,6 +137,7 @@ func _draw() -> void:
 	_x0 = float(V.x0)
 	_x1 = float(V.x1)
 	_pillee = String(V.get("variante", "standard")) == "pillee"
+	_repaire = String(V.get("variante", "standard")) == "repaire"
 	if int(V.graine) != _graine:
 		_generer()
 	_ppm = vue.terrain.ppm
@@ -151,6 +155,8 @@ func _draw() -> void:
 	_personnages(V)
 	_porte(_x0, float(V.porte_e), String(V.nom).to_upper(), 0)
 	_porte(_x1, float(V.porte_s), "SORTIE", 1)
+	if _repaire:
+		_dessiner_repaire(m)
 	if _pillee:   # lueur des incendies sur toute la ville
 		var a := maxf(0.0, _ex(_x0 - 10.0))
 		var b := minf(size.x, _ex(_x1 + 10.0))
@@ -181,6 +187,70 @@ func _incendies() -> void:
 			_poly(pts, c[0])
 		if fposmod(_t + f.ph, 0.6) < 0.3:   # braises
 			draw_circle(base + Vector2(sin(_t * 5.0 + f.ph) * s, -2.2 * s), maxf(1.5, 0.06 * _ppm), Color(1.0, 0.7, 0.2))
+
+
+# Repaire du Baron (DEC-166) : brasiers à la porte, puits du monte-charge, salle du trône à l'étage, réplique du chef
+func _brasier(x: float) -> void:
+	var p := Vector2(_ex(x), _gy)
+	draw_rect(Rect2(p + Vector2(-0.4, -1.4) * _ppm, Vector2(0.8, 1.4) * _ppm), Color("#2A2420"))
+	var fl := 0.8 + 0.2 * sin(_t * 13.0 + x)
+	draw_circle(p + Vector2(0, -1.6 * _ppm), 2.6 * _ppm, Color(1.0, 0.4, 0.1, 0.12 * fl))
+	for j in 4:
+		var dx := (j - 1.5) * 0.18 * _ppm
+		_poly(PackedVector2Array([p + Vector2(dx - 0.18 * _ppm, -1.4 * _ppm), p + Vector2(dx + 0.18 * _ppm, -1.4 * _ppm), p + Vector2(dx + sin(_t * 9.0 + j) * 0.1 * _ppm, -(2.4 + 0.5 * sin(_t * 11.0 + j * 2.0)) * _ppm * fl)]), Color(1.0, 0.45 + 0.1 * j, 0.1, 0.9))
+
+
+func _dessiner_repaire(m) -> void:
+	for x in [_x0 - 6.0, _x0 - 2.0, _x0 + 4.0]:
+		_brasier(x)
+	var ph: String = m.ville_phase()
+	if not ph in ["monte_charge", "trone"]:
+		return
+	var vp = vue._vehicule_monte()
+	if vp == null:
+		return
+	var xa: float = vue._rx(vp) - 1.0
+	var xb: float = vue._rx(vp) + vp.longueur + 1.0
+	var H: float = float(m.RP().hauteur_m)
+	var lev: float = m.repaire_levee()
+	var gx0 := _ex(xa)
+	var gx1 := _ex(xb)
+	# puits : deux poutrelles et des chaînes jusqu'à l'étage
+	for gx in [gx0, gx1]:
+		draw_line(Vector2(gx, _gy), Vector2(gx, _gy - (H + 4.5) * _ppm), Color("#1A1614"), maxf(3.0, 0.25 * _ppm))
+		draw_line(Vector2(gx, _gy - (H + 4.5) * _ppm), Vector2(gx, _gy - lev * _ppm), Color("#6A6A60"), maxf(1.5, 0.06 * _ppm))
+	draw_rect(Rect2(gx0, _gy - lev * _ppm, gx1 - gx0, 0.35 * _ppm), Color("#3A3430"))   # plateau
+	# étage du trône : plancher, mur noir, bannières, trône et Baron
+	var y_et := _gy - H * _ppm
+	draw_rect(Rect2(gx1 + 0.2 * _ppm, y_et, 22.0 * _ppm, 0.4 * _ppm), Color("#2A2420"))
+	var vis := clampf((lev - H * 0.6) / (H * 0.4), 0.0, 1.0)
+	if vis <= 0.0:
+		return
+	draw_rect(Rect2(gx1 + 0.2 * _ppm, y_et - 7.0 * _ppm, 22.0 * _ppm, 7.0 * _ppm), Color(0.08, 0.05, 0.04, 0.85 * vis))
+	for k in 3:
+		var bx := gx1 + (4.0 + k * 6.0) * _ppm
+		_poly(PackedVector2Array([Vector2(bx, y_et - 6.5 * _ppm), Vector2(bx + 1.2 * _ppm, y_et - 6.5 * _ppm), Vector2(bx + 1.2 * _ppm, y_et - 3.2 * _ppm), Vector2(bx + 0.6 * _ppm, y_et - 3.7 * _ppm), Vector2(bx, y_et - 3.2 * _ppm)]), Color(0.45, 0.08, 0.05, vis))
+		draw_circle(Vector2(bx + 0.6 * _ppm, y_et - 5.6 * _ppm), 0.3 * _ppm, Color(0.1, 0.08, 0.06, vis))   # goutte de brut
+	var tx := gx1 + 12.0 * _ppm
+	_poly(PackedVector2Array([Vector2(tx - 1.0 * _ppm, y_et), Vector2(tx + 1.0 * _ppm, y_et), Vector2(tx + 1.0 * _ppm, y_et - 3.6 * _ppm), Vector2(tx, y_et - 4.2 * _ppm), Vector2(tx - 1.0 * _ppm, y_et - 3.6 * _ppm)]), Color(0.32, 0.26, 0.12, vis))   # trône de fûts et de tôle
+	for j in 2:
+		draw_rect(Rect2(Vector2(tx + (-1.9 + 3.0 * j) * _ppm, y_et - 1.1 * _ppm), Vector2(0.8, 1.1) * _ppm), Color(0.2, 0.22, 0.14, vis))   # fûts
+	if vis >= 0.99:
+		Silhouette.dessiner(self, Vector2(tx, y_et - 0.9 * _ppm), _ppm * 1.15, "pillard", {"assis": true, "miroir": true, "peau": 7, "h": 0.55})
+		for j in 2:
+			Silhouette.dessiner(self, Vector2(tx + (-3.5 + 7.0 * j) * _ppm, y_et), _ppm, "pillard", {"miroir": j == 1, "peau": 3 + j, "bras": "vise"})
+		_brasier_haut(tx - 5.5 * _ppm, y_et)
+		_brasier_haut(tx + 5.5 * _ppm, y_et)
+		var rep: String = m.repaire_replique()
+		if rep != "":
+			_bulle(Vector2(tx, y_et - 4.6 * _ppm), rep, true)
+
+
+func _brasier_haut(px: float, y: float) -> void:
+	var fl := 0.8 + 0.2 * sin(_t * 12.0 + px)
+	draw_circle(Vector2(px, y - 1.6 * _ppm), 1.8 * _ppm, Color(1.0, 0.4, 0.1, 0.15 * fl))
+	_poly(PackedVector2Array([Vector2(px - 0.3 * _ppm, y - 1.0 * _ppm), Vector2(px + 0.3 * _ppm, y - 1.0 * _ppm), Vector2(px, y - (2.2 + 0.4 * sin(_t * 10.0)) * _ppm)]), Color(1.0, 0.5, 0.12))
+	draw_line(Vector2(px, y), Vector2(px, y - 1.0 * _ppm), Color("#2A2420"), maxf(2.0, 0.15 * _ppm))
 
 
 # Corps dans les rues : silhouettes sombres, certains sous un drap

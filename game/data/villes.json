@@ -29,6 +29,12 @@
   "habitants": 280,
   "variantes": {
     "_doc": "Villes spéciales (DEC-151). « pillee » : ville en flammes, portes enfoncées, cadavres, survivants qui appellent à l'aide ; un convoi de pillards est parti avec les réserves : poursuite. Réservée au Kit et à l'histoire (pas d'apparition au hasard).",
+    "repaire": {"_doc": "Repaire d'un chef des Raffineurs du Sud (DEC-166, 169) : ville sombre, brasiers à la porte ; monte-charge, trône, arène. Réservé au Kit et à l'histoire.",
+      "nom": "La Raffinerie Noire", "chef": "Aurèle Castagne, le Baron du Brut", "faction": "Raffineurs du Sud",
+      "monte_charge_s": 8.0, "hauteur_m": 9.0, "trone_s": 12.0,
+      "repliques": ["Un convoi indépendant… chez moi.", "Ici, chaque litre qui coule m'appartient.", "Tu veux passer ? Montre-moi ce que vaut ta ferraille.", "Ouvrez l'arène !"],
+      "arene": {"distance_m": 45.0, "vehicules": ["m4_sherman", "m3_halftrack", "m3_halftrack"], "pv_boss": 1.6},
+      "recompense": {"fuel_l": 300, "ammo": 200, "metal": 80}},
     "pillee": {
       "habitants": 120, "cadavres": 24,
       "feux": [[14, 3.4, 1.6], [24, 0.3, 1.4], [38, 9.0, 2.6], [46, 6.5, 1.8], [56, 6.3, 2.2], [68, 0.3, 1.6], [83, 5.0, 1.5], [97, 9.5, 1.4], [108, 8.4, 2.4], [116, 0.3, 1.3], [126, 9.0, 2.0], [135, 6.0, 1.8]],

@@ -91,6 +91,7 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_titre(v, "Ville")
 	_bouton(v, "Ville devant (enceinte, porte, mairie)", func(): m.kit_ville())
 	_bouton(v, "Ville pillée devant (événement : poursuite)", func(): m.kit_ville("pillee"))
+	_bouton(v, "Repaire du Baron devant (boss des Raffineurs)", func(): m.kit_ville("repaire"))
 	_titre(v, "Divers")
 	_rangee(v, DIVERS.map(func(e): return [e[0], e]), func(e): _lancer(e))
 	_maj()
