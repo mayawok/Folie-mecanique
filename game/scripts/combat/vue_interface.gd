@@ -27,7 +27,7 @@ func _appliquer_marges() -> void:
 
 
 func _decaler(c) -> void:
-	if not (c is Control):
+	if not (c is Control) or c.has_meta("plein"):
 		return
 	if c is ColorRect and c.anchor_left == 0.0 and c.anchor_right == 1.0 and c.anchor_top == 0.0 and c.anchor_bottom == 1.0:
 		for e in c.get_children():   # voile plein écran : le fond reste, le contenu s'écarte des bords
@@ -285,39 +285,39 @@ func _construire_elements() -> void:
 	dv.add_child(_boite_dial)
 	_panneau_dial.visible = false
 	# --- Carte du monde
-	_voile_carte = Control.new()
+	var vc := ColorRect.new()   # ColorRect plein cadre : le fond couvre tout l'écran, seul le contenu respecte les marges sûres
+	vc.color = Color(0.03, 0.03, 0.04, 1.0)
+	_voile_carte = vc
 	_voile_carte.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	_voile_carte.visible = false
 	add_child(_voile_carte)
-	var fond_c := ColorRect.new()
-	fond_c.color = Color(0.03, 0.03, 0.04, 0.96)
-	fond_c.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
-	_voile_carte.add_child(fond_c)
 	_carte_ctl = CarteMap.new()
 	_carte_ctl.vue = self
 	_carte_ctl.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
-	_carte_ctl.offset_left = 20
-	_carte_ctl.offset_top = 20
-	_carte_ctl.offset_bottom = -20
-	_carte_ctl.offset_right = -560
+	_carte_ctl.offset_right = -520   # la carte occupe tout le reste de l'écran, sans bords
+	_carte_ctl.set_meta("plein", true)   # jamais décalée par les marges sûres
 	_voile_carte.add_child(_carte_ctl)
 	var pc := _panneau(_voile_carte, Color(0.1, 0.11, 0.12, 1.0))
 	pc.anchor_left = 1.0
 	pc.anchor_right = 1.0
 	pc.anchor_top = 0.0
 	pc.anchor_bottom = 1.0
-	pc.offset_left = -540
-	pc.offset_right = -20
-	pc.offset_top = 20
-	pc.offset_bottom = -20
+	pc.offset_left = -520
+	pc.offset_right = 0
+	pc.offset_top = 0
+	pc.offset_bottom = 0
 	var cv := VBoxContainer.new()
-	cv.add_theme_constant_override("separation", 14)
+	cv.add_theme_constant_override("separation", 12)
 	pc.add_child(cv)
 	_label("CARTE DES SECTEURS", cv, 34, C_ACCENT)
-	_lbl_carte_info = _label("", cv, 31)
+	var defil := ScrollContainer.new()   # le texte défile : les boutons restent toujours visibles en bas
+	defil.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	defil.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	cv.add_child(defil)
+	_lbl_carte_info = _label("", defil, 28)
 	_lbl_carte_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_lbl_carte_info.custom_minimum_size = Vector2(480, 0)
-	_lbl_carte_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_lbl_carte_info.custom_minimum_size = Vector2(440, 0)
+	_lbl_carte_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_btn_partir = _bouton("Partir vers ce secteur", func(): _partir(), cv, 0)
 	_bouton("Fermer la carte", func(): _fermer_carte(), cv, 0)
 	# --- Fin de partie
