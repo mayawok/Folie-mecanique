@@ -788,6 +788,15 @@ func _maj_halte() -> void:
 		_bouton("Déterrer la cache", func(): m.cache_reprendre(), _panneau_halte, 300)
 
 
+func _deposer_quart() -> void:
+	var res := {}
+	for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
+		var q := floorf(float(m.stocks.get(k, 0.0)) * 0.25)
+		if q > 0.0:
+			res[k] = q
+	m.ville_deposer(res)
+
+
 func _cache_quart() -> void:
 	var res := {}
 	for k in ["fuel_l", "ammo", "metal", "eau", "vivres"]:
@@ -871,6 +880,8 @@ func _remplir_ville() -> void:
 				var kk: String = k
 				var p: int = m.ville_prix_lot(kk)
 				_dialogue_bouton("Acheter %d %s (%d métal)" % [int(CombatModele.VD().marche.lot), "bidons d'eau" if kk == "eau" else "caisses de vivres", p], func(): m.ville_acheter(kk); _ville_aller("marche"), m.bac_a_sable or m.stocks.metal >= p)
+			_dialogue_bouton("Déposer un quart des réserves (reçu)", func(): _deposer_quart(); _ville_aller("marche"))   # DEC-157
+			_dialogue_bouton("Présenter mes reçus (%d)" % m.recus.size(), func(): m.ville_retirer(); _ville_aller("marche"), not m.recus.is_empty())
 			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
 		"bilan":
 			var b: Dictionary = m.mission_bilan

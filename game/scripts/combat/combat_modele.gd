@@ -279,7 +279,7 @@ func sauver() -> Dictionary:
 				troupes.append(s.pv)
 		vehs.append({"type": v.type, "assemblage": v.assemblage, "pieces": pcs, "equipage": eq, "noms": nm, "statut": v.statut, "tir": v.tir, "troupes": troupes, "principal": v.principal})
 	var w := monde
-	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
+	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "recus": recus.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
 		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
@@ -355,7 +355,8 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 		m.equip_demin[k] = d.equip_demin[k]
 	m.etape_ouverture = int(d.get("etape_ouverture", 0))
 	m.pieces_stock = d.get("pieces_stock", []).duplicate(true)
-	m.caches = d.get("caches", []).duplicate(true)   # absent des anciennes sauvegardes : aucune cache
+	m.caches = d.get("caches", []).duplicate(true)
+	m.recus = d.get("recus", []).duplicate(true)   # absent des anciennes sauvegardes   # absent des anciennes sauvegardes : aucune cache
 	for e in d.convoi:
 		# v2 : véhicule rebâti depuis son assemblage ; v1 (ancienne sauvegarde) : depuis son type
 		var asm: Variant = e.get("assemblage", {})

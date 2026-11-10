@@ -72,12 +72,28 @@ func _init() -> void:
 	ok(cout > 0 and m.ville_reparer(), "le mécanicien répare (%d métal)" % cout)
 	ok(float(v.pieces.moteur.pv) == float(v.pieces.moteur.max), "moteur remis à neuf")
 	ok(m.ville_texte_maire().contains(nom), "le maire parle")
+	# Dépôt contre reçu (DEC-157)
+	m.stocks.fuel_l = 200.0
+	ok(m.ville_deposer({"fuel_l": 100.0}) and absf(float(m.stocks.fuel_l) - 100.0) < 0.01 and m.recus.size() == 1, "dépôt : reçu tamponné")
+	ok(not m.ville_deposer({"fuel_l": 999.0}), "dépôt : refusé au-delà des réserves")
+	var sv_r := m.sauver()
+	ok(sv_r.recus.size() == 1, "dépôt : reçu sauvegardé")
+	var sect := m.monde.secteur
+	m.monde.secteur = (sect + 1) % m.monde.secteurs.size()
+	ok(m.ville_retirer() and absf(float(m.stocks.fuel_l) - 190.0) < 0.01, "retrait ailleurs : 10 %% perdus (%d L)" % int(m.stocks.fuel_l))
+	m.monde.secteur = sect
+	ok(m.recus.is_empty(), "reçus rendus")
 	# Sauvegarde dans la ville (point de reprise)
 	var m2 := CombatModele.depuis_sauvegarde(JSON.parse_string(JSON.stringify(m.sauver())))
 	ok(m2.ville_dedans() and String(m2.ville.nom) == nom, "reprise dans la ville")
 	ok(bool(m2.monde.secteurs[m2.monde.secteur].get("ville_connue", false)), "la carte garde la ville")
 	# Sorties
 	var so: Array = m.ville_sorties()
+	# Porte du retour (DEC-168)
+	m.monde.secteur_prec = (m.monde.secteur + 5) % m.monde.secteurs.size()
+	var so_r: Array = m.ville_sorties()
+	ok(not so_r.filter(func(e): return bool(e.get("retour", false))).is_empty(), "porte du retour vers l'ancienne destination")
+	m.monde.secteur_prec = -1
 	ok(so.size() == int(D.sorties), "%d sorties proposées : %s" % [so.size(), ", ".join(so.map(func(o): return "%s (%s)" % [o.porte, o.secteur]))])
 	var dest := int(so[1].id)
 	ok(m.ville_partir(dest), "départ demandé")

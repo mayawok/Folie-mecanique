@@ -406,3 +406,34 @@ func ville_charger(d: Dictionary) -> void:
 		for k in ["secteur", "dest", "graine"]:
 			ville[k] = int(ville[k])
 		Terrain.aplanir(float(ville.x0) - 6.0, float(ville.x1) + 6.0)
+
+
+# --- Dépôt contre reçu (DEC-157, DEV-027) ----------------------------------------------------------------
+# On laisse des ressources dans une ville contre un reçu papier ; on les retire dans n'importe quelle ville :
+# intégralement là où on les a laissées, avec 10 % de perte ailleurs (valeur : villes.json → depot.perte).
+var recus: Array = []   # [{"secteur": id, "ville": nom, "res": {stock: qté}}]
+
+func ville_deposer(res: Dictionary) -> bool:
+	if not ville_dedans() or res.is_empty():
+		return false
+	for k in res:
+		if float(stocks.get(k, 0.0)) < float(res[k]) or float(res[k]) <= 0.0:
+			return false
+	for k in res:
+		stocks[k] = float(stocks[k]) - float(res[k])
+	recus.append({"secteur": monde.secteur, "ville": String(ville.nom), "res": res.duplicate()})
+	log_("Dépôt à %s : reçu tamponné." % ville.nom, "ok")
+	return true
+
+
+func ville_retirer() -> bool:
+	if not ville_dedans() or recus.is_empty():
+		return false
+	var perte := float(VD().get("depot", {}).get("perte", 0.10))
+	for r in recus:
+		var f := 1.0 if int(r.secteur) == monde.secteur else 1.0 - perte
+		for k in r.res:
+			stocks[k] = float(stocks.get(k, 0.0)) + floorf(float(r.res[k]) * f)
+	log_("Reçus présentés : %d. Les dépôts d'autres villes perdent %d %%." % [recus.size(), int(perte * 100.0)], "ok")
+	recus.clear()
+	return true

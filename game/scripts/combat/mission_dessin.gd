@@ -1,6 +1,6 @@
 # Scènes de départ en mission (DEC-145), dessinées par le code au-dessus des véhicules :
 # bandes noires de cinéma, sous-titres et fondus ; pont roulant de l'atelier qui descend la cargaison sur le Berliet ;
-# hommes de l'escorte debout sur leurs véhicules, qui crient et lèvent leurs armes (et un joueur de tambour sur la Jeep).
+# pilotes et passagers de l'escorte qui sortent les bras et les armes par les fenêtres en criant (DEC-165).
 # Lit vue.m.mission, vue.m.ville (modele_mission.gd, modele_ville.gd).
 class_name MissionDessin
 extends Control
@@ -54,7 +54,7 @@ func _draw() -> void:
 		var places := [0.45] if moto else [0.35, 0.7]
 		for j in places.size():
 			var xm: float = x0 + v.longueur * float(places[j])
-			var h := 1.05 if moto else 1.55
+			var h := 0.95 if moto else 1.15   # hauteur de la portière : assis, pas debout sur le toit
 			var pied := Vector2(vue.terrain.ecran_x(xm), vue._sy(xm) - h * ppm)
 			var tambour: bool = n == 0 and not moto
 			_fou(pied, ppm * 0.95, t, float(uid) * 1.7 + j, fete, tambour)
@@ -84,35 +84,24 @@ func _pont_roulant(m, ppm: float) -> void:
 	draw_arc(crochet + Vector2(0, 0.15 * ppm), 0.18 * ppm, 0.0, PI, 8, Color("#C9A43A"), maxf(2.0, 0.08 * ppm))
 
 
-# Un « fou » de l'escorte : torse nu peint à la craie, yeux charbonnés, arme levée, saute et crie
-func _fou(pied: Vector2, s: float, t: float, ph: float, fete: bool, tambour: bool) -> void:
-	var saut := absf(sin(t * 5.5 + ph)) * 0.18 * s if fete else 0.0
-	var p := pied - Vector2(0, saut)
-	var craie := Color("#E6E0D4")
-	var hanche := p + Vector2(0, -0.85 * s)
-	var epaule := hanche + Vector2(0, -0.6 * s)
-	for i in 2:   # jambes
-		draw_line(hanche, p + Vector2((0.18 - 0.36 * i) * s, 0), Color("#2E2A24"), maxf(2.0, 0.13 * s))
-	draw_line(hanche, epaule, craie, maxf(3.0, 0.3 * s))   # torse
-	var tete := epaule + Vector2(0, -0.2 * s)
-	draw_circle(tete, 0.16 * s, craie)
-	draw_line(tete + Vector2(-0.1, -0.02) * s, tete + Vector2(0.1, -0.02) * s, Color("#151210"), maxf(1.5, 0.06 * s))   # yeux charbonnés
-	if tambour:   # bidon-tambour devant lui, il frappe à deux bras
-		var fut := hanche + Vector2(0.45 * s, 0.05 * s)
-		draw_rect(Rect2(fut + Vector2(-0.25, -0.3) * s, Vector2(0.5, 0.6) * s), Color("#7A3A2A"))
-		draw_line(fut + Vector2(-0.25, -0.3) * s, fut + Vector2(0.25, -0.3) * s, Color("#D8CDB2"), maxf(1.5, 0.06 * s))
-		for i in 2:
-			var frappe := absf(sin(t * 8.0 + i * PI))
-			var main := fut + Vector2((-0.1 + 0.2 * i) * s, (-0.35 - 0.35 * frappe) * s)
-			draw_line(epaule, main, craie, maxf(2.0, 0.1 * s))
-			draw_line(main, main + Vector2(0.15, -0.2) * s, Color("#3A2E22"), maxf(1.5, 0.05 * s))
-		return
-	var lever := 0.5 + 0.5 * sin(t * 4.0 + ph) if fete else 0.15
-	var g := epaule + Vector2(-0.3 * s, (-0.15 - 0.55 * lever) * s)
-	var d := epaule + Vector2(0.3 * s, (-0.2 - 0.6 * (1.0 - lever * 0.6)) * s)
-	draw_line(epaule, g, craie, maxf(2.0, 0.1 * s))
-	draw_line(epaule, d, craie, maxf(2.0, 0.1 * s))
-	draw_line(g + Vector2(-0.15 * s, 0.05 * s), d + Vector2(0.35 * s, -0.1 * s), Color("#2A2420"), maxf(2.0, 0.09 * s))   # fusil tenu à bout de bras
+# Escorte (DEC-165) : plus d'hommes peints debout sur les véhicules ; ce sont les pilotes et passagers, assis, qui sortent
+# la tête, le bras et l'arme par la fenêtre (ou depuis la selle pour une moto) et l'agitent en criant.
+func _fou(pied: Vector2, s: float, t: float, ph: float, fete: bool, _tambour: bool) -> void:
+	var peau := Color("#B98A66")
+	var veste := Color("#5B5A3E")
+	var epaule := pied + Vector2(0, -0.15 * s)
+	draw_line(pied + Vector2(0, 0.35 * s), epaule, veste, maxf(3.0, 0.32 * s))   # buste qui dépasse de la portière
+	var tete := epaule + Vector2(0.05 * s, -0.22 * s)
+	draw_circle(tete, 0.15 * s, peau)
+	draw_arc(tete + Vector2(0, -0.03 * s), 0.16 * s, PI, TAU, 8, Color("#3B3326"), maxf(2.0, 0.09 * s))   # casquette ou calot
+	draw_line(tete + Vector2(-0.08, -0.03) * s, tete + Vector2(0.12, -0.03) * s, Color("#2A2620"), maxf(1.5, 0.05 * s))   # lunettes de route
+	var lever := 0.5 + 0.5 * sin(t * 4.0 + ph) if fete else 0.2
+	var coude := epaule + Vector2(0.25 * s, (-0.1 - 0.25 * lever) * s)
+	var main := coude + Vector2(0.15 * s, (-0.2 - 0.35 * lever) * s)
+	draw_line(epaule, coude, veste, maxf(2.0, 0.12 * s))   # bras sorti par la fenêtre
+	draw_line(coude, main, peau, maxf(2.0, 0.1 * s))
+	var dir := Vector2(0.9, -0.35 - 0.5 * lever).normalized()
+	draw_line(main - dir * 0.25 * s, main + dir * 0.75 * s, Color("#2A2420"), maxf(2.0, 0.09 * s))   # fusil ou pistolet-mitrailleur brandi
 
 
 func _bulle(bas: Vector2, txt: String) -> void:

@@ -23,6 +23,8 @@
   "kit_distance_m": 120.0,
   "sorties": 3,
   "reparation_metal_par_pv": 0.05,
+  "dialogue_nuit": [{"qui": "garde", "texte": "Halte ! Qui va là ?"}, {"qui": "convoi", "texte": "Convoi indépendant. On vient en paix."}, {"qui": "garde", "texte": "Coupez les phares… C'est bon, ouvrez !"}],
+  "depot": {"_doc": "Dépôt contre reçu (DEC-157) : perte au retrait dans une autre ville", "perte": 0.10},
   "marche": {"_doc": "Marché (DEC-148) : eau et vivres par lots, payés en métal", "lot": 5, "prix_metal": {"eau": 2, "vivres": 3}},
   "habitants": 280,
   "variantes": {

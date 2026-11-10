@@ -596,6 +596,26 @@ func _personnages(V: Dictionary) -> void:
 	_bulle(Vector2(px, _gy - 2.2 * _ppm), String(phrases[(cycle * 5 + _graine) % phrases.size()]), false)
 
 
+# Dialogue en bulles à la porte, la nuit (DEC-164) : la garde interpelle, le convoi répond, la garde ouvre.
+# Répliques : villes.json → dialogue_nuit (ajouter une réplique = une ligne, sans code).
+func _dialogue_nuit(M, src: Vector2) -> void:
+	var ph: String = M.ville_phase()
+	var D: Array = CombatModele.VD().get("dialogue_nuit", [])
+	if D.is_empty() or not ph in ["approche", "ouverture"]:
+		return
+	var arret: bool = ph == "ouverture" or (M.vitesse_convoi < 0.1 and float(M.ville.x0) - M.x_tete < 8.0)
+	if not arret:
+		return
+	var t: float = float(M.ville.t) if ph == "ouverture" else 0.0
+	var k := clampi(int(t / 1.8), 0, D.size() - 1)
+	var r: Dictionary = D[k]
+	if String(r.qui) == "garde":
+		_bulle(src + Vector2(-1.0 * _ppm, -1.2 * _ppm), String(r.texte), true)
+	else:
+		var tete := Vector2(vue.terrain.ecran_x(M.x_tete - 1.5), vue._sy(M.x_tete - 1.5) - 3.2 * _ppm)
+		_bulle(tete, String(r.texte), false)
+
+
 func _bulle(bas: Vector2, txt: String, accent: bool) -> void:
 	var fs := int(clampf(_ppm * 0.48, 14.0, 26.0))
 	var tz := _f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
@@ -675,7 +695,22 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 		var src := _p(gx + 0.7, TOUR_H + 2.1)
 		var ang := (-0.35 if cote == 0 else -2.8) + 0.35 * sin(_t * 0.5 + cote)
 		var l := 30.0 * _ppm
-		_poly(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
+		var M = vue.m
+		var ph: String = M.ville_phase()
+		if cote == 0 and ph in ["approche", "ouverture"] and float(M.ville.x0) - M.x_tete < 120.0:
+			# arrivée de nuit (DEC-164) : le projecteur de la porte se braque sur le convoi et le suit
+			var cible := Vector2(vue.terrain.ecran_x(M.x_tete - 2.5), vue._sy(M.x_tete - 2.5) - 1.2 * _ppm)
+			var dv := cible - src
+			ang = dv.angle()
+			l = dv.length() + 6.0 * _ppm
+			var lar := 0.06 + 2.2 * _ppm / maxf(1.0, l)
+			_poly(PackedVector2Array([src, src + Vector2.from_angle(ang - lar) * l, src + Vector2.from_angle(ang + lar) * l]), Color(1.0, 0.95, 0.75, 0.22 * _nuit))
+			draw_circle(cible, 2.2 * _ppm, Color(1.0, 0.95, 0.75, 0.12 * _nuit))
+			draw_circle(src, 0.35 * _ppm, Color(1.0, 0.97, 0.85, _nuit))
+		else:
+			_poly(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
+		if cote == 0:
+			_dialogue_nuit(M, src)
 	# gardes armés sur le chemin de ronde (aucune ville ne tire pour l'instant) ; ville pillée : plus personne
 	for i in (0 if _pillee else 3):
 		var px: float = a + 0.3 + i * 1.6
