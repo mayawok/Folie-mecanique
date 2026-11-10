@@ -199,5 +199,31 @@ func _init() -> void:
 		var s1: Dictionary = ConstructionLibre.analyser(gg).stats
 		ok(bool(s1.gazogene) and float(s1.conso) < float(s0.conso) * 0.5, "gazogène : consomme peu de carburant (%.2f → %.2f)" % [float(s0.conso), float(s1.conso)])
 		ok(float(s1.vitesse) <= float(s0.vitesse), "gazogène : moins de puissance")
+	# Bouton de marche (design du 10/11) : le geste est bien transmis et les chevrons s'étirent
+	var bm := BoutonMarche.new()
+	bm.size = Vector2(420, 112)
+	var recu := []
+	bm.geste.connect(func(dx): recu.append(dx))
+	var e1 := InputEventMouseButton.new()
+	e1.button_index = MOUSE_BUTTON_LEFT
+	e1.pressed = true
+	e1.position = Vector2(100, 50)
+	bm._gui_input(e1)
+	var e2 := InputEventMouseMotion.new()
+	e2.position = Vector2(180, 50)
+	bm._gui_input(e2)
+	bm._process(0.5)
+	ok(bm._ouv > 0.5, "bouton de marche : glisser à droite étire les chevrons vers la droite")
+	var e3 := InputEventMouseButton.new()
+	e3.button_index = MOUSE_BUTTON_LEFT
+	e3.pressed = false
+	e3.position = Vector2(180, 50)
+	bm._gui_input(e3)
+	ok(recu.size() == 1 and absf(float(recu[0]) - 80.0) < 0.01, "bouton de marche : geste transmis (+80 px)")
+	bm.etat = "recul"
+	for i in 20:
+		bm._process(0.1)
+	ok(bm._ouv < -0.9, "bouton de marche : en marche arrière, chevrons étirés vers la gauche")
+	bm.free()
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)

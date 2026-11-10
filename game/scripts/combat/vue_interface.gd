@@ -149,14 +149,15 @@ func _construire_elements() -> void:
 	_btn_ordres.offset_right = -16
 	_btn_ordres.offset_top = -BARRE_H - 140
 	_btn_ordres.offset_bottom = -BARRE_H - 80
-	_btn_marche = _bouton("Avancer", func(): pass, self, 300)   # bouton unique de marche (DEC-160) : toucher, glisser
-	_btn_marche.gui_input.connect(_glisse_marche)
+	_btn_marche = BoutonMarche.new()   # bouton unique de marche (DEC-160), design du 10/11 : frein à main et chevrons
+	add_child(_btn_marche)
+	_btn_marche.geste.connect(func(dx: float): _demarrer_audio(); _son("sfx_ui_clic", -6.0); action_marche_geste(dx))
 	_construire_halte()
 	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
-	_btn_marche.offset_left = -320
+	_btn_marche.offset_left = -440
 	_btn_marche.offset_right = -16
-	_btn_marche.offset_top = -BARRE_H - 76
-	_btn_marche.offset_bottom = -BARRE_H - 12
+	_btn_marche.offset_top = -BARRE_H - 128
+	_btn_marche.offset_bottom = -BARRE_H - 16
 	# --- Actions du véhicule sélectionné
 	_bande_actions = _panneau(self)
 	_bande_actions.set_anchors_and_offsets_preset(PRESET_BOTTOM_LEFT)
@@ -755,9 +756,9 @@ func _construire_halte() -> void:
 	_panneau_halte = VBoxContainer.new()
 	_panneau_halte.add_theme_constant_override("separation", 4)
 	_panneau_halte.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
-	_panneau_halte.offset_left = -320
+	_panneau_halte.offset_left = -440
 	_panneau_halte.offset_right = -16
-	_panneau_halte.offset_bottom = -BARRE_H - 82
+	_panneau_halte.offset_bottom = -BARRE_H - 136
 	_panneau_halte.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	add_child(_panneau_halte)
 
@@ -808,23 +809,7 @@ func _cache_quart() -> void:
 
 # Bouton de marche unique (DEC-160) : toucher = halte, glisser vers la droite = avancer, vers la gauche = reculer.
 # En ville, le toucher ouvre le choix de la sortie comme avant.
-var _marche_x0 := -1.0
-const GLISSE_MARCHE_PX := 40.0
-
-func _glisse_marche(ev: InputEvent) -> void:
-	var appui: bool = (ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT) or ev is InputEventScreenTouch
-	if not appui:
-		return
-	if ev.pressed:
-		_marche_x0 = ev.position.x
-		return
-	if _marche_x0 < 0.0:
-		return
-	var dx: float = ev.position.x - _marche_x0
-	_marche_x0 = -1.0
-	_btn_marche.accept_event()
-	action_marche_geste(dx)
-
+const GLISSE_MARCHE_PX := BoutonMarche.SEUIL_PX
 
 func action_marche_geste(dx: float) -> void:
 	if m.ville_dedans() or (m.ville_protegee() and absf(dx) < GLISSE_MARCHE_PX):
@@ -1089,12 +1074,13 @@ func _maj_interface() -> void:
 	_ord.visible = false            # menu « Ordres du convoi » supprimé (DEC-160)
 	_maj_halte()
 	_btn_ordres.visible = false
-	_btn_marche.text = {"avancer": "■  ◀ glisser ▶  (en avant)", "recul": "■  ◀ glisser ▶  (recul)"}.get(m.ordres.marche, "◀  glisser  ▶   (halte)")
+	_btn_marche.etat = String(m.ordres.marche)
 	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()
+	_btn_marche.texte = ""
 	if m.ville_dedans():
-		_btn_marche.text = "Repartir…"
+		_btn_marche.texte = "Repartir…"
 	elif m.ville_protegee():
-		_btn_marche.text = "Entrée en ville" if m.ville_phase() in ["ouverture", "entree"] else "Sortie de la ville"
+		_btn_marche.texte = "Entrée en ville" if m.ville_phase() in ["ouverture", "entree"] else "Sortie de la ville"
 	if _bande_actions.visible:
 		var ab_g = m.abri_garage()
 		_btn_garage.text = "Sortir du garage" if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
