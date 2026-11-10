@@ -223,7 +223,7 @@ func _lame() -> void:
 	var L := BerlietConfig.lame(config)
 	var x0 := float(BerlietConfig.donnees().lame.avant) - 30.0   # fixée sur les longerons, sous le pare-chocs
 	var s := BerlietConfig.sol()
-	var yb := s - 12.0                 # bas : frôle le sol
+	var yb := s - 75.0                 # bas : relevé au niveau du pare-chocs (retour du 10/11)
 	var t := texture(BerlietConfig.image(String(L.image)))   # planche ChatGPT du 10/11, calée à gauche sur les longerons
 	var h := float(L.haut)
 	var w := h * t.get_width() / float(t.get_height())
