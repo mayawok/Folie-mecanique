@@ -144,6 +144,11 @@ func _ready() -> void:
 	_monde.mouse_filter = MOUSE_FILTER_IGNORE
 	_monde.draw.connect(_dessiner_grille)
 	add_child(_monde)
+	_apercu_art = VehiculeDessin.new()   # vrai dessin du Berliet sous la grille (DEC-167)
+	_apercu_art.mouse_filter = MOUSE_FILTER_IGNORE
+	_apercu_art.plat = true
+	_apercu_art.visible = false
+	_monde.add_child(_apercu_art)
 	_apercu = VehiculeDessin.new()
 	_apercu.equipage = true
 	_apercu.plat = true   # l'aperçu reste droit même si le véhicule est penché (DEC-082)
@@ -313,6 +318,8 @@ func _maj(revoir_vue := false) -> void:
 	_disposer()
 
 
+var _apercu_art: VehiculeDessin
+
 func _placer_apercu(b := {}) -> void:
 	if _apercu == null:   # appelé avant _ready (éditeur ouvert hors de l'arbre) : rien à placer
 		return
@@ -320,15 +327,32 @@ func _placer_apercu(b := {}) -> void:
 	if source.get("cases", []).is_empty():
 		_apercu.visible = false
 		return
-	var F := ConstructionLibre.forme(source, _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles", "vehicule", "voitures"])   # coques transparentes quand on règle la mécanique
+	var berliet := source.has("berliet")
+	var F := ConstructionLibre.forme(source, berliet or _ecorche or not onglet in ["coque", "equipage", "peinture", "vehicules", "toles", "vehicule", "voitures"])   # coques transparentes quand on règle la mécanique
 	_apercu.ppm = _cell / ConstructionLibre.C
 	_apercu.configurer_d(F)
 	_apercu.visible = true
 	_apercu.position = _px(float(F.x0), float(F.sol)) - _zone.position - Vector2(0, _apercu.size.y)   # l'aperçu vit dans la fenêtre
+	_apercu_art.visible = berliet
+	if berliet:
+		_apercu_art.ppm = _apercu.ppm
+		_apercu_art.type = "berliet_gdr"
+		_apercu_art.configurer_art(m.berliet_config if m != null and "berliet_config" in m else BerlietConfig.defaut())
+		_apercu_art.custom_minimum_size = Vector2(_apercu_art.D.longueur, _apercu_art.D.hauteur) * _apercu_art.ppm
+		_apercu_art.size = _apercu_art.custom_minimum_size
+		var x_cab := float(source.berliet.essieu_av) * ConstructionLibre.C   # roue avant de l'art sur l'essieu avant de la grille
+		var r_av := 0.0
+		for r in _apercu_art.D.roues:
+			r_av = maxf(r_av, float(r.x))
+		_apercu_art.position = _px(x_cab / ConstructionLibre.C + 0.5 - r_av / ConstructionLibre.C, float(F.sol)) - _zone.position - Vector2(0, _apercu_art.size.y)
+		_apercu_art.queue_redraw()
 
 
 # Zoom ou déplacement de la vue : le dessin du véhicule suit sans être recalculé
 func _zoomer_apercu() -> void:
+	if _apercu_art != null and _apercu_art.visible:
+		_placer_apercu()
+		return
 	if _apercu == null or not _apercu.visible or _apercu.D.is_empty():
 		return
 	_apercu.ppm = _cell / ConstructionLibre.C
@@ -521,7 +545,21 @@ func _verrou() -> bool:
 	return a.has("plateforme") and not (m != null and m.bac_a_sable)
 
 
+func _verrou_berliet() -> bool:
+	return a.has("berliet") and not (m != null and m.bac_a_sable)
+
+
 func _appuyer(cell: Vector2i) -> void:
+	if _verrou_berliet():   # Berliet (DEC-167) : châssis, cabine, sièges et essieu avant ne bougent pas
+		var ipb := ConstructionLibre.piece_en(a, cell)
+		if ipb >= 0 and ConstructionLibre.fixe_berliet(a, "piece", a.pieces[ipb].piece) and onglet != "coque":
+			_dire("Berliet : la cabine et les sièges sont fixes.")
+			return
+		if onglet == "essieux":
+			var exb := ConstructionLibre.essieu_en(a, cell.x)
+			if not exb.is_empty() and ConstructionLibre.fixe_berliet(a, "essieu", exb.x):
+				_dire("Berliet : l'essieu avant est fixe.")
+				return
 	if _verrou() and onglet in ["chassis", "essieux"]:
 		var ipv := ConstructionLibre.piece_en(a, cell)
 		if ipv >= 0 and not _est_coque(String(a.pieces[ipv].piece)):
@@ -640,6 +678,9 @@ func _relacher(pos: Vector2) -> void:
 			for y in range(mini(_rect0.y, _rect1.y), maxi(_rect0.y, _rect1.y) + 1):
 				b = ConstructionLibre.peindre(b, Vector2i(x, y), sorte)
 		_rect0 = Vector2i(-99, -99)
+		if _verrou_berliet() and ConstructionLibre.fixe_berliet(b, "cases", b.cases):
+			_dire("Berliet : le châssis d'origine ne change pas ; on peut l'agrandir.")
+			b = a
 		if b != a:
 			a = b
 			_son()

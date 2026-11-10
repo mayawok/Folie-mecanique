@@ -46,6 +46,7 @@ class Pieton:
 var m                          # CombatModele
 var secteurs: Array = []       # {id, nom, pos: Vector2 (0..1), niveau, faction}
 var secteur := 0               # secteur actuel
+var secteur_prec := -1         # secteur d'où l'on vient : sortie « retour » des villes (DEC-168)
 var x_entree := 0.0            # abscisse d'entrée dans le secteur
 var trajet := {}               # {dest, reste, total} : zone calme entre deux secteurs
 var heure := HEURE_DEBUT
@@ -293,6 +294,7 @@ func _cap(dt: float) -> void:
 		return
 	trajet.reste -= maxf(0.0, m.vitesse_convoi) * dt
 	if trajet.reste <= 0.0:
+		secteur_prec = secteur
 		secteur = trajet.dest
 		x_entree = m.x_tete
 		trajet = {}

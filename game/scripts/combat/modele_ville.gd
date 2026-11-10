@@ -295,6 +295,14 @@ func ville_sorties() -> Array:
 		var connue := bool(s.get("ville_connue", false))
 		res.append({"id": int(s.id), "porte": "Porte vers " + CARDINAUX[oct], "secteur": s.nom, "ville": String(s.get("ville", "")) if connue else "",
 			"niveau": int(s.niveau), "distance_m": int(250.0 + ici.distance_to(s.pos) * 900.0)})
+	# Demi-tour (DEC-168) : la porte qui ramène vers l'ancienne destination est toujours proposée
+	var p: int = monde.secteur_prec
+	if p >= 0 and p != monde.secteur and res.filter(func(e): return int(e.id) == p).is_empty():
+		var s0: Dictionary = monde.secteurs[p]
+		res.append({"id": p, "porte": "Porte du retour", "secteur": s0.nom, "ville": String(s0.get("ville", "")) if bool(s0.get("ville_connue", false)) else "",
+			"niveau": int(s0.niveau), "distance_m": int(250.0 + ici.distance_to(s0.pos) * 900.0)})
+	for e in res:
+		e["retour"] = int(e.id) == p
 	return res
 
 

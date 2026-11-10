@@ -174,5 +174,17 @@ func _init() -> void:
 	_avancer(m8, 1.0)
 	ok(m8.halte.is_empty(), "halte : levée quand le convoi repart")
 	ok(m8.halte_garde() and m8.convoi[0].reparation, "surveillance : les mécaniciens réparent")
+	# Berliet dans la grille (DEC-167)
+	var gb := ConstructionLibre.convertir(Assemblage.de_type("berliet_gdr"), "berliet_gdr")
+	ok(gb.has("berliet"), "Berliet : grille marquée")
+	ok(not gb.berliet.fixes.is_empty() and ConstructionLibre.fixe_berliet(gb, "piece", gb.berliet.fixes[0]), "Berliet : cabine fixe")
+	ok(ConstructionLibre.fixe_berliet(gb, "essieu", gb.berliet.essieu_av), "Berliet : essieu avant fixe")
+	var autre_x := -1
+	for e in gb.essieux:
+		if int(e.x) != int(gb.berliet.essieu_av):
+			autre_x = int(e.x)
+	ok(autre_x >= 0 and not ConstructionLibre.fixe_berliet(gb, "essieu", autre_x), "Berliet : essieux arrière libres")
+	ok(not ConstructionLibre.fixe_berliet(gb, "cases", gb.cases), "Berliet : châssis d'origine complet")
+	ok(ConstructionLibre.fixe_berliet(gb, "cases", gb.cases.slice(1)), "Berliet : case d'origine retirée refusée")
 	print("%d ÉCHEC(S)" % echecs if echecs else "TOUT OK")
 	quit(1 if echecs else 0)

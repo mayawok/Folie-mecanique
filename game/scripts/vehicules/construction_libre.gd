@@ -1496,7 +1496,35 @@ static func convertir(a: Dictionary, type: String) -> Dictionary:
 		if not c.is_empty():
 			b = c
 	b.plaques = int(a.get("plaques", 0))
+	# Berliet GDR (DEC-167) : châssis, cabine et sièges, essieu avant fixes ; le reste se personnalise
+	if String(a.get("chassis", "")) == "chassis_berliet_gdr":
+		var xav := 1000
+		for e in b.essieux:
+			xav = mini(xav, int(e.x))
+		var fixes := []
+		for p in b.pieces:
+			if Assemblage.piece(String(p.piece)).get("famille", "") == "cabine":
+				fixes.append(String(p.piece))
+		b.berliet = {"essieu_av": xav, "fixes": fixes}
 	return b
+
+
+# Berliet (DEC-167) : la pièce, la case ou l'essieu est-il fixe ? (hors mode créatif)
+static func fixe_berliet(a: Dictionary, quoi: String, val) -> bool:
+	if not a.has("berliet"):
+		return false
+	match quoi:
+		"piece":
+			return String(val) in a.berliet.fixes
+		"essieu":
+			return int(val) == int(a.berliet.essieu_av)
+		"cases":   # toutes les cases d'origine doivent rester
+			var n := 0
+			for c in val:
+				if String(c[2]) == "origine":
+					n += 1
+			return n < int(a.origine.n)
+	return false
 
 
 # --- Dessin (fiche au format de formes_vehicules.json) -------------------------------------------

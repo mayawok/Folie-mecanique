@@ -282,7 +282,7 @@ func sauver() -> Dictionary:
 	return {"v": 2, "bac": bac_a_sable, "meteo": meteo_on, "champs": champs_on, "equip_demin": equip_demin.duplicate(), "ouverture": ouverture, "etape_ouverture": etape_ouverture, "pieces_stock": pieces_stock.duplicate(true), "caches": caches.duplicate(true), "graine": graine, "temps": temps, "x_tete": x_tete, "stocks": stocks.duplicate(), "composants": composants.duplicate(true),
 		"distance_max": distance_max, "tues": ennemis_detruits, "n_rencontres": _n_rencontres, "n_noms": _n_noms, "lore": _lore_dit,
 		"reserve": reserve_survivants, "rng": str(rng.state), "convoi": vehs, "berliet": berliet_config.duplicate(), "villes": ville_sauver(), "mission": mission_sauver(),
-		"monde": {"secteur": w.secteur, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
+		"monde": {"secteur": w.secteur, "secteur_prec": w.secteur_prec, "x_entree": w.x_entree, "trajet": w.trajet.duplicate(), "heure": w.heure, "jour": w.jour, "quete": w.quete.duplicate(true)}}
 
 # --- Eau et vivres (DEC-148) ------------------------------------------------------------------
 var _alerte_ravit := {}   # alertes déjà données : {"eau_bas": true, "eau_vide": true, ...}
@@ -387,6 +387,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.rng.state = int(d.rng)
 	var w: Dictionary = d.monde
 	m.monde.secteur = int(w.secteur)
+	m.monde.secteur_prec = int(w.get("secteur_prec", -1))   # absent des anciennes sauvegardes
 	m.monde.x_entree = float(w.x_entree)
 	m.monde.heure = float(w.heure)
 	m.monde.jour = int(w.jour)
