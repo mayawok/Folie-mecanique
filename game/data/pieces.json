@@ -1169,6 +1169,28 @@
       ],
       "metal": 2
     },
+    "arme_molotov": {
+      "famille": "arme",
+      "nom": "Lanceur de Molotov",
+      "arme": "molotov",
+      "poids_kg": 15,
+      "emprise": [
+        2,
+        1
+      ],
+      "metal": 0
+    },
+    "arme_lance_explosive": {
+      "famille": "arme",
+      "nom": "Lances à pointe explosive",
+      "arme": "lance_explosive",
+      "poids_kg": 25,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1
+    },
     "phares": {
       "famille": "equipement",
       "nom": "Phares",
