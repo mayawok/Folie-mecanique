@@ -229,3 +229,11 @@ Quelle faction tient le repaire ? Proposition : les Hommes du Péage ou une fami
 Le Berliet est déjà ouvrable dans la grille (atelier de ville, bac à sable), mais dessiné en formes simplifiées, et sa vitrine de modules est à part.
 Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son vrai dessin dans la grille ; 2) le modifier librement pièce par pièce ;
 3) fusionner sa vitrine de modules dans la grille ? Autre question en suspens : remettre un bouton de demi-tour (retiré avec le menu d'ordres, DEC-160) ?
+
+## OQ-033 — Suites de l'entretien du 10/11 (à poser au créateur)
+
+1. Ordres tactiques seulement (DEC-174) alors que le menu d'ordres a été supprimé (DEC-160) : quels ordres le joueur donne-t-il, et par quelle interface ?
+2. Difficulté forcée (DEC-172) : tant que la quête principale n'existe pas, quelle région sert de repère dans le Kit ?
+3. Retour au dernier checkpoint (DEC-173) : que garde-t-on (équipement, véhicules, ressources) et que perd-on (cargaison, mission) ?
+4. Le Kit exclut le branchement de la carte (DEV-009) mais celui-ci est la priorité n°2 de code : ordre exact ?
+5. `claude/VISION.md` est ancien : le réaligner sur la Bible et DEC-091 à 102 ?

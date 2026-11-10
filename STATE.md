@@ -1,6 +1,6 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-09. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
+Mis à jour : 2026-11-10. Résumé volontairement court (≈ 60 lignes). Détails : [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/INDEX.md`](docs/INDEX.md).
 
 ## Cap (recentrage du 06/11, DEC-091 à DEC-102)
 
@@ -18,6 +18,7 @@ Mis à jour : 2026-11-09. Résumé volontairement court (≈ 60 lignes). Détail
 - **Berliet GDR (08/11, DEC-136 à 138)** : camion de l'expédition dessiné par l'art (2 châssis, 5 pneus avant et arrière, 5 échappements, 5 réservoirs, trappe), 6 modules arrière dessinés par le code, halte de l'équipage animée ; **véhicule principal dès le départ (DEC-139)**, dessiné par l'art dans le convoi ; pièces réglables dans le Kit (« Berliet GDR : pièces et halte »). Suite : DEV-020 (dans le convoi), DEV-021 (portières), lot 12 motos et side-cars (prompts dans `docs/art/prompts/motos_sidecars.md`).
 - **Carte du monde (09/11, DEC-154)** : carte de conception dans le Kit sur la carte de France déformée : 13 villes-étapes, 22 routes, 30 lieux (pétrole, eau, mines, péages…), factions ; « Y aller » vers une ville. Détail : `docs/design/CARTE.md`.
 - **Orientation (09/11, DEC-155)** : toujours en paysage ; en portrait, l'image du jeu est couchée au lieu d'afficher « Tournez le téléphone ».
+- **Entretien du chef programmeur (10/11, DEC-171 à 176)** : jalon = finir le Kit ; monde libre avec difficulté forcée hors région de quête, indices diffus ; échec = retour au dernier checkpoint ; combat aux ordres tactiques ; gros lots espacés ; ordre de code Berliet → carte branchée → carburants et factions. Détail : `docs/design/ENTRETIEN_CHEF_PROG.md`, questions : OQ-033.
 - **Méthode de travail** : Claude fusionne lui-même dans `main` (autorisation du 07/11) ; la page web se reconstruit ensuite toute seule.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 
