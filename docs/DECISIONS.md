@@ -210,3 +210,22 @@
 | 2026-11-10 | DEC-183 | **Session libre, sauvegarde partout** (pas de durée cible) | Entretien 2. |
 | 2026-11-10 | DEC-184 | **Réputation par faction** : les actes changent les relations ; l'amitié avec une faction peut rendre ennemi d'une autre | Entretien 2. Faction et règles exactes : OQ-034. |
 | 2026-11-10 | DEC-185 | **Priorité audio : sons de moteurs et d'armes** (ElevenLabs) ; le reste plus tard | Entretien 2. |
+| 2026-11-10 | DEC-186 | **Ordres : réordonner les vignettes.** Le joueur déplace un véhicule parmi les autres vignettes (bas de l'écran) pour changer sa place dans le convoi ; ensuite le véhicule se bat seul et choisit seul sa cible. Précise DEC-177 : pas de désignation de cible | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-187 | **Réputation, effets** : accueil en ville, prix du marché, missions proposées, rencontres en route (convois alliés ou ennemis). Complète DEC-184 | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-188 | **Épaves** : récupération légère sur place, lourde au garage d'une ville, selon l'état. Complète DEC-181 | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-189 | **Points de reprise** : chaque ville découverte, plus une sauvegarde automatique de la progression en route. Complète DEC-173 | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-190 | **Carburant : contrainte forte** (panne sèche possible, ravitaillements à planifier) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-191 | **Nuit** : plus dangereuse et plus discrète (visibilité réduite, rencontres différentes, phares utiles) ; le joueur choisit de camper ou rouler (DEC-161) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-192 | **Fouille par ordre de site** : le joueur touche un site et désigne qui y va | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-193 | **Langues : français et anglais dès le début.** Tous les textes passent par un fichier de traduction, aucun texte en dur dans le code. À appliquer au fil des lots (DEV à créer) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-194 | **Tutoriel : bulles d'aide discrètes** à la première utilisation de chaque fonction | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-195 | **Sauvegarde locale d'abord**, iCloud plus tard | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-196 | **Appareil minimal : iPhone 14 Pro Max et plus récents**, effets riches permis | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-197 | **Noms de véhicules : mixte.** Modèles historiques anciens conservés, marques encore actives déguisées ; à vérifier avant publication (OQ-035) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-198 | **Prix visé du jeu complet : autour de 5 €** après la démo (provisoire) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-199 | **Durée visée de l'histoire principale : plus de 30 heures.** À confronter au prix de 5 € et à la production d'art (OQ-035) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-200 | **Fin de l'histoire : boss final contre une faction**, avec le repaire (DEC-166, DEC-169) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-201 | **Lot motos et side-cars d'images : après le Berliet dans le convoi** | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-202 | **Cinématique d'ouverture : après le Kit et le chapitre 1** | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-203 | **Mode créatif du jeu final : verrouillé jusqu'à un jalon** à fixer (déblocage après un chapitre) | Entretien 3 du 10/11. |
+| 2026-11-10 | DEC-204 | **Pas de date cible** pour la démo ou la sortie ; **retours : quelques proches** (TestFlight plus tard) | Entretien 3 du 10/11. |

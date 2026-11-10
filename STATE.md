@@ -19,6 +19,7 @@ Mis à jour : 2026-11-10. Résumé volontairement court (≈ 60 lignes). Détail
 - **Carte du monde (09/11, DEC-154)** : carte de conception dans le Kit sur la carte de France déformée : 13 villes-étapes, 22 routes, 30 lieux (pétrole, eau, mines, péages…), factions ; « Y aller » vers une ville. Détail : `docs/design/CARTE.md`.
 - **Orientation (09/11, DEC-155)** : toujours en paysage ; en portrait, l'image du jeu est couchée au lieu d'afficher « Tournez le téléphone ».
 - **Entretien du chef programmeur (10/11, DEC-171 à 176)** : jalon = finir le Kit ; monde libre avec difficulté forcée hors région de quête, indices diffus ; échec = retour au dernier checkpoint ; combat aux ordres tactiques ; gros lots espacés ; ordre de code Berliet → carte branchée → carburants et factions. Détail : `docs/design/ENTRETIEN_CHEF_PROG.md`, questions : OQ-033.
+- **Entretiens 2 et 3 (10/11, DEC-177 à 204)** : ordres = réordonner les vignettes, véhicules autonomes ; réputation par faction ; épaves récupérables et coûteuses ; carburant contrainte forte ; fr + en dès le début ; prix visé ~5 €, histoire > 30 h, boss final ; motos après le Berliet ; Mode créatif final verrouillé ; VISION archivé. Questions : OQ-034, OQ-035.
 - **Méthode de travail** : Claude fusionne lui-même dans `main` (autorisation du 07/11) ; la page web se reconstruit ensuite toute seule.
 - **Ouverture** : cinématique vidéo, idée décrite dans [`docs/scenario/OUVERTURE.md`](docs/scenario/OUVERTURE.md) (DEC-102).
 

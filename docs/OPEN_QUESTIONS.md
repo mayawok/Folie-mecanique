@@ -244,3 +244,11 @@ Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son
 2. Retour au checkpoint (DEC-173) : ce qui est gardé ou perdu reste à définir.
 3. Réputation (DEC-184) : quelles paires de factions sont rivales, quels paliers (accueil, prix, missions, hostilité) ?
 4. Épaves (DEC-181) : quel coût en ressources, et quelle probabilité de récupération ?
+
+## OQ-035 — Suites de l'entretien 3 (10/11)
+
+1. **Cohérence prix / durée / art** : plus de 30 heures de jeu pour environ 5 € demande beaucoup d'art et de contenu ; faut-il viser une durée plus courte pour la première version, ou un prix plus haut ?
+2. **Traduction (DEC-193)** : français et anglais dès le début ; qui relit l'anglais ?
+3. **Noms de véhicules (DEC-197)** : liste des marques encore actives à déguiser ; vérification juridique avant publication.
+4. **Jalon de déblocage du Mode créatif (DEC-203)** : après quel chapitre ?
+5. Restent de OQ-034 : retour au checkpoint (ce qu'on garde), paires de factions rivales et paliers de réputation, coût et probabilité des épaves.

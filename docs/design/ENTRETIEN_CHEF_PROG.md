@@ -38,3 +38,28 @@ Questions posées par Claude (chef programmeur) au porteur de projet pour cadrer
 | 20 | Durée de session ? | Libre, sauvegarde partout. |
 | 21 | Factions ? | Réputation par faction ; l'amitié avec l'une peut rendre ennemi de l'autre. |
 | 22 | Priorité audio ? | Sons de moteurs et d'armes. |
+
+## Série 3 (10/11, DEC-186 à 204)
+
+| # | Question | Réponse |
+|---|---|---|
+| 23 | Geste du glisser ? | On déplace le véhicule parmi les vignettes ; il se bat seul et choisit seul sa cible. |
+| 24 | Effets de la réputation ? | Accueil en ville, prix, missions, rencontres en route. |
+| 25 | Récupération d'épave ? | Les deux selon l'état (sur place ou au garage). |
+| 26 | Checkpoints ? | Villes + sauvegarde auto en route. |
+| 27 | Rôle du carburant ? | Contrainte forte. |
+| 28 | Rôle de la nuit ? | Plus dangereux, plus discret. |
+| 29 | Fouille ? | Ordre par site. |
+| 30 | Langues ? | Français et anglais dès le début. |
+| 31 | Tutoriel ? | Bulles d'aide discrètes. |
+| 32 | Sauvegarde ? | Locale d'abord, iCloud plus tard. |
+| 33 | Appareil minimal ? | iPhone 14 Pro Max et plus. |
+| 34 | Noms réels ? | Mixte. |
+| 35 | Prix ? | Autour de 5 €. |
+| 36 | Durée de l'histoire ? | Plus de 30 heures. |
+| 37 | Fin ? | Boss final contre une faction. |
+| 38 | Motos et side-cars ? | Après le Berliet. |
+| 39 | Cinématique d'ouverture ? | Après le Kit et le chapitre 1. |
+| 40 | Mode créatif final ? | Verrouillé jusqu'à un jalon. |
+| 41 | Date cible ? | Pas de date. |
+| 42 | Testeurs ? | Quelques proches. |
