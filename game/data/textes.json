@@ -278,7 +278,19 @@
   "phys.degage": "%s est dégagé, il repart au ralenti.",
   "phys.crevaison": "Crevaison sur %s : l'équipage change la roue.",
   "phys.surface": "Surface",
-  "phys.titre": "Physique"
+  "phys.titre": "Physique",
+  "phys.treuil": "%s est sorti au treuil par %s.",
+  "trans.collision": "Choc : %s heurte l'obstacle avant d'avoir pu s'arrêter.",
+  "trans.glisse": "Le convoi glisse au freinage : sol meuble ou glissant.",
+  "trans.tamponne": "%s tamponne %s : le convoi s'est resserré trop vite.",
+  "trans.saut": "Le convoi décolle sur une bosse !",
+  "trans.atterrit": "Atterrissage rude : équipages secoués, suspensions éprouvées.",
+  "trans.renverse": "%s se couche dans le virage : demi-tour pris trop vite.",
+  "trans.derape": "Demi-tour à vitesse : le convoi dérape.",
+  "trans.rapport": "Rapport",
+  "trans.urgence": "URGENCE",
+  "trans.demarreur": "DÉMARRAGE",
+  "trans.coupe": "MOTEUR COUPÉ"
  },
  "en": {
   "res.gazole": "Diesel",
@@ -558,6 +570,18 @@
   "phys.degage": "%s is free and moves off slowly.",
   "phys.crevaison": "Flat tyre on %s: the crew is changing the wheel.",
   "phys.surface": "Surface",
-  "phys.titre": "Physics"
+  "phys.titre": "Physics",
+  "phys.treuil": "%s is winched out by %s.",
+  "trans.collision": "Crash: %s hits the obstacle before it could stop.",
+  "trans.glisse": "The convoy slides under braking: soft or slippery ground.",
+  "trans.tamponne": "%s rams %s: the convoy closed up too fast.",
+  "trans.saut": "The convoy takes off over a bump!",
+  "trans.atterrit": "Hard landing: crews shaken, suspensions strained.",
+  "trans.renverse": "%s rolls over in the turn: U-turn taken too fast.",
+  "trans.derape": "U-turn at speed: the convoy skids.",
+  "trans.rapport": "Gear",
+  "trans.urgence": "EMERGENCY",
+  "trans.demarreur": "STARTING",
+  "trans.coupe": "ENGINE OFF"
  }
 }

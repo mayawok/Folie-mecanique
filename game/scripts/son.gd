@@ -146,6 +146,11 @@ func moteur(nom: String) -> void:
 	_boucle(_moteur, nom, "_moteur_nom")
 
 
+# Hauteur de la boucle moteur : suit le régime (DEC-232)
+func moteur_hauteur(h: float) -> void:
+	_moteur.pitch_scale = clampf(h, 0.5, 2.0)
+
+
 func _boucle(p: AudioStreamPlayer, nom: String, champ: String) -> void:
 	if get(champ) == nom:
 		return

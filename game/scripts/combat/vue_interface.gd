@@ -164,6 +164,13 @@ func _construire_elements() -> void:
 	_btn_marche.offset_right = -16
 	_btn_marche.offset_top = -BARRE_H - 128
 	_btn_marche.offset_bottom = -BARRE_H - 16
+	_ind_rapport = IndicateurRapport.new()   # rapport et régime du convoi (DEC-232)
+	add_child(_ind_rapport)
+	_ind_rapport.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
+	_ind_rapport.offset_left = -440
+	_ind_rapport.offset_right = -16
+	_ind_rapport.offset_top = -BARRE_H - 190
+	_ind_rapport.offset_bottom = -BARRE_H - 134
 	# --- Actions du véhicule sélectionné
 	_bande_actions = _panneau(self)
 	_bande_actions.set_anchors_and_offsets_preset(PRESET_BOTTOM_LEFT)
@@ -714,6 +721,7 @@ func _maj_interface() -> void:
 	_maj_halte()
 	_btn_ordres.visible = false
 	_btn_marche.etat = String(m.ordres.marche)
+	_ind_rapport.maj(m.trans)
 	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()
 	_btn_marche.texte = ""
 	if m.ville_dedans():

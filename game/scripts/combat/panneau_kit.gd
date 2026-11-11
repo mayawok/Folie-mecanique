@@ -151,6 +151,16 @@ func _lancer(e: Array) -> void:
 	m.kit_apparaitre(e[1], p)
 
 
+var _t_maj := 0.0
+
+
+func _process(delta: float) -> void:   # relecture régulière de la physique et de la transmission (DEC-231, 232)
+	_t_maj -= delta
+	if _t_maj <= 0.0 and visible and _lbl_phys != null:
+		_t_maj = 0.5
+		_maj()
+
+
 func _maj() -> void:
 	_btn_calme.text = "Route calme : OUI (rien n'arrive seul)" if m.kit_calme else "Route calme : NON (rencontres normales)"
 	_etat.text = "Zone : %s" % CombatModele.KIT_ZONES_NOMS.get(m.kit_zone, m.kit_zone)
@@ -158,6 +168,8 @@ func _maj() -> void:
 	for cv in m.convoi:
 		if cv.actif():
 			lignes.append("%s : %s%s" % [cv.nom, PhysiqueRoulage.resume(cv.profil), " (dégagé)" if cv.enlise and cv.degage > 0.0 else ""])
+	lignes.append("Rapport %d/%d · régime %d %% · accél %.1f m/s² · %s%s" % [int(m.trans.rapport), int(m.trans.nb), int(float(m.trans.regime) * 100.0), float(m.trans.accel),
+		"URGENCE" if bool(m.trans.urgence) else "calme", "" if bool(m.trans.moteur_on) else " · moteur coupé"])
 	_lbl_phys.text = "\n".join(lignes) if not lignes.is_empty() else "aucun véhicule"
 	for i in _vals.size():
 		var val: float = m.kit_reglage_valeur(i)

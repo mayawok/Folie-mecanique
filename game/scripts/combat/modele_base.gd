@@ -102,6 +102,9 @@ class Veh extends RefCounted:
 	var enlise_t := 0.0           # secondes passées enlisé avant l'arrivée des secours (physique des pneus, DEC-230)
 	var degage := 0.0             # secondes restantes de marche au ralenti après un dégagement
 	var enlise := false           # enlisé en ce moment (lu par la vue et le Kit)
+	var ecart_acc := 0.0          # écart en plus ou en moins par rapport à sa place (effet accordéon, DEC-233)
+	var u_suiv := 0.0             # vitesse retardée avec laquelle il suit la tête
+	var cd_acc := 0.0             # délai entre deux tamponnements
 
 	func remorque() -> bool:
 		return bool(profil.get("remorque", false))
@@ -257,6 +260,7 @@ func regime_suivant() -> void:
 	log_(Textes.t("base.001", [regime_donnees().nom]), "info")
 
 var vitesse_convoi := 0.0
+var trans := Transmission.etat_neuf()   # rapport, régime, démarrage, mode de conduite (DEC-232)
 var blocage := ""                 # raison pour laquelle le convoi n'avance pas
 var fouille_en_cours := {}
 var journal: Array = []           # {t, txt, ton}
@@ -563,7 +567,7 @@ func _replacer(immediat := false) -> void:
 	for v in convoi:
 		if v.remorque() and v != convoi[0]:
 			bord += gap - float(donnees().get("ecart_remorque", 0.5))   # attelée au véhicule de devant (DEC-080)
-		v.x_cible = bord - v.longueur
+		v.x_cible = bord - v.longueur + v.ecart_acc
 		bord = v.x_cible - gap
 		if immediat:
 			v.x = v.x_cible

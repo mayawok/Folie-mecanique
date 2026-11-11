@@ -744,9 +744,13 @@ func _maj_sons() -> void:
 		if v.actif() and (lourd == null or v.profil.metal > lourd.profil.metal):
 			lourd = v
 	var nom := ""
-	if lourd != null and m.vitesse_convoi != 0.0 and not pause and not m.fini:
+	if lourd != null and (m.vitesse_convoi != 0.0 or bool(m.trans.moteur_on)) and not pause and not m.fini:   # ralenti à l'arrêt, démarreur au départ (DEC-232)
 		nom = MOTEURS.get(lourd.type, "sfx_moteur_" + String(VehiculeDessin.donnees().vehicules[lourd.type].get("moteur", "")))
 	so.moteur(nom)
+	if float(m.trans.demarreur) > 0.0:
+		so.moteur_hauteur(0.55)   # le démarreur peine
+	else:
+		so.moteur_hauteur(lerpf(0.75, 1.5, clampf((float(m.trans.regime) - 0.2) / 0.9, 0.0, 1.0)))
 	if m.ordres.marche != _marche_prec:
 		if m.ordres.marche == "avancer":
 			_son("sfx_depart_marche", -4.0)

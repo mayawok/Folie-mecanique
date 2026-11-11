@@ -218,6 +218,15 @@ func ordre_demi_tour() -> bool:
 		if v.garage != 0:
 			log_(Textes.t("modele.013"), "alerte")
 			return false
+	var DT: Dictionary = Transmission.donnees().demi_tour   # à vitesse : le convoi dérape, un véhicule instable se couche (DEC-233)
+	if absf(vitesse_convoi) > float(DT.vitesse_max):
+		trans.glisse = float(DT.derapage_s)
+		for v in convoi:
+			if v.actif() and Transmission.se_renverse(float(v.profil.get("stabilite", 99.0)), vitesse_convoi):
+				_degats_choc(v, float(DT.degats), "bas")
+				log_(Textes.t("trans.renverse", [v.nom]), "alerte")
+		vitesse_convoi *= float(DT.frein_v)
+		log_(Textes.t("trans.derape"), "alerte")
 	var arriere := INF
 	for v in convoi:
 		arriere = minf(arriere, v.x)
@@ -550,6 +559,8 @@ func _marche(dt: float) -> void:
 	var vit := 0.0
 	blocage = ""
 	var actifs: Array = convoi.filter(func(v): return v.actif())
+	var P := _params_conduite(actifs)
+	_urgence(dt)
 	if ordres.marche != "halte" and not actifs.is_empty():
 		var vmax := INF
 		var immobilise := false
@@ -599,6 +610,11 @@ func _marche(dt: float) -> void:
 			vmax *= clampf(1.0 - 2.4 * pente, 0.55, 1.3)   # montée : plus lent ; descente : plus vite
 			vmax *= facteur_vitesse_meteo() * facteur_vitesse_mines() * float(regime_donnees().vitesse)
 			vit = vmax if ordres.marche == "avancer" else -0.6 * vmax
+			if vit > 0.0 and not (conduite() == "eperonner" and ordres.marche == "avancer"):   # freinage anticipé : on s'arrête avant l'obstacle
+				var frein := Transmission.frein_dispo(float(P.adh), float(P.masse_f))
+				for e in ennemis:
+					if e.actif() and not voie_libre(e) and e.x > x_tete and e.x - x_tete < float(Transmission.donnees().distance_anticipation):
+						vit = minf(vit, Transmission.vitesse_sure(e.x - x_tete - 1.6, frein))
 			if vit > 0.0:
 				for e in ennemis:
 					if e.actif() and not voie_libre(e) and not (conduite() == "eperonner" and ordres.marche == "avancer") and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
@@ -609,14 +625,16 @@ func _marche(dt: float) -> void:
 	for v in actifs:
 		vmax_ville = vitesse_attelee(v) if vmax_ville == 0.0 else minf(vmax_ville, vitesse_attelee(v))
 	vit = _ville_vitesse(vit, vmax_ville)
+	vit = _inertie(dt, vit, P, actifs)   # la vitesse évolue : démarrage, rapports, freinage (DEC-232)
 	x_tete += vit * dt
 	vitesse_convoi = vit
+	_tenue(dt, vit, actifs)
 	if vit != 0.0:
 		for v in actifs:
 			var kr := 1.0
 			for r in remorques_de(v):   # tirer une remorque fait consommer plus
 				kr += 0.5 * float(r.profil.get("poids_kg", 0.0)) / maxf(1.0, float(v.profil.get("poids_kg", 1000.0)))
-			var litres: float = v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso) * PhysiqueRoulage.facteur_conso(v.profil)
+			var litres: float = v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso) * PhysiqueRoulage.facteur_conso(v.profil) * _conso_conduite()
 			var t := carburant_de(v)   # chaque véhicule brûle son carburant (essence ou gazole)
 			stocks[t] = maxf(0.0, float(stocks.get(t, 0.0)) - litres)
 	_physique(dt, actifs, vit)
@@ -792,10 +810,16 @@ func _physique(dt: float, actifs: Array, vit: float) -> void:
 			if not etait:
 				log_(Textes.t("phys.enlise", [v.nom]), "alerte")
 			v.enlise_t += dt
-			if v.enlise_t >= float(PH.duree_enlisement):
+			var aide = null   # un autre véhicule libre le sort au treuil ; seul, l'équipage creuse et cale des plaques (DEC-233)
+			for h in actifs:
+				if h != v and not h.enlise and not h.remorque():
+					aide = h
+					break
+			var TRE: Dictionary = Transmission.donnees().treuil
+			if v.enlise_t >= float(TRE.duree_avec_aide if aide != null else TRE.duree_seul):
 				v.enlise_t = 0.0
 				v.degage = float(PH.duree_degagement)
-				log_(Textes.t("phys.degage", [v.nom]), "info")
+				log_(Textes.t("phys.treuil", [v.nom, aide.nom]) if aide != null else Textes.t("phys.degage", [v.nom]), "info")
 		elif not v.enlise:
 			v.enlise_t = 0.0
 		if v.crevaison <= 0.0 and rng_physique.randf() < float(e.crevaison_m) * absf(vit) * dt:
@@ -804,3 +828,145 @@ func _physique(dt: float, actifs: Array, vit: float) -> void:
 		var U: Dictionary = PH.usure_chocs
 		if float(e.chocs) > float(U.seuil) and v.pieces.has("suspension") and v.pieces.suspension.pv > 1.0:
 			v.pieces.suspension.pv = maxf(1.0, v.pieces.suspension.pv - float(U.pv_par_s) * (float(e.chocs) - float(U.seuil)) * dt)
+
+
+# --- Transmission, accélération, freinage et tenue (DEC-232, DEC-233) -----------------------------------
+func _params_conduite(actifs: Array) -> Dictionary:
+	var vtop := INF
+	var a_base := INF
+	var adh := 1.0
+	var masse_f := 1.0
+	var rythme := float(donnees().equilibrage.get("rythme_vitesse", 1.0))
+	for v in actifs:
+		if v.remorque():
+			continue
+		var M := float(v.profil.get("poids_kg", 1000.0))
+		var Mr := 0.0
+		for r in remorques_de(v):
+			if r.actif():
+				Mr += float(r.profil.get("poids_kg", 0.0))
+		vtop = minf(vtop, vitesse_attelee(v) * rythme)
+		a_base = minf(a_base, Transmission.accel_base(float(v.profil.get("puissance_ch", 0.0)), M + Mr))
+		adh = minf(adh, float(PhysiqueRoulage.evaluer(v.profil).adherence))
+		masse_f = minf(masse_f, sqrt(M / (M + Mr)))
+	if vtop == INF:
+		vtop = 8.0
+		a_base = 1.5
+	return {"vtop": vtop, "a_base": a_base, "adh": adh, "masse_f": masse_f, "pente": Terrain.pente(x_tete)}
+
+
+# Départ en urgence : un ennemi en vue ou en approche (et quelques secondes après)
+func _urgence(dt: float) -> void:
+	var D := Transmission.donnees()
+	var vu := false
+	for e in ennemis:
+		if e.actif() and not e.allie and absf(e.x - x_tete) < float(D.urgence_m):
+			vu = true
+			break
+	trans.urgence_t = float(D.urgence_tenue) if vu else maxf(0.0, float(trans.urgence_t) - dt)
+	trans.urgence = float(trans.urgence_t) > 0.0
+
+
+func _conso_conduite() -> float:
+	return float(Transmission.donnees().conso_urgence) if bool(trans.urgence) else 1.0
+
+
+# Vitesse réelle du convoi : démarreur après un long arrêt, puis accélération par rapports, freinage, saut en l'air
+func _inertie(dt: float, cible: float, P: Dictionary, actifs: Array) -> float:
+	var D := Transmission.donnees()
+	var v0 := vitesse_convoi
+	trans.glisse = maxf(0.0, float(trans.glisse) - dt)
+	trans.air = maxf(0.0, float(trans.air) - dt)
+	if actifs.is_empty():
+		trans.moteur_on = false
+		return move_toward(v0, 0.0, 6.0 * dt)
+	if float(trans.air) > 0.0:
+		return v0   # en l'air : ni traction ni freinage
+	if absf(v0) < 0.05 and cible == 0.0:
+		trans.arret_t = float(trans.arret_t) + dt
+		if float(trans.arret_t) > float(D.demarreur_apres):
+			trans.moteur_on = false   # moteur coupé après un long arrêt
+	elif cible != 0.0:
+		trans.arret_t = 0.0
+	if cible != 0.0 and absf(v0) < 0.05 and not bool(trans.moteur_on):
+		trans.demarreur = float(D.demarreur_urgence) if bool(trans.urgence) else float(D.demarreur_calme)
+		trans.moteur_on = true
+	if float(trans.demarreur) > 0.0:   # le démarreur tourne : on l'entend, le convoi ne bouge pas encore
+		trans.demarreur = maxf(0.0, float(trans.demarreur) - dt)
+		trans.regime = float(D.ralenti)
+		return 0.0
+	if absf(v0) >= 0.05:
+		trans.moteur_on = true
+	return Transmission.pas(trans, v0, cible, dt, P)
+
+
+# Contact, dérapage, effet accordéon, saut : tout ce que l'inertie change sur la route
+func _tenue(dt: float, vit: float, actifs: Array) -> void:
+	var D := Transmission.donnees()
+	trans.collision_t = maxf(0.0, float(trans.collision_t) - dt)
+	var tete = actifs[0] if not actifs.is_empty() else null
+	# 1) l'élan ne s'arrête pas net : un obstacle atteint trop vite est un choc
+	var C: Dictionary = D.collision
+	if tete != null and vit > float(C.vitesse_min) and float(trans.collision_t) <= 0.0 and not (conduite() == "eperonner" and ordres.marche == "avancer"):
+		for e in ennemis:
+			if e.actif() and not voie_libre(e) and e.x - x_tete < 1.6 and e.x + e.longueur > x_tete - 8.0:
+				var d := float(C.k) * vit * vit
+				_degats_choc(tete, d, "avant")
+				_degats_choc(e, d, "arriere")
+				trans.collision_t = float(C.delai)
+				vitesse_convoi = vit * 0.3
+				log_(Textes.t("trans.collision", [tete.nom]), "alerte")
+				break
+	# 2) glissade au freinage sur sol meuble ou glissant
+	if float(trans.glisse) > 0.9 and not bool(trans.glisse_log):
+		trans.glisse_log = true
+		log_(Textes.t("trans.glisse"), "alerte")
+	elif float(trans.glisse) <= 0.0:
+		trans.glisse_log = false
+	# 3) effet accordéon : chaque suiveur réagit avec un retard, l'écart s'étire puis se resserre
+	var A: Dictionary = D.accordeon
+	var prec = null
+	var rang := 0
+	for v in convoi:
+		v.cd_acc = maxf(0.0, v.cd_acc - dt)
+		if not v.actif():
+			v.ecart_acc = 0.0
+			v.u_suiv = vit
+		elif prec == null:
+			v.ecart_acc = 0.0
+			v.u_suiv = vit
+		elif v.remorque():
+			v.ecart_acc = prec.ecart_acc   # l'attelage est rigide
+			v.u_suiv = prec.u_suiv
+		else:
+			rang += 1
+			var ue := Transmission.suiveur(v.u_suiv, v.ecart_acc, vit, float(A.tau) * rang, dt)
+			v.u_suiv = ue[0]
+			v.ecart_acc = ue[1]
+			var gap: float = float(donnees().ecart_convoi) + v.ecart_acc - prec.ecart_acc
+			if gap < float(A.ecart_min):
+				if v.cd_acc <= 0.0 and vit > 1.0:
+					v.cd_acc = float(A.delai)
+					_degats_choc(v, float(A.degats), "avant")
+					_degats_choc(prec, float(A.degats), "arriere")
+					log_(Textes.t("trans.tamponne", [v.nom, prec.nom]), "alerte")
+				v.ecart_acc = prec.ecart_acc - (float(donnees().ecart_convoi) - float(A.ecart_min) * 0.5)
+		if v.actif():
+			prec = v
+	# 4) saut : sur sol très cassé et à bonne vitesse, une bosse plus grosse que les autres décolle le convoi
+	var S: Dictionary = D.saut
+	if float(trans.air_prev) > 0.0 and float(trans.air) <= 0.0:
+		for v in actifs:
+			var deb := float(v.profil.get("physique", {}).get("debattement", 0.2))
+			var dsaut := float(S.degats) * float(trans.air_dur) / (1.0 + float(S.use_suspension) * deb)
+			_degats_choc(v, dsaut, "bas")
+			_blesser_equipage(v, dsaut * float(S.equipage))
+		if tete != null:
+			log_(Textes.t("trans.atterrit"), "alerte")
+	trans.air_prev = float(trans.air)
+	if tete != null and vit > float(S.vitesse_min) and float(trans.air) <= 0.0:
+		var ev := PhysiqueRoulage.evaluer(tete.profil)
+		if float(ev.chocs) >= float(S.chocs_min) and rng_physique.randf() < float(S.proba_m) * vit * dt:
+			trans.air = lerpf(float(S.duree[0]), float(S.duree[1]), rng_physique.randf())
+			trans.air_dur = float(trans.air)
+			log_(Textes.t("trans.saut"), "info")

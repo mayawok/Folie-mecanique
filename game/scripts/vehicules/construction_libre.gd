@@ -1243,6 +1243,8 @@ static func analyser(a: Dictionary) -> Dictionary:
 	if not essieux.is_empty():   # pneus, suspension et charge pour la physique de roulage (DEC-230)
 		stats["physique"] = {"pneu": PhysiqueRoulage.pneu_de_piece(String(essieux[0].get("train", ""))), "debattement": debattement,
 			"charge_essieu": M / essieux.size()}
+	stats["puissance_ch"] = puissance   # accélération du convoi (DEC-232)
+	stats["stabilite"] = minf(stab, 99.0)   # renversement au demi-tour (DEC-233)
 	stats["carburant"] = "gazole" if _pieces(a).any(func(p): return p.fiche.get("famille", "") == "moteur" and p.fiche.get("carburant", "") == "gazole") else "essence"
 	if a.has("origine"):
 		var ch := Assemblage.piece(String(a.origine.chassis))

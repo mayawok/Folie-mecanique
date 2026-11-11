@@ -113,6 +113,7 @@ var _ord: Control
 var _ord_t := 0.0               # temps restant d'affichage du bandeau d'ordres
 var _btn_ordres: Button
 var _btn_marche: BoutonMarche
+var _ind_rapport: IndicateurRapport
 var _btn_garage: Button
 var _btn_troupes: Button
 var _save_t := 0.0
