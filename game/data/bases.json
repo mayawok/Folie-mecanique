@@ -523,6 +523,31 @@
         "chassis": 0.7,
         "essieux": 0.65
       }
+    },
+    "m16_mgmc": {
+      "nom": "M16 MGMC (base)",
+      "historique": "m16_mgmc",
+      "famille": "semi_chenille",
+      "boite": "boite_moyenne",
+      "rallonge_max": {
+        "avant": 1,
+        "milieu": 3,
+        "arriere": 2
+      },
+      "essieux_max": 2,
+      "plateau_cases": 8,
+      "modules": [
+        "plateau_nu",
+        "bache",
+        "infirmerie",
+        "plateforme_tir"
+      ],
+      "etat_origine": {
+        "moteur": 0.6,
+        "boite": 0.6,
+        "chassis": 0.7,
+        "essieux": 0.65
+      }
     }
   }
 }

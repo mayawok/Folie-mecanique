@@ -1008,6 +1008,48 @@
           ]
         }
       ]
+    },
+    "m16_mgmc": {
+      "nom": "M16 MGMC",
+      "chassis": "chassis_m3_half_track",
+      "plaques": 0,
+      "pieces": [
+        {
+          "piece": "roulement_m3_half_track",
+          "pos": [
+            0,
+            0
+          ]
+        },
+        {
+          "piece": "suspension_m3_half_track",
+          "pos": [
+            6,
+            2
+          ]
+        },
+        {
+          "piece": "moteur_m3_half_track",
+          "pos": [
+            0,
+            4
+          ]
+        },
+        {
+          "piece": "cabine_m3_half_track",
+          "pos": [
+            6,
+            4
+          ]
+        },
+        {
+          "piece": "arme_quad_50",
+          "pos": [
+            10,
+            8
+          ]
+        }
+      ]
     }
   }
 }

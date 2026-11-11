@@ -117,5 +117,20 @@ func _init() -> void:
 	var niv_hors: int = g.monde.niveau_a(0.0)
 	g.kit_regler_region_quete(rc)
 	ok(g.monde.niveau_a(0.0) == niv_hors - g.kit_malus_region, "dans la région de la quête : niveau normal")
+	# Allié qui rejoint le convoi + M16 quadruple .50 (DEC-236)
+	var al := jeu()
+	var n0: int = al.convoi.size()
+	ok(al.kit_apparaitre("allie", {"type": "m16_mgmc"}) and al.convoi.size() == n0 + 1, "kit : un M16 allié rejoint le convoi")
+	var q = al.convoi.back()
+	ok(q.camp == "joueur" and q.armes.size() == 1 and String(q.armes[0].id) == "mitrailleuse_quad_50", "le M16 porte la quadruple .50")
+	var W: Dictionary = CombatModele.donnees().armes
+	ok(float(W.mitrailleuse_quad_50.degats) / float(W.mitrailleuse_quad_50.cadence) > 5.0 * float(W.mitrailleuse.degats) / float(W.mitrailleuse.cadence), "le M16 inflige au moins 5 fois la mitrailleuse")
+	ok(float(W.mitrailleuse_quad_50.munitions) / float(W.mitrailleuse_quad_50.cadence) > 8.0 * float(W.mitrailleuse.munitions) / float(W.mitrailleuse.cadence), "le M16 consomme au moins 8 fois plus de munitions")
+	ok(not al.kit_apparaitre("allie", {"type": "inconnu"}), "kit : un type inconnu est refusé")
+	al.stocks.ammo = 2000.0
+	al.kit_apparaitre("ennemi", {"type": "citroen_t23", "dx": -60.0})
+	var m0: float = al.stocks.ammo
+	marche(al, 30.0)
+	ok(al.stocks.ammo < m0 - 100.0, "le M16 vide les munitions du convoi (%.0f consommées)" % (m0 - al.stocks.ammo))
 	print("--- %s" % ("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs))
 	quit(1 if echecs > 0 else 0)

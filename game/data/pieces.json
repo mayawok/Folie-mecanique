@@ -2502,6 +2502,23 @@
       ],
       "metal": 1,
       "style": "camion"
+    },
+    "arme_quad_50": {
+      "famille": "arme",
+      "nom": "Quadruple .50 M45",
+      "arme": "mitrailleuse_quad_50",
+      "poids_kg": 560,
+      "emprise": [
+        4,
+        2
+      ],
+      "metal": 6,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      }
     }
   }
 }

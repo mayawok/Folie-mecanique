@@ -9,7 +9,8 @@ const HEURES := [["Aube", 0.02], ["Matin", 0.3], ["Après-midi", 0.55], ["Soir",
 # Apparitions : [libellé, genre, paramètres]
 const ENNEMIS := [
 	["Moto", "ennemi", {"type": "moto_bmw"}], ["Voiture", "ennemi", {"type": "citroen_traction"}],
-	["Camion", "ennemi", {"type": "citroen_t23"}], ["Char", "ennemi", {"type": "m4_sherman"}]]
+	["Camion", "ennemi", {"type": "citroen_t23"}], ["Char", "ennemi", {"type": "m4_sherman"}],
+	["M16 quad .50", "ennemi", {"type": "m16_mgmc"}]]
 const POURSUITES := [
 	["2 motos", "poursuite", {"types": ["bmw_r75", "moto_bmw"], "abordeurs": 2}],
 	["2 voitures", "poursuite", {"types": ["citroen_traction", "willys_mb"], "abordeurs": 3}],
@@ -46,6 +47,8 @@ static func tout_le_catalogue() -> Array:
 		res.append_array(liste)
 	for b in BATIMENTS:
 		res.append([b[0], "batiment", {"type": b[1]}])
+	for k in CombatModele.KIT_VEHICULES.keys():
+		res.append(["Allié " + String(k), "allie", {"type": k}])
 	return res
 
 
@@ -95,6 +98,8 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_titre(v, "Convoi à rattraper (devant)")
 	_rangee(v, VITESSES, func(s): _vitesse_convoi = float(s))
 	_rangee(v, CONVOIS.map(func(e): return [e[0], e]), func(e): _lancer(e))
+	_titre(v, "Allié rejoint le convoi")
+	_rangee(v, CombatModele.KIT_VEHICULES.keys().map(func(k): return [CombatModele.KIT_VEHICULES[k], ["", "allie", {"type": k}]]), func(e): _lancer(e))
 	_titre(v, "Poursuite par l'arrière")
 	_rangee(v, POURSUITES.map(func(e): return [e[0], e]), func(e): _lancer(e))
 	_titre(v, "Bâtiments")
@@ -108,7 +113,7 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_titre(v, "Groupe sur mesure")
 	_rangee(v, CombatModele.KIT_VEHICULES.keys().map(func(k): return [CombatModele.KIT_VEHICULES[k], k]), func(k): _groupe.type = k; _maj())
 	_rangee(v, [["−", -1], ["+", 1]], func(d): _groupe.n = clampi(int(_groupe.n) + int(d), 1, 8); _maj())
-	_rangee(v, [["À l'approche", "approche"], ["Convoi devant", "convoi"], ["En face", "face"], ["Poursuite", "poursuite"]], func(k): _groupe.mode = k; _maj())
+	_rangee(v, [["À l'approche", "approche"], ["Convoi devant", "convoi"], ["En face", "face"], ["Poursuite", "poursuite"], ["Allié (convoi)", "allie"]], func(k): _groupe.mode = k; _maj())
 	_lbl_groupe = Label.new()
 	_lbl_groupe.add_theme_font_size_override("font_size", 24)
 	v.add_child(_lbl_groupe)

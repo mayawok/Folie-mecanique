@@ -121,7 +121,7 @@ func _choisir_cible(att, w: Dictionary):
 	for e in ennemis:
 		if not e.actif() or e.allie:
 			continue
-		if w.classe in ["mitrailleuse", "flamme"] and e.profil.blindage > 25.0:
+		if w.classe in ["mitrailleuse", "flamme"] and e.profil.blindage > 25.0 and not bool(w.get("perce_blinde", false)):
 			continue   # la mitrailleuse ne perce pas un blindé : on économise les munitions
 		var g := ecart(att.x, att.longueur, e.x, e.longueur)
 		if g > w.portee or g < float(w.get("portee_min", 0.0)):

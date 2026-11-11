@@ -10,7 +10,7 @@ const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux"
 const KIT_VEHICULES := {"bmw_r75": "Moto side-car", "moto_bmw": "Moto", "willys_mb": "Jeep", "citroen_traction": "Voiture",
 	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman",
 	"moto_zundapp": "Zündapp KS 750", "moto_harley": "Harley WLA", "moto_gnome": "Gnome & Rhône", "peugeot_202": "Peugeot 202", "juvaquatre": "Juvaquatre",
-	"kubelwagen": "Kübelwagen", "citroen_h": "Citroën Type H", "opel_blitz": "Opel Blitz", "gmc_cckw": "GMC CCKW", "laffly_s15": "Laffly S15"}
+	"kubelwagen": "Kübelwagen", "citroen_h": "Citroën Type H", "opel_blitz": "Opel Blitz", "gmc_cckw": "GMC CCKW", "laffly_s15": "Laffly S15", "m16_mgmc": "M16 quadruple .50"}
 
 var kit_zone := "terre"
 var kit_lieu := "kerbrume"     # lieu de la carte où se trouve le convoi (Mode créatif seulement, non sauvegardé)
@@ -78,6 +78,18 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 			e.mode = "approche"
 			ennemis.append(e)
 			log_("Kit : %s ennemi à %d m." % [e.nom, int(x - x_tete)], "info")
+		"allie":
+			# Allié qui rejoint notre convoi (derrière le dernier véhicule) : il tire avec nos munitions comme les autres.
+			# Ajouter un type à KIT_VEHICULES suffit pour le proposer ici (panneau Kit : « Allié rejoint le convoi »).
+			var types_a: Array = p.get("types", [p.get("type", "willys_mb")])
+			for t in types_a:
+				if not KIT_VEHICULES.has(String(t)):
+					return false
+			for t in types_a:
+				var al := creer_vehicule(String(t), "joueur", x_tete)
+				convoi.append(al)
+				log_("Kit : %s rejoint le convoi." % al.nom, "ok")
+			_replacer(true)
 		"convoi_devant":
 			# convoi qui roule dans notre sens, devant nous : il faut le rattraper
 			var types: Array = p.get("types", ["citroen_t23", "willys_mb"])
@@ -152,6 +164,8 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 			match mode:
 				"poursuite":
 					return kit_apparaitre("poursuite", {"types": types, "abordeurs": int(p.get("abordeurs", 2))})
+				"allie":
+					return kit_apparaitre("allie", {"types": types})
 				"face":
 					return kit_apparaitre("face", {"types": types})
 				"convoi":
