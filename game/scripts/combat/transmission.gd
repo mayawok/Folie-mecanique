@@ -118,7 +118,7 @@ static func pas(T: Dictionary, v: float, cible: float, dt: float, P: Dictionary)
 
 # Renversement : la stabilité du véhicule (demi-empattement / hauteur du centre de gravité) contre un virage serré à cette vitesse
 static func se_renverse(stabilite: float, v: float) -> bool:
-	var D := donnees().demi_tour
+	var D: Dictionary = donnees().demi_tour
 	return absf(v) > float(D.vitesse_max) and stabilite < float(D.renverse_stab) * absf(v) / 8.0
 
 

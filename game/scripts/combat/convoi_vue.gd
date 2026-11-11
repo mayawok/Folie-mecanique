@@ -239,7 +239,8 @@ func _synchroniser() -> void:
 			noeuds[b.uid] = n
 		n.ppm = ppm
 		n.size = Vector2(b.longueur, b.hauteur) * ppm
-		n.position = Vector2(terrain.ecran_x(b.x), _sy(b.x + b.longueur * 0.5) - n.size.y + 2.0)
+		var y_bat := maxf(_sy(b.x, true), maxf(_sy(b.x + b.longueur * 0.5, true), _sy(b.x + b.longueur, true)))   # posé sur le point le plus bas : ne flotte jamais
+		n.position = Vector2(terrain.ecran_x(b.x), y_bat - n.size.y + 2.0)
 		n.modulate = Color.WHITE.lerp(Color(0.42, 0.48, 0.72), terrain.nuit)
 		n.z_index = -2
 	for uid in noeuds.keys():

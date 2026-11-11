@@ -324,8 +324,22 @@ func _draw() -> void:
 					te = texture("elem_arbre_mort")
 					hm = 5.0
 			if te != null:
+				# Posé sur le sol (plus de décalage en l'air) ; épaves, objets, clôtures et murets suivent la pente de la route,
+				# les autres restent droits et s'enfoncent du côté haut pour ne jamais flotter
 				var sc := hm * ppm / te.get_height()
-				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc - 0.7 * ppm), te.get_size() * sc), false, teinte)
+				var lw := te.get_width() * sc
+				var lh := te.get_height() * sc
+				var demi := lw * 0.5 / ppm
+				var y_g := sol_y - relief(xm3 - demi) * ppm
+				var y_d := sol_y - relief(xm3 + demi) * ppm
+				var y_c := pied.y
+				if genre == "epave" or genre == "objet" or genre == "cloture" or genre == "muret":
+					draw_set_transform(Vector2(pied.x, y_c + 0.06 * ppm), atan2(y_d - y_g, lw), Vector2.ONE)
+					draw_texture_rect(te, Rect2(Vector2(-lw * 0.5, -lh), Vector2(lw, lh)), false, teinte)
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				else:
+					var y_bas := maxf(y_c, maxf(y_g, y_d)) + 0.06 * ppm
+					draw_texture_rect(te, Rect2(Vector2(pied.x - lw * 0.5, y_bas - lh), Vector2(lw, lh)), false, teinte)
 		elif genre == "poteau":   # poteau télégraphique penché
 			var hp := 4.6 * ppm
 			draw_line(pied, pied + Vector2(0.15 * ppm, -hp), Color("#4A3828"), maxf(3.0, ppm * 0.12))
