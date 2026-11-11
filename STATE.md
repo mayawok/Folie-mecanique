@@ -37,6 +37,7 @@ Textes et boutons du HUD, fluidité des villes et de la ville pillée, scènes d
 4. **Lot E : la route** : **fait** (DEC-218) : voyage de plusieurs étapes, convois alliés et hostiles, rumeurs, tempêtes de désert. **Reste** : décor complet par région (DEV-008), zones habitées calmes (DEV-007).
 5. **Lot F : combat vivant** : **fait** (DEC-219 à 222) : béliers et harceleurs, Molotov, lances explosives, feu et explosions, couleurs de faction, 10 véhicules à noms réels, équilibrage de base. **Non vérifié sur iPhone** : fanion et teinte de faction, flammes, harcèlement par derrière, lisibilité des explosions.
 6. **Lot physique : pneus et suspensions** : **codé le 11/11 (DEC-230, 231, `docs/design/PHYSIQUE.md`), à essayer sur iPhone** : surfaces, enlisement, chocs, crevaisons, rendu par roue, section « Physique » du Kit (DEV-041).
+7. **Lot transmission** : conception décidée le 11/11 (DEC-232, `docs/design/TRANSMISSION.md`) ; code à faire (DEV-042).
 4. Gelé jusqu'à la fin du Kit : train, centrale, gazogène, caches, boss, lot motos et side-cars.
 
 ## Décisions ouvertes
