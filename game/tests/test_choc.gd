@@ -62,6 +62,8 @@ func _init() -> void:
 	for i in 8:
 		marche(m, 10.0)
 		print("DBG t=%d x_tete=%.1f vit=%.2f ennemi.x=%.1f mode=%s blocage=%s" % [(i + 1) * 10, m.x_tete, m.vitesse_convoi, m.ennemis.back().x, m.ennemis.back().mode, str(m.get("blocage"))])
+	for l in m.journal:
+		print("DBGJ ", String(l.txt))
 	ok(chocs(m) == 0 and m.x_tete > m.ennemis.back().x + 2.0, "éviter : on double le convoi par la voie d'à côté")
 
 	# 4) Poursuivant qui nous emboutit par l'arrière
