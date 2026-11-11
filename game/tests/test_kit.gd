@@ -58,9 +58,9 @@ func _init() -> void:
 	# Toutes les apparitions du panneau réussissent
 	for e in PanneauKit.tout_le_catalogue():
 		var k := jeu()
-		var avant: int = k.ennemis.size() + k.batiments.size() + k.epaves.size() + k.mines.size() + k.monde.vivants() + k.monde.pnj.size()
+		var avant: int = k.convoi.size() + k.ennemis.size() + k.batiments.size() + k.epaves.size() + k.mines.size() + k.monde.vivants() + k.monde.pnj.size()
 		var r := k.kit_apparaitre(e[1], e[2])
-		var apres: int = k.ennemis.size() + k.batiments.size() + k.epaves.size() + k.mines.size() + k.monde.vivants() + k.monde.pnj.size()
+		var apres: int = k.convoi.size() + k.ennemis.size() + k.batiments.size() + k.epaves.size() + k.mines.size() + k.monde.vivants() + k.monde.pnj.size()
 		ok(r and apres > avant, "apparition « %s » (%s)" % [e[0], e[1]])
 		marche(k, 20.0)   # la simulation tient avec l'élément présent
 
