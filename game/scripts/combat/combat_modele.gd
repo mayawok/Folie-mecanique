@@ -950,7 +950,7 @@ func _tenue(dt: float, vit: float, actifs: Array) -> void:
 					_degats_choc(v, float(A.degats), "avant")
 					_degats_choc(prec, float(A.degats), "arriere")
 					log_(Textes.t("trans.tamponne", [v.nom, prec.nom]), "alerte")
-				v.ecart_acc = prec.ecart_acc + (float(donnees().ecart_convoi) - float(A.ecart_min) * 0.5)
+				v.ecart_acc = prec.ecart_acc + (float(donnees().ecart_convoi) - float(A.ecart_min) - 0.4)
 		if v.actif():
 			prec = v
 	# 4) saut : sur sol très cassé et à bonne vitesse, une bosse plus grosse que les autres décolle le convoi

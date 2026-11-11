@@ -93,10 +93,6 @@ func _init() -> void:
 	var m2 := CombatModele.depuis_sauvegarde(JSON.parse_string(JSON.stringify(m.sauver())))
 	ok(m2.mission_en_route() and m2.mission.escorte.size() == M.escorte.size(), "reprise : mission et escorte gardées")
 	_en_ville(m)
-	print("DBG x=%.1f x0=%.1f vit=%.2f phase=%s dedans=%s marche=%s blocage=%s" % [m.x_tete, float(m.ville.x0), m.vitesse_convoi, m.ville_phase(), str(m.ville_dedans()), str(m.ordres.marche), str(m.get("blocage"))])
-	for l in m.journal:
-		if String(l.txt).contains("tamponne") or String(l.txt).contains("détruit") or String(l.txt).contains("atterri") or String(l.txt).contains("décolle") or String(l.txt).contains("rev"):
-			print("DBGJ ", String(l.txt))
 	ok(not m.mission_active() and bool(m.mission_bilan.get("ok", false)), "cargaison livrée")
 	ok(String(m.ville.nom) == String(o.dest_nom), "livrée à %s" % m.ville.nom)
 	ok(m.convoi.size() == n0, "l'escorte reste dans la ville")
