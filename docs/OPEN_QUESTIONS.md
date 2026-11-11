@@ -260,3 +260,8 @@ Le carburant est un stock unique du convoi. Le réservoir du Berliet (120 à 560
 ## OQ-037 — Boue, neige et dégagement (11/11)
 
 Quand la boue apparaît (pluie, dégel, zone fixe) ; quelles zones de la carte ont de la neige ; action de dégagement d'un véhicule enlisé (plaques, treuil, remorquage). Valeurs d'adhérence à régler en essai. Voir `docs/design/PHYSIQUE.md` (DEC-230).
+
+## OQ-038 — Châssis modulaires et grille Berliet (11/11)
+
+Quels camions pour la 1re série de pièces (proposé : Berliet GDR, Citroën T23, Diamond T) ; placement fin : quart de case ou libre ; le Berliet reste-t-il verrouillé au début de l'histoire ou modifiable d'emblée.
+
