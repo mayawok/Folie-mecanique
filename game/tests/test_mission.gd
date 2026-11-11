@@ -23,7 +23,7 @@ func _jusqua(m: CombatModele, cond: Callable, s_max: float, nettoyer := false) -
 
 func _en_ville(m: CombatModele) -> void:
 	m.ordre_marche("avancer")
-	_jusqua(m, func(): return m.ville_dedans(), 400.0, true)
+	_jusqua(m, func(): return m.ville_dedans(), 1200.0, true)
 
 
 func _init() -> void:
@@ -86,7 +86,7 @@ func _init() -> void:
 	_jusqua(m, func():
 		if m.ennemis.size() > 0:
 			vagues[0] += 1
-		return not m.monde.en_transit(), 600.0, true)
+		return not m.monde.en_transit(), 1800.0, true)
 	ok(int(m.mission.vagues) == m.mission.plan.size() and m.mission.plan.size() > 0, "%d vague(s) sur la route" % int(m.mission.vagues))
 	ok(m.ville_active() and float(m.ville.x0) - m.x_tete < float(M.ville_arrivee_m) + 1.0, "la ville de destination est au bout de l'étape")
 	# Sauvegarde pendant la mission

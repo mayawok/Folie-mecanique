@@ -55,18 +55,18 @@ func _init() -> void:
 	m.kit_apparaitre("convoi_devant", {"types": ["citroen_t23"], "vitesse": 1.0})
 	e = m.ennemis.back()
 	var pv0: float = e.pieces.roulement.pv
-	marche(m, 30.0)
+	marche(m, 80.0)
 	ok(chocs(m) >= 1 and e.pieces.roulement.pv < pv0, "éperonner : on emboutit le convoi devant, ses roues prennent")
 	m = jeu()
 	m.kit_apparaitre("convoi_devant", {"types": ["citroen_t23"], "vitesse": 1.0})
-	marche(m, 30.0)
+	marche(m, 80.0)
 	ok(chocs(m) == 0 and m.x_tete > m.ennemis.back().x + 2.0, "éviter : on double le convoi par la voie d'à côté")
 
 	# 4) Poursuivant qui nous emboutit par l'arrière
 	m = jeu()
 	m.kit_apparaitre("poursuite", {"types": ["citroen_traction"], "abordeurs": 0})
 	m._intention[m.ennemis.back().uid] = true
-	marche(m, 30.0)
+	marche(m, 80.0)
 	var arr := false
 	for l in m.journal:
 		arr = arr or "emboutit" in String(l.txt)

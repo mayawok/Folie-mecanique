@@ -488,6 +488,7 @@ func appliquer_valeurs_berliet(v: Veh) -> void:
 	v.profil["tout_terrain"] = float(V.tout_terrain)
 	v.profil["charge_t"] = float(V.charge_t)
 	v.profil["gazole_l"] = float(V.gazole_l)
+	v.profil["puissance_ch"] = 150.0 * (1.0 + float(V.bonus_puissance))   # moteur du Berliet (DEC-232) : base de l'accélération
 	v.profil["physique"] = {"pneu": "berliet_" + String(berliet_config.get("pneu_ar", "route")), "debattement": 0.45,
 		"charge_essieu": float(v.profil.get("poids_kg", 6000.0)) * 0.5}   # pneus du camion (DEC-230)
 	if v.pieces.has("roulement"):

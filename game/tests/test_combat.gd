@@ -46,6 +46,7 @@ func _init() -> void:
 	verifier(m.x_tete > x0 + 20.0, "le convoi avance (%.0f m en 10 s)" % (m.x_tete - x0))
 	verifier(m.stocks.gazole < c0, "le carburant baisse (%.1f L)" % (c0 - m.stocks.gazole))
 	m.ordre_marche("halte")
+	_avancer(m, 20.0)   # freinage progressif (DEC-232) : on laisse le temps de s'arrêter
 	var x1 := m.x_tete
 	_avancer(m, 2.0)
 	verifier(is_equal_approx(m.x_tete, x1), "Halte : le convoi s'arrête")
