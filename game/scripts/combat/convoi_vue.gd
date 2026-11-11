@@ -201,6 +201,7 @@ func _synchroniser() -> void:
 			n.custom_minimum_size = n.size
 		var x := _rx(v)
 		n.x_monde = x
+		_regler_physique(n, v)
 		n.vitesse = v.vitesse_act if (v.actif() and not pause) else 0.0
 		n.equipage = v.actif()
 		if n.roues_perdues != v.roues_perdues:   # roue arrachée ou remontée (DEC-080)
@@ -327,3 +328,17 @@ func _couleur_faction(v) -> Color:
 		return VehiculeDessin.COULEUR_BANDITS
 	var F: Dictionary = CarteMonde.donnees().factions
 	return Color(String(F[f].couleur)) if F.has(f) else Color(0, 0, 0, 0)
+
+
+# Rendu de la physique des pneus et des suspensions (DEC-230) : raideur et course selon le débattement, pneu écrasé selon la charge
+func _regler_physique(n: VehiculeDessin, v) -> void:
+	var ph: Dictionary = v.profil.get("physique", {})
+	if ph.is_empty():
+		return
+	var e := PhysiqueRoulage.evaluer(v.profil)
+	var deb := clampf(float(ph.get("debattement", 0.2)), 0.1, 1.0)
+	n.raideur = VehiculeDessin.RAIDEUR * sqrt(0.2 / deb)
+	n.amorti = VehiculeDessin.AMORTI * pow(0.2 / deb, 0.25)
+	n.course_force = clampf(deb * 0.5, 0.05, 0.4)
+	n.ecrasement = clampf(0.05 + 0.25 * float(e.pression), 0.04, 0.3)
+	n.surface = String(e.surface)

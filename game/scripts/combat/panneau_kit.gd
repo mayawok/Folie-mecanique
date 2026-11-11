@@ -29,6 +29,7 @@ var m                      # CombatModele
 var _vitesse_convoi := 4.5
 var _btn_calme: Button
 var _etat: Label
+var _lbl_phys: Label   # lecture de la physique des pneus et suspensions (DEC-230)
 var _son: Callable
 var _ouvrir_berliet: Callable
 var _ouvrir_carte: Callable
@@ -77,6 +78,12 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 		_bouton(v, "Berliet GDR : pièces et halte", func(): _ouvrir_berliet.call())
 	_titre(v, "Zone et décor")
 	_rangee(v, KIT_ZONES_LIBELLES(), func(z): m.kit_regler_zone(z); _maj())
+	_titre(v, "Physique : surface du sol")
+	_rangee(v, [["Route", "route"], ["Selon la zone", ""]], func(k): PhysiqueRoulage.surface_forcee = String(k); _maj())
+	_lbl_phys = Label.new()
+	_lbl_phys.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lbl_phys.add_theme_font_size_override("font_size", 22)
+	v.add_child(_lbl_phys)
 	_titre(v, "Heure")
 	_rangee(v, HEURES.map(func(h): return [h[0], h[1]]), func(h): m.kit_regler_heure(float(h)))
 	_titre(v, "Météo")
@@ -128,7 +135,7 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 
 
 static func KIT_ZONES_LIBELLES() -> Array:
-	return ["sable", "terre", "cailloux", "eau"].map(func(z): return [CombatModele.KIT_ZONES_NOMS[z], z])
+	return ["sable", "terre", "cailloux", "eau", "neige", "boue"].map(func(z): return [CombatModele.KIT_ZONES_NOMS[z], z])
 
 
 func _lancer_groupe() -> void:
@@ -147,6 +154,11 @@ func _lancer(e: Array) -> void:
 func _maj() -> void:
 	_btn_calme.text = "Route calme : OUI (rien n'arrive seul)" if m.kit_calme else "Route calme : NON (rencontres normales)"
 	_etat.text = "Zone : %s" % CombatModele.KIT_ZONES_NOMS.get(m.kit_zone, m.kit_zone)
+	var lignes: Array = []
+	for cv in m.convoi:
+		if cv.actif():
+			lignes.append("%s : %s%s" % [cv.nom, PhysiqueRoulage.resume(cv.profil), " (dégagé)" if cv.enlise and cv.degage > 0.0 else ""])
+	_lbl_phys.text = "\n".join(lignes) if not lignes.is_empty() else "aucun véhicule"
 	for i in _vals.size():
 		var val: float = m.kit_reglage_valeur(i)
 		_vals[i].text = ("%d" if val >= 10.0 or CombatModele.KIT_REGLAGES[i].pas >= 1.0 else "%.2f") % val

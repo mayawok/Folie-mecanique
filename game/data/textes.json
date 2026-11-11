@@ -273,7 +273,12 @@
   "nuit.devant": "devant",
   "nuit.derriere": "derrière",
   "nuit.aucun": "Aucun abri en vue : cherchez une ruine ou une église.",
-  "vue_interface.036": "Passer la nuit à l'abri"
+  "vue_interface.036": "Passer la nuit à l'abri",
+  "phys.enlise": "%s s'enlise : les roues patinent, l'équipage va le dégager.",
+  "phys.degage": "%s est dégagé, il repart au ralenti.",
+  "phys.crevaison": "Crevaison sur %s : l'équipage change la roue.",
+  "phys.surface": "Surface",
+  "phys.titre": "Physique"
  },
  "en": {
   "res.gazole": "Diesel",
@@ -548,6 +553,11 @@
   "nuit.devant": "ahead",
   "nuit.derriere": "behind",
   "nuit.aucun": "No shelter in sight: look for a ruin or a church.",
-  "vue_interface.036": "Spend the night in shelter"
+  "vue_interface.036": "Spend the night in shelter",
+  "phys.enlise": "%s is bogged down: wheels spinning, the crew will dig it out.",
+  "phys.degage": "%s is free and moves off slowly.",
+  "phys.crevaison": "Flat tyre on %s: the crew is changing the wheel.",
+  "phys.surface": "Surface",
+  "phys.titre": "Physics"
  }
 }

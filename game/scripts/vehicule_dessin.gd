@@ -51,6 +51,15 @@ var _art: BerlietDessin = null
 var art_montage := {}        # Berliet monté par éléments dans la grille (DEC-211) : voir BerlietDessin.montage
 var module_leve := 0.0       # Berliet : cargaison suspendue au pont roulant (mission, DEC-145)
 var roues_perdues: Array = []   # indices des roues arrachées en combat (DEC-080) : on ne les dessine plus
+# Physique des pneus et des suspensions (DEC-230), réglée par la vue d'après PhysiqueRoulage ; les valeurs par défaut = ancien rendu
+var raideur := RAIDEUR       # ressort de la caisse (plus la suspension a de course, plus il est souple)
+var amorti := AMORTI
+var course_force := -1.0     # course des roues (m) ; négatif = celle de la fiche du véhicule
+var ecrasement := 0.0        # fraction d'écrasement du pneu sous la charge (0 à 0,3)
+var surface := "route"       # surface sous les roues : poussière, sable, neige ou boue projetés
+var _poussiere := []         # {x, y, vx, age, teinte} : projections des roues
+var _t_pous := 0.0
+var _vit_prec := 0.0
 
 
 static func donnees() -> Dictionary:
@@ -166,12 +175,12 @@ func configurer_d(d: Dictionary) -> void:
 	for r in D.get("roues", []):
 		var yb := float(r.get("yb", r.r))   # hauteur du centre dans le repère du véhicule (roues de tailles différentes)
 		var y0 := yb if plat else float(r.r)
-		_appuis.append({"x": float(r.x), "r": float(r.r), "y0": y0, "y": y0, "yb": yb})
+		_appuis.append({"x": float(r.x), "r": float(r.r), "y0": y0, "y": y0, "yb": yb, "ys": y0, "vs": 0.0})
 	if D.has("chenille"):
 		var c: Dictionary = D.chenille
 		for x in c.galets:
 			var y0: float = c.r_galet + c.ep
-			_appuis.append({"x": float(x), "r": float(c.r_galet), "y0": y0, "y": y0, "galet": true})
+			_appuis.append({"x": float(x), "r": float(c.r_galet), "y0": y0, "y": y0, "galet": true, "ys": y0, "vs": 0.0})
 	_xc = 0.0
 	for a in _appuis:
 		_xc += a.x
@@ -228,14 +237,33 @@ func _process(delta: float) -> void:
 			pente = clampf((sxy / n - (sx / n) * (sy / n)) / var_x, -0.3, 0.3)
 	# Caisse suspendue : ressort amorti vers la position imposée par le sol
 	var vib := 0.006 * sin(_temps * 37.0) if vitesse != 0.0 else 0.0
-	_hv += (RAIDEUR * (moy + vib - _h) - AMORTI * _hv) * delta
+	# Tangage : l'accélération cabre la caisse, le freinage la plonge (transfert de charge)
+	var accel := clampf((vitesse - _vit_prec) / maxf(delta, 0.001), -6.0, 6.0) if not plat else 0.0
+	_vit_prec = vitesse
+	_pv += accel * 1.9 * delta   # équilibre : environ 0,04 rad pour 3 m/s²
+	_hv += (raideur * (moy + vib - _h) - amorti * _hv) * delta
 	_h += _hv * delta
-	_pv += (RAIDEUR * (pente - _p) - AMORTI * _pv) * delta
-	_p += _pv * delta
-	var course: float = D.get("course", 0.1)
+	_pv += (raideur * (pente - _p) - amorti * _pv) * delta
+	_p = clampf(_p + _pv * delta, -0.2, 0.2)
+	var course: float = course_force if course_force >= 0.0 else float(D.get("course", 0.1))
 	for a in _appuis:
 		var repos: float = a.y0 + _h + _p * (a.x - _xc)
-		a.y = clampf(_sol(a.x) + a.y0, repos - course, repos + course)
+		# chaque roue a son propre ressort : elle rebondit après une bosse, plus ou moins selon l'amortissement
+		var cible: float = _sol(a.x) + a.y0
+		var kw := raideur * 2.5
+		a.vs += (kw * (cible - a.ys) - amorti * 2.4 * a.vs) * delta
+		a.ys += a.vs * delta
+		a.y = clampf(a.ys, repos - course, repos + course)
+	# Projections des roues selon la surface
+	_t_pous -= delta
+	if vitesse > 1.5 and surface != "route" and not plat and _appuis.size() > 0 and _t_pous <= 0.0 and _poussiere.size() < 40:
+		_t_pous = clampf(0.5 / vitesse, 0.04, 0.2)
+		var a2: Dictionary = _appuis[(int(_temps * 17.0)) % _appuis.size()]
+		if not a2.has("galet"):
+			_poussiere.append({"x": float(a2.x) - float(a2.r) * 0.6, "y": maxf(0.0, float(a2.y) - float(a2.r)), "vx": vitesse, "age": 0.0, "teinte": surface})
+	for f in _poussiere:
+		f.age += delta
+	_poussiere = _poussiere.filter(func(f): return f.age < 0.9)
 	# Armes
 	_flash = maxf(0.0, _flash - delta)
 	_flash_mg = maxf(0.0, _flash_mg - delta)
@@ -454,7 +482,21 @@ func _ressort(a: Vector2, b: Vector2) -> void:
 	draw_polyline(pts, Color("#2F2E2B"), maxf(1.0, ppm * 0.03), true)
 
 
+func _couleur_projection(nom: String) -> Color:
+	match nom:
+		"sable": return Color(0.78, 0.64, 0.42)
+		"neige": return Color(0.94, 0.96, 0.98)
+		"boue", "eau": return Color(0.30, 0.22, 0.14)
+		"cailloux": return Color(0.55, 0.53, 0.50)
+		_: return Color(0.50, 0.42, 0.30)
+
+
 func _train() -> void:
+	for f in _poussiere:
+		var k: float = f.age / 0.9
+		var c := _couleur_projection(String(f.teinte))
+		c.a = 0.5 * (1.0 - k)
+		draw_circle(_e(Vector2(float(f.x) - float(f.vx) * 0.7 * f.age, float(f.y) + 0.05 + k * 0.35)), (0.05 + k * 0.16) * ppm, c)
 	# Suspensions : ressort entre le moyeu et la caisse
 	for a in _appuis:
 		var moyeu := _e(Vector2(a.x, a.y))
@@ -465,7 +507,8 @@ func _train() -> void:
 	for i in _appuis.size():
 		var a: Dictionary = _appuis[i]
 		if not a.has("galet") and not roues_perdues.has(i):
-			_roue(_e(Vector2(a.x, a.y)), a.r)
+			var ec: float = a.r * 0.5 * ecrasement   # pneu écrasé : le moyeu descend, le bas du pneu reste au sol
+			_roue(_e(Vector2(a.x, a.y - ec)), a.r - ec)
 
 
 func _chenille() -> void:

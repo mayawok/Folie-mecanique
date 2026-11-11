@@ -14,6 +14,10 @@ const PALETTES := {
 				["objet", 0.70], ["bat", 0.76], ["ruine", 0.79], ["clocher", 0.81], ["chateau_eau", 0.83]]},
 		"cailloux": {"sol": "#7A7570", "crete": "#5C5853", "trace": "#5A5651", "couches": ["#A7A29A", "#928D86", "#7E7973"],
 		"decor": [["poteau", 0.08], ["rocher", 0.80], ["carcasse", 0.88]]},
+	"neige": {"sol": "#D9DEE3", "crete": "#B9C4CE", "trace": "#AEB8C2", "couches": ["#E4E9ED", "#CDD6DD", "#BCC7D0"],
+		"decor": [["poteau", 0.15], ["rocher", 0.70], ["carcasse", 0.84]]},
+	"boue": {"sol": "#4A3B2A", "crete": "#3B3A22", "trace": "#33291D", "couches": ["#7A735A", "#6A6A4A", "#5A5E3C"],
+		"decor": [["poteau", 0.15], ["herbe", 0.40], ["rocher", 0.62], ["carcasse", 0.80]]},
 	"eau": {"sol": "#4F6B73", "crete": "#9BBBC2", "trace": "#86A9B1", "couches": ["#9DB4BA", "#8AA3AA", "#738E96"],
 		"decor": [["poteau", 0.20], ["roseau", 0.60], ["carcasse", 0.68]]},
 }

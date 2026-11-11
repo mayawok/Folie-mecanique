@@ -9,6 +9,8 @@ extends "res://scripts/combat/modele_mission.gd"
 func _init(g := 1, options := {}) -> void:
 	graine = g
 	rng.seed = g
+	rng_physique.seed = g * 7919 + 3
+	PhysiqueRoulage.surface_forcee = ""
 	var D := donnees()
 	bac_a_sable = bool(options.get("bac_a_sable", false))
 	Terrain.zone = "terre"
@@ -614,9 +616,10 @@ func _marche(dt: float) -> void:
 			var kr := 1.0
 			for r in remorques_de(v):   # tirer une remorque fait consommer plus
 				kr += 0.5 * float(r.profil.get("poids_kg", 0.0)) / maxf(1.0, float(v.profil.get("poids_kg", 1000.0)))
-			var litres: float = v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso)
+			var litres: float = v.profil.conso / 100.0 * absf(vit) * dt * kr * float(regime_donnees().conso) * PhysiqueRoulage.facteur_conso(v.profil)
 			var t := carburant_de(v)   # chaque véhicule brûle son carburant (essence ou gazole)
 			stocks[t] = maxf(0.0, float(stocks.get(t, 0.0)) - litres)
+	_physique(dt, actifs, vit)
 	var perdu := borner_carburants()   # réservoirs, citerne et bidons pleins : le surplus est perdu
 	for t in perdu:
 		if perdu[t] >= 1.0:
@@ -771,3 +774,33 @@ func kit_aller(id: String) -> bool:
 		kit_apparaitre("batiment", {"type": String(l.batiment)})
 	log_(Textes.t("modele.039", [l.nom]), "info")
 	return true
+
+
+# Pneus et suspensions (DEC-230) : enlisement puis dégagement par l'équipage, crevaisons au kilomètre, usure de la suspension
+# sur sol cassé. Déterministe (rng_physique). Un véhicule enlisé n'est jamais perdu : il finit toujours par être dégagé.
+func _physique(dt: float, actifs: Array, vit: float) -> void:
+	var PH: Dictionary = PhysiqueRoulage.donnees()
+	for v in actifs:
+		v.crevaison = maxf(0.0, v.crevaison - dt)
+		v.degage = maxf(0.0, v.degage - dt)
+		var e := PhysiqueRoulage.evaluer(v.profil)
+		if absf(vit) <= 0.01:
+			continue
+		var etait: bool = v.enlise
+		v.enlise = bool(e.enlise)
+		if v.enlise and v.degage <= 0.0:
+			if not etait:
+				log_(Textes.t("phys.enlise", [v.nom]), "alerte")
+			v.enlise_t += dt
+			if v.enlise_t >= float(PH.duree_enlisement):
+				v.enlise_t = 0.0
+				v.degage = float(PH.duree_degagement)
+				log_(Textes.t("phys.degage", [v.nom]), "info")
+		elif not v.enlise:
+			v.enlise_t = 0.0
+		if v.crevaison <= 0.0 and rng_physique.randf() < float(e.crevaison_m) * absf(vit) * dt:
+			v.crevaison = float(PH.duree_crevaison)
+			log_(Textes.t("phys.crevaison", [v.nom]), "alerte")
+		var U: Dictionary = PH.usure_chocs
+		if float(e.chocs) > float(U.seuil) and v.pieces.has("suspension") and v.pieces.suspension.pv > 1.0:
+			v.pieces.suspension.pv = maxf(1.0, v.pieces.suspension.pv - float(U.pv_par_s) * (float(e.chocs) - float(U.seuil)) * dt)

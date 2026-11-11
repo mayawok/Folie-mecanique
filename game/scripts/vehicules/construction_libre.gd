@@ -1240,6 +1240,9 @@ static func analyser(a: Dictionary) -> Dictionary:
 		"precision": precision, "immobile": immobile, "phares": phares, "classe": classe, "moteurs": n_moteurs, "roles": roles,
 		"chargeurs": roles.count("chargeur"), "chef": roles.has("chef"), "mecaniciens": roles.count("mecanicien"),
 		"infirmiers": roles.count("infirmier")}
+	if not essieux.is_empty():   # pneus, suspension et charge pour la physique de roulage (DEC-230)
+		stats["physique"] = {"pneu": PhysiqueRoulage.pneu_de_piece(String(essieux[0].get("train", ""))), "debattement": debattement,
+			"charge_essieu": M / essieux.size()}
 	stats["carburant"] = "gazole" if _pieces(a).any(func(p): return p.fiche.get("famille", "") == "moteur" and p.fiche.get("carburant", "") == "gazole") else "essence"
 	if a.has("origine"):
 		var ch := Assemblage.piece(String(a.origine.chassis))

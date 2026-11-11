@@ -4,8 +4,8 @@
 # route calme (aucune rencontre automatique) et apparitions à la demande. Actif seulement en Mode créatif (bac_a_sable).
 extends "res://scripts/combat/modele_choc.gd"
 
-const KIT_ZONES := ["sable", "terre", "cailloux", "eau"]
-const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux": "Cailloux", "eau": "Eau"}
+const KIT_ZONES := ["sable", "terre", "cailloux", "eau", "neige", "boue"]
+const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux": "Cailloux", "eau": "Eau", "neige": "Neige", "boue": "Boue"}
 # Véhicules d'apparition : id d'assemblage -> libellé court
 const KIT_VEHICULES := {"bmw_r75": "Moto side-car", "moto_bmw": "Moto", "willys_mb": "Jeep", "citroen_traction": "Voiture",
 	"citroen_t23": "Camion", "diamond_t": "Dépanneuse", "m3_half_track": "Half-track", "m3_stuart": "Char léger", "m4_sherman": "Sherman",

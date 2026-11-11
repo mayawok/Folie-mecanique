@@ -1,0 +1,35 @@
+{
+  "_lisez_moi": "Physique des pneus et des suspensions (DEC-230, docs/design/PHYSIQUE.md). Une surface = rugosite (secousses, x vitesse / debattement), portance (pression au sol tolérée, rapportée à charge_ref du pneu), roulement (résistance : vitesse et consommation), crevaison (risque relatif). Un pneu = charge_ref (kg par roue avant que le sol cède), roulement, crevaison, adh (adhérence 0 à 1 par surface). 'terre' est la surface de référence : un véhicule normal n'y perd rien. Ajouter un pneu ou une surface = une entrée ici, aucun code. Valeurs à régler en essai (Kit, panneau Physique).",
+  "pneu_defaut": "roue_moyenne",
+  "seuil_enlisement": 0.3,
+  "duree_enlisement": 8.0,
+  "duree_degagement": 14.0,
+  "facteur_degagement": 0.6,
+  "facteur_enlise": 0.2,
+  "duree_crevaison": 18.0,
+  "usure_chocs": {"seuil": 1.5, "pv_par_s": 0.25},
+  "surfaces": {
+    "route":    {"nom": "Route", "rugosite": 0.35, "portance": 99.0, "roulement": 1.0, "crevaison": 0.3},
+    "terre":    {"nom": "Terre et herbe", "rugosite": 0.5, "portance": 1.6, "roulement": 1.0, "crevaison": 0.6},
+    "cailloux": {"nom": "Cailloux", "rugosite": 1.3, "portance": 3.0, "roulement": 1.1, "crevaison": 2.0},
+    "sable":    {"nom": "Sable", "rugosite": 0.8, "portance": 0.6, "roulement": 1.8, "crevaison": 0.3},
+    "neige":    {"nom": "Neige", "rugosite": 0.7, "portance": 0.9, "roulement": 1.6, "crevaison": 0.4},
+    "boue":     {"nom": "Boue", "rugosite": 1.0, "portance": 0.8, "roulement": 2.0, "crevaison": 0.5},
+    "eau":      {"nom": "Gué et marais", "rugosite": 0.9, "portance": 0.8, "roulement": 2.0, "crevaison": 0.5}
+  },
+  "pneus": {
+    "roue_moto":     {"nom": "Moto", "charge_ref": 260, "roulement": 1.0, "crevaison": 1.4, "adh": {"route": 1.0, "terre": 1.0, "cailloux": 0.85, "sable": 0.6, "neige": 0.5, "boue": 0.45, "eau": 0.45}},
+    "roue_petite":   {"nom": "Petite roue", "charge_ref": 500, "roulement": 1.0, "crevaison": 1.2, "adh": {"route": 1.0, "terre": 1.0, "cailloux": 0.9, "sable": 0.55, "neige": 0.55, "boue": 0.5, "eau": 0.5}},
+    "roue_moyenne":  {"nom": "Roue moyenne", "charge_ref": 1600, "roulement": 1.0, "crevaison": 1.0, "adh": {"route": 1.0, "terre": 1.0, "cailloux": 0.95, "sable": 0.75, "neige": 0.7, "boue": 0.65, "eau": 0.65}},
+    "roue_grande":   {"nom": "Grande roue", "charge_ref": 5000, "roulement": 1.0, "crevaison": 0.9, "adh": {"route": 1.0, "terre": 1.0, "cailloux": 1.0, "sable": 0.85, "neige": 0.8, "boue": 0.75, "eau": 0.75}},
+    "roue_course":   {"nom": "Roue de course", "charge_ref": 700, "roulement": 0.9, "crevaison": 1.6, "adh": {"route": 1.0, "terre": 0.95, "cailloux": 0.8, "sable": 0.45, "neige": 0.5, "boue": 0.4, "eau": 0.4}},
+    "roue_geante":   {"nom": "Roue géante", "charge_ref": 6500, "roulement": 1.15, "crevaison": 0.8, "adh": {"route": 0.95, "terre": 1.0, "cailloux": 1.0, "sable": 0.95, "neige": 0.9, "boue": 0.85, "eau": 0.85}},
+    "roue_tracteur": {"nom": "Roue de tracteur", "charge_ref": 9000, "roulement": 1.3, "crevaison": 0.7, "adh": {"route": 0.9, "terre": 1.0, "cailloux": 1.0, "sable": 1.0, "neige": 0.95, "boue": 0.95, "eau": 0.95}},
+    "chenille":      {"nom": "Chenille", "charge_ref": 15000, "roulement": 1.4, "crevaison": 0.2, "adh": {"route": 0.9, "terre": 1.0, "cailloux": 1.0, "sable": 1.0, "neige": 1.0, "boue": 1.0, "eau": 0.95}},
+    "berliet_route":    {"nom": "Berliet : route", "charge_ref": 2500, "roulement": 1.0, "crevaison": 1.0, "adh": {"route": 1.0, "terre": 0.97, "cailloux": 0.85, "sable": 0.6, "neige": 0.6, "boue": 0.55, "eau": 0.55}},
+    "berliet_agraire":  {"nom": "Berliet : agraire", "charge_ref": 3000, "roulement": 1.1, "crevaison": 0.9, "adh": {"route": 0.9, "terre": 1.0, "cailloux": 0.95, "sable": 0.75, "neige": 0.75, "boue": 0.8, "eau": 0.75}},
+    "berliet_crampons": {"nom": "Berliet : crampons", "charge_ref": 3000, "roulement": 1.15, "crevaison": 0.8, "adh": {"route": 0.85, "terre": 1.0, "cailloux": 1.0, "sable": 0.8, "neige": 0.85, "boue": 0.95, "eau": 0.85}},
+    "berliet_chaines":  {"nom": "Berliet : chaînes", "charge_ref": 3000, "roulement": 1.25, "crevaison": 0.7, "adh": {"route": 0.75, "terre": 1.0, "cailloux": 1.0, "sable": 0.8, "neige": 1.0, "boue": 0.95, "eau": 0.85}},
+    "berliet_blindee":  {"nom": "Berliet : blindée", "charge_ref": 3500, "roulement": 1.1, "crevaison": 0.3, "adh": {"route": 0.9, "terre": 0.95, "cailloux": 0.95, "sable": 0.7, "neige": 0.7, "boue": 0.7, "eau": 0.65}}
+  }
+}

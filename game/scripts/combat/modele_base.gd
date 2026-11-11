@@ -99,6 +99,9 @@ class Veh extends RefCounted:
 	var principal := false        # camion de l'expédition (Berliet) : gardé du début à la fin, ni abandonné ni démonté (DEC-139)
 	var crevaison := 0.0   # secondes de pneus crevés (chausse-trappes) : l'ennemi ralentit
 	var roues_perdues: Array = [] # indices des roues arrachées (DEC-080) : chacune ralentit, elles reviennent à la réparation
+	var enlise_t := 0.0           # secondes passées enlisé avant l'arrivée des secours (physique des pneus, DEC-230)
+	var degage := 0.0             # secondes restantes de marche au ralenti après un dégagement
+	var enlise := false           # enlisé en ce moment (lu par la vue et le Kit)
 
 	func remorque() -> bool:
 		return bool(profil.get("remorque", false))
@@ -151,6 +154,10 @@ class Veh extends RefCounted:
 		f *= pow(float(E.get("roue_perdue", 0.75)), roues_perdues.size())
 		if crevaison > 0.0:
 			f *= float(E.get("crevaison_facteur", 0.35))
+		f *= PhysiqueRoulage.facteur_vitesse(profil)   # pneus, surface et suspension (DEC-230)
+		if enlise:
+			var PH: Dictionary = PhysiqueRoulage.donnees()
+			f *= float(PH.facteur_degagement) if degage > 0.0 else float(PH.facteur_enlise)
 		return f
 
 	func vitesse() -> float:
@@ -167,6 +174,7 @@ class Veh extends RefCounted:
 			f *= E.cabine_hs_precision
 		if bool(profil.get("chef", false)):
 			f *= float(CombatModele.donnees().equipage_roles.chef_precision)   # chef de char (DEC-050)
+		f *= PhysiqueRoulage.facteur_precision(profil)   # secousses : suspension trop courte pour la vitesse et le sol (DEC-230)
 		return f * float(profil.get("precision", 1.0))   # construction libre : recul, instabilité (DEC-043)
 
 	func bord_avant() -> float:
@@ -281,6 +289,7 @@ var champs_on := false
 var tempete := {}                # {} | {phase: "annonce"|"active", reste, duree} (modele_meteo.gd)
 var rng_meteo := RandomNumberGenerator.new()
 var rng_mines := RandomNumberGenerator.new()
+var rng_physique := RandomNumberGenerator.new()   # crevaisons au kilomètre (DEC-230)
 var _tempete_t := 0.0            # délai avant la prochaine tempête
 var _champ_id := 0
 var _prochain_champ_x := 0.0
@@ -475,6 +484,8 @@ func appliquer_valeurs_berliet(v: Veh) -> void:
 	v.profil["tout_terrain"] = float(V.tout_terrain)
 	v.profil["charge_t"] = float(V.charge_t)
 	v.profil["gazole_l"] = float(V.gazole_l)
+	v.profil["physique"] = {"pneu": "berliet_" + String(berliet_config.get("pneu_ar", "route")), "debattement": 0.45,
+		"charge_essieu": float(v.profil.get("poids_kg", 6000.0)) * 0.5}   # pneus du camion (DEC-230)
 	if v.pieces.has("roulement"):
 		var r: Dictionary = v.pieces.roulement
 		var base_max := float(v.profil.get("roulement_pv_assemblage", r.max))

@@ -1,6 +1,6 @@
 # Physique des pneus et des suspensions — Folie Mécanique
 
-Statut : **conception décidée le 11/11 (DEC-230), pas encore codée.** Lot de code : DEV-041.
+Statut : **conception décidée (DEC-230) et codée le 11/11 (DEC-231, DEV-041)**. Code : `scripts/combat/physique_roulage.gd`, `data/surfaces.json`, `_physique` dans `combat_modele.gd`, rendu dans `vehicule_dessin.gd`, section Physique de `panneau_kit.gd`. Non exécuté en local (pas de Godot dans l'environnement) : vérifié par la CI et à essayer sur iPhone.
 
 ## Ce qui existe aujourd'hui
 
