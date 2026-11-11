@@ -14,6 +14,18 @@ Statut : **conception décidée le 11/11 (DEC-232), pas encore codée.** Lot de 
 - **Son** : boucles moteur existantes à hauteur variable selon le régime, ralenti à l'arrêt, démarreur, petit à-coup à chaque passage. Aucun nouveau son généré pour ce lot (pas de crédits ElevenLabs).
 - **Affichage** : petit indicateur discret (rapport, compte-tours) dans le HUD du convoi ; lecture détaillée (rapport, régime, accélération) dans le panneau du Kit.
 
+## Extension du lot (DEC-233) : freinage, tenue de route et convoi
+
+Thèmes retenus le 11/11 : **freinage et tenue**, **convoi**. Thèmes proposés mais **non retenus pour ce lot** (à reprendre plus tard) : moteur (courbe de couple, surchauffe avec radiateurs, moteur et boîte abîmés, calage, grand froid) ; mécanique de la grille (roues motrices, différentiel, traînée, consommation selon régime).
+
+- **Freinage selon le sol** : distance d'arrêt allongée sur sable et boue, glissade sur neige (adhérence des pneus, DEC-231).
+- **Virages et demi-tours** : ralentissement dans les virages ; un demi-tour à pleine vitesse fait déraper.
+- **Transfert de charge et renversement** : un freinage brusque ou une pente raide déleste l'avant ou l'arrière ; risque de renversement si le centre de gravité est haut (assiette et centre de gravité déjà calculés par la grille).
+- **Sauts** : un véhicule rapide décolle sur une crête ; l'atterrissage secoue l'équipage et use la suspension.
+- **Départ échelonné et effet accordéon** : les véhicules démarrent l'un après l'autre, l'écart s'allonge et se resserre, un freinage brusque peut provoquer un tamponnement.
+- **Remorques** : inertie propre, poussée en descente, balancement au virage.
+- **Dégagement des enlisés** : treuil ou remorquage par un autre véhicule, à la place du dégagement automatique de DEC-231 (réponse à OQ-037, détail à fixer au codage).
+
 ## Conséquences à traiter au codage
 
 Distances parcourues en baisse : équilibrage du combat à revoir (DEC-113, 229). Interaction avec la physique des pneus (DEC-231 : adhérence → accélération tenable, enlisement). Départ échelonné des véhicules et effet d'accordéon : plus tard.
