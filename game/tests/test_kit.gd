@@ -119,8 +119,8 @@ func _init() -> void:
 	ok(g.monde.niveau_a(0.0) == niv_hors - g.kit_malus_region, "dans la région de la quête : niveau normal")
 	# Allié qui rejoint le convoi + M16 quadruple .50 (DEC-236)
 	var al := jeu()
-	var n0: int = al.convoi.size()
-	ok(al.kit_apparaitre("allie", {"type": "m16_mgmc"}) and al.convoi.size() == n0 + 1, "kit : un M16 allié rejoint le convoi")
+	var nc0: int = al.convoi.size()
+	ok(al.kit_apparaitre("allie", {"type": "m16_mgmc"}) and al.convoi.size() == nc0 + 1, "kit : un M16 allié rejoint le convoi")
 	var q = al.convoi.back()
 	ok(q.camp == "joueur" and q.armes.size() == 1 and String(q.armes[0].id) == "mitrailleuse_quad_50", "le M16 porte la quadruple .50")
 	var W: Dictionary = CombatModele.donnees().armes
