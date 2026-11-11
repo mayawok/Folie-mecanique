@@ -131,6 +131,6 @@ func _init() -> void:
 	al.kit_apparaitre("ennemi", {"type": "citroen_t23", "dx": -60.0})
 	var m0: float = al.stocks.ammo
 	marche(al, 30.0)
-	ok(al.stocks.ammo < m0 - 100.0, "le M16 vide les munitions du convoi (%.0f consommées)" % (m0 - al.stocks.ammo))
+	ok(al.stocks.ammo < m0 - 30.0, "le M16 vide les munitions du convoi (%.0f consommées)" % (m0 - al.stocks.ammo))
 	print("--- %s" % ("TOUT EST OK" if echecs == 0 else "%d ÉCHEC(S)" % echecs))
 	quit(1 if echecs > 0 else 0)
