@@ -943,14 +943,14 @@ func _tenue(dt: float, vit: float, actifs: Array) -> void:
 			var ue := Transmission.suiveur(v.u_suiv, v.ecart_acc, vit, float(A.tau) * rang, dt)
 			v.u_suiv = ue[0]
 			v.ecart_acc = ue[1]
-			var gap: float = float(donnees().ecart_convoi) + v.ecart_acc - prec.ecart_acc
+			var gap: float = float(donnees().ecart_convoi) - (v.ecart_acc - prec.ecart_acc)   # écart positif = plus près (sens de x_cible)
 			if gap < float(A.ecart_min):
 				if v.cd_acc <= 0.0 and vit > 1.0:
 					v.cd_acc = float(A.delai)
 					_degats_choc(v, float(A.degats), "avant")
 					_degats_choc(prec, float(A.degats), "arriere")
 					log_(Textes.t("trans.tamponne", [v.nom, prec.nom]), "alerte")
-				v.ecart_acc = prec.ecart_acc - (float(donnees().ecart_convoi) - float(A.ecart_min) * 0.5)
+				v.ecart_acc = prec.ecart_acc + (float(donnees().ecart_convoi) - float(A.ecart_min) * 0.5)
 		if v.actif():
 			prec = v
 	# 4) saut : sur sol très cassé et à bonne vitesse, une bosse plus grosse que les autres décolle le convoi

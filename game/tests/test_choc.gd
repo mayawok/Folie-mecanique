@@ -59,11 +59,7 @@ func _init() -> void:
 	ok(chocs(m) >= 1 and e.pieces.roulement.pv < pv0, "éperonner : on emboutit le convoi devant, ses roues prennent")
 	m = jeu()
 	m.kit_apparaitre("convoi_devant", {"types": ["citroen_t23"], "vitesse": 1.0})
-	for i in 8:
-		marche(m, 10.0)
-		print("DBG t=%d x_tete=%.1f vit=%.2f ennemi.x=%.1f mode=%s blocage=%s" % [(i + 1) * 10, m.x_tete, m.vitesse_convoi, m.ennemis.back().x, m.ennemis.back().mode, str(m.get("blocage"))])
-	for l in m.journal:
-		print("DBGJ ", String(l.txt))
+	marche(m, 80.0)
 	ok(chocs(m) == 0 and m.x_tete > m.ennemis.back().x + 2.0, "éviter : on double le convoi par la voie d'à côté")
 
 	# 4) Poursuivant qui nous emboutit par l'arrière
