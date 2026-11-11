@@ -32,7 +32,7 @@ Le journal complet et chronologique est [`DECISIONS.md`](DECISIONS.md). Cet inde
 - **Villes** : DEC-140 à 143, 151, 164. **Missions du maire** : DEC-144 à 147, 150, 165.
 - **Ressources** : DEC-094 (essence et gazole), DEC-148 (eau et vivres, remplace le retrait de DEC-114), DEC-157 (dépôt, caches), DEC-190, 207 (carburants et capacité).
 - **Factions** : DEC-098, 166, 169, 184, 187.
-- **Terrain et décor** : DEC-027, 028, 036, 037, 093, 097, 114 à 118, 120, 153, 159, 170.
+- **Terrain et décor** : DEC-027, 028, 036, 037, 093, 097, 114 à 118, 120, 153, 159, 170., 230 (physique pneus et suspensions).
 
 ## Interface
 - DEC-065, 086 à 089, 114, 117, 149, 156, 160, 177, 186, 194.

@@ -256,3 +256,7 @@ Que veut dire « intégrer le Berliet dans la grille 2D » : 1) le voir avec son
 ## OQ-036 — Capacité du réservoir (10/11) — RÉSOLUE par DEC-207 (réservoir + citerne + bidons)
 
 Le carburant est un stock unique du convoi. Le réservoir du Berliet (120 à 560 L) n'en limite pas encore le montant, car des récompenses de 150 à 300 L seraient perdues (missions, Baron). DEC-190 veut un carburant contraignant. Choix : plafonner au réservoir + citerne du module ; ou laisser le surplus dans des jerrycans qui se vident en premier.
+
+## OQ-037 — Boue, neige et dégagement (11/11)
+
+Quand la boue apparaît (pluie, dégel, zone fixe) ; quelles zones de la carte ont de la neige ; action de dégagement d'un véhicule enlisé (plaques, treuil, remorquage). Valeurs d'adhérence à régler en essai. Voir `docs/design/PHYSIQUE.md` (DEC-230).
