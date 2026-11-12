@@ -64,7 +64,9 @@ Principe décidé : **une grande ville par région**, capitale et lieu majeur du
 | Provence | Marseille (Massalie) | Port, étangs salés, raffineries de l'Étang | Martigues |
 | Alpes | Briançon | Ville forte la plus haute, forts de montagne, cols | Grenoble |
 
-Prochaines étapes : fiche de lieu par capitale (comme `docs/lore/dol-cite-des-marees.md`), puis passage de `carte_monde.json` à 12 capitales + lieux mineurs (lot de code distinct).
+Fiches des capitales (DEC-241) : `docs/lore/villes/` (Dol : `docs/lore/dol-cite-des-marees.md`).
+
+Prochaines étapes :  (comme `docs/lore/dol-cite-des-marees.md`), puis passage de `carte_monde.json` à 12 capitales + lieux mineurs (lot de code distinct).
 
 ## Routes (22)
 
