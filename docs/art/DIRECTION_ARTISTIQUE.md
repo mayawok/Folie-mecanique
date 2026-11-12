@@ -232,6 +232,17 @@ Bretagne et zones côtières
 
 Atmosphère : froide, maritime, humide, parfois mélancolique.
 
+Dol (LOC-013, fiche : docs/lore/dol-cite-des-marees.md)
+
+* silhouette de la ville haute et de la cathédrale Saint-Samson lisible de très loin ;
+* ville basse de pierre et de bois qui se fond dans les marais et les plaines ;
+* digues, écluses, canaux, chaussées surélevées ;
+* à marée basse : vase et sable humide, brume saline, miroitement blanchâtre, reflets des bâtiments ;
+* bateaux échoués posés sur la vase ou sur leur quille, amarrés : entretenus, jamais abandonnés ;
+* palette : gris perle, blanc salin, bruns de vase, granite, bois mouillé, verts de prés salés.
+
+Atmosphère : contemplative, légèrement mélancolique, mystérieuse, jamais fantastique. Aucune magie, aucun anachronisme.
+
 Campagnes françaises
 
 * verts naturels ;

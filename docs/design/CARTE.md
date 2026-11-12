@@ -56,6 +56,7 @@ Route des citernes (Les Chais-Noirs–Massalie, par Lacq, danger 5) ; Traversée
 - **Ressources** : pétrole brut (Brie, Parentis, vieux puits du Rhin), raffineries (Étang, Estuaire), gaz et chimie (Lacq, zone « maudite »),
   mines (charbon, fer, Massif, carrières), eau (sources des Hautes-Terres, lac de montagne, puits artésien), dépôts de carburant
   (Normandie, Loire), épaves et arsenal (Bretagne).
+- **Dol (LOC-013)** : grenier de l'ouest et cité des marées au nord de Kerbrume, face à la baie ; pas encore dans `carte_monde.json` (statut à trancher, OQ-039). Fiche : `docs/lore/dol-cite-des-marees.md`.
 - **Sites** : bunkers (vieille ligne, Alpes, Pyrénées, Nord), antenne des Veilleurs, péages des Hommes du Péage (Landes, Rhône, Nord),
   champs de bataille (Somme, front de Champagne), vallée préservée (rumeur, jamais visitée), déserts (Beauce, Landes).
 

@@ -265,3 +265,6 @@ Quand la boue apparaît (pluie, dégel, zone fixe) ; quelles zones de la carte o
 
 Quels camions pour la 1re série de pièces (proposé : Berliet GDR, Citroën T23, Diamond T) ; placement fin : quart de case ou libre ; le Berliet reste-t-il verrouillé au début de l'histoire ou modifiable d'emblée.
 
+## OQ-039 — Dol et la Bretagne (12/11)
+
+1. Dol devient-elle une 14e ville-étape, remplace-t-elle Kerbrume (Rennes) comme ville bretonne, ou reste-t-elle un lieu d'intérêt ? 2. Pêche : la Bible dit qu'elle « ne rapporte presque rien » ; la fiche la limite à la baie, en complément de l'agriculture : à confirmer. 3. Abondance alimentaire vs monde pauvre (DEC-097) : exception relative et fragile, à confirmer. 4. Ville haute sur un rebord de plateau (réel) plutôt qu'une butte isolée (le Mont-Dol) : à confirmer. 5. Identifiant RES pour la nourriture ? 6. Accès ferroviaire à Dol ? 7. Lien avec la baie de PRJ-001 (Mont-Tombe) et les marées jouables. Voir `docs/lore/dol-cite-des-marees.md` §11.

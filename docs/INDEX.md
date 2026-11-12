@@ -32,7 +32,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 
 ## Source de vérité
 
--   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION` ; propositions en attente de validation : `docs/lore/communautes-ferroviaires.md`
+-   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION` ; compléments : `docs/lore/communautes-ferroviaires.md`, `docs/lore/dol-cite-des-marees.md` (Bretagne, LOC-013)
 -   Registre des documents : `docs/DOCUMENT_REGISTRY.md` ; questions ouvertes : `docs/OPEN_QUESTIONS.md`
 -   **Ce jeu-ci** : vision `archive/docs_design/VISION_2026-11-10.md` (archivé), scénario `docs/scenario/` (ouverture : `OUVERTURE.md` ; proposition : `mission-liberation-camp-travailleurs.md`)
 -   État courant et priorités : `STATE.md` (racine)

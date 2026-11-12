@@ -5,7 +5,7 @@
 **Statut :** Texte validé par le porteur du projet le 07/11/2026 (DEC-132) ; lieu et noms propres encore ouverts (OQ-024)  
 **Version :** 0.1  
 **Cadre :** secteur côtier du Nord-Ouest, dans une région marquée par les ouvrages du Mur de l'Atlantique  
-**Références :** Bible du lore, sections 01, 03, 09 et 11 ; LOC-006 — Bretagne ; LOC-012 — Le Havre et estuaire de la Seine.
+**Références :** Bible du lore, sections 01, 03, 09 et 11 ; LOC-006 — Bretagne ; LOC-012 — Le Havre et estuaire de la Seine ; LOC-013 — Dol (voisine du Cotentin).
 
 ---
 

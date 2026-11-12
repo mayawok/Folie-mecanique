@@ -24,6 +24,7 @@ Statuts : référence, validé, en cours, à revoir, obsolète, archivé. Aucun 
 |---|---|---|---|---|---|---|
 | [`docs/lore/01_BIBLE_FOUNDATION`](../docs/lore/01_BIBLE_FOUNDATION) | Lore | Bible du lore, volume I : référence universelle du monde | référence | — | 2026-11-06 | Volume I seulement ; volumes II à VII à écrire |
 | [`docs/lore/communautes-ferroviaires.md`](../docs/lore/communautes-ferroviaires.md) | Lore | Communautés ferroviaires itinérantes (proposition v0.1, complément à la Bible) | validé (texte) | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-07 | Non canon avant validation ; FAC-008 en attente (OQ-024) |
+| [`docs/lore/dol-cite-des-marees.md`](../docs/lore/dol-cite-des-marees.md) | Lore | Fiche de lieu LOC-013 Dol, Cité des Marées : Bretagne, ville haute et basse, digues, ressources (v0.1) | en cours | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-12 | Pêche (Bible 04.5), abondance (DEC-097), ville-étape (OQ-039) |
 | [`docs/design/LORE.md`](../docs/design/LORE.md) | Lore | Principe « on ne revoit jamais ceux qui s'éloignent » et rencontres du monde | à revoir | `docs/lore/01_BIBLE_FOUNDATION` | 2026-11-06 | Recouvre en partie la Bible (MYS-001) ; marchands et villes (DEC-061) à rattacher à la Bible |
 
 ## 3. Gameplay et systèmes

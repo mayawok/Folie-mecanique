@@ -69,6 +69,7 @@ P1 modèle (niveau d'eau, point critique par véhicule, avertissement, tests san
 
 ### À trancher (OQ-028)
 
+- Lien avec Dol (LOC-013, DEC-237), cité des marées au fond de la baie : `docs/lore/dol-cite-des-marees.md`.
 - Emplacement final et nom de la ville (Mont-Tombe ?), et rôle de la baie dans l'histoire (chapitre, mission du Réseau des Marées ?).
 - Rythme des marées : deux par jour de jeu, ou plus lent pour laisser le temps d'agir ?
 - Un moteur noyé est-il réparable (vidange, séchage au garage) ou perdu pour de bon ?
@@ -198,3 +199,4 @@ La Bible lie la Bretagne à la mer : villages au bord de l'eau, pêche qui ne ra
 
 Taille et nombre de bateaux dans le décor ; un bateau qui flotte encore peut-il servir (bac, PRJ-001) ;
 quelle part de la carte de 12 ou 13 secteurs est bretonne.
+Note (DEC-237) : à Dol, les bateaux échoués sont vivants et entretenus (ils attendent la marée) ; les épaves à fouiller restent sur la côte hors de Dol.
