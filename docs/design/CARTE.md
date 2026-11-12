@@ -45,11 +45,11 @@ Refusé hors Mode créatif et pendant une mission du maire.
 
 Le danger monte de l'ouest (Bretagne, départ conseillé à Dol) vers l'est (Rhin-Gris, fin de partie).
 
-## Capitales régionales (DEC-239, villes à valider : OQ-040)
+## Capitales régionales (DEC-239, villes validées le 12/11 : DEC-240)
 
-Principe décidé : **une grande ville par région**, capitale et lieu majeur du scénario, sur le modèle de Dol. Tout le reste de la carte devient des **lieux mineurs** (hameaux, dépôts, péages, gares, sites). Proposition, à valider région par région :
+Principe décidé : **une grande ville par région**, capitale et lieu majeur du scénario, sur le modèle de Dol. Tout le reste de la carte devient des **lieux mineurs** (hameaux, dépôts, péages, gares, sites). Les 12 capitales ci-dessous sont **validées** par le porteur du projet (DEC-240). Les alternatives ne sont plus retenues ; elles restent notées pour mémoire.
 
-| Région | Capitale proposée | Repère réel et raison | Alternative |
+| Région | Capitale | Repère réel et raison | Alternative (non retenue) |
 |---|---|---|---|
 | Armorique | **Dol** (validé) | Mont-Dol, marais, marées | — |
 | Pertuis | Brouage | Ancienne place forte au milieu des marais, que la mer a quittée : remparts, digues, marées | La Rochelle |
@@ -64,7 +64,7 @@ Principe décidé : **une grande ville par région**, capitale et lieu majeur du
 | Provence | Marseille (Massalie) | Port, étangs salés, raffineries de l'Étang | Martigues |
 | Alpes | Briançon | Ville forte la plus haute, forts de montagne, cols | Grenoble |
 
-Une fois validées : fiche de lieu par capitale (comme `docs/lore/dol-cite-des-marees.md`), puis passage de `carte_monde.json` à 12 capitales + lieux mineurs (lot de code distinct).
+Prochaines étapes : fiche de lieu par capitale (comme `docs/lore/dol-cite-des-marees.md`), puis passage de `carte_monde.json` à 12 capitales + lieux mineurs (lot de code distinct).
 
 ## Routes (22)
 
