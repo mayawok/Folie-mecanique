@@ -9,7 +9,7 @@ Le journal complet et chronologique est [`DECISIONS.md`](DECISIONS.md). Cet inde
 - **Art et audio** : DEC-020, 021, 023, 024, 066, 084 à 090, 138, 153, 185, 201, 202.
 
 ## Univers et lore
-- **Bible** : DEC-061, 091 à 095, 097, 098, 101, 102, 109, 131 à 134, 152, 169, 170, 197, 237 (Bretagne et Dol). **VISION.md archivé** : DEC-179.
+- **Bible** : DEC-061, 091 à 095, 097, 098, 101, 102, 109, 131 à 134, 152, 169, 170, 197, 237, 238 (Bretagne et Dol ; Dol remplace Kerbrume). **VISION.md archivé** : DEC-179.
 - **Carte et régions** : DEC-017 (remplacée par DEC-101), DEC-154, 163, 170.
 
 ## Cap du jeu

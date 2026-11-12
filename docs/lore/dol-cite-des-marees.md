@@ -1,159 +1,143 @@
 # Dol — la Cité des Marées
 
 **Projet :** Folie Mécanique  
-**Catégorie :** Lore — fiche de lieu (complément à la Bible, section 04.5 et 04.5 bis)  
+**Catégorie :** Lore — fiche de lieu (complément à la Bible, sections 04.5 bis et 05.3)  
 **Identifiant :** LOC-013 — Dol (rattaché à LOC-006 — Bretagne)  
-**Statut :** Texte commandé par le porteur du projet le 12/11/2026 (DEC-237) ; points à valider : OQ-039  
-**Version :** 0.1  
-**Références existantes :** Bible, sections 01.2, 04.5, 05.3 (FAC-003) ; `docs/design/PROJETS.md` PRJ-001 (baie des marées) et PRJ-004 (côte bretonne) ; `docs/design/CARTE.md` (Kerbrume) ; `docs/art/DIRECTION_ARTISTIQUE.md` 4.3.
+**Statut :** Validé par le porteur du projet (DEC-237, révisé par DEC-238 le 12/11/2026) ; points encore ouverts : OQ-039  
+**Version :** 0.2  
+**Références existantes :** Bible, sections 01.2, 04.5, 05.3 (FAC-003) ; `docs/design/PROJETS.md` PRJ-001 (baie des marées) et PRJ-004 (côte bretonne) ; `docs/design/CARTE.md` ; `docs/art/DIRECTION_ARTISTIQUE.md` 4.3.
 
-> **Réel / fictif.** Ce qui est marqué **[réel]** s'appuie sur la ville de Dol-de-Bretagne et les marais de Dol tels qu'ils existent.
+> **Réel / fictif.** Ce qui est marqué **[réel]** s'appuie sur des lieux existants (Mont-Dol, Dol-de-Bretagne, marais de Dol).
 > Ce qui est marqué **[fiction]** appartient au monde du jeu et ne doit jamais être présenté comme un fait historique.
 
 ---
 
 ## 1. Nom et place dans le monde
 
-- Nom officiel : **DOL**. Trois lettres, pas de surnom obligatoire dans les textes courants. « La Cité des Marées » est un titre descriptif, réservé aux titres et aux textes d'ambiance.
-- Principal centre de population et d'organisation de la Bretagne (LOC-006).
-- **Ce n'est pas une faction.** Dol est un centre régional autonome, avec ses propres règles et ses propres assemblées. Elle n'appartient pas au Réseau des Marées (FAC-003) et n'en est pas la capitale (le Réseau n'en a pas, Bible 05.3) ; des familles du Réseau y vivent, y commercent et y réparent leurs bateaux, comme d'autres.
-- Aucune faction existante n'est modifiée pour lui faire une place.
+- Nom officiel : **DOL**. Trois lettres, pas de surnom obligatoire. « La Cité des Marées » est réservé aux titres et textes d'ambiance.
+- **Seule grande ville de Bretagne** (LOC-006) et **capitale du Réseau des Marées** (FAC-003). Le reste de la région n'est fait que de villages, de hameaux de pêcheurs et de ports à moitié vides.
+- Dans le jeu, Dol **remplace Kerbrume** comme ville-étape bretonne et point de départ (DEC-238).
+- Capitale ne veut pas dire chef unique : les familles du Réseau y tiennent leur conseil, leurs archives et leurs tables des marées, mais le Réseau reste fondé sur les accords oraux et les dettes entre familles (Bible 05.3).
+- **Mont-Saint-Michel** : quelque chose s'y trouve, encore à définir (PRJ-001, OQ-028, OQ-039).
 
 ## 2. L'exception bretonne
 
-Partout ailleurs, l'effondrement a été suivi de militarisation et de luttes pour les ressources. Les communautés bretonnes ont pris une autre voie, peu à peu : elles ont refusé la brutalité comme fondement de leur organisation. Elles valorisent la sagesse, la tradition, la paix, la coopération, la transmission des connaissances et le respect des cycles naturels.
+Partout ailleurs, l'effondrement a été suivi de militarisation et de luttes pour les ressources. Autour de Dol, les communautés ont pris une autre voie : elles ont refusé la brutalité comme fondement de leur organisation. Sagesse, tradition, paix, coopération, transmission des connaissances, respect des cycles naturels.
 
-La population est peu armée et n'a pas de grande organisation militaire. Elle n'est ni naïve ni faible : sa défense repose sur la connaissance du territoire, les ouvrages hydrauliques et la maîtrise des marées.
+Population peu armée, sans organisation militaire comparable aux factions. Ni naïve ni faible : sa défense repose sur la connaissance du territoire, les ouvrages hydrauliques et la maîtrise des marées.
 
-Ce choix n'est pas une utopie (voir 8).
+Ce pacifisme est celui de Dol et de ses villages. Le Réseau des Marées compte aussi des équipages devenus pillards en mer (Bible 05.3) : sa capitale les tolère tant que les accords sont respectés, et c'est l'une de ses contradictions.
 
 ## 3. Organisation urbaine : deux niveaux
 
-### 3.1 La ville haute — mémoire et continuité
+### 3.1 Le repère réel **[réel]**
 
-**[réel]** Dol-de-Bretagne est bâtie au rebord d'un plateau granitique qui domine les marais : l'ancienne ligne de côte, une falaise morte tournée vers la baie du Mont-Saint-Michel. Éléments réels à respecter :
+Le **Mont-Dol** est une butte de granite isolée d'environ 65 m, au milieu des marais de Dol, à quelques kilomètres de la baie du Mont-Saint-Michel. Un village ancien, avec son église, est installé à son pied. Au sommet se trouvent une chapelle, une tour surmontée d'une statue, un ancien moulin et des vestiges d'installations de guet (détail exact à vérifier avant production artistique). La ville réelle de Dol-de-Bretagne, avec sa cathédrale Saint-Samson, est à environ 3 km au sud.
 
-- **La cathédrale Saint-Samson** : grand édifice gothique en granite (XIIIe siècle pour l'essentiel), ancien siège d'un évêché jusqu'à la Révolution ; deux tours de façade inégales, massive silhouette visible de loin depuis les marais. Élément structurant de la silhouette.
-- **La Grande-Rue** et ses maisons anciennes à porches et piliers, dont des maisons romanes et médiévales en pierre parmi les plus anciennes de France.
-- Restes de **remparts** et promenade des douves sur le rebord du plateau.
-- Rues étroites, maisons de granit, bâtiments religieux et publics.
-- **Le Mont-Dol** : butte de granite isolée au nord, au milieu des marais, repère visuel majeur du paysage.
+**[fiction]** Dans le jeu, Dol est rassemblée autour du Mont-Dol : la géographie est resserrée volontairement.
 
-**[fiction]** La ville haute reste le cœur permanent de Dol. On y trouve :
+### 3.2 La ville basse — le village historique, au pied du mont **[fiction inspirée du réel]**
 
-- les lieux de décision (assemblée des paroisses et des villages, conseil des digues) ;
-- les **archives** : registres des marées, plans des écluses, cadastre des marais, mémoires des anciens ;
-- les espaces communautaires, lieux de rassemblement et institutions régionales ;
-- les réserves alimentaires de sécurité (greniers hors d'eau).
+Le cœur ancien de Dol est **en contrebas du Mont-Dol**, sur les terres les plus fermes au pied de la butte.
 
-Elle est en hauteur et échappe aux inondations ordinaires des plaines.
+- Bâtiments anciens en pierre et granit, rues étroites, maisons traditionnelles, architecture médiévale et religieuse. L'église et les grandes bâtisses de pierre structurent la silhouette.
+- Les **institutions** : conseil des familles du Réseau, conseil des digues, archives (registres et tables des marées, plans des écluses, cadastre des marais), lieux de rassemblement.
+- Autour, gagnés sur les marais par des digues, des canaux et des chaussées surélevées : marchés, entrepôts, ateliers, pêcheries, stockage, quais et zones de chargement des convois.
 
-> Note de cohérence : la ville réelle est sur un **rebord de plateau**, pas sur une butte isolée. Le terme « butte historique » du cahier des charges est conservé dans l'esprit (la ville haute domine les marais) ; la seule vraie butte isolée est le Mont-Dol. Voir OQ-039.
+C'est la mémoire et la continuité de la société bretonne, mais aussi la partie **exposée à la mer** : protégée par les digues, elle vit au rythme des marées.
 
-### 3.2 La ville basse — l'économie de la mer **[fiction]**
+### 3.3 La ville haute — le village neuf, au sommet du mont **[fiction]**
 
-Autour de la ville haute, dans les anciens marais, une seconde ville a été aménagée au fil des générations grâce à des digues, des canaux, des chaussées surélevées et des ouvrages hydrauliques. C'est une extension fictionnelle.
+Un second village a été construit plus récemment **au sommet du Mont-Dol**, autour de la chapelle, de la tour et du vieux moulin, qui restent les seuls bâtiments anciens du haut.
 
-Elle accueille : marchés, entrepôts, ateliers, installations de pêche, stockage alimentaire, habitations, comptoirs, espaces de transit, zones de stationnement et de chargement des convois.
+- Construction plus pauvre et moins soignée : **matériaux de récupération**, tôles, **épaves**, **morceaux de bateaux** (coques retournées en toits, mâts en poutres, bordés en palissades, cabines de chalutiers en abris).
+- Habité par ceux qui sont arrivés après : réfugiés de la côte, familles chassées par les inondations, marins sans bateau.
+- Rôle : refuge hors d'eau lors des grandes marées et des inondations, **poste de guet** sur la baie et les marais (on y lit la mer et l'on y voit venir les convois), greniers de secours.
 
-C'est là que transitent la plupart des marchandises et des convois venant de l'intérieur ou partant vers les autres régions.
+Tension naturelle : le haut est sûr mais pauvre, le bas est riche de son histoire mais menacé par l'eau.
 
-### 3.3 Vivre au rythme des marées **[fiction]**
+### 3.4 Vivre au rythme des marées
 
-**[réel]** Les marées de la baie du Mont-Saint-Michel sont parmi les plus fortes d'Europe, avec un marnage pouvant dépasser une dizaine de mètres en vives-eaux. Les marais de Dol ont été gagnés sur la mer depuis le Moyen Âge et sont protégés par une longue digue littorale, dite digue de la Duchesse Anne.
+**[réel]** Les marées de la baie du Mont-Saint-Michel sont parmi les plus fortes d'Europe ; les marais de Dol ont été gagnés sur la mer depuis le Moyen Âge et sont protégés par une longue digue littorale, dite digue de la Duchesse Anne.
 
-**[fiction]** Le dérèglement climatique (EVT-002) a rendu les marées plus fortes et moins prévisibles (cohérent avec PRJ-001) ; la mer est revenue jusqu'au pied de Dol.
+**[fiction]** Le dérèglement climatique (EVT-002) a rendu les marées plus fortes et moins prévisibles (cohérent avec PRJ-001) ; la mer est revenue jusqu'au pied du Mont-Dol.
 
-- **Marée basse** : l'eau se retire de certaines zones aménagées ; routes, quais et passages deviennent praticables ; les convois circulent, chargent et déchargent.
+- **Marée basse** : routes, quais et passages deviennent praticables ; les convois circulent, chargent, déchargent.
 - **Marée montante** : des secteurs de la ville basse deviennent peu à peu inaccessibles.
-- Les habitants connaissent les horaires et les niveaux ; toute l'activité suit ces cycles.
-- Les visiteurs respectent les horaires de circulation et les consignes locales. Un convoi qui les ignore risque l'enlisement ou le noyage de ses moteurs.
-
-La ville basse n'est pas seulement un port : son fonctionnement dépend directement de la mer.
+- Les habitants connaissent horaires et niveaux ; toute l'activité suit ces cycles. Les visiteurs respectent les horaires de circulation et les consignes locales, sous peine d'enlisement ou de moteurs noyés.
 
 ## 4. Les digues et la défense hydraulique **[fiction]**
 
 ### 4.1 Le réseau
 
-Digues périphériques, écluses, canaux, portes hydrauliques, bassins de rétention, routes surélevées, zones d'inondation contrôlée. Tout est mécanique et manuel, dans la technique des années 1940 : vannes à crémaillère, treuils, portes busquées en bois et fer, pompes à moteur thermique pour les bassins. Aucune technologie moderne.
-
-L'entretien est collectif : chaque village doit des journées de travail aux digues. Ce patrimoine technique et culturel est la fierté de la région.
+Digues périphériques, écluses, canaux, portes hydrauliques, bassins de rétention, routes surélevées, zones d'inondation contrôlée. Technique mécanique et manuelle des années 1940 : vannes à crémaillère, treuils, portes de bois et de fer, quelques pompes à moteur thermique. Rien de moderne. Entretien collectif : chaque village doit des journées de travail aux digues.
 
 ### 4.2 Défendre sans détruire
 
-Face à une menace grave, le conseil des digues peut modifier le fonctionnement du réseau : ouvrir des écluses, sacrifier volontairement certaines protections, inonder les plaines basses. Routes noyées, champs impraticables, accès à la ville haute très réduits.
-
-Les étrangers ne connaissent pas les passages encore praticables ; les habitants connaissent les chemins surélevés, les chenaux et les horaires.
-
-Cette défense ne vise pas à détruire l'ennemi, mais à l'empêcher de progresser.
+Face à une menace grave, le conseil des digues peut ouvrir des écluses, sacrifier des protections et inonder les plaines basses : routes noyées, champs impraticables, accès au mont très réduits. Les étrangers ignorent les passages encore praticables ; les habitants connaissent les chemins surélevés, les chenaux et les horaires. On empêche l'ennemi de progresser, on ne cherche pas à le détruire.
 
 ### 4.3 La faiblesse
 
-Une digue rompue, une tempête exceptionnelle ou une erreur de manœuvre peuvent causer une catastrophe : récoltes perdues, villages isolés, approvisionnement de toute la région menacé. Chaque inondation défensive coûte une saison de cultures sur les terres sacrifiées (sel dans les sols).
-
-**La mer protège Dol, mais elle peut aussi la condamner.**
+Une digue rompue, une tempête exceptionnelle ou une erreur de manœuvre peuvent tout perdre : récoltes, villages isolés, approvisionnement de la région. Chaque inondation défensive sale les terres et coûte au moins une saison de cultures. **La mer protège Dol, mais elle peut aussi la condamner.**
 
 ## 5. Bateaux et vie maritime
 
-Activité réelle mais à l'échelle de la baie : pêche côtière et pêcheries d'estran, cabotage, transport par canaux. Bateaux adaptés aux eaux peu profondes et aux grands marnages : bateaux de pêche traditionnels, petites embarcations de transport, chalands, caboteurs, bateaux de travail, bateaux de récupération et de réparation. Plutôt à fond plat ou à quille courte, capables de rester posés sur la vase.
+Pêche de baie et d'estran, petit cabotage, transport par les canaux. Bateaux adaptés aux eaux peu profondes et aux grands marnages : bateaux de pêche traditionnels, petites embarcations, chalands, caboteurs, bateaux de travail, de récupération et de réparation.
 
-**Image caractéristique de Dol** : à marée basse, de nombreux bateaux restent **échoués** dans les zones portuaires et les chenaux, retenus par leurs amarres, posés sur la vase ou sur leur quille. Ils ne sont **ni abandonnés ni détruits** : ils attendent la prochaine marée. Leurs propriétaires connaissent parfaitement les cycles.
+**Image caractéristique** : à marée basse, les bateaux restent **échoués** dans les chenaux et les zones portuaires, retenus par leurs amarres, posés sur la vase ou sur leur quille. Ni abandonnés ni détruits : ils attendent la marée.
 
-> Différence avec PRJ-004 : les bateaux **abandonnés** (épaves à fouiller) appartiennent à la côte bretonne hors de Dol. À Dol, les bateaux échoués sont vivants et entretenus ; on ne les fouille pas.
+> À Dol, les bateaux échoués sont vivants. Les épaves à fouiller (PRJ-004) sont sur la côte, hors de la ville, ou déjà démontées pour bâtir le village du haut.
 
-## 6. Économie et ressources
+## 6. Économie et ressources : tout est tendu
 
-Dol est le grenier de l'ouest. Sa principale richesse stratégique est sa **capacité alimentaire**.
+Comme partout dans le monde (DEC-097), **les ressources sont rares et tendues**. Dol n'est pas un grenier d'abondance.
 
-| Activité | Contenu | Ressource du jeu (nomenclature existante) |
+| Activité | Réalité | Ressource du jeu |
 |---|---|---|
-| Agriculture | céréales, légumes, cultures vivrières, élevage (dont prés salés), conservation des récoltes | nourriture |
-| Pêche de baie | poissons, coquillages, produits de la mer, salaison, fumage, conserverie | nourriture |
-| Eau | citernes et puits de la ville haute ; l'eau douce reste gérée à part de l'eau salée | eau |
-| Activités complémentaires | réparation de bateaux, travail du bois, entretien hydraulique, transformation et stockage des aliments, commerce régional | (matériaux, échanges) |
+| Agriculture | un peu de céréales, de légumes et d'élevage sur les terres de marais ; rendements faibles, sel et inondations | nourriture |
+| Pêche | un peu de pêche dans la baie et sur l'estran (Bible 04.5 : la pêche rapporte peu) | nourriture |
+| Eau | citernes et puits ; l'eau douce est précieuse dans un pays d'eau salée | eau |
+| Activités complémentaires | réparation de bateaux, bois, entretien des digues, conservation des aliments, commerce | (échanges) |
 
-Aucune nouvelle catégorie de ressource n'est créée : les produits de Dol entrent dans **nourriture** et **eau** (ressources du jeu, DEC-208 et HUD), et dans les échanges. La Bible n'a pas d'identifiant RES pour la nourriture ; s'il en faut un, il sera attribué par le porteur du projet (OQ-039).
+Dol **subsiste** et parvient à **vendre un petit surplus** aux autres, ce qui fait d'elle un fournisseur recherché de l'ouest. Mais la marge est mince : une mauvaise saison, une digue rompue ou trop de vente, et c'est la disette. Chaque cargaison qui part est un choix.
 
-Ce qui manque à Dol, et qu'elle achète : **carburant** (essence, gazole : la Bretagne n'est pas pétrolière, Bible 04.5), métal, munitions, pièces mécaniques.
+Aucune nouvelle catégorie de ressource : nourriture et eau (ressources du jeu). Dol achète ce qu'elle n'a pas : **carburant** (essence, gazole), métal, munitions, pièces.
 
 ## 7. Dol dans le monde
 
-- **Voisins** : Kerbrume (Rennes, ville-étape du Réseau des Marées, `CARTE.md`) au sud ; le Cotentin et Port-Estuaire (Le Havre) au nord-est ; la baie et le rocher fortifié de PRJ-001 (Mont-Tombe, nom provisoire) au nord-est, en vue directe.
-- **Routes commerciales** : convois de vivres vers l'intérieur et l'est ; cabotage le long de la côte ; chaussées surélevées vers Kerbrume. Les convois arrivent et repartent selon le calendrier des marées.
-- **Échanges** : vivres contre carburant, métal, pièces et munitions. Les Raffineurs du Sud (FAC-002) et les Compagnies de l'Est (FAC-001) cherchent à sécuriser cet approvisionnement, sans contrôler Dol.
-- **Accès** : par la route (chaussées surélevées, horaires obligatoires), par l'eau (cabotage, chalands par les canaux), éventuellement par une voie ferrée (communautés ferroviaires, à valider).
-- **Conflits possibles** : pressions et convoitises des factions armées, prix des vivres, convois pillés sur les routes de sortie, disettes ailleurs qui font monter les tensions.
+- **Voisins** : Les Pertuis (La Rochelle) au sud par la Route des grèves ; Port-Estuaire (Le Havre) au nord-est, par le Cotentin ; le Mont-Saint-Michel en vue dans la baie (usage à définir).
+- **Routes** : chaussées surélevées et horaires de marée obligatoires ; cabotage le long de la côte.
+- **Échanges** : vivres contre carburant, métal, pièces, munitions. Les factions armées (FAC-001, FAC-002) cherchent à sécuriser cet approvisionnement sans contrôler Dol.
+- **Conflits** : convoitises, prix des vivres, convois de sortie pillés, accusations de garder le meilleur pour soi.
 
 ## 8. Société et traditions
 
-Rassemblements, marchés, fêtes saisonnières (fêtes des grandes marées), chants, musique, cérémonies communautaires. Forte transmission orale ; la parole des anciens compte, notamment sur les marées.
+Rassemblements, marchés, fêtes saisonnières (grandes marées), chants, musique, cérémonies communautaires. Transmission orale ; la parole des anciens compte, surtout sur la mer. Coopération entre villages. Méfiance envers les groupes armés, hospitalité réelle mais conditionnée aux règles (horaires, armes rangées, part aux corvées).
 
-Société fondée sur la coopération entre villages. Méfiance envers les groupes armés ; hospitalité réelle mais conditionnée au respect des règles (horaires, armes rangées en ville, part aux corvées pour ceux qui restent).
+**Pas d'utopie.** Tensions à conserver :
 
-**Pas d'utopie.** Tensions internes à conserver :
-
-- villages du haut contre villages du bas quand il faut choisir les terres à inonder ;
-- familles du Réseau des Marées, parfois pillardes en mer, tolérées pour leur commerce ;
-- prix des vivres et accusations d'accaparement ;
+- le bas, ancien et institutionnel, contre le haut, pauvre et nouveau venu ;
+- quelles terres inonder quand il faut se défendre ;
+- les équipages pillards du Réseau, tolérés pour leur commerce ;
+- combien vendre quand on a à peine assez ;
 - débat sur l'armement : certains veulent des milices ;
-- autres régions qui jugent ce pacifisme permis par une situation privilégiée.
+- les autres régions jugent ce pacifisme permis par une situation privilégiée.
 
 ## 9. Le danger principal : la mer
 
-Grandes marées, tempêtes, ruptures de digues, inondations, érosion, canaux obstrués, erreurs de gestion, pertes agricoles. Pillards et factions restent secondaires. La mer rythme les déplacements, les récoltes, le commerce, la pêche et la vie quotidienne.
+Grandes marées, tempêtes, ruptures de digues, inondations, érosion, canaux obstrués, erreurs de gestion, pertes agricoles. Pillards et factions restent secondaires.
 
 > **« La Bretagne n'a pas vaincu la mer. Elle a appris à vivre avec elle. »**
 
-## 10. Atmosphère visuelle (résumé ; détail dans `docs/art/DIRECTION_ARTISTIQUE.md`, 4.3)
+## 10. Atmosphère visuelle (détail : `docs/art/DIRECTION_ARTISTIQUE.md`, 4.3)
 
-Marais, plaines agricoles, canaux, digues, pierre ancienne, zones portuaires, routes surélevées, bateaux échoués. La ville haute et la cathédrale dominent ; la ville basse se fond dans les plaines. À marée basse : vase et sable humide, brume saline et miroitement blanchâtre, reflets des silhouettes. Contemplatif, légèrement mélancolique, mystérieux, **jamais fantastique** : pas de magie, pas de surnaturel, pas d'anachronisme.
+La butte du Mont-Dol, couronnée de la chapelle, de la tour et du village de récupération, domine les marais et se voit de très loin. À son pied, le village de pierre et ses quais se fondent dans les plaines, les canaux et les digues. À marée basse : vase, sable humide, brume saline, miroitement blanchâtre, bateaux échoués. Contemplatif, mélancolique, mystérieux, jamais fantastique.
 
-Image de référence d'ambiance (non canon, non utilisée en jeu) : `docs/art/reference/concept_dol_maree_basse_2026-11-12.png`.
+Image d'ambiance (non canon, ne correspond pas à l'implantation décidée) : `docs/art/reference/concept_dol_maree_basse_2026-11-12.png`.
 
-## 11. Contradictions relevées (à trancher, OQ-039)
+## 11. Points encore ouverts (OQ-039)
 
-1. **Pêche** : la Bible (04.5) dit que la pêche « ne rapporte presque rien ». Cette fiche limite la pêche à la baie et aux pêcheries côtières, en complément de l'agriculture, qui reste la vraie richesse.
-2. **Abondance alimentaire** : le monde est pauvre en ressources et en végétation (DEC-097). Dol est présentée comme une exception **relative** et fragile (une rupture de digue suffit à affamer la région).
-3. **Bretagne « pas nécessairement pacifique »** : la Bible dit que le Réseau des Marées compte des pillards. Le pacifisme concerne la société de Dol et des villages, pas tous les Bretons.
-4. **Ville-étape** : la Bretagne du jeu est représentée par Kerbrume (Rennes). Dol est-elle une 14e ville-étape, remplace-t-elle Kerbrume, ou reste-t-elle un lieu d'intérêt ?
-5. **Butte** : voir 3.1.
+1. Ce qui se trouve au Mont-Saint-Michel.
+2. Identifiant RES pour la nourriture, si besoin.
+3. Accès ferroviaire à Dol.
+4. Détail exact des bâtiments du sommet du Mont-Dol, à vérifier avant production artistique.

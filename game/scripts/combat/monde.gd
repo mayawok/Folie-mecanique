@@ -77,7 +77,7 @@ func _init(modele) -> void:
 # --- Carte -----------------------------------------------------------------
 
 # Carte fixe (DEV-039, DEC-216) : un secteur par ville-étape de la carte du monde (carte_monde.json), identique à chaque partie.
-# Le convoi part de Kerbrume ; on ne voyage que de ville en ville par les routes de la carte.
+# Le convoi part de Dol (id « kerbrume », DEC-238) ; on ne voyage que de ville en ville par les routes de la carte.
 func _generer_carte() -> void:
 	secteurs = []
 	for l in CarteMonde.villes():

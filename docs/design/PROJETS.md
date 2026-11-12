@@ -69,7 +69,7 @@ P1 modèle (niveau d'eau, point critique par véhicule, avertissement, tests san
 
 ### À trancher (OQ-028)
 
-- Lien avec Dol (LOC-013, DEC-237), cité des marées au fond de la baie : `docs/lore/dol-cite-des-marees.md`.
+- Lien avec Dol (LOC-013, DEC-237), capitale du Réseau des Marées au fond de la baie (DEC-238) ; le Mont-Saint-Michel accueillera quelque chose, à définir : `docs/lore/dol-cite-des-marees.md`.
 - Emplacement final et nom de la ville (Mont-Tombe ?), et rôle de la baie dans l'histoire (chapitre, mission du Réseau des Marées ?).
 - Rythme des marées : deux par jour de jeu, ou plus lent pour laisser le temps d'agir ?
 - Un moteur noyé est-il réparable (vidange, séchage au garage) ou perdu pour de bon ?

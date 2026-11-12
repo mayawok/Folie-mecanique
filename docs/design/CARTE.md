@@ -29,7 +29,7 @@ Refusé hors Mode créatif et pendant une mission du maire.
 
 | Ville | Repère réel | Faction | Niveau |
 |---|---|---|---|
-| Kerbrume | Rennes | Réseau des Marées | 1 |
+| Dol (id `kerbrume`, DEC-238) | Mont-Dol, Dol-de-Bretagne | Réseau des Marées (capitale) | 1 |
 | Les Pertuis | La Rochelle | Réseau des Marées | 1 |
 | Port-Estuaire | Le Havre | Réseau des Marées | 3 |
 | Vieille-Capitale | Paris | Compagnies de l'Est | 5 |
@@ -43,12 +43,12 @@ Refusé hors Mode créatif et pendant une mission du maire.
 | Massalie | Marseille | Raffineurs du Sud | 4 |
 | Hautes-Combes | Alpes | Hautes-Terres | 5 |
 
-Le danger monte de l'ouest (Bretagne, départ conseillé à Kerbrume) vers l'est (Rhin-Gris, fin de partie).
+Le danger monte de l'ouest (Bretagne, départ conseillé à Dol) vers l'est (Rhin-Gris, fin de partie).
 
 ## Routes (22)
 
 Trois types : **route** (entre zones tenues), **piste** (no man's land, DEC-095), **voie ferrée** (rails sur la carte : on roule le long).
-Chaque route a un danger de 1 à 7 et une zone de décor. Exemples : Route des grèves (Kerbrume–Les Pertuis, danger 1) ;
+Chaque route a un danger de 1 à 7 et une zone de décor. Exemples : Route des grèves (Dol–Les Pertuis, danger 1) ;
 Route des citernes (Les Chais-Noirs–Massalie, par Lacq, danger 5) ; Traversée de l'Est (Fort-des-Puits–Rhin-Gris, danger 7).
 
 ## Lieux d'intérêt (30)
@@ -56,7 +56,7 @@ Route des citernes (Les Chais-Noirs–Massalie, par Lacq, danger 5) ; Traversée
 - **Ressources** : pétrole brut (Brie, Parentis, vieux puits du Rhin), raffineries (Étang, Estuaire), gaz et chimie (Lacq, zone « maudite »),
   mines (charbon, fer, Massif, carrières), eau (sources des Hautes-Terres, lac de montagne, puits artésien), dépôts de carburant
   (Normandie, Loire), épaves et arsenal (Bretagne).
-- **Dol (LOC-013)** : grenier de l'ouest et cité des marées au nord de Kerbrume, face à la baie ; pas encore dans `carte_monde.json` (statut à trancher, OQ-039). Fiche : `docs/lore/dol-cite-des-marees.md`.
+- **Dol (LOC-013)** : seule grande ville de Bretagne, capitale du Réseau des Marées, remplace Kerbrume (DEC-238). Fiche : `docs/lore/dol-cite-des-marees.md`. Mont-Saint-Michel : usage à définir (OQ-039).
 - **Sites** : bunkers (vieille ligne, Alpes, Pyrénées, Nord), antenne des Veilleurs, péages des Hommes du Péage (Landes, Rhône, Nord),
   champs de bataille (Somme, front de Champagne), vallée préservée (rumeur, jamais visitée), déserts (Beauce, Landes).
 

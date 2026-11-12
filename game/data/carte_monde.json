@@ -108,17 +108,17 @@
   {
    "id": "kerbrume",
    "type": "ville",
-   "nom": "Kerbrume",
+   "nom": "Dol",
    "pos": [
-    0.2181,
-    0.2852
+    0.2262,
+    0.2362
    ],
    "faction": "FAC-003",
    "niveau": 1,
    "zone": "terre",
-   "repere": "Rennes (Bretagne)",
+   "repere": "Mont-Dol et Dol-de-Bretagne (Bretagne)",
    "maire": "Le Goff",
-   "note": "Ville de granit des familles du Réseau des Marées. Point de départ conseillé : calme, marché aux épaves.",
+   "note": "Seule grande ville de Bretagne, capitale du Réseau des Marées. Village historique au pied du Mont-Dol, village de récupération au sommet. Vit au rythme des marées. Point de départ conseillé. Identifiant technique conservé (ancienne Kerbrume, DEC-238).",
    "region": "armorique"
   },
   {

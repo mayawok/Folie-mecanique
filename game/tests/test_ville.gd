@@ -29,7 +29,7 @@ func _init() -> void:
 	m.monde._assaut_t = 1.0e9
 	ok(m.ville_active() and m.ville_phase() == "approche", "une ville attend sur la route au départ")
 	var nom := String(m.ville.nom)
-	ok(nom == "Kerbrume", "la première ville est Kerbrume, nom fixe de la carte : %s" % nom)
+	ok(nom == "Dol", "la première ville est Dol (ex-Kerbrume, DEC-238), nom fixe de la carte : %s" % nom)
 	var x0 := float(m.ville.x0)
 	ok(absf(Terrain.relief(x0 + 40.0) - Terrain.relief(x0 + 110.0)) < 0.01, "la ville est plate")
 	# Approche : on avance, le convoi freine seul et s'arrête devant la porte
