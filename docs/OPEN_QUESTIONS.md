@@ -268,3 +268,7 @@ Quels camions pour la 1re série de pièces (proposé : Berliet GDR, Citroën T2
 ## OQ-039 — Dol et la Bretagne (12/11, en partie résolue par DEC-238)
 
 Résolu : Dol remplace Kerbrume, ressources tendues, implantation autour du Mont-Dol, capitale du Réseau. Reste : ce qui s'installe au Mont-Saint-Michel (lien PRJ-001, OQ-028) ; identifiant RES pour la nourriture ; accès ferroviaire ; détail réel des bâtiments du sommet du Mont-Dol. Voir `docs/lore/dol-cite-des-marees.md` §11.
+
+## OQ-040 — Capitales régionales (12/11)
+
+Valider la capitale de chaque région parmi les propositions de `docs/design/CARTE.md` (Brouage, Le Havre, Lens, Paris, Verdun, Chartres, Bordeaux, Le Puy-en-Velay, Lyon, Marseille, Briançon) ; garder les noms réels ou des noms de jeu (Dol garde son nom réel) ; nom du terminus ferroviaire avant Dol.

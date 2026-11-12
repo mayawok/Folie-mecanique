@@ -3,8 +3,8 @@
 **Projet :** Folie Mécanique  
 **Catégorie :** Lore — fiche de lieu (complément à la Bible, sections 04.5 bis et 05.3)  
 **Identifiant :** LOC-013 — Dol (rattaché à LOC-006 — Bretagne)  
-**Statut :** Validé par le porteur du projet (DEC-237, révisé par DEC-238 le 12/11/2026) ; points encore ouverts : OQ-039  
-**Version :** 0.2  
+**Statut :** Validé par le porteur du projet (DEC-237, révisé par DEC-238 et DEC-239 le 12/11/2026) ; points encore ouverts : OQ-039  
+**Version :** 0.3  
 **Références existantes :** Bible, sections 01.2, 04.5, 05.3 (FAC-003) ; `docs/design/PROJETS.md` PRJ-001 (baie des marées) et PRJ-004 (côte bretonne) ; `docs/design/CARTE.md` ; `docs/art/DIRECTION_ARTISTIQUE.md` 4.3.
 
 > **Réel / fictif.** Ce qui est marqué **[réel]** s'appuie sur des lieux existants (Mont-Dol, Dol-de-Bretagne, marais de Dol).
@@ -107,6 +107,7 @@ Aucune nouvelle catégorie de ressource : nourriture et eau (ressources du jeu).
 
 - **Voisins** : Les Pertuis (La Rochelle) au sud par la Route des grèves ; Port-Estuaire (Le Havre) au nord-est, par le Cotentin ; le Mont-Saint-Michel en vue dans la baie (usage à définir).
 - **Routes** : chaussées surélevées et horaires de marée obligatoires ; cabotage le long de la côte.
+- **Train (DEC-239)** : le train **ne va pas jusqu'à Dol** à cause des marées. Les voies des marais sont noyées ou instables ; la ligne s'arrête plus au sud, sur les hauteurs de granit, à une **gare de terminus hors d'eau** (repère réel : Combourg, sur l'ancienne ligne Rennes–Saint-Malo ; nom de jeu à définir). Le dernier tronçon se fait **en camion** par les chaussées surélevées, à marée basse, ou **en char à voile** sur les grèves découvertes (lien PRJ-003). Le terminus est un lieu de transbordement animé : quais, entrepôts, attelages, convois qui attendent l'heure de la marée. Les communautés ferroviaires y commercent.
 - **Échanges** : vivres contre carburant, métal, pièces, munitions. Les factions armées (FAC-001, FAC-002) cherchent à sécuriser cet approvisionnement sans contrôler Dol.
 - **Conflits** : convoitises, prix des vivres, convois de sortie pillés, accusations de garder le meilleur pour soi.
 
@@ -139,5 +140,4 @@ Image d'ambiance (non canon, ne correspond pas à l'implantation décidée) : `d
 
 1. Ce qui se trouve au Mont-Saint-Michel.
 2. Identifiant RES pour la nourriture, si besoin.
-3. Accès ferroviaire à Dol.
 4. Détail exact des bâtiments du sommet du Mont-Dol, à vérifier avant production artistique.

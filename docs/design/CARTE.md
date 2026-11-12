@@ -45,6 +45,27 @@ Refusé hors Mode créatif et pendant une mission du maire.
 
 Le danger monte de l'ouest (Bretagne, départ conseillé à Dol) vers l'est (Rhin-Gris, fin de partie).
 
+## Capitales régionales (DEC-239, villes à valider : OQ-040)
+
+Principe décidé : **une grande ville par région**, capitale et lieu majeur du scénario, sur le modèle de Dol. Tout le reste de la carte devient des **lieux mineurs** (hameaux, dépôts, péages, gares, sites). Proposition, à valider région par région :
+
+| Région | Capitale proposée | Repère réel et raison | Alternative |
+|---|---|---|---|
+| Armorique | **Dol** (validé) | Mont-Dol, marais, marées | — |
+| Pertuis | Brouage | Ancienne place forte au milieu des marais, que la mer a quittée : remparts, digues, marées | La Rochelle |
+| Estuaire | Le Havre | Grand port détruit en 1944 : docks, grues, ruines de la Manche | Honfleur (vieux port) |
+| Pays Noir | Lens | Cité minière, terrils, chevalements | Lille |
+| Île-Capitale | Vieille-Capitale (Paris) | Fort-des-Puits devient lieu mineur | — |
+| Marche de l'Est | Verdun | Forts, tranchées, citadelle : le front figé par excellence | Strasbourg |
+| Beauce-Loire | Chartres | Cathédrale visible de 30 km au-dessus du désert de Beauce, comme Dol au-dessus des marais | Orléans |
+| Landes | Bordeaux (Les Chais-Noirs) | Port, chais, raffineurs | Parentis (pétrole) |
+| Hautes-Terres | Le Puy-en-Velay | Pitons volcaniques coiffés de chapelles, viaducs | Clermont |
+| Confluent | Lyon (Confluent) | Rhône et Saône, usines, écluses | — |
+| Provence | Marseille (Massalie) | Port, étangs salés, raffineries de l'Étang | Martigues |
+| Alpes | Briançon | Ville forte la plus haute, forts de montagne, cols | Grenoble |
+
+Une fois validées : fiche de lieu par capitale (comme `docs/lore/dol-cite-des-marees.md`), puis passage de `carte_monde.json` à 12 capitales + lieux mineurs (lot de code distinct).
+
 ## Routes (22)
 
 Trois types : **route** (entre zones tenues), **piste** (no man's land, DEC-095), **voie ferrée** (rails sur la carte : on roule le long).

@@ -187,7 +187,7 @@ Aucune conséquence politique globale ou réputation automatique n'est imposée 
 
 ## 9. Points à décider
 
-- localisation précise : Bretagne, Normandie ou autre portion du littoral atlantique ;
+- localisation : **décidée** (DEC-134), nord du Cotentin près de Cherbourg ; voisins : Dol (LOC-013, capitale du Réseau des Marées, DEC-238) et Port-Estuaire ;
 - lien exact avec les lieux déjà enregistrés dans la Bible ;
 - identité et nom du groupe qui contrôle le camp ;
 - origine et nombre des prisonniers ;

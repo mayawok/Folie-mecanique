@@ -148,6 +148,10 @@ Le joueur ne doit pas nécessairement pouvoir recruter ou contrôler ces communa
 - **Section 04.1 ter — Zones et No Man's Land :** les trains peuvent être des rencontres mobiles traversant les espaces dangereux.
 - **Section 11 — Principes narratifs :** la disparition d'un train et la circulation des témoignages doivent respecter la connaissance limitée des personnages.
 
+### Bretagne : le terminus avant Dol (DEC-239)
+
+Les trains ne vont pas jusqu'à Dol (LOC-013) : les voies des marais sont noyées par les marées. Ils s'arrêtent à un terminus sur les hauteurs de granit au sud (repère réel : Combourg). Le dernier tronçon se fait en camion à marée basse ou en char à voile. Voir `docs/lore/dol-cite-des-marees.md`.
+
 ## 11. Points encore ouverts
 
 Les éléments suivants ne sont pas fixés :

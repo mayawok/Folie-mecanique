@@ -144,6 +144,8 @@ puis des remorques par découpe. En attendant, un dessin par le code, comme pour
 
 Tomber au hasard sur un véhicule qui avance **au vent**, avec une voile.
 
+Lien lore (DEC-239) : à Dol, le char à voile assure une partie du dernier tronçon entre le terminus ferroviaire et la ville, sur les grèves découvertes à marée basse.
+
 ### Ancrage historique et lore
 
 Le **char à voile** est une invention qui a pris racine sur les plages françaises : Louis Blériot en construisait au début du siècle
