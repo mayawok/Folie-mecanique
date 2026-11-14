@@ -5,6 +5,8 @@ Le porteur de projet donne le feu vert et transmet les images ; Claude les déco
 les range, met à jour `asset-register.csv` et passe le lot suivant « en cours ».
 
 Règles générales de dessin : `docs/art/CHATGPT.md`. Bible de style : `docs/design/GRAPHISMES.md`.
+**Transition (DEC-247, 15/11/2026)** : les lots « validé » restent valables, rien n'est à redessiner. Les lots suivants suivent la nouvelle orientation (`DIRECTION_ARTISTIQUE.md` 1 bis).
+
 Échelle commune : 1 cellule = 25 cm = 64 px (une personne de 1,75 m = 7 cellules = 448 px).
 
 ## File

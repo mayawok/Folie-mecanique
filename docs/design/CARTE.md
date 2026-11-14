@@ -85,6 +85,14 @@ Route des citernes (Les Chais-Noirs–Massalie, par Lacq, danger 5) ; Traversée
 
 Tout vient de la Bible (LOC-001 à 012, FAC-001 à 007, 04.1 bis). Ajouter ou déplacer un lieu = une entrée du JSON, sans code.
 
+## Convois du joueur et sites (DEC-246, `LOGISTIQUE_CONVOIS.md`)
+
+Calque **à venir** (rien de codé) : la carte affiche les convois autonomes du joueur (position interpolée sur une route, destination ou étape, itinéraire, progression, état, incidents) et ses sites de stockage (villes alliées, camps du joueur). Toucher un convoi ouvre sa fiche.
+
+- Les positions restent **sur les routes existantes** ; `carte_monde.json` n'est pas modifié : sites et convois sont dans la sauvegarde.
+- Les routes n'ont pas d'identifiant : une route sera identifiée par la **paire de lieux triée** (tâche LOG-T4). Le passage aux 12 capitales et aux lieux mineurs (DEC-240) change les routes : un convoi sur une route supprimée est replacé sur son lieu le plus proche à la migration.
+- La conversion entre distances de la carte (km) et distances de scène (m) est à vérifier avant tout calcul de croisement (LOG-T1).
+
 ## Ouvert
 
 - Valider villes, noms, factions et niveaux (OQ-010, OQ-011).

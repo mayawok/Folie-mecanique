@@ -8,6 +8,7 @@ Complète `docs/art/ART_PIPELINE.md` (règles du registre d'assets).
 
 - **Production : IA générative d'images** (ex. ChatGPT), retouchée et découpée à la main.
 - **Rendu : semi-réaliste peint**, référence *Earn to Die*, ambiance Mad Max, technologie 1940.
+- **Évolution du 15/11/2026 (DEC-247)** : peinture stylisée semi-réaliste, formes simplifiées, détails sélectionnés, couleurs plus naturelles ; assets existants conservés. Voir `docs/art/DIRECTION_ARTISTIQUE.md` 1 bis.
 - **Noms réels complets** des véhicules (Willys MB, BMW R75…).
 
 ## Contraintes imposées par les systèmes

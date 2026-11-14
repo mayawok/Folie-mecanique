@@ -204,6 +204,8 @@ Voir [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) (OQ-001 à OQ-018). Aucune tâche 
 | DOC-003 | Proposer l'organisation des données du monde (mission 5), sans modifier les fichiers maîtres | P1 | DOC-002 | `docs/DATA_WORLD_PROPOSAL.md` | Proposition pour 11 catégories avec fichier maître, identifiants, champs, relations | Fait le 06/11 (attend la validation du concepteur) |
 | DOC-004 | Créer `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` (mission 6) | P2 | DOC-001 | `docs/audits/CONTROLE_QUALITE_DOCUMENTAIRE.md` | Grille de 10 contrôles et premier rapport avec les contrôles réellement exécutés | Fait le 06/11 (contrôles 4 et 5 restent partiels) |
 | DOC-005 | Lister les passages de VISION, CONVOI, GRILLE et LORE qui contredisent la Bible, ligne par ligne | P2 | OQ-017 | `docs/DOCUMENT_REGISTRY.md` | Tableau passage / décision contredite / document | À faire |
+| DOC-007 | Concevoir les parcours de mécanique accessible, intermédiaire et expert sur le système existant (un seul système, DEC-242) : écrans, comparaisons, ce que chaque niveau montre | P1 | OQ-047 | `docs/design/GRILLE.md`, `docs/design/VISION.md` | Document de parcours validé par le créateur | À faire |
+| DOC-008 | Valider avec le créateur les questions OQ-041 à OQ-046 puis figer les paramètres de `log.*` dans un document d'équilibrage | P1 | OQ-041 à OQ-046 | `docs/design/LOGISTIQUE_CONVOIS.md` | Questions tranchées, valeurs consignées | À faire |
 
 ### C. Tâches techniques de développement (code : seulement après décision indiquée)
 
@@ -323,4 +325,13 @@ avertissement.\
 | DEV-041 | **Lot physique : pneus et suspensions — CODÉ le 11/11 (DEC-231), à essayer sur iPhone** (DEC-230) : `data/surfaces.json`, valeurs de pneus et de suspensions, modèle d'adhérence/chocs/enlisement/crevaison, rendu par roue, panneau « Physique » du Kit, `test_physique.gd` | P1 | DEV-040 | `docs/design/PHYSIQUE.md` |
 | DEV-042 | **Lot transmission : accélération progressive, rapports, départ calme/urgence, son moteur** (DEC-232) : état de vitesse du convoi, boîte déduite des données, hauteur du son selon le régime, indicateur HUD, section Kit, `test_transmission.gd`, rééquilibrage ; **étendu par DEC-233** : freinage selon le sol, virages, renversement, sauts, accordéon, remorques, treuil | P1 | DEV-041 | `docs/design/TRANSMISSION.md` |
 | DEV-043 | **Châssis modulaires et grille Berliet** (DEC-235) : prompts ChatGPT des pièces, points d'ancrage en données, Berliet en pièces de grille, transmission par étapes. À faire après réponse à OQ-038. | à faire |
+| DEV-044 | **Logistique, prérequis** (LOG-T1 à T4) : vérifier la conversion km carte / m scène ; identifiant de véhicule stable et sauvegardé ; identifiants de personnes (nommés) et compteurs de rôle ; identifiant de route par paire de lieux | P1 | DOC-008 | `game/scripts/combat/modele_base.gd`, `game/scripts/carte_monde.gd` | Tests + migration de sauvegarde | À faire (après le Kit, DEC-171) |
+| DEV-045 | **LOG-N1, N2, N6 : sites de stockage en ville alliée, états des véhicules, affectations exclusives, bloc `logistique` versionné** | P1 | DEV-044 | futur module `logistique/` | Tests : stockage atomique, migration d'une ancienne sauvegarde vers un bloc vide | À faire |
+| DEV-046 | **LOG-N3, N4, N7 : création de convoi (présence requise), trajet unique, simulation stratégique déterministe** | P1 | DEV-045 | module `logistique/` | Tests : graine, idempotence, rattrapage de pas | À faire |
+| DEV-047 | **LOG-N5 : calque de la carte et fiche de convoi** | P1 | DEV-046 | `game/scripts/combat/carte_kit.gd` | Capture automatique, vérification iPhone | À faire |
+| DEV-048 | **LOG-P1 : circuit permanent, suspendre, modifier** | P2 | DEV-046 | module `logistique/` | Test : circuit A→B→C→D→A | À faire |
+| DEV-049 | **LOG-P4, P5, P6 : pannes, intervention personnelle, équipe de secours (convoi de type secours)** | P2 | DEV-046 | module `logistique/` | Tests : tirages reproductibles, secours atomique | À faire |
+| DEV-050 | **LOG-P3 : croisement cohérent avec la simulation, convoi du joueur instancié en scène** | P2 | DEV-046 | `monde.gd`, module `logistique/` | Test : croisement à l'aller et au retour, aucun convoi inventé | À faire |
+| DEV-051 | **LOG-P2 : camps du joueur comme sites** (après OQ-042) | P2 | DEV-045, OQ-042 | module `logistique/` | À définir | À faire |
+| DEV-052 | **LOG-P7 et expérimentaux (X1 à X6) : cargaison, interactions étendues, marées, vivres, épaves** (chacun derrière son interrupteur) | P3 | DEV-046, OQ-042 | module `logistique/` | À définir | À faire |
 

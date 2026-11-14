@@ -22,6 +22,7 @@ Résumé court et à jour : [`STATE.md`](STATE.md). Navigation complète : [`doc
 |---|---|
 | Monde et lore | [`docs/lore/`](docs/lore/) (Bible), [`docs/design/LORE.md`](docs/design/LORE.md) |
 | Vision et conception | [`docs/design/VISION.md`](docs/design/VISION.md), [`docs/design/CONVOI.md`](docs/design/CONVOI.md) |
+| Logistique et convois autonomes | [`docs/design/LOGISTIQUE_CONVOIS.md`](docs/design/LOGISTIQUE_CONVOIS.md) |
 | Grille de construction | [`docs/design/GRILLE.md`](docs/design/GRILLE.md) |
 | Scénario | [`docs/scenario/`](docs/scenario/) |
 | Décisions | [`docs/DECISIONS.md`](docs/DECISIONS.md) |

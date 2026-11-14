@@ -272,3 +272,31 @@ Résolu : Dol remplace Kerbrume, ressources tendues, implantation autour du Mont
 ## OQ-040 — Capitales régionales (12/11, en partie résolue par DEC-240)
 
 Résolu : les 12 capitales (voir `docs/design/CARTE.md`). Reste : garder les noms réels ou donner des noms de jeu (Dol garde son nom réel ; aujourd'hui Vieille-Capitale, Les Chais-Noirs, Confluent, Massalie, Port-Estuaire) ; nom du terminus ferroviaire avant Dol ; liste des lieux mineurs par région.
+
+## OQ-041 — Logistique : valeurs à équilibrer (15/11)
+
+Nombre maximal de convois (aucun plafond fixé), véhicules stockables par site, durées de panne, coûts de réparation, distances de secours, vitesses commerciales, probabilités d'incident, quantités transportées. **Rien n'est décidé** : paramètres `log.*` listés dans `docs/design/LOGISTIQUE_CONVOIS.md` §3 à 11. À trancher par essais.
+
+## OQ-042 — Sites, camps du joueur, stocks et cargaison (15/11)
+
+Qu'est-ce qu'un « camp du joueur » (persistant, posé où, comment établi, différence avec la halte DEC-161) ; autres infrastructures de stockage autorisées ; un site garde-t-il des **stocks de ressources** (carburant, eau, vivres, munitions, métal) ; d'où vient la cargaison d'un convoi (stock déposé ou achat au marché). Tant que non tranché, LOG-P2 et LOG-P7 restent désactivés.
+
+## OQ-043 — Villes alliées (15/11)
+
+À partir de quel palier de réputation (DEC-217) une ville est-elle « alliée » pour stocker et lancer des convois ; perte du statut si la réputation baisse (que devient le stock).
+
+## OQ-044 — Pannes, pertes et principe « on ne revoit jamais ceux qui s'éloignent » (15/11)
+
+Un convoi perdu est-il perdu pour toujours (proposé : oui, ce qui garde le principe de `LORE.md` et la rumeur de la Bible sur les convois disparus, sans la modifier) ; que devient son contenu (épaves récupérables : LOG-X5) ; probabilité d'attaque d'un convoi immobilisé ; un convoi peut-il être attaqué sur la carte sans que le joueur le voie.
+
+## OQ-045 — Temps et progression (15/11)
+
+Les convois progressent-ils quand l'application est fermée (proposé : non) ; l'horloge de jeu avance-t-elle dans tous les états (ville, atelier, Kit, menus) ; effet de la nuit accélérée ×3 sur les convois.
+
+## OQ-046 — Personnel des convois (15/11)
+
+Les équipages n'ont pas d'identifiants stables dans le code (tableaux et compteur). Proposé : personnages nommés par `survivor_id`, les autres par compteurs de rôle (DEC-180) ; faut-il des identifiants pour tous ; vivres et eau des équipages autonomes (LOG-X4).
+
+## OQ-047 — Mécanique à trois niveaux et direction artistique (15/11)
+
+Comment le joueur choisit son niveau d'interaction (réglage, par véhicule, progressif) ; premier lot d'assets à la nouvelle direction artistique (quel sujet de comparaison avant / après) ; faut-il reprendre un jour certains assets existants.

@@ -39,6 +39,36 @@ L’image de référence jointe à ce brief illustre cette direction artistique.
 
 Elle doit être utilisée comme référence générale d’ambiance et de traitement, pas comme une composition à reproduire systématiquement.
 
+1 bis. ÉVOLUTION DU 15/11/2026 (DEC-247)
+
+Cette section **prime** sur les passages qui lui sont contraires (3.1, 3.2, 4.1, 4.2 et la formule finale). Le reste du brief reste valable.
+
+Objectif : un jeu plus accessible et moins austère, sans devenir un dessin animé.
+
+Ancienne orientation : peinture numérique semi-réaliste, niveau de détail intermédiaire, textures relativement détaillées.
+
+Nouvelle orientation : PEINTURE STYLISÉE SEMI-RÉALISTE, formes simplifiées, détails sélectionnés, meilleure lisibilité sur écran mobile.
+
+Principes :
+
+* silhouettes immédiatement reconnaissables ;
+* proportions historiques et mécaniques cohérentes ;
+* moins de microtextures et de détails secondaires ;
+* volumes plus simples ;
+* ombres lisibles et moins lourdes ;
+* textures peintes mais moins détaillées ;
+* couleurs naturelles plus présentes, contrastes mieux maîtrisés ;
+* ambiance moins systématiquement grise, poussiéreuse et désaturée ;
+* palette variable selon les régions.
+
+À conserver : verts de la végétation, bleus du ciel et de l'eau, ocres et terres naturelles, pierres claires, façades colorées ; rouille, kaki et acier pour les véhicules et équipements.
+
+Ton : post-apocalyptique et mélancolique, avec aussi des lieux chaleureux, des villages vivants, des ateliers éclairés et des moments de vie quotidienne.
+
+Éléments validés conservés : esthétique des années 1940, véhicules historiques reconnaissables, architecture française, matériaux crédibles, personnages expressifs, vues de profil et contraintes de production des véhicules.
+
+Transition : **les assets déjà produits restent valides** et ne sont pas à redessiner. Les nouveaux lots (prompts ChatGPT, `docs/art/PRODUCTION.md`) suivent la nouvelle orientation. Une comparaison avant / après sur un même sujet est recommandée avant d'enchaîner un grand lot (même principe que pour les contours, 3.3).
+
 2. IDENTITÉ VISUELLE DU MONDE
 
 2.1. Contexte historique et esthétique
@@ -122,7 +152,7 @@ Il faut éviter :
 * les rendus 3D génériques ;
 * les surfaces artificiellement propres.
 
-3.2. Niveau de détail : intermédiaire
+3.2. Niveau de détail : intermédiaire (évolué le 15/11/2026 : voir 1 bis, détails plus sélectionnés)
 
 Le niveau de détail doit être suffisamment élevé pour donner de la personnalité aux illustrations.
 
@@ -197,7 +227,7 @@ Une scène nocturne ne doit pas être colorée comme une scène de plein soleil.
 
 La cohérence doit venir du traitement pictural et des matériaux, pas de l’utilisation systématique des mêmes couleurs.
 
-4.2. Palette générale
+4.2. Palette générale (voir 1 bis : couleurs naturelles plus présentes, ambiance moins systématiquement grise)
 
 La palette globale s’appuie sur des couleurs naturelles, industrielles et vieillies.
 
@@ -636,7 +666,7 @@ Les images de référence servent à maintenir la cohérence, pas à reproduire 
 
 14. SYNTHÈSE À RETENIR
 
-FOLIE MÉCANIQUE = SEMI-RÉALISTE PEINT + DÉTAIL INTERMÉDIAIRE + COULEURS ADAPTÉES AUX RÉGIONS + MATÉRIAUX CRÉDIBLES + UNIVERS FRANÇAIS DES ANNÉES 1940.
+FOLIE MÉCANIQUE = PEINTURE STYLISÉE SEMI-RÉALISTE (DEC-247, voir 1 bis) + DÉTAILS SÉLECTIONNÉS + COULEURS ADAPTÉES AUX RÉGIONS + MATÉRIAUX CRÉDIBLES + UNIVERS FRANÇAIS DES ANNÉES 1940.
 
 Le jeu doit présenter un monde crédible, habité, usé et reconnaissable.
 

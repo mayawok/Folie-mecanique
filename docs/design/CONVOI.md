@@ -12,6 +12,16 @@ le premier geste est d'assembler une moto sur la grille (DEC-035).
 Le convoi avance, rencontre des ruines à fouiller, des véhicules abandonnés à réparer et à récupérer,
 et des ennemis (véhicules, bâtiments) dont on prend le butin. Le danger augmente avec la distance.
 
+## Convoi principal et convois autonomes (DEC-243 à DEC-246)
+
+*Ajout du 15/11/2026. Le texte de « Principe » ci-dessus décrit l'ouverture d'origine (caisse de pièces, moto, DEC-035), remplacée par DEC-100 et DEC-139.*
+
+- Le **convoi principal** (Berliet GDR) reste le seul convoi **joué en scène** : combat, ordres par vignettes, halte, fouille, missions du maire. Il est le cœur de l'aventure.
+- Les **convois autonomes** du joueur sont calculés en **simulation stratégique** (position sur une route, temps, consommation, état, incidents), sans dessin permanent. Cahier des charges : [`LOGISTIQUE_CONVOIS.md`](LOGISTIQUE_CONVOIS.md).
+- Relations : le joueur peut **croiser** un convoi autonome sur la route (le convoi est alors instancié en scène à partir de son état), **intervenir en personne** avec le convoi principal sur un convoi immobilisé, ou **envoyer une équipe de secours**.
+- Responsabilités séparées : le combat et les rencontres relèvent de ce document ; la position, la progression et les pannes des convois autonomes relèvent du module logistique ; les convois alliés ou hostiles aléatoires (DEC-218) ne remplacent jamais un convoi du joueur.
+- Les missions du maire restent jouées par le convoi principal.
+
 ## Contrôle : ordres tactiques
 
 Pas de visée au doigt. Le joueur donne des ordres, le convoi tire seul. **Pause active** :

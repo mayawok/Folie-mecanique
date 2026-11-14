@@ -26,7 +26,8 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 | Ce qui reste à trancher | [`OPEN_QUESTIONS.md`](OPEN_QUESTIONS.md) |
 | Ce qu'il y a à faire | [`TASKS.md`](TASKS.md) |
 | Le monde (référence universelle) | [`lore/01_BIBLE_FOUNDATION`](lore/01_BIBLE_FOUNDATION) |
-| Les choix de ce jeu | [`design/VISION.md`](../archive/docs_design/VISION_2026-11-10.md), [`scenario/OUVERTURE.md`](scenario/OUVERTURE.md) |
+| Les choix de ce jeu (vision actuelle) | [`design/VISION.md`](design/VISION.md), [`scenario/OUVERTURE.md`](scenario/OUVERTURE.md) ; ancienne vision archivée : [`VISION_2026-11-10.md`](../archive/docs_design/VISION_2026-11-10.md) |
+| Logistique et convois autonomes | [`design/LOGISTIQUE_CONVOIS.md`](design/LOGISTIQUE_CONVOIS.md) |
 | Les contrats de données | [`DATA_CONTRACTS.md`](DATA_CONTRACTS.md) |
 | La direction artistique | [`art/DIRECTION_ARTISTIQUE.md`](art/DIRECTION_ARTISTIQUE.md) |
 
@@ -34,7 +35,7 @@ et les tâches doivent diriger vers les seuls documents nécessaires.
 
 -   **Monde (référence universelle, sert à tout jeu)** : `docs/lore/01_BIBLE_FOUNDATION` ; compléments : `docs/lore/communautes-ferroviaires.md`, `docs/lore/dol-cite-des-marees.md` (Bretagne, LOC-013), `docs/lore/villes/` (capitales régionales)
 -   Registre des documents : `docs/DOCUMENT_REGISTRY.md` ; questions ouvertes : `docs/OPEN_QUESTIONS.md`
--   **Ce jeu-ci** : vision `archive/docs_design/VISION_2026-11-10.md` (archivé), scénario `docs/scenario/` (ouverture : `OUVERTURE.md` ; proposition : `mission-liberation-camp-travailleurs.md`)
+-   **Ce jeu-ci** : vision actuelle `docs/design/VISION.md` (DEC-242 ; l'ancienne, `archive/docs_design/VISION_2026-11-10.md`, est archivée), logistique `docs/design/LOGISTIQUE_CONVOIS.md`, scénario `docs/scenario/` (ouverture : `OUVERTURE.md` ; proposition : `mission-liberation-camp-travailleurs.md`)
 -   État courant et priorités : `STATE.md` (racine)
 -   Règles structurées : `data/rules/regles_canoniques.json` (v1.9, sans les sections de gestion de base)
 -   Catalogue véhicules et tables de systèmes : `data/master/*.csv`

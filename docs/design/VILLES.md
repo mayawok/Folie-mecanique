@@ -59,6 +59,14 @@ Le Plessis-Grimoult, Bourg-Achard, La Pierre-Levée, Vieux-Moulin, Le Bout-du-Mo
 Le Relais-de-la-Poste, Haut-Clocher, Sainte-Colombe-sur-Gand, Les Ormes-Brûlés, Notre-Dame-de-Cenilly, Beauregard-Vendon,
 Saint-Aubin-des-Bois, La Ferté-Aurain. Ajouter un nom = une ligne dans `villes.json`, sans code.
 
+## Ville alliée : site de stockage et de lancement (DEC-244, 245, à venir)
+
+Une ville **alliée** deviendra un **site** : on y stocke des véhicules (opérationnels, endommagés, épaves, en attente de réparation) et on y **lance** des convois autonomes, à condition d'y être présent. Le garage et le mécanicien existants assurent les réparations (même règle de coût en métal). La mairie, l'atelier et le marché ne changent pas.
+
+- Seuil de réputation d'une ville « alliée » : non fixé (OQ-043) ; la réputation a cinq paliers (DEC-217).
+- Aucun bâtiment à construire dans la ville, pas de production ni de défense (DEC-099).
+- Une ville hostile reste possible (OQ-026) ; elle ne peut pas être un site.
+
 ## Ouvert (OQ-026)
 
 - Textures propres à chaque ville (images), et à quel moment.

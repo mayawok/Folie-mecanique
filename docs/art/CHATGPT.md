@@ -15,6 +15,7 @@ range les images. Le porteur de projet te donne le feu vert.
 
 ## Style (toutes les images)
 
+- **Depuis le 15/11/2026 (DEC-247) : peinture stylisée semi-réaliste, formes simplifiées, détails sélectionnés, peu de microtextures, couleurs naturelles présentes, lisible sur mobile (voir `DIRECTION_ARTISTIQUE.md` 1 bis). Les images déjà validées restent valables.**
 - Peinture numérique semi-réaliste, dans l'esprit d'*Earn to Die*, ambiance Mad Max,
   technologie des années 1940. Ton sérieux.
 - Lumière du haut à gauche, ombres douces, palette : ocre, sable, rouille, kaki olive
