@@ -11,6 +11,10 @@
 #  - Formation de combat (DEC-251) : dès qu'un ennemi est à portée, les véhicules légers armés quittent la ligne et se
 #    postent sur les flancs du camion principal (Berliet) ; à la fin du combat ils reprennent leur place dans la ligne.
 #    Pas d'ordre manuel de changement de voie pour le moment.
+#  - Contournement (DEC-252) : un barrage ennemi ou une épave ennemie sur la route arrête le convoi ; après quelques
+#    secondes il recule, puis repart par la voie libre la plus proche (droite d'abord) et reprend la voie du milieu
+#    une fois l'obstacle dépassé. Pendant la manœuvre, les gardes de flanc rejoignent la ligne.
+#  - Camion principal hors service : il reste en tête, le convoi ne repart pas ; réparé (et équipé), il se remet en service.
 #  - Bâtiments : jamais sur la route, toujours derrière (fond) ou devant.
 # Valeurs : bloc « voies » de combat_proto.json.
 extends "res://scripts/combat/modele_choc.gd"
@@ -19,6 +23,12 @@ var _cote := {}     # uid -> côté choisi (-1 ou 1) pour contourner ou aborder
 var en_combat := false   # un ennemi est à portée : formation de combat (DEC-251)
 var _combat_calme := 0.0 # secondes écoulées depuis que plus rien n'est à portée
 var _protege_uid := 0    # camion protégé par les gardes de flanc
+var _contour := ""        # contournement d'un obstacle : "" | "recul" | "passage" (DEC-252)
+var _contour_voie := 0    # voie choisie pour passer
+var _contour_obs = null   # obstacle contourné
+var _contour_x0 := 0.0    # position de la tête au début du recul
+var _contour_t := 0.0     # durée de la manœuvre
+var _arret_t := 0.0       # temps passé à l'arrêt devant l'obstacle
 var _percute := {} # uid -> poursuivant qui nous a déjà embouti par l'arrière
 var _place := {}    # uid -> vrai une fois posé sur sa voie (apparition loin de nous : directement sur la bonne voie)
 
@@ -131,11 +141,13 @@ func _voie_joueur(v: Veh, t) -> int:
 	if v.garde != 0:
 		if not v.retour:
 			return v.garde   # posté sur son flanc
-		return v.garde if absf(v.x - v.x_cible) > 1.5 else 0   # il revient : il change de voie une fois à sa place
+		return v.garde if absf(v.x - v.x_cible) > 1.5 else (_contour_voie if _contour == "passage" else 0)   # il revient : il change de voie une fois à sa place
 	if v.remorque():
 		var tr = tracteur_de(v)
 		if tr != null:
 			return tr.voie   # la remorque suit son tracteur
+	if _contour == "passage":
+		return _contour_voie   # tout le convoi passe par la voie d'à côté
 	for e in ennemis:
 		if not e.actif():
 			continue
@@ -265,7 +277,7 @@ func _formation(dt: float) -> void:
 	if en_combat != avant:
 		evt({"t": "combat", "etat": "debut" if en_combat else "fin"})
 		log_(Textes.t("formation.001" if en_combat else "formation.002"), "alerte" if en_combat else "ok")
-	if en_combat:
+	if en_combat and _contour == "":
 		_assigner_gardes()
 	else:
 		for v in convoi:   # fin du combat : retour dans la ligne, en restant sur le flanc jusqu'à sa place
@@ -352,3 +364,117 @@ func _placer_gardes() -> void:
 			continue
 		var cap := _places_flanc(p)
 		v.x_cible = p.x_cible + p.longueur * (float(v.garde_slot) + 0.5) / float(cap) - v.longueur * 0.5
+
+
+# --- Contournement d'un obstacle (DEC-252) ----------------------------------------------------------------
+func _contourne(e: Veh) -> bool:
+	return _contour == "passage" and e.mode == "barrage"
+
+
+# Barrage ennemi ou épave ennemie sur la voie du milieu, devant la tête du convoi
+func _obstacle_devant():
+	var meilleur = null
+	var cands: Array = []
+	for e in ennemis:
+		if e.actif() and not e.allie and e.mode == "barrage" and roundi(e.voie_f) == 0:
+			cands.append(e)
+	for w in epaves:
+		if w.camp == "ennemi" and roundi(w.voie_f) == 0:
+			cands.append(w)
+	for o in cands:
+		if o.x + o.longueur < x_tete - 0.5:
+			continue   # déjà dépassé
+		if meilleur == null or o.x < meilleur.x:
+			meilleur = o
+	return meilleur
+
+
+# La voie est libre autour de l'obstacle (aucun ennemi ni épave à hauteur, marge de chaque côté)
+func _voie_degagee(l: int, o: Veh) -> bool:
+	var lib := float(VO().contour_libre)
+	for w in ennemis + epaves:
+		if w == o or w.camp == "joueur":
+			continue
+		if absf(w.voie_f - l) < 0.6 and w.x < o.x + o.longueur + lib and w.x + w.longueur > o.x - lib:
+			return false
+	return true
+
+
+func _contour_fin() -> void:
+	_contour = ""
+	_contour_obs = null
+	_contour_t = 0.0
+	_arret_t = 0.0
+
+
+func _contour_vitesse(vit: float, P: Dictionary, dt: float) -> float:
+	var V := VO()
+	if ordres.marche != "avancer" or _tete() == null:
+		return vit
+	match _contour:
+		"":
+			var o = _obstacle_devant()
+			if o == null:
+				_arret_t = 0.0
+				return vit
+			var d: float = o.x - x_tete
+			if o.statut != "actif" and vit > 0.0 and d < float(V.contour_anticipation):
+				var frein := Transmission.frein_dispo(float(P.adh), float(P.masse_f))
+				vit = minf(vit, Transmission.vitesse_sure(maxf(d - 1.6, 0.0), frein))   # une épave arrête aussi le convoi
+			if d < 4.0 and absf(vitesse_convoi) < 0.3:
+				_arret_t += dt
+			else:
+				_arret_t = 0.0
+			if _arret_t >= float(V.contour_delai):
+				for l in [1, -1]:
+					if _voie_degagee(l, o):
+						_contour = "recul"
+						_contour_voie = l
+						_contour_obs = o
+						_contour_x0 = x_tete
+						_contour_t = 0.0
+						log_(Textes.t("voie.004"), "info")
+						break
+				_arret_t = 0.0
+				if _contour == "":
+					blocage = Textes.t("voie.005")
+		"recul":
+			_contour_t += dt
+			var o2 = _contour_obs
+			if o2 == null or not (ennemis.has(o2) or epaves.has(o2)) or _contour_t > float(V.contour_max_s):
+				_contour_fin()
+				return vit
+			if _contour_x0 - x_tete >= float(V.contour_recul):
+				_contour = "passage"
+				_contour_t = 0.0
+			else:
+				blocage = ""
+				return -float(V.contour_recul_vitesse)
+			return vit
+		"passage":
+			_contour_t += dt
+			var q = _queue()
+			var o3 = _contour_obs
+			if o3 == null or q == null or _contour_t > float(V.contour_max_s) or q.x > o3.x + o3.longueur + float(V.contour_marge):
+				_contour_fin()
+				return vit
+			if _contour_t < float(V.duree_changement) + 0.3:
+				return minf(vit, 1.5)   # on s'engage doucement le temps de changer de voie
+	return vit
+
+
+# Camion principal réparé : il se remet en service (équipage pris dans la réserve si besoin) (DEC-252)
+func _principal_remis() -> void:
+	for v in convoi:
+		if not v.principal or v.camp != "joueur" or v.actif() or v.garage != 0:
+			continue
+		if not (v.piece_ok("chassis") and v.piece_ok("roulement") and v.piece_ok("moteur")):
+			continue
+		if v.equipage_vivant() == 0:
+			if reserve_survivants <= 0:
+				continue
+			reserve_survivants -= 1
+			v.equipage = [float(donnees().equipage_pv)]
+		v.statut = "actif"
+		v.reparation = false
+		log_(Textes.t("voie.007", [v.nom]), "ok")

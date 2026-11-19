@@ -532,6 +532,9 @@ func equipage_dehors(v: Veh) -> int:
 
 
 func _detruire(v: Veh) -> void:
+	if v.principal and v.camp == "joueur":
+		_neutraliser(v)   # le Berliet ne devient jamais une épave abandonnée : il reste en tête, à réparer (DEC-252)
+		return
 	for pv in v.troupes:   # les soldats d'un véhicule détruit sautent à terre : ils rejoindront un autre véhicule
 		if pv > 0.0:
 			reserve_survivants += 1
@@ -567,6 +570,9 @@ func _neutraliser(v: Veh) -> void:
 		log_(Textes.t("tir.011", [v.nom]), "ok")
 
 func _sortir_du_combat(v: Veh) -> void:
+	if v.principal and v.camp == "joueur":
+		v.x_prev = v.x
+		return   # reste dans le convoi, à l'arrêt
 	v.x_prev = v.x
 	convoi.erase(v)
 	ennemis.erase(v)

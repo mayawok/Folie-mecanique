@@ -614,6 +614,11 @@ func _replacer(immediat := false) -> void:
 			v.x = v.x_cible
 
 
+# Contournement d'un obstacle (DEC-252) : redéfini par modele_voies.gd
+func _contour_vitesse(vit: float, _P: Dictionary, _dt: float) -> float:
+	return vit
+
+
 # Formation de combat : redéfini par modele_voies.gd
 func _placer_gardes() -> void:
 	pass

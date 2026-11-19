@@ -10,6 +10,7 @@ Mis à jour : 2026-11-19. Résumé court, par thème. Journal complet : [`docs/D
 - **Profondeur visuelle (19/11, DEC-249)** : pas de vraie 3D ; parallaxe sur six plans, brume, ombres, lumières additives et premier plan flou pour les zones dessinées par le code (désert en tête). **À vérifier sur iPhone** : rendu jour, soir, nuit et fluidité.
 - **Voies de profondeur (19/11, DEC-250)** : trois voies (fond, route, devant), changements de voie automatiques, abordage par le flanc, coups de flanc, couvert. **À vérifier sur iPhone** ; suites : OQ-048.
 - **Formation de combat (19/11, DEC-251)** : annonce et musique de combat, escorteurs sur les flancs du Berliet, bâtiments derrière ou devant la route, phares du Berliet. **À vérifier sur iPhone** (musique de roulage `mus_base`).
+- **Contournement et Berliet HS (19/11, DEC-252)** : le convoi recule puis passe par la voie d'à côté devant un barrage ou une épave ; Berliet hors service = convoi à l'arrêt, réparation sur place. Récupération des alliés abandonnés : à coder (OQ-049).
 - **Jalon courant : finir le Kit de développement** (DEC-171) : décor complet par zone, rencontres, équilibrage en direct. La quête principale vient après.
 - **Monde libre**, difficulté artificiellement trop forte hors de la région de la quête, signalée par des indices diffus (DEC-172). 12 à 13 secteurs, France déformée (DEC-101, 154, 170). **Échec** : retour au dernier checkpoint (DEC-173, 189).
 - **Combat** : les véhicules agissent seuls ; le joueur réordonne les vignettes (DEC-174, 177, 186). Un seul bouton de marche (DEC-160).

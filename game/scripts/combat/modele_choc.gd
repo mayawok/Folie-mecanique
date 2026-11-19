@@ -30,11 +30,18 @@ func ordre_conduite(c: String) -> void:
 
 # Le véhicule roule sur la voie d'à côté (il ne barre pas notre route) : poursuivants, convois croisés, convois doublés
 func voie_libre(e: Veh) -> bool:
+	if _contourne(e):
+		return true   # le convoi passe sur la voie d'à côté : l'obstacle ne le barre plus (DEC-252)
 	if e.mode in ["poursuite", "face", "contourne", "harcele"]:
 		return true
 	if e.mode == "approche" and role(e) == "harceleur":
 		return true   # un léger ne barre pas la route : on lui fonce dessus sans s'arrêter (DEC-219)
 	return e.mode == "convoi" and conduite() == "eviter"
+
+
+# Redéfini par modele_voies.gd : le convoi contourne cet obstacle
+func _contourne(_e: Veh) -> bool:
+	return false
 
 
 # Rôle d'un ennemi qui arrive : plus lourd que notre véhicule de tête (seuil du bloc « choc ») -> bélier, sinon harceleur.

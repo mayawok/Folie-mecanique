@@ -270,3 +270,8 @@ Trois voies : fond (gauche du sens de marche), route (milieu), devant (droite). 
 ### Formation de combat, bâtiments, phares (DEC-251)
 
 En route, le convoi est en ligne au milieu. Dès qu'un combat commence (annonce « CONTACT ! », musique de combat), les véhicules légers armés se postent sur les flancs du Berliet et bouchent les côtés : un poursuivant ne peut plus aborder, il reste derrière. Fin du combat : retour dans la ligne. Pas d'ordre manuel de voie. Bâtiments : derrière ou devant la route, jamais dessus. Le Berliet a ses phares d'origine (lumière dessinée par le code, art à venir).
+
+
+### Contournement, Berliet hors service, alliés abandonnés (DEC-252)
+
+Un barrage ennemi ou une épave ennemie sur la route arrête le convoi : après 3 s il recule de 8 m, puis passe par la voie libre la plus proche (droite d'abord) et revient au milieu. Les gardes de flanc rejoignent la ligne pendant la manœuvre. Si le Berliet est neutralisé ou détruit, il reste en tête et le convoi ne repart pas : réparation sur place, puis remise en service automatique. Tout autre allié détruit ou neutralisé est abandonné sur la route ; le récupérer (retour manuel ou dépanneuse depuis une base) reste à coder (OQ-049).

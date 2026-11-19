@@ -516,6 +516,7 @@ func avancer(dt := DT) -> void:
 	_travaux(dt)
 	_camouflage(dt)
 	_reparer(dt)
+	_principal_remis()
 	_fouiller(dt)
 	_rencontres()
 	_nettoyer()
@@ -578,7 +579,9 @@ func _marche(dt: float) -> void:
 			sans_tracteur = sans_tracteur or (v.remorque() and tracteur_de(v) == null)
 			cache = cache or v.camo_voulu
 			au_garage = au_garage or v.garage != 0
-		if camp_actif():
+		if convoi.any(func(v): return v.principal and v.camp == "joueur" and not v.actif()):
+			blocage = Textes.t("voie.006")   # le camion principal est hors service : on ne repart pas sans lui (DEC-252)
+		elif camp_actif():
 			blocage = Textes.t("modele.024")
 		elif sans_tracteur:
 			blocage = Textes.t("modele.025")
@@ -624,6 +627,7 @@ func _marche(dt: float) -> void:
 						vit = 0.0
 						blocage = Textes.t("modele.037")
 						break
+			vit = _contour_vitesse(vit, P, dt)   # recul puis passage par la voie d'à côté (DEC-252)
 	var vmax_ville := 0.0
 	for v in actifs:
 		vmax_ville = vitesse_attelee(v) if vmax_ville == 0.0 else minf(vmax_ville, vitesse_attelee(v))

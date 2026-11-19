@@ -304,3 +304,9 @@ Comment le joueur choisit son niveau d'interaction (réglage, par véhicule, pro
 ## OQ-048 — Voies de profondeur : suites (19/11, DEC-250, DEC-251)
 
 Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manuel de voie, bâtiments derrière ou devant (jamais sur la route), phares d'origine du Berliet. **Encore ouvert** : les gardes ne protègent que le camion principal (pas le dernier véhicule de la ligne s'il est léger) ; part de bâtiments devant la route (aujourd'hui 20 %, `batiment_devant`) ; musique de roulage (`mus_base` à la place de `mus_combat`) à valider à l'oreille ; sort des villes (restent sur la route).
+
+## OQ-049 — Contournement et abandon : suites (19/11, DEC-252)
+
+- **Récupérer un allié abandonné** (retour manuel depuis la carte et/ou dépanneuse envoyée depuis une base) : où l'épave est-elle mémorisée entre deux étapes (point de la carte) ? Coût et délai de la dépanneuse ? À concevoir avec le système de bases.
+- **Berliet sans équipage ni pièce de rechange** : le convoi reste bloqué indéfiniment. Faut-il une issue (défaite, remorquage par un allié lourd, abandon de l'expédition) ?
+- **Contournement** : délai d'attente (3 s) et recul (8 m) à régler en essai ; tir pendant la manœuvre ; décors-obstacles (rocher, arbre) à créer ; le convoi contourne aussi sous le feu.
