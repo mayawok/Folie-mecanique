@@ -275,3 +275,7 @@ En route, le convoi est en ligne au milieu. Dès qu'un combat commence (annonce 
 ### Contournement, Berliet hors service, alliés abandonnés (DEC-252)
 
 Un barrage ennemi ou une épave ennemie sur la route arrête le convoi : après 3 s il recule de 8 m, puis passe par la voie libre la plus proche (droite d'abord) et revient au milieu. Les gardes de flanc rejoignent la ligne pendant la manœuvre. Si le Berliet est neutralisé ou détruit, il reste en tête et le convoi ne repart pas : réparation sur place, puis remise en service automatique. Tout autre allié détruit ou neutralisé est abandonné sur la route ; le récupérer (retour manuel ou dépanneuse depuis une base) reste à coder (OQ-049).
+
+### Groupes d'ennemis et convoi de départ du Kit (DEC-253)
+
+Le Kit démarre avec un convoi constitué (patrouille légère par défaut). Cinq scénarios (marchands, patrouille, raid, embuscade, assaut) en trois tailles. Droite = devant le convoi, gauche = derrière. Quatre niveaux d'agressivité : pacifique (vert), méfiant (jaune), hostile (orange), meurtrier (rouge). Une annonce colorée indique le côté d'arrivée, le nom, le nombre de véhicules et le niveau.

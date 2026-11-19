@@ -36,6 +36,8 @@ var _ouvrir_berliet: Callable
 var _ouvrir_carte: Callable
 var _vals: Array = []          # étiquettes de valeur des réglages en direct
 var _lbl_region: Label
+var _scen_taille := "auto"
+var _scen_cote := "auto"
 var _groupe := {"type": "moto_bmw", "n": 3, "mode": "approche"}
 var _lbl_groupe: Label
 
@@ -110,6 +112,15 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_bouton(v, "Ville devant (enceinte, porte, mairie)", func(): m.kit_ville())
 	_bouton(v, "Ville pillée devant (événement : poursuite)", func(): m.kit_ville("pillee"))
 	_bouton(v, "Repaire du Baron devant (boss des Raffineurs)", func(): m.kit_ville("repaire"))
+	_titre(v, "Convoi de départ (remplace l'escorte)")
+	_rangee(v, CombatModele.donnees().kit_convois.liste.map(func(c): return [Textes.t("groupe.c." + String(c.id)), String(c.id)]), func(id): m.kit_convoi_depart(String(id)); _maj())
+	_titre(v, "Groupes d'ennemis : taille et côté")
+	_rangee(v, ["auto", "petit", "moyen", "grand"].map(func(k): return [Textes.t("groupe.t." + k), k]), func(k): _scen_taille = String(k))
+	_rangee(v, ["auto", "droite", "gauche"].map(func(k): return [Textes.t("groupe.k." + k), k]), func(k): _scen_cote = String(k))
+	_titre(v, "Groupes d'ennemis : scénario")
+	var scen: Array = CombatModele.donnees().groupes.scenarios.map(func(sc): return [Textes.t("groupe.s." + String(sc.id)) + " " + str(int(sc.agr)), String(sc.id)])
+	scen.append([Textes.t("groupe.hasard"), "hasard"])
+	_rangee(v, scen, func(id): m.kit_scenario(String(id), _scen_taille, _scen_cote))
 	_titre(v, "Groupe sur mesure")
 	_rangee(v, CombatModele.KIT_VEHICULES.keys().map(func(k): return [CombatModele.KIT_VEHICULES[k], k]), func(k): _groupe.type = k; _maj())
 	_rangee(v, [["−", -1], ["+", 1]], func(d): _groupe.n = clampi(int(_groupe.n) + int(d), 1, 8); _maj())

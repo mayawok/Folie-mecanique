@@ -34,7 +34,12 @@ func _init(g := 1, options := {}) -> void:
 		log_(Textes.t("modele.001"), "info")
 		return
 	stocks = D.stocks_depart.duplicate()
-	for t in D.depart:
+	var depart: Array = D.depart
+	if bool(options.get("kit_groupe", false)) and D.has("kit_convois"):   # Mode créatif : convoi de départ constitué (DEC-253)
+		for c in D.kit_convois.liste:
+			if c.id == String(options.get("convoi_depart", D.kit_convois.defaut)):
+				depart = c.types
+	for t in depart:
 		convoi.append(creer_vehicule(t, "joueur", 0.0))
 	if not convoi.is_empty():
 		convoi[0].principal = true   # premier véhicule du départ : le camion de l'expédition (DEC-139)

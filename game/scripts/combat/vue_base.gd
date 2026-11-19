@@ -74,6 +74,7 @@ var terrain_avant: Terrain
 var couche: Control
 var fx: Control
 var bandeau: Control             # bandeau « CONTACT ! » et bords rouges au début d'un combat (DEC-251)
+var _annonce := {}               # annonce d'un groupe qui arrive (DEC-253) : cote, n, agr, nom, age
 var _combat_anim := -1.0         # temps depuis le début du combat (s) ; < 0 : pas d'animation
 var ombres: Control              # ombres portées sous les véhicules (DEC-249)
 var lumieres: Control            # phares, feux et éclairs en mélange additif (DEC-249)

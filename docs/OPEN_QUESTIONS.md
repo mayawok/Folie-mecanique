@@ -310,3 +310,10 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Récupérer un allié abandonné** (retour manuel depuis la carte et/ou dépanneuse envoyée depuis une base) : où l'épave est-elle mémorisée entre deux étapes (point de la carte) ? Coût et délai de la dépanneuse ? À concevoir avec le système de bases.
 - **Berliet sans équipage ni pièce de rechange** : le convoi reste bloqué indéfiniment. Faut-il une issue (défaite, remorquage par un allié lourd, abandon de l'expédition) ?
 - **Contournement** : délai d'attente (3 s) et recul (8 m) à régler en essai ; tir pendant la manœuvre ; décors-obstacles (rocher, arbre) à créer ; le convoi contourne aussi sous le feu.
+
+## OQ-050 — Groupes d'ennemis : suites (19/11, DEC-253)
+
+- Brancher les scénarios sur les **rencontres aléatoires du jeu** (tirage selon la zone, le niveau et la réputation) : aujourd'hui seulement à la demande dans le Kit.
+- **Pacifique et méfiant arrivent seulement par la droite** (pas de convoi qui nous rattrape par l'arrière) : en vouloir par la gauche ?
+- Un groupe **méfiant** devient-il hostile si on le tire dessus ou si on le fouille ? Mécanique de bascule d'agressivité à concevoir.
+- Compositions, tailles et nombre d'abordeurs à régler en essai.

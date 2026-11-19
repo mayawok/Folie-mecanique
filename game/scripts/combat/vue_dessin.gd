@@ -120,6 +120,9 @@ func _evenement(e: Dictionary) -> void:
 			_aide("003")
 		"reputation":
 			_aide("006")
+		"groupe":   # un groupe arrive (DEC-253) : annonce colorée selon son agressivité
+			_annonce = {"cote": String(e.cote), "n": int(e.n), "agr": int(e.agr), "nom": String(e.nom), "age": 0.0}
+			_son("sfx_impact_blindage", -12.0)
 		"combat":   # début et fin de la formation de combat (DEC-251)
 			var so3 := get_node_or_null("/root/Son")
 			if String(e.etat) == "debut":
@@ -155,6 +158,10 @@ func _evenement(e: Dictionary) -> void:
 				_son("sfx_explosion")
 
 func _vieillir(delta: float) -> void:
+	if not _annonce.is_empty():
+		_annonce.age += delta
+		if _annonce.age > float(CombatModele.donnees().groupes.annonce_s):
+			_annonce = {}
 	if _combat_anim >= 0.0:
 		_combat_anim += delta
 		if _combat_anim > 2.6:
@@ -448,6 +455,7 @@ func dessiner_lumieres(c: CanvasItem) -> void:
 
 # Début de combat (DEC-251) : bords rouges qui pulsent, bandeau sombre qui glisse en travers de l'écran avec « CONTACT ! » au pochoir
 func dessiner_bandeau(c: CanvasItem) -> void:
+	_dessiner_annonce(c)
 	if _combat_anim < 0.0:
 		return
 	var t := _combat_anim
@@ -473,6 +481,38 @@ func dessiner_bandeau(c: CanvasItem) -> void:
 	var xt: float = lerpf(-w * 0.4, 0.0, glisse)
 	c.draw_string(f, Vector2(xt + 3.0, y + bh * 0.5 + 25.0), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 70, Color(0, 0, 0, 0.7 * a))
 	c.draw_string(f, Vector2(xt, y + bh * 0.5 + 22.0), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 70, Color(C_ACCENT.lightened(0.15), a))
+
+
+# Annonce d'un groupe qui arrive (DEC-253) : pastille en haut au centre et flèche sur le bord de l'écran du côté d'arrivée ;
+# la couleur suit l'agressivité (vert pacifique, jaune méfiant, orange hostile, rouge meurtrier)
+func _dessiner_annonce(c: CanvasItem) -> void:
+	if _annonce.is_empty():
+		return
+	var G: Dictionary = CombatModele.donnees().groupes
+	var col := Color(String(G.agressivite[int(_annonce.agr)].couleur))
+	var t: float = _annonce.age
+	var dur := float(G.annonce_s)
+	var a: float = clampf(minf(t / 0.25, (dur - t) / 0.6), 0.0, 1.0)
+	var clignote: float = 1.0 if int(_annonce.agr) < 2 else (0.7 + 0.3 * sin(t * (9.0 if int(_annonce.agr) == 2 else 15.0)))
+	var w := size.x
+	var droite: bool = _annonce.cote == "droite"
+	var f := police("pochoir", 800)
+	var l1 := "%s  %s" % [Textes.t("groupe.cd" if droite else "groupe.cg").to_upper(), ""]
+	var l2 := "%s · %d · %s" % [_annonce.nom, int(_annonce.n), Textes.t("groupe.a%d" % int(_annonce.agr))]
+	var bw := 560.0
+	var bh := 92.0
+	var r := Rect2((w - bw) * 0.5, 120.0, bw, bh)
+	c.draw_rect(r, Color(0.05, 0.045, 0.04, 0.82 * a))
+	c.draw_rect(Rect2(r.position, Vector2(bw, 4.0)), Color(col, a * clignote))
+	c.draw_rect(Rect2(r.position + Vector2(0, bh - 4.0), Vector2(bw, 4.0)), Color(col, a * clignote))
+	c.draw_string(f, r.position + Vector2(0, 38.0), l1.strip_edges(), HORIZONTAL_ALIGNMENT_CENTER, bw, 34, Color(col.lightened(0.15), a))
+	c.draw_string(get_theme_default_font(), r.position + Vector2(0, 74.0), l2, HORIZONTAL_ALIGNMENT_CENTER, bw, 28, Color(C_TEXTE, a))
+	var cy := r.position.y + bh * 0.5
+	var pulse: float = 0.5 + 0.5 * sin(t * 6.0)
+	var dx := 24.0 + 14.0 * pulse
+	var sens := 1.0 if droite else -1.0
+	var bx: float = (w - 18.0 - dx) if droite else (18.0 + dx)
+	c.draw_colored_polygon(PackedVector2Array([Vector2(bx + sens * 26.0, cy), Vector2(bx - sens * 8.0, cy - 30.0), Vector2(bx - sens * 8.0, cy + 30.0)]), Color(col, a * clignote))
 
 
 func dessiner_fx(c: CanvasItem) -> void:

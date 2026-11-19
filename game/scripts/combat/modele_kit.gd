@@ -181,6 +181,77 @@ func kit_apparaitre(genre: String, p := {}) -> bool:
 	return true
 
 
+# --- Groupes d'ennemis prêts à lancer (DEC-253) ------------------------------------------------------------------
+# id : id de scénario ou « hasard » ; taille : petit | moyen | grand | auto ; cote : droite (devant) | gauche (derrière) | auto.
+# Le niveau d'agressivité (0 à 3) décide du comportement : pacifique = marchands qui nous croisent sans arme ; méfiant = croisent
+# armés sans nous éperonner ; hostile et meurtrier = attaque (à l'approche devant, poursuite avec abordeurs derrière).
+func kit_scenario(id := "hasard", taille := "auto", cote := "auto") -> bool:
+	if not kit_actif():
+		return false
+	var G: Dictionary = donnees().groupes
+	var liste: Array = G.scenarios
+	var sc = null
+	if id == "hasard":
+		sc = liste[rng.randi() % liste.size()]
+	else:
+		for s in liste:
+			if s.id == id:
+				sc = s
+	if sc == null:
+		return false
+	var cotes: Array = sc.cotes.keys()
+	if not sc.cotes.has(cote):
+		cote = String(cotes[rng.randi() % cotes.size()])
+	if not sc.compos.has(taille):
+		taille = ["petit", "moyen", "grand"][rng.randi() % 3]
+	var compos: Array = sc.compos[taille]
+	var types: Array = compos[rng.randi() % compos.size()]
+	var agr := int(sc.agr)
+	var avant := ennemis.size()
+	match String(sc.cotes[cote]):
+		"face":
+			kit_apparaitre("face", {"types": types, "eperonne": false})
+		"poursuite":
+			kit_apparaitre("poursuite", {"types": types, "abordeurs": int(sc.get("abordeurs", 2))})
+		_:
+			var dx := 0.0
+			for t in types:
+				kit_apparaitre("ennemi", {"type": t, "dx": dx})
+				dx += float(G.espacement)
+	var fac := rep_faction_ici()
+	for i in range(avant, ennemis.size()):
+		var e = ennemis[i]
+		e.profil["agr"] = agr
+		if agr == 0:   # marchands : alliés sans arme, ils nous saluent en nous croisant
+			e.allie = true
+			e.armes = []
+			e.profil["fac"] = fac
+			e.faction = fac
+	var nom := Textes.t("groupe.s." + String(sc.id))
+	log_(Textes.t("groupe.001", [nom, types.size(), Textes.t("groupe.cd" if cote == "droite" else "groupe.cg")]), "ok" if agr == 0 else "alerte")
+	evt({"t": "groupe", "cote": cote, "n": types.size(), "agr": agr, "nom": nom})
+	return true
+
+
+# Remplace l'escorte par un convoi de départ constitué (le camion principal reste, premier véhicule de la liste)
+func kit_convoi_depart(id: String) -> bool:
+	if not kit_actif():
+		return false
+	for c in donnees().kit_convois.liste:
+		if c.id != id:
+			continue
+		for v in convoi.duplicate():
+			if not v.principal:
+				convoi.erase(v)
+		var types: Array = c.types.slice(1)
+		for t in types:
+			convoi.append(creer_vehicule(String(t), "joueur", x_tete))
+		_replacer(true)
+		log_("Kit : convoi « %s »." % Textes.t("groupe.c." + id), "ok")
+		return true
+	return false
+
+
 # Vitesse d'un véhicule de convoi ennemi (plafonnée par sa propre vitesse)
 func kit_vitesse_convoi(e) -> float:
 	return minf(e.vitesse(), float(_kit_convois.get(e.uid, 4.5)))

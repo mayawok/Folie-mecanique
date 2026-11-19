@@ -536,7 +536,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := false, bac := false) -> 
 	if sauve.is_empty():
 		_effacer_sauvegarde()
 		# Départ avec le Berliet, camion de l'expédition (DEC-139) ; l'ancien début guidé (moto à assembler, DEC-035) reste possible par ouverture = true
-		var opts := {"bac_a_sable": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true, "villes": true, "pannes": true})
+		var opts := {"bac_a_sable": true, "kit_groupe": true} if bac else ({"ouverture": true} if ouverture else {"meteo": true, "champs": true, "villes": true, "pannes": true})
 		m = CombatModele.new(g, opts)
 	else:
 		m = CombatModele.depuis_sauvegarde(sauve)
