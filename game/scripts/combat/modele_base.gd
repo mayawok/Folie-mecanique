@@ -50,7 +50,26 @@ static func ancre(v, id: String, x := NAN) -> Vector2:
 				if i < armes.size():
 					p = Vector2(armes[i].x + armes[i].long * 0.4, armes[i].y + armes[i].get("pied", 0.0) * 0.6)
 	var vx: float = v.x if is_nan(x) else x
-	return Vector2(vx + (L - p.x if v.camp == "ennemi" else p.x), p.y)
+	var gx: float = vx + (L - p.x if v.camp == "ennemi" else p.x)
+	if v is Veh:   # voie de profondeur (DEC-250) : taille apparente autour du centre et décalage vertical
+		var e := voie_echelle(v.voie_f)
+		var cx: float = vx + L * 0.5
+		return Vector2(cx + (gx - cx) * e, p.y * e + voie_dy(v.voie_f))
+	return Vector2(gx, p.y)
+
+
+# Voies de profondeur (DEC-250) : décalage vertical à l'écran (m, positif = plus haut, donc plus loin) et taille apparente.
+# vf va de -1 (fond) à 1 (devant) ; entre deux voies, on interpole.
+static func _interp_voie(tab: Array, vf: float) -> float:
+	var u := clampf(vf, -1.4, 1.4) + 1.0
+	var i := clampi(int(floorf(u)), 0, 1)
+	return lerpf(float(tab[i]), float(tab[i + 1]), u - i)
+
+static func voie_dy(vf: float) -> float:
+	return _interp_voie(donnees().voies.dy, vf)
+
+static func voie_echelle(vf: float) -> float:
+	return _interp_voie(donnees().voies.echelle, vf)
 
 static func ecart(ax: float, al: float, bx: float, bl: float) -> float:
 	return maxf(0.0, maxf(bx - (ax + al), ax - (bx + bl)))
@@ -105,6 +124,8 @@ class Veh extends RefCounted:
 	var ecart_acc := 0.0          # écart en plus ou en moins par rapport à sa place (effet accordéon, DEC-233)
 	var u_suiv := 0.0             # vitesse retardée avec laquelle il suit la tête
 	var cd_acc := 0.0             # délai entre deux tamponnements
+	var voie := 0                 # voie voulue (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite)
+	var voie_f := 0.0             # voie réelle, glisse vers « voie » pendant le changement (non sauvegardée : on repart au milieu)
 
 	func remorque() -> bool:
 		return bool(profil.get("remorque", false))

@@ -208,7 +208,10 @@ func _dessiner_monde(c: CanvasItem) -> void:
 	for ab in m.abordeurs:
 		var xa: float = ab.x
 		var haut: float = 1.7 + (sin(PI * float(ab.t)) * 1.6 if ab.etat == "saut" else 0.0)
-		var pa := Vector2(terrain.ecran_x(xa), _sy(xa) - haut * ppm)
+		var de_v = m.trouver(int(ab.de))
+		var vers_v = m.trouver(int(ab.vers))
+		var dya: float = lerpf(_dyv(de_v) if de_v != null else 0.0, _dyv(vers_v) if vers_v != null else 0.0, float(ab.t))
+		var pa := Vector2(terrain.ecran_x(xa), _sy(xa) - haut * ppm - dya)
 		Silhouette.dessiner(c, pa, ppm, "pillard", {"phase": _temps * 9.0 if ab.etat == "bord" else 0.0, "miroir": false, "peau": int(ab.uid), "bras": "vise"})
 		if ab.type == "bombe":   # lance explosive : hampe et charge, mèche qui crépite
 			var bout := pa + Vector2(0.9 * ppm, -1.5 * ppm)
@@ -375,9 +378,9 @@ func dessiner_ombres(c: CanvasItem) -> void:
 			continue
 		var L: float = v.longueur
 		var xc: float = _rx(v) + L * 0.5 - lerpf(0.25, 1.3, soir)
-		var p := Vector2(terrain.ecran_x(xc), _sy(xc) + 0.06 * ppm)
+		var p := Vector2(terrain.ecran_x(xc), _sy(xc) + 0.06 * ppm - _dyv(v))
 		var ang := atan2(_sy(xc + 1.0) - _sy(xc - 1.0), 2.0 * ppm)
-		var demi := L * lerpf(0.5, 0.72, soir) * ppm
+		var demi := L * lerpf(0.5, 0.72, soir) * ppm * CombatModele.voie_echelle(v.voie_f)
 		var ep := lerpf(0.16, 0.11, soir)   # aplatissement de l'ellipse
 		c.draw_set_transform(p, ang, Vector2(1.0, ep))
 		for k in 8:   # bord flou : huit ellipses empilées, de plus en plus petites
@@ -401,19 +404,20 @@ func dessiner_lumieres(c: CanvasItem) -> void:
 			if not v.actif() or v.camoufle or int(v.profil.get("phares", 0)) <= 0:   # seulement s'il en a (DEC-048)
 				continue
 			var L: float = v.longueur
-			var lampe := _px(Vector2(_rx(v) + L - 0.1, 0.9))
+			var dy: float = CombatModele.voie_dy(v.voie_f)
+			var lampe := _px(Vector2(_rx(v) + L - 0.1, 0.9 + dy))
 			var xb: float = _rx(v) + L + 14.0
 			var a := 0.4 * obs
-			c.draw_polygon(PackedVector2Array([lampe + Vector2(0, -0.12 * ppm), _px(Vector2(xb, 2.6)), _px(Vector2(xb, -0.2)), lampe + Vector2(0, 0.12 * ppm)]),
+			c.draw_polygon(PackedVector2Array([lampe + Vector2(0, -0.12 * ppm), _px(Vector2(xb, 2.6 + dy)), _px(Vector2(xb, -0.2 + dy)), lampe + Vector2(0, 0.12 * ppm)]),
 				PackedColorArray([Color(cc, a), Color(cc, 0.0), Color(cc, 0.0), Color(cc, a)]))
 			var xf: float = _rx(v) + L + 5.5   # flaque de lumière sur la route
-			var pf := _px(Vector2(xf, 0.0))
+			var pf := _px(Vector2(xf, dy))
 			c.draw_set_transform(pf, atan2(_sy(xf + 1.0) - _sy(xf - 1.0), 2.0 * ppm), Vector2(1.0, 0.16))
 			for k in 3:
 				c.draw_circle(Vector2.ZERO, 5.0 * ppm * (1.0 - 0.25 * k), Color(cc, 0.09 * obs))
 			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			_lueur(c, lampe, 0.6 * ppm, cc, 0.5 * obs)
-			_lueur(c, _px(Vector2(_rx(v) + 0.1, 0.8)), 0.4 * ppm, Color(1.0, 0.2, 0.1), 0.35 * obs)   # feu arrière
+			_lueur(c, _px(Vector2(_rx(v) + 0.1, 0.8 + dy)), 0.4 * ppm, Color(1.0, 0.2, 0.1), 0.35 * obs)   # feu arrière
 	var k_feu := 0.3 + 0.7 * obs   # en plein jour, les flammes éclairent peu
 	for v in m.convoi + m.ennemis + m.epaves:
 		if (v.statut == "epave" and not v.butin_pris) or v.feu > 0.0:   # épave ou véhicule en feu (DEC-220)
@@ -467,7 +471,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 			continue
 		var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
 		var x0 := terrain.ecran_x(_rx(v))
-		var top: float = _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.7) * ppm
+		var top: float = _sy(_rx(v) + v.longueur * 0.5) - _dyv(v) - (float(D.hauteur) + 0.7) * ppm
 		var w: float = v.longueur * ppm
 		var q: float = v.pieces.chassis.pv / v.pieces.chassis.max
 		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w, 6)), Color(0, 0, 0, 0.6))
@@ -476,7 +480,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_circle(Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_VERT if v.equipage[k] > 0.0 else Color(0.35, 0.35, 0.35))
 		if v.camo_voulu:
 			var fr: float = 1.0 if v.camoufle else clampf(v.camo_t / CombatModele.donnees().embuscade.camo_s, 0.0, 1.0)
-			var cam := Rect2(Vector2(x0 - 4, _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
+			var cam := Rect2(Vector2(x0 - 4, _sy(_rx(v) + v.longueur * 0.5) - _dyv(v) - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
 			c.draw_rect(cam, Color(0.25, 0.32, 0.18, 0.78 * fr))
 			for k in 9:
 				c.draw_circle(cam.position + Vector2(cam.size.x * (k + 0.5) / 9.0, cam.size.y * (0.2 + 0.5 * fposmod(k * 0.37, 1.0))), ppm * 0.45, Color(0.18, 0.26, 0.12, 0.8 * fr))
@@ -487,7 +491,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 	if m.vitesse_convoi != 0.0 and not pause:
 		for v in m.convoi:
 			if v.actif() and _rng.randf() < 0.35:
-				_poussiere_veh.append({"p": Vector2(_rx(v) + 0.3, 0.2), "age": 0.0})
+				_poussiere_veh.append({"p": Vector2(_rx(v) + 0.3, 0.2 + CombatModele.voie_dy(v.voie_f)), "age": 0.0})
 	for q in _poussiere_veh:
 		var kq: float = q.age / 0.9
 		c.draw_circle(_px(q.p) + Vector2(-kq * ppm * 1.6, -kq * ppm * 0.7), ppm * (0.2 + 0.5 * kq), Color(0.7, 0.6, 0.45, 0.35 * (1.0 - kq)))
@@ -525,7 +529,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var libre: bool = (cc is CombatModele.Veh and not cc.butin_pris) or (cc is CombatModele.Bat and cc.statut == "neutralise" and not cc.butin_pris)
 		if libre:
 			var h: float = 2.0 if cc is CombatModele.Veh else cc.hauteur
-			var p := Vector2(terrain.ecran_x(_rx(cc) + cc.longueur * 0.5), _sy(_rx(cc) + cc.longueur * 0.5) - (h + 1.3) * ppm - 4.0 * sin(_temps * 3.0))
+			var p := Vector2(terrain.ecran_x(_rx(cc) + cc.longueur * 0.5), _sy(_rx(cc) + cc.longueur * 0.5) - _dyv(cc) - (h + 1.3) * ppm - 4.0 * sin(_temps * 3.0))
 			c.draw_rect(Rect2(p - Vector2(10, 10), Vector2(20, 20)), C_ACCENT)
 			c.draw_string(f, p + Vector2(-10, 7), "$", HORIZONTAL_ALIGNMENT_CENTER, 20, 18, Color("#1A1A18"))
 	if not m.fouille_en_cours.is_empty():
@@ -533,7 +537,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		if cible != null:
 			var fr: float = 1.0 - m.fouille_en_cours.restant / m.fouille_en_cours.total
 			var h2: float = 2.0 if cible is CombatModele.Veh else cible.hauteur
-			var p2 := Vector2(terrain.ecran_x(_rx(cible) + cible.longueur * 0.5), _sy(_rx(cible) + cible.longueur * 0.5) - (h2 + 2.4) * ppm)
+			var p2 := Vector2(terrain.ecran_x(_rx(cible) + cible.longueur * 0.5), _sy(_rx(cible) + cible.longueur * 0.5) - _dyv(cible) - (h2 + 2.4) * ppm)
 			c.draw_rect(Rect2(p2 - Vector2(50, 7), Vector2(100, 14)), Color(0, 0, 0, 0.7))
 			c.draw_rect(Rect2(p2 - Vector2(48, 5), Vector2(96 * fr, 10)), C_ACCENT)
 			c.draw_string(f, p2 + Vector2(-60, -14), "Fouille", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, C_TEXTE)
@@ -607,7 +611,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		if v.remorque() and v.actif() and v.garage == 0:
 			var t = m.tracteur_de(v)
 			if t != null and t.garage == 0:
-				c.draw_line(_px(Vector2(_rx(v) + v.longueur - 0.1, 0.55)), _px(Vector2(_rx(t) + 0.1, 0.55)), Color("#2E2C28"), maxf(3.0, ppm * 0.07))
+				c.draw_line(_px(Vector2(_rx(v) + v.longueur - 0.1, 0.55 + CombatModele.voie_dy(v.voie_f))), _px(Vector2(_rx(t) + 0.1, 0.55 + CombatModele.voie_dy(t.voie_f))), Color("#2E2C28"), maxf(3.0, ppm * 0.07))
 	for w in _roues_tombees:
 		var rp: float = w.r * ppm
 		var tex: Texture2D = VehiculeDessin._tex("roue_petite" if w.r < 0.3 else ("roue_moyenne" if w.r < 0.5 else "roue_grande"))
@@ -655,7 +659,7 @@ func _dessiner_panneau(c: CanvasItem) -> void:
 	var largeur: float = casses.size() * (t + 8.0) + (198.0 if rejoindre else 0.0) - 8.0
 	var x0: float = terrain.ecran_x(_rx(v)) + v.longueur * ppm * 0.5 - largeur * 0.5
 	x0 = clampf(x0, 12.0, size.x - largeur - 12.0)
-	var y0: float = maxf(150.0, _sy(_rx(v) + v.longueur * 0.5) - (float(D.hauteur) + 0.7) * ppm - 120.0)
+	var y0: float = maxf(150.0, _sy(_rx(v) + v.longueur * 0.5) - _dyv(v) - (float(D.hauteur) + 0.7) * ppm - 120.0)
 	var f := get_theme_default_font()
 	for i in casses.size():
 		var id: String = casses[i]

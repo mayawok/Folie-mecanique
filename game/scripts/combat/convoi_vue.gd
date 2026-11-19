@@ -231,13 +231,16 @@ func _synchroniser() -> void:
 		if v.camo_voulu:
 			n.modulate = Color(0.55, 0.66, 0.5, 0.45 if v.camoufle else 0.8)
 		n.modulate = n.modulate * Color.WHITE.lerp(Color(0.5, 0.55, 0.75), terrain.nuit)
-		n.z_index = 0 if v.actif() else -1   # les épaves passent derrière les véhicules
-		if v.mode == "poursuite" and v.actif():   # poursuivant sur la voie d'à côté : derrière nos véhicules, un peu assombri (DEC-077)
-			n.z_index = -1
-			n.modulate = n.modulate * Color(0.8, 0.8, 0.8)
+		# Voies de profondeur (DEC-250) : le fond passe derrière, plus petit, plus haut et un peu voilé ; devant passe devant et cache
+		var vf: float = v.voie_f
+		n.z_index = (0 if v.actif() else -1) + 3 * roundi(vf)
+		if vf < -0.5:
+			n.modulate = n.modulate * Color(0.88, 0.88, 0.9)
+		var ech := CombatModele.voie_echelle(vf)
+		n.scale = Vector2(ech, ech)
 		var cxv: float = x + v.longueur * 0.5
 		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
-		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y)
+		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y - _dyv(v))
 		if v.camp == "joueur" and m.ville_repaire() and v == _vehicule_monte():   # monte-charge du repaire (DEC-166)
 			n.position.y -= m.repaire_levee() * ppm
 		n.rotation = -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
@@ -307,7 +310,7 @@ func _tap(p: Vector2) -> void:
 		if v.statut == "epave":
 			continue
 		var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
-		var r := Rect2(Vector2(terrain.ecran_x(_rx(v)) - 12.0, _sy(_rx(v) + v.longueur * 0.5) - float(D.hauteur) * ppm - 50.0), Vector2(v.longueur * ppm + 24.0, float(D.hauteur) * ppm + 60.0))
+		var r := Rect2(Vector2(terrain.ecran_x(_rx(v)) - 12.0, _sy(_rx(v) + v.longueur * 0.5) - _dyv(v) - float(D.hauteur) * ppm - 50.0), Vector2(v.longueur * ppm + 24.0, float(D.hauteur) * ppm + 60.0))
 		if r.has_point(p):
 			trouve = v.uid
 	ouvert = 0 if trouve == ouvert else trouve

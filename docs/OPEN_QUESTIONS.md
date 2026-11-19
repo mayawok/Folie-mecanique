@@ -300,3 +300,7 @@ Les équipages n'ont pas d'identifiants stables dans le code (tableaux et compte
 ## OQ-047 — Mécanique à trois niveaux et direction artistique (15/11)
 
 Comment le joueur choisit son niveau d'interaction (réglage, par véhicule, progressif) ; premier lot d'assets à la nouvelle direction artistique (quel sujet de comparaison avant / après) ; faut-il reprendre un jour certains assets existants.
+
+## OQ-048 — Voies de profondeur : suites (19/11, DEC-250)
+
+Nos véhicules d'escorte doivent-ils aller d'eux-mêmes boucher le flanc où un poursuivant veut monter (aujourd'hui ils restent au milieu et frappent de côté en mode « éperonner ») ? Le joueur doit-il pouvoir ordonner un changement de voie ? Les bâtiments et les villes restent posés sur la voie du milieu : faut-il les reculer sur le bas-côté du fond ? Le Berliet doit-il avoir des phares d'origine (DEC-048, DEC-249) ?

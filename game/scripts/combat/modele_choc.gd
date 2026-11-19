@@ -93,8 +93,9 @@ func _chocs(dt: float) -> void:
 		if not e.actif() or e.allie or float(_cd_choc.get(e.uid, 0.0)) > 0.0:
 			continue
 		var avant: float = t.x + t.longueur
+		var voie_t: bool = meme_voie(t, e)
 		# 1) Devant nous : on rentre dedans (ordre), ou un véhicule d'en face nous fonce dessus
-		if e.x - avant < ct and e.x + e.longueur > t.x and e.x > t.x:
+		if voie_t and e.x - avant < ct and e.x + e.longueur > t.x and e.x > t.x:
 			var nous: bool = conduite() == "eperonner" and ordres.marche == "avancer"
 			match String(e.mode):
 				"face":   # convoi qui nous croise : choc frontal si l'un des deux le veut
@@ -112,11 +113,16 @@ func _chocs(dt: float) -> void:
 		if q == null:
 			continue
 		# 2) Derrière nous : un poursuivant nous emboutit, ou on recule dans un ennemi
-		if e.x < q.x and e.x + e.longueur > q.x - ct:
+		if meme_voie(q, e) and e.x < q.x and e.x + e.longueur > q.x - ct:
 			if e.mode == "poursuite" and eperonne(e) and e.vitesse_act > vitesse_convoi:
 				_choc(e, q, e.vitesse_act - vitesse_convoi + float(C.elan), "avant", "arriere", false)
 			elif conduite() == "eperonner" and ordres.marche == "recul":
 				_choc(q, e, absf(vitesse_convoi) + float(C.elan), "arriere", "avant", true)
+
+
+# Deux véhicules sur la même voie de profondeur (DEC-250) : seuls ceux-là peuvent se percuter de face ou par l'arrière
+func meme_voie(a: Veh, b: Veh) -> bool:
+	return absf(a.voie_f - b.voie_f) < 0.5
 
 
 # a frappe b. cote_a / cote_b : « avant » ou « arriere ». par_joueur : c'est notre convoi qui a voulu le choc.

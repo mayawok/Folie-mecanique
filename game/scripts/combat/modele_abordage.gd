@@ -47,7 +47,8 @@ func _ia_poursuite(dt: float) -> void:
 		var P: Dictionary = _pours.get(e.uid, {"restants": int(AB().abordeurs_defaut), "types": ["lame"], "cd": 0.0})
 		_pours[e.uid] = P
 		P.cd = maxf(0.0, float(P.cd) - dt)
-		if absf(d) < float(AB().ecart_saut) and int(P.restants) > 0 and P.cd <= 0.0 and e.equipage_vivant() > 1:
+		var flanc: bool = absf(absf(e.voie_f - c.voie_f) - 1.0) < 0.3   # sur la voie d'à côté de sa cible (DEC-250)
+		if flanc and absf(d) < float(AB().ecart_saut) and int(P.restants) > 0 and P.cd <= 0.0 and e.equipage_vivant() > 1:
 			var types: Array = P.types
 			var type: String = types[rng.randi() % types.size()]
 			_uid_ab += 1

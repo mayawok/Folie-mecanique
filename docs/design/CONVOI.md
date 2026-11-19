@@ -262,3 +262,7 @@ Bouton **Kit** en haut (Mode créatif seulement) : panneau à droite. Code : `mo
 Bloc `equilibrage` de `combat_proto.json`, testé par `test_equilibrage.gd` : `ennemi_degats_subis` 1,5 (véhicules ennemis), `ennemi_degats_infliges` 0,7 (tout tir ennemi),
 `ennemi_precision` 0,85, `rodeurs_delai` 95 s et `rodeurs_delai_abri` 60 s. Les rencontres de véhicules sont des groupes (Tiger I seul excepté). Objectif : on gagne un combat sans tout
 risquer, mais le danger vient du nombre et de l'enchaînement. À régler en essai ; l'étape suivante est de tester le Kit contre des groupes pour trouver les bons chiffres.
+
+## Voies de profondeur (DEC-250)
+
+Trois voies : fond (gauche du sens de marche), route (milieu), devant (droite). On roule au milieu ; on serre à droite pour croiser un allié ; on double par la gauche (ordre « éviter »). Les poursuivants montent sur un flanc et abordent depuis la voie d'à côté ; chocs de face et par l'arrière seulement sur la même voie ; coups de flanc entre voies voisines (une moto légère peut partir dans le fossé) ; couvert derrière un gros véhicule du milieu. Rendu : fond plus petit, plus haut, voilé ; devant plus grand, cache ce qui est derrière. Valeurs : bloc « voies » de `combat_proto.json`. Suites : OQ-048.

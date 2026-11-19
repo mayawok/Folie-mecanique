@@ -1,8 +1,8 @@
 # Couche « Kit de développement » du Mode créatif (DEC-110, DEV-010).
-# Chaîne : modele_base <- modele_tir <- modele_terrain <- modele_mines <- modele_meteo <- modele_abordage <- modele_kit <- modele_atelier <- combat_modele.
+# Chaîne : modele_base <- modele_tir <- modele_terrain <- modele_mines <- modele_meteo <- modele_abordage <- modele_choc <- modele_voies <- modele_kit <- modele_atelier <- combat_modele.
 # Sert à fabriquer à la main le monde, les décors et les rencontres avant d'écrire un chapitre : zone, heure, météo,
 # route calme (aucune rencontre automatique) et apparitions à la demande. Actif seulement en Mode créatif (bac_a_sable).
-extends "res://scripts/combat/modele_choc.gd"
+extends "res://scripts/combat/modele_voies.gd"
 
 const KIT_ZONES := ["sable", "terre", "cailloux", "eau", "neige", "boue"]
 const KIT_ZONES_NOMS := {"sable": "Sable", "terre": "Terre et herbe", "cailloux": "Cailloux", "eau": "Eau", "neige": "Neige", "boue": "Boue"}

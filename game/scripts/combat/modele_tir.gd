@@ -183,6 +183,7 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 	if monde.nuit() and joueur and not garde and not (att is Veh and int(att.profil.get("phares", 0)) > 0):
 		chance *= 0.8   # on y voit mal la nuit, sauf avec des phares (DEC-048)
 	chance *= facteur_precision_meteo()   # tempête de sable : précision ×0,5 pour tous (DEC-027)
+	chance *= _facteur_couvert(att, cible)   # cible cachée derrière un véhicule de la voie du milieu (DEC-250)
 	var touche := rng.randf() < chance
 	var origine := _bouche(att, a)
 	var zone := ""
@@ -203,7 +204,7 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 			point = Vector2(cible.x + cible.longueur * rng.randf_range(0.25, 0.75), cible.hauteur * rng.randf_range(0.15, 0.6))
 	else:
 		var sens := 1.0 if centre_x >= origine.x else -1.0
-		point = Vector2(centre_x + sens * rng.randf_range(1.0, 7.0), rng.randf_range(0.0, 1.6))
+		point = Vector2(centre_x + sens * rng.randf_range(1.0, 7.0), rng.randf_range(0.0, 1.6) + (voie_dy(cible.voie_f) if cible is Veh else 0.0))
 	if not joueur:
 		bonus *= float(donnees().equilibrage.ennemi_degats_infliges)   # tout ce qui tire contre le convoi frappe moins fort (DEC-113)
 	projectiles.append({"att": att.uid, "cible": cible.uid, "w": w, "classe": w.classe, "a": origine, "b": point,
@@ -261,7 +262,15 @@ func _bouche(att, a: Dictionary) -> Vector2:
 		else:
 			lx = ar.x + ar.long
 			ly = ar.y
-	return Vector2(att.x + (att.longueur - lx if att.camp == "ennemi" else lx), ly)
+	var e := voie_echelle(att.voie_f)   # voie de profondeur du tireur (DEC-250)
+	var cx: float = att.x + att.longueur * 0.5
+	var gx: float = att.x + (att.longueur - lx if att.camp == "ennemi" else lx)
+	return Vector2(cx + (gx - cx) * e, ly * e + voie_dy(att.voie_f))
+
+
+# Couvert entre voies (DEC-250) : redéfini par modele_voies.gd ; 1 = cible dégagée
+func _facteur_couvert(_att, _cible) -> float:
+	return 1.0
 
 func _projectiles(dt: float) -> void:
 	var en_vol := []

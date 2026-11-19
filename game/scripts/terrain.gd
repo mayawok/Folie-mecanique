@@ -34,6 +34,10 @@ const GROUPES := {
 # premier plan (passe devant les véhicules) : [fichier, hauteur réelle en m]
 const AVANT := [["av_herbes", 1.4], ["av_ronce", 1.2], ["av_fougeres", 1.0], ["av_roseaux", 2.0], ["av_pierres", 0.5], ["av_pneu", 0.7], ["av_planches", 0.8], ["av_flaque", 0.25], ["av_squelette", 1.0]]
 static var _tex := {}
+# Voies de profondeur (DEC-250) : le bord de la route, côté fond, est BAS_COTE m au-dessus de la voie du milieu.
+# Les voies elles-mêmes (décalages, tailles) sont dans le bloc « voies » de combat_proto.json ; ornières : DY_VOIES.
+const BAS_COTE := 1.15
+const DY_VOIES := [0.75, 0.0, -0.85]
 
 var avant := false      # vrai : ce calque ne dessine que le premier plan, posé devant les véhicules
 var soir := 0.0         # 0..1 : ciel de fin de journée
@@ -151,7 +155,10 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 	var base := Color(pal.sol).lerp(nuitc, 0.62 * nuit)
 	draw_colored_polygon(sol_pts, base.darkened(0.25))
 	# couches : [profondeur haute, profondeur basse (m), couleur]
-	var couches := [[0.0, 0.55, Color(pal.trace).lightened(0.22)], [0.55, 1.4, Color(pal.sol)], [1.4, 2.6, Color(pal.sol).darkened(0.12)], [2.6, 4.5, Color(pal.sol).darkened(0.24)]]
+	# bas-côté du fond, chaussée large de trois voies (DEC-250), puis la terre en couches
+	var r1 := BAS_COTE + 1.2
+	var couches := [[0.0, 0.25, Color(pal.sol).darkened(0.06)], [0.25, r1, Color(pal.trace).lightened(0.22)], [r1, r1 + 0.85, Color(pal.sol)],
+		[r1 + 0.85, r1 + 2.0, Color(pal.sol).darkened(0.12)], [r1 + 2.0, r1 + 3.9, Color(pal.sol).darkened(0.24)]]
 	for c in couches:
 		var col: Color = Color(c[2]).lerp(nuitc, 0.62 * nuit)
 		var pts := PackedVector2Array()
@@ -162,12 +169,14 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 			var ond := 0.12 * ppm * sin((q.x + camera_x * ppm) * 0.013 + float(c[1]))   # limite de couche un peu ondulée
 			pts.append(q + Vector2(0, float(c[1]) * ppm + ond))
 		draw_colored_polygon(pts, col)
-	# ornières de la route
-	for d in [0.18, 0.42]:
-		var orn := PackedVector2Array()
-		for p in crete:
-			orn.append(p + Vector2(0, d * ppm))
-		draw_polyline(orn, Color(0, 0, 0, 0.16), maxf(2.0, 0.07 * ppm))
+	# ornières : deux traces par voie, plus fines et plus pâles vers le fond
+	for i in DY_VOIES.size():
+		var prof := BAS_COTE - float(DY_VOIES[i])
+		for d in [-0.06, 0.12]:
+			var orn := PackedVector2Array()
+			for p in crete:
+				orn.append(p + Vector2(0, (prof + d) * ppm))
+			draw_polyline(orn, Color(0, 0, 0, 0.08 + 0.05 * i), maxf(1.5, (0.05 + 0.015 * i) * ppm))
 	# crête : liseré et touffes d'herbe (zone terre)
 	draw_polyline(crete, Color(pal.crete).lerp(nuitc, 0.6 * nuit), maxf(2.0, 0.06 * ppm))
 	if zone == "terre":
@@ -178,7 +187,7 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 			if alea(k, 31.0) < 0.45:
 				continue
 			var xm := k * 0.7 + 0.5 * alea(k, 32.0)
-			var pied := Vector2(ecran_x(xm), sol_y - sol(xm) * ppm)
+			var pied := Vector2(ecran_x(xm), sol_y - (sol(xm) + BAS_COTE) * ppm)
 			var h := (0.12 + 0.22 * alea(k, 33.0)) * ppm
 			for j in 3:
 				var dx := (j - 1) * 0.06 * ppm
@@ -452,7 +461,7 @@ func _dessiner_avant() -> void:
 			var te := texture(String(it[0]))
 			if te != null:
 				var sc := float(it[1]) * 1.25 * ppm / te.get_height()
-				var pied := Vector2(ecran_x(xm), sol_y - sol(xm) * ppm + 1.3 * ppm)
+				var pied := Vector2(ecran_x(xm), sol_y - sol(xm) * ppm + 1.45 * ppm)
 				draw_texture_rect(te, Rect2(pied + Vector2(-te.get_width() * sc * 0.5, -te.get_height() * sc), te.get_size() * sc), false, teinte)
 		kk += 1.0
 
@@ -485,7 +494,7 @@ func _draw() -> void:
 	var x2 := 0.0
 	while x2 <= w + 8:
 		var xm := camera_x + (x2 - ancre_x) / ppm
-		var p := Vector2(x2, sol_y - sol(xm) * ppm)
+		var p := Vector2(x2, sol_y - (sol(xm) + BAS_COTE) * ppm)   # bord du fond de la route (DEC-250)
 		sol_pts.append(p)
 		crete.append(p)
 		x2 += 8
@@ -509,7 +518,7 @@ func _draw() -> void:
 	while kk * pas <= k1:
 		var xm3 := kk * pas + alea(kk, 6.0) * pas
 		var r := alea(kk, 7.0)
-		var pied := Vector2(ecran_x(xm3), sol_y - sol(xm3) * ppm)
+		var pied := Vector2(ecran_x(xm3), sol_y - (sol(xm3) + BAS_COTE) * ppm)   # sur le bas-côté du fond (DEC-250)
 		var genre := ""
 		for dk in pal.decor:
 			if r < float(dk[1]):
@@ -536,8 +545,8 @@ func _draw() -> void:
 				var lw := te.get_width() * sc
 				var lh := te.get_height() * sc
 				var demi := lw * 0.5 / ppm
-				var y_g := sol_y - relief(xm3 - demi) * ppm
-				var y_d := sol_y - relief(xm3 + demi) * ppm
+				var y_g := sol_y - (relief(xm3 - demi) + BAS_COTE) * ppm
+				var y_d := sol_y - (relief(xm3 + demi) + BAS_COTE) * ppm
 				var y_c := pied.y
 				if genre == "epave" or genre == "objet" or genre == "cloture" or genre == "muret":
 					draw_set_transform(Vector2(pied.x, y_c + 0.06 * ppm), atan2(y_d - y_g, lw), Vector2.ONE)

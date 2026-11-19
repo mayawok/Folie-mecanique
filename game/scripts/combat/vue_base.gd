@@ -562,35 +562,14 @@ func _rtete() -> float:
 # --- Événements et effets --------------------------------------------------
 func _centre_veh(v) -> Vector2:
 	var h: float = float(VehiculeDessin.donnees().vehicules[v.type].hauteur) if v is CombatModele.Veh else v.hauteur
-	return Vector2(_rx(v) + v.longueur * 0.5, h * 0.5)
+	return Vector2(_rx(v) + v.longueur * 0.5, h * 0.5 + (CombatModele.voie_dy(v.voie_f) if v is CombatModele.Veh else 0.0))
 
 func _ancre(v, id: String) -> Vector2:
-	var D: Dictionary = VehiculeDessin.donnees().vehicules[v.type]
-	var L: float = D.longueur
-	var H: float = D.hauteur
-	var p := Vector2(L * 0.5, H * 0.4)
-	match id:
-		"roulement":
-			p = Vector2(L * 0.5, 0.4)
-		"suspension":
-			p = Vector2(L * 0.35, 0.7)
-		"moteur":
-			p = Vector2(L * 0.85, H * 0.35)
-		"cabine":
-			p = Vector2(L * 0.45, H * 0.6)
-			var eq: Array = D.get("equipage", [])
-			if not eq.is_empty():
-				p = Vector2(eq[0].x, eq[0].y + 0.5)
-		"chassis":
-			p = Vector2(L * 0.5, H * 0.3)
-		_:
-			if id.begins_with("a"):
-				var armes: Array = D.get("armes", [])
-				var i := int(id.substr(1))
-				if i < armes.size():
-					p = Vector2(armes[i].x + armes[i].long * 0.4, armes[i].y + armes[i].get("pied", 0.0) * 0.6)
-	var gx: float = _rx(v) + (L - p.x if v.camp == "ennemi" else p.x)
-	return Vector2(gx, p.y)
+	return CombatModele.ancre(v, id, _rx(v))   # même calcul que le modèle, voie de profondeur comprise (DEC-250)
+
+# Décalage vertical (px, positif = plus haut) de la voie de profondeur d'un véhicule (DEC-250)
+func _dyv(v) -> float:
+	return CombatModele.voie_dy(v.voie_f) * ppm if v is CombatModele.Veh else 0.0
 
 func _px(p: Vector2) -> Vector2:
 	return Vector2(terrain.ecran_x(p.x), SOL_Y + cam_h * ppm - (p.y + Terrain.sol(p.x)) * ppm)
