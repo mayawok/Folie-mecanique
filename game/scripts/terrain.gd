@@ -195,8 +195,253 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 		draw_circle(cp + Vector2(-r * 0.3, -r * 0.3), r * 0.45, Color(1, 1, 1, 0.08 * (1.0 - nuit)))
 
 
+# --- Lot profondeur (DEC-249) : décor dessiné par le code pour les zones sans images ---------------
+# Six plans : mesas très lointaines, ville en ruine, trois rangs de dunes, ligne télégraphique. Plus un plan est loin,
+# plus il est pâle et pris dans la couleur de l'horizon (perspective atmosphérique). Le soleil, à droite, éclaire
+# les versants tournés vers lui ; les crêtes ont un liseré de lumière.
+
+# Ciel selon l'heure et la météo : [zénith, horizon]
+func _ciel() -> Array:
+	var zen := Color("#6E9CC0")
+	var hor := Color("#EAD3A6")
+	if zone == "neige":
+		hor = Color("#DCE3E8")
+	elif zone == "eau" or zone == "boue":
+		hor = Color("#D9D2B8")
+	zen = zen.lerp(Color("#4B5C86"), soir)
+	hor = hor.lerp(Color("#E8955A"), soir)
+	zen = zen.lerp(Color("#5A5F66"), orage * 0.8)
+	hor = hor.lerp(Color("#9A8F80"), orage * 0.8)
+	zen = zen.lerp(Color("#070D1C"), nuit)
+	hor = hor.lerp(Color("#2A2C48"), nuit)
+	return [zen, hor]
+
+
+func _etoiles(w: float) -> void:
+	if nuit > 0.2:
+		for i in 70:
+			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
+
+
+# Bande de brume : transparente en haut et en bas, plus dense au milieu
+func _brume(y0: float, y1: float, col: Color, a: float, w: float) -> void:
+	var ym := (y0 + y1) * 0.5
+	var c0 := Color(col, 0.0)
+	var c1 := Color(col, a)
+	draw_polygon(PackedVector2Array([Vector2(0, y0), Vector2(w, y0), Vector2(w, ym), Vector2(0, ym)]), PackedColorArray([c0, c0, c1, c1]))
+	draw_polygon(PackedVector2Array([Vector2(0, ym), Vector2(w, ym), Vector2(w, y1), Vector2(0, y1)]), PackedColorArray([c1, c1, c0, c0]))
+
+
+func _dune_y(x: float, vit: float, niveau: float, amp: float, graine: float) -> float:
+	var u: float = (camera_x * ppm * vit + x) / 300.0
+	return sol_y * niveau - amp * (0.6 * sin(u * 0.9 + graine) + 0.4 * sin(u * 2.1 + 2.0 * graine))
+
+
+# Rang de dunes ombré : versants éclairés côté soleil, pieds plus sombres, liseré de lumière sur la crête
+func _dune(w: float, hgt: float, vit: float, niveau: float, amp: float, col: Color, graine: float) -> void:
+	var jour := (1.0 - nuit) * (1.0 - 0.7 * orage)
+	var clair := col.lerp(Color("#FFE2B0") if soir > 0.3 else Color.WHITE, 0.22 * jour)
+	var ombre := col.darkened(0.16 * jour + 0.05)
+	var bande := amp * 1.8
+	var haut := PackedVector2Array()
+	var cols := PackedColorArray()
+	var x := -20.0
+	while x <= w + 20.0:
+		var y := _dune_y(x, vit, niveau, amp, graine)
+		var pente := _dune_y(x + 10.0, vit, niveau, amp, graine) - _dune_y(x - 10.0, vit, niveau, amp, graine)   # > 0 : descend vers la droite, face au soleil
+		haut.append(Vector2(x, y))
+		cols.append(col.lerp(clair if pente > 0.0 else ombre, clampf(absf(pente) / 9.0, 0.0, 1.0)))
+		x += 20.0
+	var pied := col.darkened(0.12)
+	var pts := PackedVector2Array(haut)
+	for i in range(haut.size() - 1, -1, -1):
+		pts.append(haut[i] + Vector2(0, bande))
+		cols.append(pied)
+	draw_polygon(pts, cols)
+	var bas := PackedVector2Array()
+	for p in haut:
+		bas.append(p + Vector2(0, bande - 1.0))
+	bas.append(Vector2(w + 20.0, hgt))
+	bas.append(Vector2(-20.0, hgt))
+	draw_colored_polygon(bas, pied)
+	draw_polyline(haut, Color(clair, 0.55 * jour), 2.0)
+
+
+# Mesas plates très lointaines (plateaux érodés)
+func _mesas(w: float, hgt: float, vit: float, base: float, col: Color) -> void:
+	var cel := 150.0
+	var dec := camera_x * ppm * vit
+	var k0 := floorf(dec / cel) - 1.0
+	var pts := PackedVector2Array([Vector2(-cel, hgt), Vector2(-cel, base)])
+	var k := k0
+	while (k * cel - dec) < w + cel:
+		var x0 := k * cel - dec
+		var r := alea(k, 41.0)
+		if r < 0.55:
+			var hm := 30.0 + 80.0 * alea(k, 42.0)
+			var a := 18.0 + 22.0 * alea(k, 43.0)
+			pts.append(Vector2(x0 + 8.0, base))
+			pts.append(Vector2(x0 + a, base - hm * 0.85))
+			pts.append(Vector2(x0 + a + 6.0, base - hm))
+			pts.append(Vector2(x0 + cel - a - 6.0, base - hm * (0.92 + 0.08 * alea(k, 44.0))))
+			pts.append(Vector2(x0 + cel - a, base - hm * 0.8))
+			pts.append(Vector2(x0 + cel - 8.0, base))
+		else:   # collines basses entre deux plateaux
+			pts.append(Vector2(x0 + cel * 0.5, base - 10.0 - 14.0 * alea(k, 45.0)))
+		k += 1.0
+	pts.append(Vector2(w + cel * 2.0, base))
+	pts.append(Vector2(w + cel * 2.0, hgt))
+	draw_colored_polygon(pts, col)
+
+
+# Silhouette d'une ville en ruine, très loin
+func _ville_ruine(w: float, hgt: float, vit: float, base: float, col: Color) -> void:
+	var ville := PackedVector2Array([Vector2(0, hgt)])
+	var xv := 0.0
+	while xv <= w + 24:
+		var uu: float = floorf((camera_x * ppm * vit + xv) / 24.0)
+		var bloc := alea(floorf(uu / 9.0), 46.0) > 0.45   # quartiers séparés par des vides
+		var hh: float = (14.0 + 62.0 * alea(uu, 1.0) * (1.0 if alea(uu, 2.0) > 0.35 else 0.25)) if bloc else 3.0
+		ville.append(Vector2(xv, base - hh))
+		ville.append(Vector2(xv + 24, base - hh * (0.5 + 0.5 * alea(uu, 3.0))))
+		xv += 24
+	ville.append(Vector2(w, hgt))
+	draw_colored_polygon(ville, col)
+
+
+# Ligne télégraphique plantée sur le rang de dunes proche : poteaux penchés, fils qui pendent, quelques poteaux tombés
+func _ligne_poteaux(w: float, vit: float, niveau: float, amp: float, graine: float, col: Color) -> void:
+	var pas := 230.0
+	var dec := camera_x * ppm * vit
+	var k := floorf(dec / pas) - 1.0
+	var h := 5.0 * ppm * 0.45
+	var prec := Vector2.INF
+	while k * pas - dec < w + pas:
+		var x := k * pas - dec + 40.0 * alea(k, 47.0)
+		var debout := alea(k, 48.0) > 0.18
+		var pied := Vector2(x, _dune_y(x, vit, niveau, amp, graine) + 3.0)
+		if debout:
+			var tete := pied + Vector2((alea(k, 49.0) - 0.5) * 0.35 * h, -h)
+			draw_line(pied, tete, col, maxf(2.0, ppm * 0.07))
+			draw_line(tete + Vector2(-0.12 * h, 0.07 * h), tete + Vector2(0.14 * h, 0.06 * h), col, maxf(1.5, ppm * 0.05))
+			if prec != Vector2.INF:   # fil qui pend entre deux poteaux debout
+				var fil := PackedVector2Array()
+				for j in 9:
+					var t := j / 8.0
+					fil.append(prec.lerp(tete, t) + Vector2(0, 0.12 * h * sin(PI * t)))
+				draw_polyline(fil, Color(col, 0.6), 1.0)
+			prec = tete
+		else:
+			draw_line(pied, pied + Vector2(0.9 * h, -0.08 * h), col, maxf(2.0, ppm * 0.07))   # poteau tombé
+			prec = Vector2.INF
+		k += 1.0
+
+
+func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
+	var cs := _ciel()
+	var zen: Color = cs[0]
+	var hor: Color = cs[1]
+	var y_h := sol_y * 0.72   # ligne d'horizon
+	var mi := zen.lerp(hor, 0.55)
+	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, y_h * 0.55), Vector2(0, y_h * 0.55)]), PackedColorArray([zen, zen, mi, mi]))
+	draw_polygon(PackedVector2Array([Vector2(0, y_h * 0.55), Vector2(w, y_h * 0.55), Vector2(w, hgt), Vector2(0, hgt)]), PackedColorArray([mi, mi, hor, hor]))
+	_etoiles(w)
+	# Astre : soleil voilé de halos (bas et orangé le soir), lune la nuit
+	if nuit < 0.5:
+		var sp := Vector2(w * 0.78, lerpf(sol_y * 0.24, sol_y * 0.52, soir))
+		var sc := Color(1.0, 0.96, 0.84).lerp(Color(1.0, 0.62, 0.3), soir)
+		var r := lerpf(46.0, 62.0, soir)
+		var voile := 1.0 - 0.75 * orage
+		for k in 14:   # halo doux : beaucoup de disques très transparents
+			draw_circle(sp, r * (1.0 + 0.28 * (14 - k)), Color(sc, 0.028 * voile))
+		draw_circle(sp, r, Color(sc, 0.95 * voile))
+	else:
+		var lp := Vector2(w * 0.7, sol_y * 0.22)
+		for k in 4:
+			draw_circle(lp, 30.0 * (1.0 + 0.7 * (4 - k)), Color(0.75, 0.82, 1.0, 0.035 * nuit))
+		draw_circle(lp, 30.0, Color(0.88, 0.9, 1.0, 0.9 * nuit))
+	# Nuages étirés, pris dans la lumière de l'horizon
+	for i in 5:
+		var cx := fposmod(i * 460.0 + 120.0 - camera_x * ppm * 0.015 - Time.get_ticks_msec() * 0.004 * (1 + i % 2), w + 600.0) - 300.0
+		var cy := 50.0 + 34.0 * alea(i, 4.0) + i * 12.0
+		var cn := Color.WHITE.lerp(hor, 0.5)
+		draw_set_transform(Vector2(cx, cy), 0.0, Vector2(2.2, 0.55))
+		for j in 4:
+			draw_circle(Vector2(j * 30.0, 8.0 * sin(j * 1.7)), 28.0 + 8.0 * alea(i + j, 5.0), Color(cn, 0.18 * (1.0 - 0.7 * nuit)))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var cl: Array = pal.couches
+	# Six plans, du plus lointain au plus proche ; la brume s'intercale entre eux
+	_mesas(w, hgt, 0.02, y_h + 8.0, Color(cl[0]).lerp(hor, 0.7))
+	_brume(y_h - 50.0, y_h + 30.0, hor, 0.55, w)
+	_ville_ruine(w, hgt, 0.05, sol_y * 0.77, Color(cl[0]).darkened(0.15).lerp(hor, 0.55))
+	_brume(sol_y * 0.70, sol_y * 0.80, hor, 0.4, w)
+	_dune(w, hgt, 0.1, 0.75, 55.0, Color(cl[0]).lerp(hor, 0.38), 1.0)
+	_brume(sol_y * 0.74, sol_y * 0.84, hor, 0.3, w)
+	_dune(w, hgt, 0.2, 0.82, 46.0, Color(cl[1]).lerp(hor, 0.2), 2.0)
+	# Sable soulevé par le vent, en traînées qui filent entre les plans (désert et neige)
+	if zone == "sable" or zone == "neige" or zone == "cailloux":
+		var t := Time.get_ticks_msec() * 0.001
+		for i in 8:
+			var sx := fposmod(i * 311.0 - t * (140.0 + 45.0 * (i % 3)) - camera_x * ppm * 0.25, w + 500.0) - 250.0
+			var sy := sol_y * (0.78 + 0.018 * i) + 6.0 * sin(t * 0.7 + i)
+			draw_set_transform(Vector2(sx, sy), 0.0, Vector2(7.0, 0.45))
+			draw_circle(Vector2.ZERO, 16.0, Color(hor.lightened(0.15), 0.09 * (1.0 - nuit)))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_brume(sol_y * 0.80, sol_y * 0.92, hor, 0.22, w)
+	_ligne_poteaux(w, 0.38, 0.9, 34.0, 3.0, Color("#3E3024").lerp(hor, 0.35))
+	_dune(w, hgt, 0.38, 0.9, 34.0, Color(cl[2]).lerp(hor, 0.08), 3.0)
+
+
+# Premier plan des zones dessinées (DEC-249) : lèvre de terrain sombre en bas de l'écran et, de temps en temps, une grosse
+# silhouette floue (rocher, poteau, carcasse) qui passe devant la caméra, plus vite que la route.
+const VIT_AVANT := 1.6
+func _avant_code() -> void:
+	var w := size.x
+	var hgt := size.y
+	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
+	var sombre := Color(pal.sol).darkened(0.62).lerp(Color(0.03, 0.035, 0.06), 0.7 * nuit)
+	var s := ppm * VIT_AVANT
+	var dec := camera_x * s
+	var levre := PackedVector2Array()
+	var x := -24.0
+	while x <= w + 24.0:
+		var xl := dec + x
+		levre.append(Vector2(x, hgt - (26.0 + 16.0 * sin(xl / 170.0) + 9.0 * sin(xl / 61.0 + 1.0))))
+		x += 24.0
+	var fond := PackedVector2Array(levre)
+	fond.append(Vector2(w + 24.0, hgt + 2.0))
+	fond.append(Vector2(-24.0, hgt + 2.0))
+	draw_polyline(levre, Color(sombre, 0.35), 8.0)   # bord adouci (hors du plan de netteté)
+	draw_colored_polygon(fond, sombre)
+	# Grosses silhouettes floues : une cellule tous les 40 m « de premier plan », moins d'une sur deux occupée
+	var cel := 40.0
+	var xm0 := camera_x + (-300.0 - ancre_x) / s
+	var xm1 := camera_x + (w + 300.0 - ancre_x) / s
+	var k := floorf(xm0 / cel)
+	while k * cel <= xm1:
+		if alea(k, 51.0) < 0.42:
+			var xm := k * cel + cel * alea(k, 52.0)
+			var pied := Vector2(ancre_x + (xm - camera_x) * s, hgt + 12.0)
+			var genre := alea(k, 53.0)
+			for e in [[7.0, 0.22], [3.5, 0.45], [0.0, 0.92]]:   # flou : la forme grossie et pâle, puis le cœur
+				var c := Color(sombre, float(e[1]))
+				var g := float(e[0])
+				if genre < 0.45:   # amas de rochers
+					for j in 3:
+						draw_circle(pied + Vector2((j - 1) * 0.9 * s, -0.15 * s * j), (0.7 + 0.5 * alea(k + j, 54.0)) * s + g, c)
+				elif genre < 0.7:   # poteau télégraphique tout proche
+					var tete := pied + Vector2(0.4 * s, -7.0 * s)
+					draw_line(pied, tete, c, 0.28 * s + 2.0 * g)
+					draw_line(tete + Vector2(-1.1 * s, 0.6 * s), tete + Vector2(1.2 * s, 0.5 * s), c, 0.16 * s + 2.0 * g)
+				else:   # carcasse de voiture
+					draw_rect(Rect2(pied + Vector2(-2.2 * s - g, -1.5 * s - g), Vector2(4.4 * s + 2.0 * g, 1.3 * s + 2.0 * g)), c)
+					draw_rect(Rect2(pied + Vector2(-1.1 * s - g, -2.3 * s - g), Vector2(2.2 * s + 2.0 * g, 0.9 * s + 2.0 * g)), c)
+		k += 1.0
+
+
 func _dessiner_avant() -> void:
 	if not _avec_images():
+		_avant_code()
 		return
 	var teinte := Color.WHITE.lerp(Color(0.25, 0.3, 0.5), nuit) * Color(0.82, 0.8, 0.78)
 	var kk := floorf((camera_x - ancre_x / ppm - 6.0) / 13.0)
@@ -229,50 +474,11 @@ func _draw() -> void:
 				draw_texture_rect(tc, Rect2(0, 0, w, hgt), false, Color(teinte.r, teinte.g, teinte.b, float(var_ciel[1])))
 		_bande("terre_lointain", 0.08, sol_y * 0.93 - g * 0.25)
 		_bande("terre_moyen", 0.2, sol_y * 1.0 - g * 0.5)
-	# Ciel en dégradé
-	var haut := Color("#7FA6BF").lerp(Color("#070D1C"), nuit)
-	var horizon := Color("#E9CFA0").lerp(Color("#2B2B48"), nuit)
-	if not img:
-		draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, sol_y), Vector2(0, sol_y)]),
-			PackedColorArray([haut, haut, horizon, horizon]))
-	if nuit > 0.2:
-		for i in 70:
-			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
-	if not img:
-		draw_circle(Vector2(w * 0.78, sol_y * 0.28), 70 if nuit < 0.5 else 46, Color(1.0, 0.95, 0.82, 0.85).lerp(Color(0.85, 0.9, 1.0, 0.95), nuit))
-	# Dunes en parallaxe (lointain -> proche)
 	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
-	var cl: Array = pal.couches
-	var couches := [[0.08, 0.62, 70.0, Color(cl[0])], [0.2, 0.74, 55.0, Color(cl[1])], [0.45, 0.86, 40.0, Color(cl[2])]]
-	for c in (couches if not img else []):
-		var pts := PackedVector2Array([Vector2(0, hgt)])
-		var x := 0.0
-		while x <= w + 20:
-			var u: float = (camera_x * ppm * c[0] + x) / 300.0
-			var y: float = sol_y * c[1] - c[2] * (0.6 * sin(u * 0.9) + 0.4 * sin(u * 2.1 + 2.0))
-			pts.append(Vector2(x, y))
-			x += 20
-		pts.append(Vector2(w, hgt))
-		draw_colored_polygon(pts, c[3])
-	# Silhouette d'une ville en ruine, très loin
-	var ville := PackedVector2Array([Vector2(0, hgt)])
-	var xv := 0.0
-	while xv <= w + 24 and not img:
-		var uu: float = floorf((camera_x * ppm * 0.12 + xv) / 24.0)
-		var hh: float = 18.0 + 70.0 * alea(uu, 1.0) * (1.0 if alea(uu, 2.0) > 0.35 else 0.25)
-		var yb: float = sol_y * 0.80 - 14.0
-		ville.append(Vector2(xv, yb - hh))
-		ville.append(Vector2(xv + 24, yb - hh * (0.5 + 0.5 * alea(uu, 3.0))))
-		xv += 24
-	ville.append(Vector2(w, hgt))
-	if not img:
-		draw_colored_polygon(ville, Color(cl[0]).darkened(0.12))
-	# Nuages lents
-	for i in (5 if not img else 0):
-		var cx := fposmod(i * 460.0 + 120.0 - camera_x * ppm * 0.03 - Time.get_ticks_msec() * 0.006 * (1 + i % 2), w + 400.0) - 200.0
-		var cy := 60.0 + 38.0 * alea(i, 4.0) + i * 14.0
-		for j in 4:
-			draw_circle(Vector2(cx + j * 46.0, cy + 8.0 * sin(j * 1.7)), 30.0 + 8.0 * alea(i + j, 5.0), Color(1, 1, 1, 0.22))
+	if img:
+		_etoiles(w)
+	else:
+		_fond_profondeur(w, hgt, pal)   # lot profondeur (DEC-249) : ciel, brume, six plans en parallaxe
 	# Sol proche
 	var sol_pts := PackedVector2Array([Vector2(0, hgt)])
 	var crete := PackedVector2Array()

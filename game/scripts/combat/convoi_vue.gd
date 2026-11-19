@@ -17,10 +17,24 @@ func _ready() -> void:
 	ville_calque.vue = self
 	ville_calque.z_index = -9
 	add_child(ville_calque)
+	ombres = CalqueVue.new()   # ombres au sol : entre le décor et les véhicules (DEC-249)
+	ombres.dessin = dessiner_ombres
+	ombres.mouse_filter = MOUSE_FILTER_IGNORE
+	ombres.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	ombres.z_index = -8
+	add_child(ombres)
 	couche = Control.new()
 	couche.mouse_filter = MOUSE_FILTER_IGNORE
 	couche.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	add_child(couche)
+	lumieres = CalqueVue.new()   # lumières additives au-dessus des véhicules : elles éclairent les carrosseries (DEC-249)
+	lumieres.dessin = dessiner_lumieres
+	lumieres.mouse_filter = MOUSE_FILTER_IGNORE
+	lumieres.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	lumieres.material = mat
+	add_child(lumieres)
 	fx = FxVue.new()
 	fx.vue = self
 	fx.mouse_filter = MOUSE_FILTER_IGNORE

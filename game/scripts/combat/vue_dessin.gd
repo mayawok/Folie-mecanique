@@ -361,16 +361,83 @@ func _dessiner_oiseau(c: CanvasItem) -> void:
 	c.draw_polyline(PackedVector2Array([p, p + Vector2(e * 0.4, -e * 0.15), p + Vector2(e, b)]), col, maxf(1.5, e * 0.18), true)
 
 
+# --- Lot profondeur (DEC-249) ----------------------------------------------------------------
+# Ombres portées : ellipse douce sous chaque véhicule, couchée sur la pente. Le soleil est à droite : l'ombre part
+# vers la gauche, courte à midi, longue et plus diffuse le soir ; presque rien la nuit ou sous l'orage.
+func dessiner_ombres(c: CanvasItem) -> void:
+	var nuit := terrain.nuit
+	var soir := terrain.soir
+	var force := 0.42 * (1.0 - 0.75 * nuit) * (1.0 - 0.5 * terrain.orage)
+	if force < 0.02:
+		return
+	for v in m.convoi + m.ennemis + m.epaves:
+		if not v.actif() and v.statut != "epave":
+			continue
+		var L: float = v.longueur
+		var xc: float = _rx(v) + L * 0.5 - lerpf(0.25, 1.3, soir)
+		var p := Vector2(terrain.ecran_x(xc), _sy(xc) + 0.06 * ppm)
+		var ang := atan2(_sy(xc + 1.0) - _sy(xc - 1.0), 2.0 * ppm)
+		var demi := L * lerpf(0.5, 0.72, soir) * ppm
+		var ep := lerpf(0.16, 0.11, soir)   # aplatissement de l'ellipse
+		c.draw_set_transform(p, ang, Vector2(1.0, ep))
+		for k in 8:   # bord flou : huit ellipses empilées, de plus en plus petites
+			c.draw_circle(Vector2.ZERO, demi * (1.05 - 0.075 * k), Color(0.08, 0.06, 0.04, force * 0.14))
+		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# Lueur additive : quatre disques empilés, plus vive au centre
+func _lueur(c: CanvasItem, p: Vector2, r: float, col: Color, a: float) -> void:
+	for k in 4:
+		c.draw_circle(p, r * (1.0 - 0.22 * k), Color(col, a * 0.3))
+
+
+# Lumières en mélange additif, au-dessus des véhicules : phares (cône, flaque au sol, éblouissement), feux arrière,
+# incendies, explosions et départs de coups. Les carrosseries prises dans un faisceau s'éclairent vraiment.
+func dessiner_lumieres(c: CanvasItem) -> void:
+	var obs: float = m.monde.obscurite()
+	if obs > 0.05:
+		var cc := Color(1.0, 0.9, 0.65)
+		for v in m.convoi:
+			if not v.actif() or v.camoufle or int(v.profil.get("phares", 0)) <= 0:   # seulement s'il en a (DEC-048)
+				continue
+			var L: float = v.longueur
+			var lampe := _px(Vector2(_rx(v) + L - 0.1, 0.9))
+			var xb: float = _rx(v) + L + 14.0
+			var a := 0.4 * obs
+			c.draw_polygon(PackedVector2Array([lampe + Vector2(0, -0.12 * ppm), _px(Vector2(xb, 2.6)), _px(Vector2(xb, -0.2)), lampe + Vector2(0, 0.12 * ppm)]),
+				PackedColorArray([Color(cc, a), Color(cc, 0.0), Color(cc, 0.0), Color(cc, a)]))
+			var xf: float = _rx(v) + L + 5.5   # flaque de lumière sur la route
+			var pf := _px(Vector2(xf, 0.0))
+			c.draw_set_transform(pf, atan2(_sy(xf + 1.0) - _sy(xf - 1.0), 2.0 * ppm), Vector2(1.0, 0.16))
+			for k in 3:
+				c.draw_circle(Vector2.ZERO, 5.0 * ppm * (1.0 - 0.25 * k), Color(cc, 0.09 * obs))
+			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			_lueur(c, lampe, 0.6 * ppm, cc, 0.5 * obs)
+			_lueur(c, _px(Vector2(_rx(v) + 0.1, 0.8)), 0.4 * ppm, Color(1.0, 0.2, 0.1), 0.35 * obs)   # feu arrière
+	var k_feu := 0.3 + 0.7 * obs   # en plein jour, les flammes éclairent peu
+	for v in m.convoi + m.ennemis + m.epaves:
+		if (v.statut == "epave" and not v.butin_pris) or v.feu > 0.0:   # épave ou véhicule en feu (DEC-220)
+			var fl: float = 0.8 + 0.2 * sin(_temps * 11.0 + v.uid)
+			_lueur(c, _px(_ancre(v, "moteur")), 4.5 * ppm * fl, Color(1.0, 0.5, 0.18), 0.28 * k_feu)
+	for b in m.batiments:
+		if b.feu:
+			for g in b.garnison:
+				if g.pv > 0.0:
+					_lueur(c, _px(b.fenetre(g.slot)), 3.0 * ppm * (0.85 + 0.15 * sin(_temps * 13.0 + b.uid)), Color(1.0, 0.55, 0.2), 0.22 * k_feu)
+	for ex in _explosions:
+		var t: float = clampf(ex.age / 1.4, 0.0, 1.0)
+		_lueur(c, _px(ex.p), ppm * (1.5 + 3.0 * float(ex.taille)) * (0.6 + t), Color(1.0, 0.7, 0.35), 0.6 * (1.0 - t) * (1.0 - t) * (0.5 + 0.5 * obs))
+	for bf in _bouffees:
+		_lueur(c, _px(bf.p), ppm * (3.0 if bf.get("grand", false) else 1.6), Color(1.0, 0.8, 0.45), 0.4 * clampf(1.0 - bf.age / 0.1, 0.0, 1.0) * (0.4 + 0.6 * obs))
+
+
 func dessiner_fx(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
 	var obs: float = m.monde.obscurite()
 	_dessiner_tempete(c)
 	if obs > 0.01:
 		c.draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.04, 0.12, 0.2 * obs))
-		for v in m.convoi:   # phares
-			if v.actif() and not v.camoufle and int(v.profil.get("phares", 0)) > 0:   # seulement s'il en a (DEC-048)
-				var av := _px(Vector2(_rx(v) + v.longueur, 0.9))
-				c.draw_colored_polygon(PackedVector2Array([av, av + Vector2(14.0 * ppm, -1.2 * ppm), av + Vector2(14.0 * ppm, 1.8 * ppm)]), Color(1.0, 0.95, 0.7, 0.16 * obs))
+		# les phares sont dessinés par le calque de lumières additives (dessiner_lumieres, DEC-249)
 	_dessiner_monde(c)
 	_dessiner_oiseau(c)
 	# Fumée des véhicules endommagés et épaves

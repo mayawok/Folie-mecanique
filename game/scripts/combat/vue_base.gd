@@ -73,6 +73,8 @@ var terrain: Terrain
 var terrain_avant: Terrain
 var couche: Control
 var fx: Control
+var ombres: Control              # ombres portées sous les véhicules (DEC-249)
+var lumieres: Control            # phares, feux et éclairs en mélange additif (DEC-249)
 var noeuds := {}                # uid -> VehiculeDessin ou BatimentDessin
 var ppm := 34.0
 var pause := false
@@ -385,6 +387,16 @@ class FxVue extends Control:
 
 	func _draw() -> void:
 		vue.dessiner_fx(self)
+
+	func _process(_d: float) -> void:
+		queue_redraw()
+
+# Calque dessiné par une fonction de la vue (ombres au sol, lumières additives : DEC-249)
+class CalqueVue extends Control:
+	var dessin: Callable
+
+	func _draw() -> void:
+		dessin.call(self)
 
 	func _process(_d: float) -> void:
 		queue_redraw()

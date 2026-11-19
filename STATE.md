@@ -1,12 +1,13 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-15. Résumé court, par thème. Journal complet : [`docs/DECISIONS.md`](docs/DECISIONS.md) ; **index par thème : [`docs/DECISIONS_INDEX.md`](docs/DECISIONS_INDEX.md)** ; navigation : [`docs/INDEX.md`](docs/INDEX.md) ; questions : [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md).
+Mis à jour : 2026-11-19. Résumé court, par thème. Journal complet : [`docs/DECISIONS.md`](docs/DECISIONS.md) ; **index par thème : [`docs/DECISIONS_INDEX.md`](docs/DECISIONS_INDEX.md)** ; navigation : [`docs/INDEX.md`](docs/INDEX.md) ; questions : [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md).
 
 ## Cap
 
 - **Référence unique : la Bible du lore** ([`docs/lore/01_BIBLE_FOUNDATION`](docs/lore/01_BIBLE_FOUNDATION)) ; les documents du jeu s'y conforment (DEC-091).
 - **Vision actuelle** : [`docs/design/VISION.md`](docs/design/VISION.md) (15/11, DEC-242) : survie et mécanique à parité, mécanique à profondeur facultative, **réseau logistique de convois autonomes** à concevoir ([`docs/design/LOGISTIQUE_CONVOIS.md`](docs/design/LOGISTIQUE_CONVOIS.md), DEC-243 à 248 ; **conception seulement, aucun code**), direction artistique plus lisible et plus colorée (DEC-247).
 - **Roguelite de convoi** : plus de gestion de base (DEC-099, partiellement remplacée par DEC-243 : stockage et convois autorisés, base toujours exclue). Le joueur est chef d'un convoi indépendant dont le camion principal est le **Berliet GDR**, du début à la fin (DEC-100, 139).
+- **Profondeur visuelle (19/11, DEC-249)** : pas de vraie 3D ; parallaxe sur six plans, brume, ombres, lumières additives et premier plan flou pour les zones dessinées par le code (désert en tête). **À vérifier sur iPhone** : rendu jour, soir, nuit et fluidité.
 - **Jalon courant : finir le Kit de développement** (DEC-171) : décor complet par zone, rencontres, équilibrage en direct. La quête principale vient après.
 - **Monde libre**, difficulté artificiellement trop forte hors de la région de la quête, signalée par des indices diffus (DEC-172). 12 à 13 secteurs, France déformée (DEC-101, 154, 170). **Échec** : retour au dernier checkpoint (DEC-173, 189).
 - **Combat** : les véhicules agissent seuls ; le joueur réordonne les vignettes (DEC-174, 177, 186). Un seul bouton de marche (DEC-160).
