@@ -301,6 +301,6 @@ Les équipages n'ont pas d'identifiants stables dans le code (tableaux et compte
 
 Comment le joueur choisit son niveau d'interaction (réglage, par véhicule, progressif) ; premier lot d'assets à la nouvelle direction artistique (quel sujet de comparaison avant / après) ; faut-il reprendre un jour certains assets existants.
 
-## OQ-048 — Voies de profondeur : suites (19/11, DEC-250)
+## OQ-048 — Voies de profondeur : suites (19/11, DEC-250, DEC-251)
 
-Nos véhicules d'escorte doivent-ils aller d'eux-mêmes boucher le flanc où un poursuivant veut monter (aujourd'hui ils restent au milieu et frappent de côté en mode « éperonner ») ? Le joueur doit-il pouvoir ordonner un changement de voie ? Les bâtiments et les villes restent posés sur la voie du milieu : faut-il les reculer sur le bas-côté du fond ? Le Berliet doit-il avoir des phares d'origine (DEC-048, DEC-249) ?
+Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manuel de voie, bâtiments derrière ou devant (jamais sur la route), phares d'origine du Berliet. **Encore ouvert** : les gardes ne protègent que le camion principal (pas le dernier véhicule de la ligne s'il est léger) ; part de bâtiments devant la route (aujourd'hui 20 %, `batiment_devant`) ; musique de roulage (`mus_base` à la place de `mus_combat`) à valider à l'oreille ; sort des villes (restent sur la route).

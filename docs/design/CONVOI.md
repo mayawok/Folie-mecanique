@@ -266,3 +266,7 @@ risquer, mais le danger vient du nombre et de l'enchaînement. À régler en ess
 ## Voies de profondeur (DEC-250)
 
 Trois voies : fond (gauche du sens de marche), route (milieu), devant (droite). On roule au milieu ; on serre à droite pour croiser un allié ; on double par la gauche (ordre « éviter »). Les poursuivants montent sur un flanc et abordent depuis la voie d'à côté ; chocs de face et par l'arrière seulement sur la même voie ; coups de flanc entre voies voisines (une moto légère peut partir dans le fossé) ; couvert derrière un gros véhicule du milieu. Rendu : fond plus petit, plus haut, voilé ; devant plus grand, cache ce qui est derrière. Valeurs : bloc « voies » de `combat_proto.json`. Suites : OQ-048.
+
+### Formation de combat, bâtiments, phares (DEC-251)
+
+En route, le convoi est en ligne au milieu. Dès qu'un combat commence (annonce « CONTACT ! », musique de combat), les véhicules légers armés se postent sur les flancs du Berliet et bouchent les côtés : un poursuivant ne peut plus aborder, il reste derrière. Fin du combat : retour dans la ligne. Pas d'ordre manuel de voie. Bâtiments : derrière ou devant la route, jamais dessus. Le Berliet a ses phares d'origine (lumière dessinée par le code, art à venir).

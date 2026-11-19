@@ -487,6 +487,7 @@ func avancer(dt := DT) -> void:
 	_ia_poursuite(dt)
 	_ia_face(dt)
 	_ia_comportements(dt)
+	_formation(dt)
 	_voies(dt)
 	_chocs(dt)
 	_coups_lateraux(dt)
@@ -934,6 +935,10 @@ func _tenue(dt: float, vit: float, actifs: Array) -> void:
 		if not v.actif():
 			v.ecart_acc = 0.0
 			v.u_suiv = vit
+		elif not v.en_ligne():
+			v.ecart_acc = 0.0   # posté sur un flanc (DEC-251) : hors de la chaîne des écarts
+			v.u_suiv = vit
+			continue
 		elif prec == null:
 			v.ecart_acc = 0.0
 			v.u_suiv = vit

@@ -73,6 +73,8 @@ var terrain: Terrain
 var terrain_avant: Terrain
 var couche: Control
 var fx: Control
+var bandeau: Control             # bandeau « CONTACT ! » et bords rouges au début d'un combat (DEC-251)
+var _combat_anim := -1.0         # temps depuis le début du combat (s) ; < 0 : pas d'animation
 var ombres: Control              # ombres portées sous les véhicules (DEC-249)
 var lumieres: Control            # phares, feux et éclairs en mélange additif (DEC-249)
 var noeuds := {}                # uid -> VehiculeDessin ou BatimentDessin
@@ -569,7 +571,11 @@ func _ancre(v, id: String) -> Vector2:
 
 # Décalage vertical (px, positif = plus haut) de la voie de profondeur d'un véhicule (DEC-250)
 func _dyv(v) -> float:
-	return CombatModele.voie_dy(v.voie_f) * ppm if v is CombatModele.Veh else 0.0
+	if v is CombatModele.Veh:
+		return CombatModele.voie_dy(v.voie_f) * ppm
+	if v is CombatModele.Bat:
+		return CombatModele.voie_dy(float(v.voie)) * ppm
+	return 0.0
 
 func _px(p: Vector2) -> Vector2:
 	return Vector2(terrain.ecran_x(p.x), SOL_Y + cam_h * ppm - (p.y + Terrain.sol(p.x)) * ppm)
@@ -588,15 +594,20 @@ func _demarrer_audio() -> void:
 	_audio_ok = true
 	var so := get_node_or_null("/root/Son")
 	if so:
-		so.musique("mus_menu" if _accueil_visible() else "mus_combat")   # accueil : « Rue du Swing » (DEC-089)
+		so.musique("mus_menu" if _accueil_visible() else _musique_partie())   # accueil : « Rue du Swing » (DEC-089)
 		_son("sfx_ui_clic")
 
 
-# Musique selon l'écran : accueil = mus_menu, partie = mus_combat. Rien avant le premier toucher (règle des navigateurs).
+# Musique de la partie (DEC-251) : calme en route, musique de combat dès que la formation de combat est en place
+func _musique_partie() -> String:
+	return "mus_combat" if m != null and m.en_combat else "mus_base"
+
+
+# Musique selon l'écran : accueil = mus_menu, partie = route calme (mus_base) ou combat (mus_combat). Rien avant le premier toucher (règle des navigateurs).
 func _musique_ecran(accueil: bool) -> void:
 	var so := get_node_or_null("/root/Son")
 	if so and _audio_ok:
-		so.musique("mus_menu" if accueil else "mus_combat")
+		so.musique("mus_menu" if accueil else _musique_partie())
 
 
 # Redéfini par vue_interface.gd (écran d'accueil)

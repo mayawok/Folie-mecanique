@@ -8,10 +8,17 @@
 #  - Effets : choc de face ou par l'arrière seulement sur la même voie (modele_choc) ; abordage seulement depuis la
 #    voie d'à côté (modele_abordage) ; coup de flanc entre voies voisines (une moto légère peut finir dans le fossé) ;
 #    une cible cachée derrière un gros véhicule de la voie du milieu est plus dure à toucher.
+#  - Formation de combat (DEC-251) : dès qu'un ennemi est à portée, les véhicules légers armés quittent la ligne et se
+#    postent sur les flancs du camion principal (Berliet) ; à la fin du combat ils reprennent leur place dans la ligne.
+#    Pas d'ordre manuel de changement de voie pour le moment.
+#  - Bâtiments : jamais sur la route, toujours derrière (fond) ou devant.
 # Valeurs : bloc « voies » de combat_proto.json.
 extends "res://scripts/combat/modele_choc.gd"
 
 var _cote := {}     # uid -> côté choisi (-1 ou 1) pour contourner ou aborder
+var en_combat := false   # un ennemi est à portée : formation de combat (DEC-251)
+var _combat_calme := 0.0 # secondes écoulées depuis que plus rien n'est à portée
+var _protege_uid := 0    # camion protégé par les gardes de flanc
 var _percute := {} # uid -> poursuivant qui nous a déjà embouti par l'arrière
 var _place := {}    # uid -> vrai une fois posé sur sa voie (apparition loin de nous : directement sur la bonne voie)
 
@@ -76,24 +83,55 @@ func _voie_ennemi(e: Veh, t) -> int:
 			if eperonne(e) and not _percute.has(e.uid) and q != null and e.x < q.x:
 				return 0   # celui qui veut éperonner nous emboutit d'abord par l'arrière, puis remonte sur le flanc
 			var c = _cible_poursuite(e)
-			var cote := _cote_de(e)
-			if c != null and _cote_bouche(c, cote, e) and not _cote_bouche(c, -cote, e):
-				_cote[e.uid] = -cote
-				cote = -cote
-			return cote
+			if c == null:
+				return _cote_de(e)
+			var cl := roundi(c.voie_f)
+			var libres: Array = []
+			for l in [cl - 1, cl + 1]:
+				if l >= -1 and l <= 1:
+					libres.append(l)
+			var pref := _cote_de(e)
+			if not libres.has(pref):
+				pref = libres[0]
+			if _cote_bouche(c, pref, e) and libres.size() > 1 and not _cote_bouche(c, libres[1] if libres[0] == pref else libres[0], e):
+				pref = libres[1] if libres[0] == pref else libres[0]
+			_cote[e.uid] = pref
+			return pref
 	return 0   # approche, barrage, convoi, harcele : au milieu
 
 
-# Un de nos véhicules roule sur ce côté, à hauteur de la cible
-func _cote_bouche(c: Veh, cote: int, sauf: Veh) -> bool:
+# Un de nos véhicules roule sur cette voie, à hauteur de la cible
+func _cote_bouche(c: Veh, voie: int, sauf: Veh) -> bool:
 	for v in convoi:
-		if v != c and v != sauf and v.actif() and absf(v.voie_f - cote) < 0.5 and v.x < c.x + c.longueur and v.x + v.longueur > c.x:
+		if v != c and v != sauf and v.actif() and absf(v.voie_f - voie) < 0.5 and v.x < c.x + c.longueur and v.x + v.longueur > c.x:
 			return true
 	return false
 
 
+# Le poursuivant dont le côté est bouché reste derrière la ligne, sans se superposer à sa cible
+func _x_poursuite(e: Veh, c: Veh) -> float:
+	var voie := roundi(e.voie)
+	if voie != 0 and _cote_bouche(c, voie, e):
+		return c.x - e.longueur - float(VO().garde_attente)
+	return c.x + (c.longueur - e.longueur) * 0.5
+
+
+# On ne vise que les véhicules de la ligne : ceux postés sur un flanc ne sont pas des cibles d'approche
+func _cible_poursuite(e: Veh):
+	var meilleur = null
+	for v in convoi:
+		if v.actif() and not v.camoufle and v.garage == 0 and v.en_ligne():
+			if meilleur == null or absf(v.x - e.x) < absf(meilleur.x - e.x):
+				meilleur = v
+	return meilleur if meilleur != null else super._cible_poursuite(e)
+
+
 func _voie_joueur(v: Veh, t) -> int:
 	var V := VO()
+	if v.garde != 0:
+		if not v.retour:
+			return v.garde   # posté sur son flanc
+		return v.garde if absf(v.x - v.x_cible) > 1.5 else 0   # il revient : il change de voie une fois à sa place
 	if v.remorque():
 		var tr = tracteur_de(v)
 		if tr != null:
@@ -182,3 +220,135 @@ func _facteur_couvert(att, cible) -> float:
 		if rec >= float(V.couvert_recouvrement) * cible.longueur and float(VehiculeDessin.donnees().vehicules[w.type].hauteur) >= float(V.couvert_hauteur) * hc:
 			return float(V.couvert_facteur)
 	return 1.0
+
+
+# --- Formation de combat (DEC-251) -----------------------------------------------------------------------
+# Distance entre un ennemi et la colonne du convoi (0 s'il est à hauteur)
+func _distance_colonne(x: float, longueur: float) -> float:
+	var q = _queue()
+	var t = _tete()
+	if q == null or t == null:
+		return INF
+	return maxf(0.0, maxf(x - (t.x + t.longueur), q.x - (x + longueur)))
+
+
+func _menace_proche(limite: float) -> bool:
+	for e in ennemis:
+		if e.actif() and not e.allie and _distance_colonne(e.x, e.longueur) < limite:
+			return true
+	for b in batiments:
+		if b.actif() and (b.tireurs_vivants() + b.garnison_vivants() > 0 or b.arme_fixe != "") and _distance_colonne(b.x, b.longueur) < limite * 0.8:
+			return true
+	for p in monde.pietons:
+		if p.actif() and p.camp == "ennemi" and not p.animal and _distance_colonne(p.x, 1.0) < limite * 0.7:
+			return true
+	return false
+
+
+func _formation(dt: float) -> void:
+	var V := VO()
+	var avant := en_combat
+	var calme: bool = ville_protegee() or ville_calme() or mission_active()
+	if calme:
+		en_combat = false
+	elif not en_combat:
+		if _menace_proche(float(V.combat_entree)):
+			en_combat = true
+			_combat_calme = 0.0
+	else:
+		if _menace_proche(float(V.combat_sortie)):
+			_combat_calme = 0.0
+		else:
+			_combat_calme += dt
+			if _combat_calme >= float(V.combat_delai_sortie):
+				en_combat = false
+	if en_combat != avant:
+		evt({"t": "combat", "etat": "debut" if en_combat else "fin"})
+		log_(Textes.t("formation.001" if en_combat else "formation.002"), "alerte" if en_combat else "ok")
+	if en_combat:
+		_assigner_gardes()
+	else:
+		for v in convoi:   # fin du combat : retour dans la ligne, en restant sur le flanc jusqu'à sa place
+			if v.garde != 0 and not v.retour:
+				v.retour = true
+	for v in convoi:
+		if v.garde != 0:
+			if not v.actif() or v.garage != 0:
+				v.garde = 0
+				v.retour = false
+			elif v.retour and absf(v.x - v.x_cible) < 1.5 and absf(v.voie_f) < 0.5:
+				v.garde = 0
+				v.retour = false
+
+
+# Le camion principal est le protégé ; à défaut, le plus lourd de la ligne
+func _protege():
+	var meilleur = null
+	for v in convoi:
+		if not v.actif() or v.garage != 0 or v.camoufle or v.remorque() or not v.en_ligne():
+			continue
+		if v.principal:
+			return v
+		if meilleur == null or float(v.profil.get("poids_kg", 0.0)) > float(meilleur.profil.get("poids_kg", 0.0)):
+			meilleur = v
+	return meilleur
+
+
+func _places_flanc(p: Veh) -> int:
+	return maxi(1, int(floorf(p.longueur / 3.5)))
+
+
+func _assigner_gardes() -> void:
+	var p = _protege()
+	if p == null:
+		return
+	_protege_uid = p.uid
+	var V := VO()
+	var cap := _places_flanc(p)
+	var occupees := {-1: [], 1: []}
+	for v in convoi:
+		if v.garde != 0 and v.retour:
+			v.retour = false   # le combat reprend
+		if v.garde != 0 and v.actif():
+			occupees[v.garde].append(v.garde_slot)
+	var poids_max: float = float(p.profil.get("poids_kg", 1500.0)) * float(V.garde_poids_max)
+	var candidats: Array = []
+	for v in convoi:
+		if v == p or v.garde != 0 or not v.actif() or not v.mobile() or v.garage != 0 or v.camoufle or v.remorque():
+			continue
+		if v.armes.is_empty() or float(v.profil.get("poids_kg", 1500.0)) > poids_max:
+			continue
+		candidats.append(v)
+	candidats.sort_custom(func(a, b): return absf(a.x - p.x) < absf(b.x - p.x))
+	# côté le plus menacé en premier
+	var menace := {-1: 0, 1: 0}
+	for e in ennemis:
+		if e.actif() and not e.allie and e.mode in ["poursuite", "harcele", "contourne"]:
+			menace[_cote_de(e)] += 1
+	for v in candidats:
+		var cote := -1 if (occupees[-1].size() < occupees[1].size() or (occupees[-1].size() == occupees[1].size() and menace[-1] >= menace[1])) else 1
+		if occupees[cote].size() >= cap:
+			cote = -cote
+		if occupees[cote].size() >= cap:
+			break   # tous les flancs sont gardés
+		var slot := 0
+		while occupees[cote].has(slot):
+			slot += 1
+		occupees[cote].append(slot)
+		v.garde = cote
+		v.garde_slot = slot
+		v.retour = false
+
+
+func _placer_gardes() -> void:
+	if _protege_uid == 0:
+		return   # aucune formation en cours (et le modèle n'est pas encore complètement construit)
+	var p = trouver(_protege_uid)
+	for v in convoi:
+		if v.en_ligne():
+			continue
+		if p == null or not p.actif():
+			v.garde = 0
+			continue
+		var cap := _places_flanc(p)
+		v.x_cible = p.x_cible + p.longueur * (float(v.garde_slot) + 0.5) / float(cap) - v.longueur * 0.5

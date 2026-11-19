@@ -29,6 +29,11 @@ func _cible_poursuite(e: Veh):
 	return meilleur
 
 
+# Où le poursuivant veut se caler : à hauteur de sa cible (redéfini par modele_voies.gd quand le flanc est bouché)
+func _x_poursuite(e: Veh, c: Veh) -> float:
+	return c.x + (c.longueur - e.longueur) * 0.5
+
+
 func _ia_poursuite(dt: float) -> void:
 	for e in ennemis:
 		if not e.actif() or e.mode != "poursuite" or not e.mobile():
@@ -36,7 +41,7 @@ func _ia_poursuite(dt: float) -> void:
 		var c = _cible_poursuite(e)
 		if c == null:
 			continue
-		var voulu: float = c.x + (c.longueur - e.longueur) * 0.5
+		var voulu: float = _x_poursuite(e, c)
 		var d: float = voulu - e.x
 		var vmax: float = maxf(e.vitesse() * float(AB().vitesse_poursuite), absf(vitesse_convoi) + float(AB().avance_poursuite))   # pied au plancher : ils gagnent toujours du terrain
 		var v := clampf(vitesse_convoi + d * 0.8, -vmax * 0.5, vmax)

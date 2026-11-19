@@ -88,7 +88,7 @@ func _evenement(e: Dictionary) -> void:
 					_son("sfx_depart_convoi", -4.0)
 				"livree", "echec":
 					if so and _audio_ok:
-						so.musique("mus_combat")
+						so.musique(_musique_partie())
 					if String(e.etat) == "livree":
 						_ville_onglet = "bilan"
 						_ville_ferme = false
@@ -96,7 +96,7 @@ func _evenement(e: Dictionary) -> void:
 		"pillage":   # ville pillée : tambours pendant la poursuite (DEC-151)
 			var so2 := get_node_or_null("/root/Son")
 			if so2 and _audio_ok:
-				so2.musique("mus_tambours" if String(e.etat) == "poursuite" else "mus_combat")
+				so2.musique("mus_tambours" if String(e.etat) == "poursuite" else _musique_partie())
 			if String(e.etat) == "poursuite":
 				_son("sfx_depart_convoi", -2.0)
 		"nuit_tombe":
@@ -120,6 +120,13 @@ func _evenement(e: Dictionary) -> void:
 			_aide("003")
 		"reputation":
 			_aide("006")
+		"combat":   # début et fin de la formation de combat (DEC-251)
+			var so3 := get_node_or_null("/root/Son")
+			if String(e.etat) == "debut":
+				_combat_anim = 0.0
+				_son("sfx_impact_blindage", -6.0)
+			if so3 and _audio_ok and not _accueil_visible():
+				so3.musique(_musique_partie())
 		"contact":
 			if e.ennemi:
 				_aide("007")
@@ -148,6 +155,10 @@ func _evenement(e: Dictionary) -> void:
 				_son("sfx_explosion")
 
 func _vieillir(delta: float) -> void:
+	if _combat_anim >= 0.0:
+		_combat_anim += delta
+		if _combat_anim > 2.6:
+			_combat_anim = -1.0
 	for l in [_etincelles, _explosions, _bouffees, _poussieres, _ricochets]:
 		for x in l:
 			x.age += delta
@@ -435,6 +446,35 @@ func dessiner_lumieres(c: CanvasItem) -> void:
 		_lueur(c, _px(bf.p), ppm * (3.0 if bf.get("grand", false) else 1.6), Color(1.0, 0.8, 0.45), 0.4 * clampf(1.0 - bf.age / 0.1, 0.0, 1.0) * (0.4 + 0.6 * obs))
 
 
+# Début de combat (DEC-251) : bords rouges qui pulsent, bandeau sombre qui glisse en travers de l'écran avec « CONTACT ! » au pochoir
+func dessiner_bandeau(c: CanvasItem) -> void:
+	if _combat_anim < 0.0:
+		return
+	var t := _combat_anim
+	var a: float = clampf(1.0 - maxf(0.0, t - 1.7) / 0.9, 0.0, 1.0)
+	var w := size.x
+	var h := size.y
+	var pulse: float = (0.55 + 0.45 * sin(t * 13.0)) * a
+	var rouge := Color(0.78, 0.1, 0.05, 0.42 * pulse)
+	var nul := Color(rouge, 0.0)
+	var ep := 110.0
+	c.draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(ep, 0), Vector2(ep, h), Vector2(0, h)]), PackedColorArray([rouge, nul, nul, rouge]))
+	c.draw_polygon(PackedVector2Array([Vector2(w - ep, 0), Vector2(w, 0), Vector2(w, h), Vector2(w - ep, h)]), PackedColorArray([nul, rouge, rouge, nul]))
+	c.draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, ep * 0.6), Vector2(0, ep * 0.6)]), PackedColorArray([rouge, rouge, nul, nul]))
+	var glisse: float = 1.0 - pow(1.0 - clampf(t / 0.3, 0.0, 1.0), 3.0)   # arrivée vive, freinage net
+	var bh := 92.0
+	var y := h * 0.26
+	var x0: float = lerpf(-w, 0.0, glisse)
+	c.draw_rect(Rect2(x0, y, w, bh), Color(0.05, 0.045, 0.04, 0.8 * a))
+	c.draw_rect(Rect2(x0, y, w, 3.0), Color(C_ACCENT, a))
+	c.draw_rect(Rect2(x0, y + bh - 3.0, w, 3.0), Color(C_ACCENT, a))
+	var txt := Textes.t("formation.003")
+	var f := police("pochoir", 800)
+	var xt: float = lerpf(-w * 0.4, 0.0, glisse)
+	c.draw_string(f, Vector2(xt + 3.0, y + bh * 0.5 + 25.0), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 70, Color(0, 0, 0, 0.7 * a))
+	c.draw_string(f, Vector2(xt, y + bh * 0.5 + 22.0), txt, HORIZONTAL_ALIGNMENT_CENTER, w, 70, Color(C_ACCENT.lightened(0.15), a))
+
+
 func dessiner_fx(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
 	var obs: float = m.monde.obscurite()
@@ -463,7 +503,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		if b.statut == "neutralise":
 			for k in 4:
 				var ph := fposmod(_temps * 0.5 + k * 0.25 + b.uid * 0.1, 1.0)
-				var p := _px(Vector2(b.x + b.longueur * (0.25 + 0.15 * k), 1.5 + ph * 4.0))
+				var p := _px(Vector2(b.x + b.longueur * (0.25 + 0.15 * k), 1.5 + ph * 4.0 + CombatModele.voie_dy(float(b.voie))))
 				c.draw_circle(p, (0.4 + ph * 1.2) * ppm, Color(0.12, 0.11, 0.1, 0.5 * (1.0 - ph)))
 	# Barre de vie et équipage : seulement pour NOS véhicules (l'état de l'ennemi reste inconnu)
 	for v in m.convoi:

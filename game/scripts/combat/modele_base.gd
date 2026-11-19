@@ -124,11 +124,19 @@ class Veh extends RefCounted:
 	var ecart_acc := 0.0          # écart en plus ou en moins par rapport à sa place (effet accordéon, DEC-233)
 	var u_suiv := 0.0             # vitesse retardée avec laquelle il suit la tête
 	var cd_acc := 0.0             # délai entre deux tamponnements
+	var garde := 0                # formation de combat (DEC-251) : côté du flanc protégé (-1 fond, 1 devant), 0 = dans la ligne
+	var garde_slot := 0           # place le long du véhicule protégé, de l'arrière vers l'avant
+	var retour := false           # le combat est fini : il rejoint sa place dans la ligne en restant sur son flanc
 	var voie := 0                 # voie voulue (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite)
 	var voie_f := 0.0             # voie réelle, glisse vers « voie » pendant le changement (non sauvegardée : on repart au milieu)
 
 	func remorque() -> bool:
 		return bool(profil.get("remorque", false))
+
+	# Dans la ligne du convoi (chaîne des écarts) : tout véhicule qui n'est pas posté sur un flanc, ou qui n'a pas encore
+	# quitté la voie du milieu, ou qui revient dans sa place
+	func en_ligne() -> bool:
+		return garde == 0 or retour or absf(voie_f) < 0.5
 
 	func troupes_vivantes() -> int:
 		var n := 0
@@ -231,6 +239,7 @@ class Bat extends RefCounted:
 	var barricade_cible := false
 	var blindage_base := 0.0
 	var feu := false              # feu allumé à l'intérieur (nuit, garnison barricadée)
+	var voie := -1                # derrière la route (-1) ou devant (1) : jamais sur la route (DEC-251)
 
 	func actif() -> bool:
 		return statut == "actif" and not ami
@@ -238,7 +247,8 @@ class Bat extends RefCounted:
 	func fenetre(i: int) -> Vector2:
 		var f: Array = CombatModele.FENETRES.get(type, [[0.5, 0.5]])
 		var e: Array = f[mini(i, f.size() - 1)]
-		return Vector2(x + e[0] * longueur, e[1] * hauteur)
+		var ech := CombatModele.voie_echelle(float(voie))   # la voie réduit ou agrandit le bâtiment autour de son centre
+		return Vector2(x + longueur * 0.5 + (e[0] - 0.5) * longueur * ech, e[1] * hauteur * ech + CombatModele.voie_dy(float(voie)))
 
 	func garnison_vivants() -> int:
 		var n := 0
@@ -350,6 +360,9 @@ func ville_protegee() -> bool:
 	return false
 
 func ville_calme() -> bool:
+	return false
+
+func mission_active() -> bool:   # redéfini par modele_mission.gd
 	return false
 
 func ville_zone(_x: float) -> bool:
@@ -504,6 +517,7 @@ func appliquer_valeurs_berliet(v: Veh) -> void:
 	var base_vit := float(v.profil.get("vitesse_assemblage", v.profil.vitesse))
 	v.profil["vitesse_assemblage"] = base_vit
 	v.profil.vitesse = base_vit * float(V.vitesse_route) * (1.0 + float(V.bonus_puissance)) * float(V.lame_vitesse)
+	v.profil["phares"] = maxi(int(v.profil.get("phares", 0)), 1)   # phares d'origine du Berliet (DEC-251)
 	v.profil["lame_choc"] = float(V.lame_choc)   # lame avant (DEC-212) : multiplicateur de dégâts quand on enfonce un obstacle
 	v.profil["lame_pv"] = int(V.lame_pv)
 	v.profil["tout_terrain"] = float(V.tout_terrain)
@@ -554,6 +568,7 @@ func creer_batiment(type: String, x: float) -> Bat:
 	for k in d.butin:
 		res[k] = round(rng.randf_range(d.butin[k][0], d.butin[k][1]))
 	b.butin = {"ressources": res, "composants": []}
+	b.voie = 1 if fposmod(sin(x * 12.9898 + b.uid * 78.233) * 43758.5453, 1.0) < float(donnees().voies.batiment_devant) else -1   # hasard stable, sans toucher au tirage de la partie
 	return b
 
 func ajouter_vehicule(type: String) -> Veh:
@@ -587,12 +602,21 @@ func _replacer(immediat := false) -> void:
 	var gap: float = donnees().ecart_convoi
 	var bord := x_tete
 	for v in convoi:
+		if not v.en_ligne():
+			continue   # posté sur un flanc (DEC-251) : la ligne se resserre, sa place est donnée par _placer_gardes
 		if v.remorque() and v != convoi[0]:
 			bord += gap - float(donnees().get("ecart_remorque", 0.5))   # attelée au véhicule de devant (DEC-080)
 		v.x_cible = bord - v.longueur + v.ecart_acc
 		bord = v.x_cible - gap
-		if immediat:
+	_placer_gardes()
+	if immediat:
+		for v in convoi:
 			v.x = v.x_cible
+
+
+# Formation de combat : redéfini par modele_voies.gd
+func _placer_gardes() -> void:
+	pass
 
 
 # Remorques (DEC-080) : un véhicule tire les remorques qui le suivent dans le convoi

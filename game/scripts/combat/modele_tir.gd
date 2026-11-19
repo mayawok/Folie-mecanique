@@ -201,10 +201,11 @@ func _tirer(att, a: Dictionary, w: Dictionary, cible) -> void:
 			point = Vector2(cible.x + 0.35, 0.9)
 		else:
 			zone = "structure"
-			point = Vector2(cible.x + cible.longueur * rng.randf_range(0.25, 0.75), cible.hauteur * rng.randf_range(0.15, 0.6))
+			var eb := voie_echelle(float(cible.voie))   # bâtiment derrière ou devant la route (DEC-251)
+			point = Vector2(cible.x + cible.longueur * 0.5 + (rng.randf_range(0.25, 0.75) - 0.5) * cible.longueur * eb, cible.hauteur * rng.randf_range(0.15, 0.6) * eb + voie_dy(float(cible.voie)))
 	else:
 		var sens := 1.0 if centre_x >= origine.x else -1.0
-		point = Vector2(centre_x + sens * rng.randf_range(1.0, 7.0), rng.randf_range(0.0, 1.6) + (voie_dy(cible.voie_f) if cible is Veh else 0.0))
+		point = Vector2(centre_x + sens * rng.randf_range(1.0, 7.0), rng.randf_range(0.0, 1.6) + (voie_dy(cible.voie_f) if cible is Veh else (voie_dy(float(cible.voie)) if cible is Bat else 0.0)))
 	if not joueur:
 		bonus *= float(donnees().equilibrage.ennemi_degats_infliges)   # tout ce qui tire contre le convoi frappe moins fort (DEC-113)
 	projectiles.append({"att": att.uid, "cible": cible.uid, "w": w, "classe": w.classe, "a": origine, "b": point,

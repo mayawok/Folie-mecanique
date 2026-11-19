@@ -46,6 +46,12 @@ func _ready() -> void:
 	terrain_avant.sol_y = SOL_Y
 	terrain_avant.ancre_x = 150.0
 	add_child(terrain_avant)
+	bandeau = CalqueVue.new()   # annonce de combat : au-dessus des véhicules de devant (DEC-251)
+	bandeau.dessin = dessiner_bandeau
+	bandeau.mouse_filter = MOUSE_FILTER_IGNORE
+	bandeau.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	bandeau.z_index = 6
+	add_child(bandeau)
 	mission_calque = MissionDessin.new()   # scènes de mission : au-dessus de tout, bandes noires comprises (DEC-145)
 	mission_calque.vue = self
 	mission_calque.z_index = 10
@@ -257,9 +263,15 @@ func _synchroniser() -> void:
 		n.ppm = ppm
 		n.size = Vector2(b.longueur, b.hauteur) * ppm
 		var y_bat := maxf(_sy(b.x, true), maxf(_sy(b.x + b.longueur * 0.5, true), _sy(b.x + b.longueur, true)))   # posé sur le point le plus bas : ne flotte jamais
-		n.position = Vector2(terrain.ecran_x(b.x), y_bat - n.size.y + 2.0)
+		# jamais sur la route (DEC-251) : derrière (plus petit, plus haut, voilé) ou devant (plus grand, cache le convoi)
+		var ech_b := CombatModele.voie_echelle(float(b.voie))
+		n.scale = Vector2(ech_b, ech_b)
+		n.pivot_offset = Vector2(n.size.x * 0.5, n.size.y)
+		n.position = Vector2(terrain.ecran_x(b.x), y_bat - n.size.y + 2.0 - CombatModele.voie_dy(float(b.voie)) * ppm)
 		n.modulate = Color.WHITE.lerp(Color(0.42, 0.48, 0.72), terrain.nuit)
-		n.z_index = -2
+		if b.voie < 0:
+			n.modulate = n.modulate * Color(0.88, 0.88, 0.9)
+		n.z_index = -2 if b.voie < 0 else 4
 	for uid in noeuds.keys():
 		if not vus.has(uid):
 			noeuds[uid].queue_free()
