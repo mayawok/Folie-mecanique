@@ -136,6 +136,11 @@ const SAVE_PATH := "user://convoi_save.json"
 var _btn_feu: Button
 var _btn_rep: Button
 var _chips := {}
+var _tray: HBoxContainer         # menu déployable (DEC-258)
+var _btn_menu: Button
+var _radar: RadarMenaces
+var _chip_val := {}              # dernière valeur de chaque ressource
+var _chip_jusqu := {}            # instant jusqu'auquel la pastille reste affichée
 var _horloge_ui: Control
 var _lbl_dist: Label
 var _lbl_banniere: Label
@@ -450,13 +455,13 @@ static func police(nom := "oswald", graisse := 500) -> Font:
 
 # Verre fumé : fond sombre semi-transparent, bord ambre discret (DEC-149)
 static func verre(fond: float, bord: float, accent := false, rayon := 12) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.91, 0.64, 0.24, 0.88) if accent else Color(0.055, 0.055, 0.05, fond)
-	s.border_color = Color(1.0, 0.82, 0.55, bord)
-	s.set_border_width_all(2)
-	s.set_corner_radius_all(rayon)
-	s.shadow_color = Color(0, 0, 0, 0.28)
-	s.shadow_size = 4
+	var s := StyleBoxFlat.new()   # style tactique sobre (DEC-258) : fond sombre, filet blanc fin, angles peu arrondis
+	s.bg_color = Color(0.91, 0.64, 0.24, 0.92) if accent else Color(0.035, 0.04, 0.045, fond)
+	s.border_color = Color(1.0, 1.0, 1.0, bord * 0.5) if not accent else Color(1.0, 0.82, 0.55, 0.9)
+	s.set_border_width_all(1)
+	s.set_corner_radius_all(mini(rayon, 8))
+	s.shadow_color = Color(0, 0, 0, 0.35)
+	s.shadow_size = 6
 	s.content_margin_left = 18
 	s.content_margin_right = 18
 	s.content_margin_top = 6
@@ -490,11 +495,11 @@ func _panneau(parent: Node, fond := C_FOND) -> PanelContainer:
 	var p := PanelContainer.new()
 	var s := StyleBoxFlat.new()
 	s.bg_color = fond
-	s.set_corner_radius_all(14 if fond.a > 0.0 else 0)
+	s.set_corner_radius_all(8 if fond.a > 0.0 else 0)
 	s.set_content_margin_all(18)
-	if fond.a > 0.0:   # panneaux en verre fumé (DEC-149)
-		s.border_color = Color(1.0, 0.82, 0.55, 0.28)
-		s.set_border_width_all(2)
+	if fond.a > 0.0:   # panneaux sobres (DEC-258)
+		s.border_color = Color(1.0, 1.0, 1.0, 0.14)
+		s.set_border_width_all(1)
 	p.add_theme_stylebox_override("panel", s)
 	parent.add_child(p)
 	return p
@@ -503,20 +508,29 @@ func _panneau(parent: Node, fond := C_FOND) -> PanelContainer:
 func _bulle(parent: Node) -> PanelContainer:
 	var p := PanelContainer.new()
 	var s := StyleBoxFlat.new()
-	s.bg_color = Color(0.07, 0.075, 0.08, 0.66)
+	s.bg_color = Color(0.035, 0.04, 0.045, 0.7)
 	s.set_corner_radius_all(30)
 	s.border_color = Color(1, 1, 1, 0.16)
-	s.set_border_width_all(2)
+	s.set_border_width_all(1)
 	s.content_margin_left = 14
 	s.content_margin_right = 18
 	s.content_margin_top = 8
 	s.content_margin_bottom = 8
-	s.set_corner_radius_all(14)
-	s.border_color = Color(1.0, 0.82, 0.55, 0.22)
-	p.add_theme_stylebox_override("panel", s)   # pastille en verre fumé (DEC-149)
+	s.set_corner_radius_all(8)
+	s.border_color = Color(1.0, 1.0, 1.0, 0.14)
+	p.add_theme_stylebox_override("panel", s)   # pastille sobre (DEC-258)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(p)
 	return p
+
+# Les panneaux plein écran montent du bas, comme une feuille (DEC-258)
+func _feuille(c: Control) -> void:
+	c.modulate.a = 0.0
+	c.position.y = 140.0
+	var tw := c.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(c, "position:y", 0.0, 0.28)
+	tw.tween_property(c, "modulate:a", 1.0, 0.22)
+
 
 func _bouton(texte: String, action: Callable, parent: Node, largeur := 0.0) -> Button:
 	var b := Button.new()

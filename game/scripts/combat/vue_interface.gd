@@ -73,19 +73,35 @@ func _construire_elements() -> void:
 	var esp2 := Control.new()
 	esp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(esp2)
-	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), hb, 190)
+	var tray := HBoxContainer.new()   # menu qui se déploie (DEC-258) : l'écran reste dégagé tant qu'on ne l'ouvre pas
+	tray.add_theme_constant_override("separation", 10)
+	tray.visible = false
+	hb.add_child(tray)
+	_tray = tray
+	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), tray, 190)
 	_btn_atelier.visible = false
-	_btn_nouveau = _bouton("Construire", func(): _ouvrir_editeur(0), hb, 160)
+	_btn_nouveau = _bouton("Construire", func(): _ouvrir_editeur(0), tray, 160)
 	_btn_nouveau.visible = false
-	_btn_kit = _bouton("Kit", _basculer_kit, hb, 90)
+	_btn_kit = _bouton("Kit", _basculer_kit, tray, 90)
 	_btn_kit.visible = false
-	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), hb, 150)
-	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), hb, 110)
+	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), tray, 150)
+	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), tray, 110)
+	_btn_menu = _bouton("≡", func(): _tray.visible = not _tray.visible, hb, 76)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
 	# Un seul bouton de vitesse : chaque toucher passe de x1 à x2, x3, puis revient à x1
-	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, hb, 70)
+	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, tray, 70)
 	_btns_vitesse.append(bv)
-	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), hb, 190)   # 5 régimes moteur, un toucher change
+	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), tray, 190)   # 5 régimes moteur, un toucher change
+	for b in [_btn_atelier, _btn_nouveau, _btn_kit, _btn_surv, _btn_carte]:   # un panneau s'ouvre : le menu se replie
+		b.pressed.connect(func(): _tray.visible = false)
+	_radar = RadarMenaces.new()   # radar des menaces (DEC-258)
+	_radar.vue = self
+	_radar.set_anchors_and_offsets_preset(PRESET_CENTER_TOP)
+	_radar.offset_left = -230
+	_radar.offset_right = 230
+	_radar.offset_top = 100
+	_radar.offset_bottom = 142
+	add_child(_radar)
 	_lbl_quete = _label("", self, 28, C_ACCENT)
 	_lbl_quete.position = Vector2(30, 164)
 	_lbl_quete.add_theme_constant_override("outline_size", 6)
@@ -159,6 +175,7 @@ func _construire_elements() -> void:
 	add_child(_btn_marche)
 	_btn_marche.geste.connect(func(dx: float): _demarrer_audio(); _son("sfx_ui_clic", -6.0); action_marche_geste(dx))
 	_construire_halte()
+	_btn_marche.modulate = Color(1, 1, 1, 0.78)   # plus discret (DEC-258)
 	_btn_marche.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
 	_btn_marche.offset_left = -440
 	_btn_marche.offset_right = -16
@@ -648,6 +665,17 @@ func _effacer_sauvegarde() -> void:
 
 
 # --- Interface -------------------------------------------------------------
+# Une ressource s'affiche quelques secondes quand elle change, et reste tant qu'elle est critique ou que le menu est ouvert (DEC-258)
+func _pastille(k: String, val: float, critique: bool) -> void:
+	if not _chip_val.has(k):
+		_chip_val[k] = val
+		_chip_jusqu[k] = 0.0
+	elif absf(float(_chip_val[k]) - val) > 0.01:
+		_chip_val[k] = val
+		_chip_jusqu[k] = _temps + 4.0
+	_chips[k][2].visible = critique or _tray.visible or _temps < float(_chip_jusqu[k])
+
+
 func _maj_interface() -> void:
 	for k in ["ammo", "gazole", "essence", "metal", "eau", "vivres"]:
 		var l: Label = _chips[k][0]
@@ -657,7 +685,10 @@ func _maj_interface() -> void:
 			l.text = "%d/%d L" % [int(ceil(val)), int(m.capacite_carburant(k))]
 		var bas: bool = k in ["eau", "vivres"] and m.jours_de(k) < 1.0
 		l.modulate = C_ROUGE if val <= 0.5 else (C_ACCENT if bas else Color.WHITE)
+		_pastille(k, val, val <= 0.5 or bas or (k in CombatModele.CARBURANTS and val < 99990.0 and val < 0.15 * m.capacite_carburant(k)))
 	_chips.pieces[0].text = "%d" % (m.composants.size() + m.pieces_stock.size())
+	_pastille("pieces", float(m.composants.size() + m.pieces_stock.size()), false)
+	_radar.queue_redraw()
 	_horloge_ui.queue_redraw()
 	_btn_atelier.visible = _atelier == null and not m.en_kit and not m.atelier_possible().is_empty()
 	_btn_nouveau.visible = _atelier == null and _editeur == null and not m.en_kit and not m.fini

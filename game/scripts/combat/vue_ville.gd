@@ -70,6 +70,7 @@ func _ouvrir_surv() -> void:
 	_surv_sel = {}
 	_surv_sig = ""
 	_voile_surv.visible = true
+	_feuille(_voile_surv)
 
 func _fermer_surv() -> void:
 	_voile_surv.visible = false
@@ -127,6 +128,7 @@ func _ouvrir_carte() -> void:
 	pause = true
 	_carte_sel = -1
 	_voile_carte.visible = true
+	_feuille(_voile_carte)
 	_aide("002")
 	_carte_ctl.queue_redraw()
 
