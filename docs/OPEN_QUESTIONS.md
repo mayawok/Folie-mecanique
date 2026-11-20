@@ -333,3 +333,12 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Armes de mêlée** (barre de fer, hache) : refusées pour l'instant. À reprendre si l'abordage reste trop passif.
 - **Réglages** : fréquence des coups de volant, proportion de pillards repoussés, nombre d'abordeurs, dégâts des chocs : à régler en essai sur iPhone.
 - **Étincelles et débris** : pas de secousse d'écran ni de son dédié (le bruit de choc réutilise l'impact de blindage).
+
+## OQ-053 — Zoom, gore, annonces, interface (20/11, DEC-257)
+
+- **« Sans les démembrements »** : la phrase du 20/11 est ambiguë (avec ou sans ?). Fait : démembrement actif au niveau Gore « maximum », désactivable. À confirmer.
+- **Interface moderne** (style GTA / Apple : annonces, indicateurs, panneaux plus épurés) : refonte à cadrer ; proposition : un lot dédié (bandeau d'état, carte radar des menaces, panneaux translucides).
+- **Zoom** : distance de déclenchement (16 m), zoom maximum (60 px/m) et délai de retour (5 s) à régler sur iPhone ; pas encore de ralenti ni de pause au contact.
+- **Gore** : corps et taches dessinés en simple (formes), sans sprites ; à raffiner avec la direction artistique. Classification d'âge App Store à vérifier (réglage coupé possible).
+- **Annonces** : attaque par l'avant/arrière sans niveau d'agressivité propre (couleurs fixes) ; à relier aux rencontres si on veut des pacifiques.
+

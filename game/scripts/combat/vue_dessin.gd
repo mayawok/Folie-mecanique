@@ -51,12 +51,18 @@ func _evenement(e: Dictionary) -> void:
 		"melee":   # bagarre sur le toit
 			var ym: float = 1.7 + CombatModele.voie_dy(float(e.get("voie", 0.0)))
 			_etincelles.append({"p": Vector2(float(e.x), ym), "age": 0.0, "gros": false})
+			_gore(Vector2(float(e.x), ym), false, 5.0, float(e.get("voie", 0.0)))
 			_son("sfx_impact_blindage", -10.0)
 		"repousse":   # un pillard est jeté du plateau : il vole puis retombe sur la route
 			var yr: float = 1.7 + CombatModele.voie_dy(float(e.get("voie", 0.0)))
-			_debris.append({"p": Vector2(float(e.x), yr), "v": Vector2(_rng.randf_range(-2.5, 2.5), 3.5), "age": 0.0, "forme": "homme", "rot": 0.0, "vrot": _rng.randf_range(-7.0, 7.0), "taille": 1.0})
+			_debris.append({"p": Vector2(float(e.x), yr), "v": Vector2(_rng.randf_range(-2.5, 2.5), 3.5), "age": 0.0, "forme": "homme", "rot": 0.0, "vrot": _rng.randf_range(-7.0, 7.0), "taille": 1.0,
+				"dy": CombatModele.voie_dy(float(e.get("voie", 0.0))), "cadavre": Gore.lire() >= 2, "vie": 6.0})
+			_gore(Vector2(float(e.x), yr), false, 6.0, float(e.get("voie", 0.0)))
 			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": true})
 			_son("sfx_impact_blindage", -4.0)
+		"sang":   # un homme touché ou tué : sang, corps, membres (DEC-257)
+			var ys: float = (1.7 if bool(e.get("toit", false)) else 1.3) + CombatModele.voie_dy(float(e.get("voie", 0.0)))
+			_gore(Vector2(float(e.x) + _rng.randf_range(-1.2, 1.2), ys), bool(e.mort), float(e.fort), float(e.get("voie", 0.0)))
 		"explosion":   # obus, cocktail Molotov, lance explosive, réservoir (DEC-220)
 			var pe := Vector2(float(e.x), float(e.y))
 			_explosions.append({"p": pe, "age": 0.0, "taille": float(e.taille)})
@@ -136,6 +142,9 @@ func _evenement(e: Dictionary) -> void:
 			_aide("003")
 		"reputation":
 			_aide("006")
+		"annonce":   # annonce générale : attaque avant/arrière, ville en vue, champ de mines (DEC-257)
+			_annonce = {"cote": String(e.cote), "agr": int(e.agr), "titre": String(e.titre), "sous": String(e.sous), "age": 0.0}
+			_son("sfx_impact_blindage", -12.0)
 		"groupe":   # un groupe arrive (DEC-253) : annonce colorée selon son agressivité
 			_annonce = {"cote": String(e.cote), "n": int(e.n), "agr": int(e.agr), "nom": String(e.nom), "age": 0.0}
 			_son("sfx_impact_blindage", -12.0)
@@ -164,6 +173,7 @@ func _evenement(e: Dictionary) -> void:
 			var v = m.trouver(e.uid)
 			if v != null:
 				_explosions.append({"p": _ancre(v, e.piece), "age": 0.0, "taille": 1.1})
+				_lancer_debris(_ancre(v, e.piece), 4, true)   # la pièce part en morceaux
 		"roue_perdue":
 			_roues_tombees.append({"p": Vector2(e.x, float(e.r) + 0.4), "v": Vector2(float(e.sens) * _rng.randf_range(1.0, 2.5), 3.0), "r": float(e.r), "age": 0.0})
 			_son("sfx_impact_blindage", -6.0)
@@ -171,6 +181,7 @@ func _evenement(e: Dictionary) -> void:
 			var v = m.trouver(e.uid)
 			if v != null:
 				_explosions.append({"p": _centre_veh(v), "age": 0.0, "taille": 2.6})
+				_lancer_debris(_centre_veh(v), 9, true)   # la carcasse se disloque
 				_son("sfx_explosion")
 
 # Pièces arrachées par un choc : tôles, rétroviseurs, portières, boulons (DEC-255)
@@ -182,18 +193,66 @@ func _lancer_debris(p: Vector2, n: int, grosses: bool) -> void:
 			"age": 0.0, "forme": fm, "rot": _rng.randf() * TAU, "vrot": _rng.randf_range(-12.0, 12.0), "taille": 1.4 if fm == "porte" else (0.7 if fm == "boulon" else 1.0)})
 
 
+# Sang, corps et membres (DEC-257) selon le réglage Gore : 0 rien, 1 sang, 2 maximum
+func _gore(p: Vector2, mort: bool, fort: float, voie := 0.0) -> void:
+	var g := Gore.lire()
+	if g == 0:
+		return
+	var dy := CombatModele.voie_dy(voie)
+	var n := (14 if mort else 5) if g == 2 else (7 if mort else 3)
+	for i in n:
+		if _gouttes.size() >= 220:
+			break
+		_gouttes.append({"p": p + Vector2(_rng.randf_range(-0.3, 0.3), _rng.randf_range(-0.2, 0.3)), "v": Vector2(_rng.randf_range(-3.5, 3.5), _rng.randf_range(1.5, 5.5)), "age": 0.0, "dy": dy, "r": _rng.randf_range(0.04, 0.1)})
+	if mort and g == 2:
+		_debris.append({"p": p, "v": Vector2(_rng.randf_range(-2.5, 2.5), 3.0), "age": 0.0, "forme": "homme", "rot": 0.0, "vrot": _rng.randf_range(-6.0, 6.0), "taille": 1.0, "dy": dy, "cadavre": true, "vie": 6.0})
+		if _rng.randf() < 0.6 or fort >= 12.0:
+			var membres := ["bras", "jambe", "tete"]
+			membres.shuffle()
+			for fm in membres.slice(0, _rng.randi_range(1, 3)):
+				_debris.append({"p": p, "v": Vector2(_rng.randf_range(-5.0, 5.0), _rng.randf_range(3.0, 7.0)), "age": 0.0, "forme": fm, "rot": _rng.randf() * TAU, "vrot": _rng.randf_range(-14.0, 14.0), "taille": 1.0, "dy": dy, "vie": 16.0, "trace": 0.0})
+
+
 func _vieillir(delta: float) -> void:
 	for d in _debris:   # vol, rebonds, puis la pièce reste un moment sur la route
 		d.age += delta
 		d.v.y -= 9.8 * delta
 		d.p += d.v * delta
 		d.rot += d.vrot * delta
-		if d.p.y < 0.1:
-			d.p.y = 0.1
+		var sol: float = 0.1 + float(d.get("dy", 0.0))
+		if d.p.y < sol:
+			d.p.y = sol
 			d.v.y = -d.v.y * 0.3
 			d.v.x *= 0.7
 			d.vrot *= 0.6
-	_debris = _debris.filter(func(d): return d.age < 5.0)
+			if d.get("cadavre", false) and d.age > 0.15:   # le corps s'abat sur la route et y reste
+				d["cadavre"] = false
+				d.age = 99.0
+				if _corps.size() >= 18:
+					_corps.pop_front()
+				_corps.append({"x": d.p.x, "dy": float(d.get("dy", 0.0)), "age": 0.0, "peau": _rng.randi() % 5, "flip": _rng.randf() < 0.5})
+				_taches.append({"x": d.p.x, "dy": float(d.get("dy", 0.0)), "r": 0.8, "age": 0.0})
+		if d.has("trace") and d.age < 1.4:   # un membre arraché sème des gouttes
+			d.trace -= delta
+			if d.trace <= 0.0 and _gouttes.size() < 220:
+				d.trace = 0.07
+				_gouttes.append({"p": d.p, "v": Vector2(_rng.randf_range(-1.0, 1.0), _rng.randf_range(0.0, 1.5)), "age": 0.0, "dy": float(d.get("dy", 0.0)), "r": 0.05})
+	_debris = _debris.filter(func(d): return d.age < float(d.get("vie", 5.0)))
+	for g in _gouttes:
+		g.age += delta
+		g.v.y -= 9.8 * delta
+		g.p += g.v * delta
+		if g.p.y <= 0.05 + g.dy:
+			g.age = 99.0
+			if _taches.size() < 90 and Gore.lire() >= 1:
+				_taches.append({"x": g.p.x, "dy": g.dy, "r": g.r * _rng.randf_range(2.0, 4.0), "age": 0.0})
+	_gouttes = _gouttes.filter(func(g): return g.age < 3.0)
+	for t in _taches:
+		t.age += delta
+	_taches = _taches.filter(func(t): return t.age < 120.0)
+	for k in _corps:
+		k.age += delta
+	_corps = _corps.filter(func(k): return k.age < 180.0)
 	if not _annonce.is_empty():
 		_annonce.age += delta
 		if _annonce.age > float(CombatModele.donnees().groupes.annonce_s):
@@ -534,7 +593,12 @@ func _dessiner_annonce(c: CanvasItem) -> void:
 	var droite: bool = _annonce.cote == "droite"
 	var f := police("pochoir", 800)
 	var l1 := "%s  %s" % [Textes.t("groupe.cd" if droite else "groupe.cg").to_upper(), ""]
-	var l2 := "%s · %d · %s" % [_annonce.nom, int(_annonce.n), Textes.t("groupe.a%d" % int(_annonce.agr))]
+	var l2 := ""
+	if _annonce.has("titre"):   # annonce générale (DEC-257)
+		l1 = _annonce.titre
+		l2 = _annonce.sous
+	else:
+		l2 = "%s · %d · %s" % [_annonce.nom, int(_annonce.n), Textes.t("groupe.a%d" % int(_annonce.agr))]
 	var bw := 560.0
 	var bh := 92.0
 	var r := Rect2((w - bw) * 0.5, 120.0, bw, bh)
@@ -543,12 +607,36 @@ func _dessiner_annonce(c: CanvasItem) -> void:
 	c.draw_rect(Rect2(r.position + Vector2(0, bh - 4.0), Vector2(bw, 4.0)), Color(col, a * clignote))
 	c.draw_string(f, r.position + Vector2(0, 38.0), l1.strip_edges(), HORIZONTAL_ALIGNMENT_CENTER, bw, 34, Color(col.lightened(0.15), a))
 	c.draw_string(get_theme_default_font(), r.position + Vector2(0, 74.0), l2, HORIZONTAL_ALIGNMENT_CENTER, bw, 28, Color(C_TEXTE, a))
+	if String(_annonce.cote) == "":
+		return   # pas de flèche : ville, mines
 	var cy := r.position.y + bh * 0.5
 	var pulse: float = 0.5 + 0.5 * sin(t * 6.0)
 	var dx := 24.0 + 14.0 * pulse
 	var sens := 1.0 if droite else -1.0
 	var bx: float = (w - 18.0 - dx) if droite else (18.0 + dx)
 	c.draw_colored_polygon(PackedVector2Array([Vector2(bx + sens * 26.0, cy), Vector2(bx - sens * 8.0, cy - 30.0), Vector2(bx - sens * 8.0, cy + 30.0)]), Color(col, a * clignote))
+
+
+# Taches, corps restés sur la route et gouttes en vol (DEC-257)
+func _dessiner_gore(c: CanvasItem) -> void:
+	for t in _taches:
+		var al: float = 0.85 * clampf((120.0 - t.age) / 40.0, 0.0, 1.0)
+		var p := _px(Vector2(t.x, 0.0)) - Vector2(0.0, float(t.dy) * ppm)
+		c.draw_set_transform(p, 0.0, Vector2(1.0, 0.22))
+		c.draw_circle(Vector2.ZERO, float(t.r) * ppm, Color(0.3, 0.03, 0.03, al))
+	for k in _corps:
+		var al2: float = clampf((180.0 - k.age) / 30.0, 0.0, 1.0)
+		var p2 := _px(Vector2(k.x, 0.0)) - Vector2(0.0, float(k.dy) * ppm)
+		var sx: float = -1.0 if k.flip else 1.0
+		c.draw_set_transform(p2, 0.0, Vector2(sx, 1.0))
+		c.draw_set_transform(p2, 0.0, Vector2(sx, 1.0))
+		c.draw_rect(Rect2(-0.6 * ppm, -0.08 * ppm, 1.9 * ppm, 0.12 * ppm), Color(0.3, 0.03, 0.03, 0.8 * al2))
+		c.draw_rect(Rect2(-0.45 * ppm, -0.26 * ppm, 0.85 * ppm, 0.24 * ppm), Color(0.27, 0.28, 0.2, al2))
+		c.draw_rect(Rect2(0.4 * ppm, -0.2 * ppm, 0.85 * ppm, 0.18 * ppm), Color(0.2, 0.19, 0.16, al2))
+		c.draw_circle(Vector2(-0.62 * ppm, -0.15 * ppm), 0.13 * ppm, Color(0.62, 0.48, 0.38, al2))
+	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for g in _gouttes:
+		c.draw_circle(_px(g.p) - Vector2(0.0, float(g.dy) * ppm), maxf(1.5, float(g.r) * ppm), Color(0.58, 0.04, 0.04, 0.95))
 
 
 func dessiner_fx(c: CanvasItem) -> void:
@@ -725,10 +813,11 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_line(p, p + Vector2.from_angle(k * TAU / nb + s.age * 3) * ((9 if gros else 6) + (34 if gros else 22) * s.age), Color(1, 0.8, 0.3, fade2), 2.0)
 	for s in _bouffees:
 		c.draw_circle(_px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
+	_dessiner_gore(c)
 	for d in _debris:   # pièces et hommes qui volent (DEC-255)
 		var pd := _px(d.p)
 		var k: float = ppm * 0.22 * float(d.taille)
-		var a: float = clampf(5.0 - d.age, 0.0, 1.0)
+		var a: float = clampf(float(d.get("vie", 5.0)) - d.age, 0.0, 1.0)
 		c.draw_set_transform(pd, d.rot, Vector2.ONE)
 		match String(d.forme):
 			"tole":
@@ -741,6 +830,15 @@ func dessiner_fx(c: CanvasItem) -> void:
 				c.draw_circle(Vector2(k * 0.9, 0), k * 0.4, Color(0.75, 0.8, 0.82, a))
 			"homme":
 				Silhouette.dessiner(c, Vector2.ZERO, ppm, "pillard", {"phase": d.age * 9.0, "miroir": false, "peau": 1, "bras": "vise"})
+			"bras":
+				c.draw_line(Vector2(-k * 1.6, 0), Vector2(k * 1.6, 0), Color(0.62, 0.48, 0.38, a), maxf(2.0, ppm * 0.1))
+				c.draw_circle(Vector2(-k * 1.6, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
+			"jambe":
+				c.draw_line(Vector2(-k * 2.0, 0), Vector2(k * 2.0, 0), Color(0.28, 0.27, 0.22, a), maxf(3.0, ppm * 0.14))
+				c.draw_circle(Vector2(-k * 2.0, 0), maxf(2.0, ppm * 0.08), Color(0.6, 0.04, 0.04, a))
+			"tete":
+				c.draw_circle(Vector2.ZERO, maxf(3.0, ppm * 0.15), Color(0.62, 0.48, 0.38, a))
+				c.draw_circle(Vector2(-ppm * 0.07, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
 			_:
 				c.draw_circle(Vector2.ZERO, k * 0.35, Color(0.55, 0.5, 0.45, a))
 		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

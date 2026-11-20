@@ -454,10 +454,12 @@ func _blesser_equipage(v: Veh, d: float) -> void:
 	if i < 0:
 		var j := -1 - i
 		v.troupes[j] = maxf(0.0, v.troupes[j] - d)
+		evt({"t": "sang", "x": v.x + v.longueur * 0.5, "voie": v.voie_f, "mort": v.troupes[j] <= 0.0, "fort": d, "uid": v.uid})
 		if v.troupes[j] <= 0.0 and v.camp == "joueur":
 			log_(Textes.t("tir.004", [v.nom]), "alerte")
 		return
 	v.equipage[i] = maxf(0.0, v.equipage[i] - d)
+	evt({"t": "sang", "x": v.x + v.longueur * 0.5, "voie": v.voie_f, "mort": v.equipage[i] <= 0.0, "fort": d, "uid": v.uid})
 	if v.equipage[i] <= 0.0 and v.camp == "joueur":
 		log_(Textes.t("tir.005", [v.nom]), "alerte")
 

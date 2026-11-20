@@ -124,6 +124,7 @@ func _abordages(dt: float) -> void:
 				evt({"t": "repousse", "x": float(ab.x), "voie": v.voie_f, "uid": v.uid})
 				log_(Textes.t("abordage.004", [v.nom]), "ok")
 			else:
+				evt({"t": "sang", "x": float(ab.x), "voie": v.voie_f, "mort": true, "fort": 8.0, "uid": v.uid, "toit": true})
 				log_(Textes.t("abordage.002", [v.nom]), "ok")
 
 

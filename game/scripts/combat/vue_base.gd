@@ -53,6 +53,12 @@ var _surv_sig := ""
 var _pause_surv := false
 var _look_x := 0.0
 var _look_t := 0.0
+var _zoom_u := 1.0              # zoom du joueur (pincement à deux doigts, DEC-257) : multiplie le cadrage automatique
+var _zoom_t := 0.0              # secondes avant que le zoom revienne au cadrage normal
+var _doigts := {}               # index du doigt -> position écran
+var _pinch_d := 0.0             # écart des deux doigts au dernier événement
+var _multi := false             # vrai tant qu'un geste à deux doigts n'est pas fini : le doigt restant ne fait plus défiler
+const REPOS := 5.0              # secondes sans toucher avant le retour sur le convoi
 var _pressing := false
 var _drag := false
 var _press := Vector2.ZERO
@@ -95,6 +101,9 @@ var _btn_sortir: Button
 var _btn_camo: Button
 var _etincelles := []           # {p: Vector2 (m), age}
 var _explosions := []           # {p: Vector2 (m), age, taille}
+var _gouttes := []              # gouttes de sang en vol (DEC-257) : {p, v, age}
+var _taches := []               # taches de sang sur la route : {x, dy, r, age}
+var _corps := []                # corps restés sur la route : {x, dy, age, peau, flip}
 var _debris := []               # pièces qui volent après un choc (DEC-255) : {p, v, age, forme, rot, vrot, taille}
 var _roues_tombees := []        # roues arrachées qui roulent sur la route (DEC-080) : {p, v, r, age}
 var _bouffees := []             # {p: Vector2 (m), age} lueur de tir des tireurs

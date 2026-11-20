@@ -160,6 +160,8 @@ func _ville(dt: float) -> void:
 				else:
 					log_(Textes.t("ville.003", [ville.nom]), "ok")
 				evt({"t": "ville", "etat": "annonce"})
+				var dv := int(x0 - x_tete)
+				evt({"t": "annonce", "cote": "", "agr": 2 if ville_pillee() else 0, "titre": Textes.t("annonce.ville", [String(ville.nom).to_upper()]), "sous": Textes.t("annonce.ville_pillee" if ville_pillee() else "annonce.ville_d", [dv])})
 			if ville_pillee() and x_tete >= x0 - 6.0:   # personne pour ouvrir : on entre au pas (DEC-151)
 				ville.phase = "entree"
 				ordres.marche = "halte"

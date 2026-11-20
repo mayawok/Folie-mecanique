@@ -74,6 +74,7 @@ func _champs() -> void:
 		_champs_annonces[c.id] = true
 		log_(Textes.t("mines.001", [int(c.dist)]), "alerte")
 		evt({"t": "champ_mines"})
+		evt({"t": "annonce", "cote": "", "agr": 2, "titre": Textes.t("annonce.mines"), "sous": Textes.t("annonce.mines_d", [int(c.dist)])})
 
 
 # --- Fléau : monté à l'avant d'un véhicule à chenilles ------------------------------

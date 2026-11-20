@@ -723,6 +723,7 @@ func _rencontres() -> void:
 			xp -= e.longueur + r.randf_range(6.0, 14.0)
 		log_(Textes.t("modele.038"), "alerte")
 		evt({"t": "contact", "ennemi": true})
+		evt({"t": "annonce", "cote": "gauche", "agr": 3, "titre": Textes.t("annonce.arriere"), "sous": Textes.t("annonce.n", [choix.get("vehicules", []).size()])})
 		_prochain_x = x_tete + r.randf_range(R.intervalle[0], R.intervalle[1])
 		return
 	for t in choix.get("vehicules", []):
@@ -734,6 +735,8 @@ func _rencontres() -> void:
 			_role[e.uid] = "belier"
 		ennemis.append(e)
 		x += e.longueur + r.randf_range(5.0, 12.0)
+	if not choix.get("vehicules", []).is_empty():   # annonce d'attaque par l'avant (DEC-257)
+		evt({"t": "annonce", "cote": "droite", "agr": 2, "titre": Textes.t("annonce.avant"), "sous": Textes.t("annonce.n", [choix.get("vehicules", []).size()])})
 	for bt in choix.get("batiments", []):
 		var b := creer_batiment(bt, x + r.randf_range(4.0, 14.0))
 		batiments.append(b)

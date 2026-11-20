@@ -71,9 +71,49 @@ func _notification(what: int) -> void:
 		_sauver_vue()
 
 func _input(e: InputEvent) -> void:
+	_geste(e)
 	# Le premier toucher peut tomber sur un bouton : on débloque l'audio sur n'importe quelle entrée
 	if not _audio_ok and ((e is InputEventMouseButton and e.pressed) or (e is InputEventScreenTouch and e.pressed) or (e is InputEventKey and e.pressed)):
 		_demarrer_audio()
+
+# Un doigt : faire défiler ; deux doigts : zoomer et dézoomer seulement (DEC-257)
+func _geste(e: InputEvent) -> void:
+	if e is InputEventScreenTouch:
+		if e.pressed:
+			_doigts[e.index] = e.position
+		else:
+			_doigts.erase(e.index)
+		if _doigts.size() >= 2:
+			_multi = true
+			_pressing = false
+			_drag = false
+			_pinch_d = _ecart_doigts()
+		else:
+			_pinch_d = 0.0
+			if _doigts.is_empty():
+				_multi = false
+	elif e is InputEventScreenDrag and _doigts.has(e.index):
+		_doigts[e.index] = e.position
+		if _doigts.size() >= 2:
+			var d := _ecart_doigts()
+			if _pinch_d > 10.0 and d > 10.0:
+				_regler_zoom(d / _pinch_d)
+			_pinch_d = d
+			get_viewport().set_input_as_handled()
+	elif e is InputEventMagnifyGesture:
+		_regler_zoom(e.factor)
+
+
+func _ecart_doigts() -> float:
+	var p := _doigts.values()
+	return (p[0] as Vector2).distance_to(p[1])
+
+
+func _regler_zoom(f: float) -> void:
+	_zoom_u = clampf(_zoom_u * f, 0.45, 2.5)
+	_zoom_t = REPOS
+	_look_t = REPOS
+
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo:
@@ -123,6 +163,35 @@ func _process(delta: float) -> void:
 	_maj_sons()
 	_maj_interface()
 
+# Zone à cadrer quand un ennemi est à moins de 16 m de notre convoi : Vector2(gauche, droite) en mètres, vide si aucun contact
+func _zone_contact() -> Vector2:
+	if m.convoi.is_empty() or m.fini:
+		return Vector2.ZERO
+	var mi := _rx(m.convoi.back())
+	var ma := _rtete()
+	var lo := INF
+	var hi := -INF
+	for e in m.ennemis:
+		if not e.actif() or e.allie:
+			continue
+		var el: float = _rx(e)
+		var eh: float = el + e.longueur
+		if maxf(el - ma, mi - eh) > 16.0:
+			continue
+		if el > ma:         # devant : notre avant et l'arrière de l'autre
+			lo = minf(lo, ma - 9.0)
+			hi = maxf(hi, el + 9.0)
+		elif eh < mi:       # derrière : notre arrière et l'avant de l'autre
+			lo = minf(lo, eh - 9.0)
+			hi = maxf(hi, mi + 9.0)
+		else:               # côte à côte : toute la partie en contact
+			lo = minf(lo, maxf(el, mi) - 6.0)
+			hi = maxf(hi, minf(eh, ma) + 6.0)
+	if lo == INF:
+		return Vector2.ZERO
+	return Vector2(lo, hi)
+
+
 func _camera(delta: float) -> void:
 	var gauche: float = _rx(m.convoi.back()) if not m.convoi.is_empty() else _rtete() - 20.0
 	var droite := _rtete() + 20.0
@@ -141,6 +210,8 @@ func _camera(delta: float) -> void:
 	gauche = maxf(gauche, tete - (42.0 if combat else 22.0))
 	if not combat:
 		droite = tete + 12.0
+	# Zoom de contact (DEC-257) : dès que deux convois sont proches on cadre le point de rencontre, avant de l'un et arrière de l'autre
+	var zone := _zone_contact()
 	for b in m.batiments:
 		var proche: bool = b.x - m.x_tete < 85.0 and b.x + b.longueur > gauche - 40.0
 		if ((b.actif() or b.ami) and b.x - m.x_tete < 85.0) or (b.garnison.size() > 0 and proche):
@@ -149,6 +220,11 @@ func _camera(delta: float) -> void:
 				gauche = minf(gauche, b.x - 2.0)
 		if proche:
 			plafond = minf(plafond, 600.0 / b.hauteur)   # un grand bâtiment (église) doit tenir à l'écran
+	if zone != Vector2.ZERO:
+		gauche = zone.x
+		droite = zone.y
+		if plafond >= 62.0:
+			plafond = 72.0
 	if m.ville_active() and m.ville_phase() != "fin":   # la porte, puis la place de la ville, restent à l'écran
 		var x0v: float = float(m.ville.x0)
 		if m.ville_phase() == "chargement":   # plan de l'atelier
@@ -166,6 +242,12 @@ func _camera(delta: float) -> void:
 			plafond = minf(plafond, 600.0 / 15.5)
 	var span := maxf(droite - gauche + 4.0, 26.0)
 	var cible := clampf(1560.0 / span, 24.0, plafond)
+	var vue_base := 1560.0 / cible
+	if not (_pressing and _drag) and _doigts.is_empty():
+		_zoom_t -= delta
+		if _zoom_t <= 0.0:
+			_zoom_u = lerpf(_zoom_u, 1.0, 1.0 - exp(-2.5 * delta))
+	cible = clampf(cible * _zoom_u, 14.0, 90.0)
 	if m.fini:   # convoi anéanti : grand dézoom lent sur le désert (DEC-055)
 		_fin_t += delta
 		cible = 6.0
@@ -175,7 +257,8 @@ func _camera(delta: float) -> void:
 		_look_t -= delta
 		if _look_t <= 0.0:
 			_look_x = lerpf(_look_x, 0.0, 1.0 - exp(-2.5 * delta))
-	terrain.camera_x = lerpf(terrain.camera_x, gauche - 2.0 + _look_x, 1.0 - exp(-4.0 * delta))
+	var decal_zoom := (vue_base - 1560.0 / cible) * 0.5   # le zoom du joueur reste centré sur la zone cadrée
+	terrain.camera_x = lerpf(terrain.camera_x, gauche - 2.0 + _look_x + decal_zoom, 1.0 - exp(-4.0 * delta))
 	var centre: float = (gauche + droite) * 0.5 + _look_x
 	cam_h = lerpf(cam_h, Terrain.sol(centre) * 0.6 + Terrain.sol(_rtete()) * 0.4 - 0.5, 1.0 - exp(-3.0 * delta))
 	terrain.sol_y = SOL_Y + cam_h * ppm
@@ -280,6 +363,15 @@ func _synchroniser() -> void:
 
 # --- Panneau d'état d'un véhicule (au toucher) ------------------------------
 func _gui_input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN] and e.pressed:
+		_regler_zoom(1.12 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.12)
+		accept_event()
+		return
+	if _multi and (e is InputEventMouseButton or e is InputEventMouseMotion):
+		_pressing = false   # geste à deux doigts : jamais de défilement ni de toucher
+		_drag = false
+		accept_event()
+		return
 	if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
 		if e.pressed:
 			_pressing = true
@@ -295,7 +387,8 @@ func _gui_input(e: InputEvent) -> void:
 			_drag = true
 		if _drag:
 			_look_x = clampf(_look_x - e.relative.x / ppm, -70.0, 70.0)
-			_look_t = 3.0
+			_look_t = REPOS
+			_zoom_t = REPOS
 			accept_event()
 
 func _tap(p: Vector2) -> void:

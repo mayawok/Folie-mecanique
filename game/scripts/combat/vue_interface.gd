@@ -433,6 +433,10 @@ func _curseurs_son(vo: Control) -> void:
 		var nom: String = bus
 		sl.value_changed.connect(func(v: float): if so: so.regler(nom, v))
 		hbo.add_child(sl)
+	var bg: Button = _bouton(Textes.t("gore.%d" % Gore.lire()), func(): pass, vo, 420)   # réglage du gore (DEC-257) : coupé, sang, maximum
+	bg.pressed.connect(func():
+		Gore.regler((Gore.lire() + 1) % 3)
+		bg.text = Textes.t("gore.%d" % Gore.lire()))
 
 
 # Menu de pause : Reprendre, Son, Menu principal (calque sous l'accueil)
