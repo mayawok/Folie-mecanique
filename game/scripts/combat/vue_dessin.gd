@@ -602,9 +602,9 @@ func _dessiner_annonce(c: CanvasItem) -> void:
 	var bw := 560.0
 	var bh := 92.0
 	var r := Rect2((w - bw) * 0.5, 120.0, bw, bh)
-	c.draw_rect(r, Color(0.05, 0.045, 0.04, 0.82 * a))
-	c.draw_rect(Rect2(r.position, Vector2(bw, 4.0)), Color(col, a * clignote))
-	c.draw_rect(Rect2(r.position + Vector2(0, bh - 4.0), Vector2(bw, 4.0)), Color(col, a * clignote))
+	c.draw_rect(r, Color(0.035, 0.04, 0.045, 0.78 * a))   # style tactique (DEC-258) : barre de couleur à gauche, filet fin
+	c.draw_rect(r, Color(1, 1, 1, 0.14 * a), false, 1.0)
+	c.draw_rect(Rect2(r.position, Vector2(8.0, bh)), Color(col, a * clignote))
 	c.draw_string(f, r.position + Vector2(0, 38.0), l1.strip_edges(), HORIZONTAL_ALIGNMENT_CENTER, bw, 34, Color(col.lightened(0.15), a))
 	c.draw_string(get_theme_default_font(), r.position + Vector2(0, 74.0), l2, HORIZONTAL_ALIGNMENT_CENTER, bw, 28, Color(C_TEXTE, a))
 	if String(_annonce.cote) == "":

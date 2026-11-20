@@ -89,9 +89,9 @@ func _construire_elements() -> void:
 	_btn_menu = _bouton("≡", func(): _tray.visible = not _tray.visible, hb, 76)
 	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
 	# Un seul bouton de vitesse : chaque toucher passe de x1 à x2, x3, puis revient à x1
-	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, tray, 70)
+	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, hb, 70)
 	_btns_vitesse.append(bv)
-	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), tray, 190)   # 5 régimes moteur, un toucher change
+	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), hb, 190)   # 5 régimes moteur, un toucher change
 	for b in [_btn_atelier, _btn_nouveau, _btn_kit, _btn_surv, _btn_carte]:   # un panneau s'ouvre : le menu se replie
 		b.pressed.connect(func(): _tray.visible = false)
 	_radar = RadarMenaces.new()   # radar des menaces (DEC-258)
@@ -412,7 +412,7 @@ func _construire_elements() -> void:
 		pause = _atelier != null or _editeur != null)
 	_bouton_titre("Recommencer", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1))
 	_bouton_titre("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true))
-	_bouton_titre("Options", func(): _panneau_options.visible = true)
+	_bouton_titre("Options", func(): _panneau_options.visible = true; _feuille(_panneau_options))
 	_voile_menu.resized.connect(_placer_titre)
 	# Options : volumes (Son.regler les mémorise)
 	_panneau_options = ColorRect.new()
@@ -525,6 +525,7 @@ func _par_dessus(c: Control) -> void:
 	c.theme = theme   # le calque coupe l'héritage du thème
 	calque.add_child(c)
 	c.tree_exited.connect(calque.queue_free)
+	_feuille(c)   # les panneaux montent du bas (DEC-258)
 
 
 func _accueil_visible() -> bool:

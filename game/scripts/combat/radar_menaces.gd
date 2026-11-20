@@ -46,6 +46,16 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([Vector2(px + sens * s, cy), Vector2(px - sens * s * 0.4, cy - s), Vector2(px - sens * s * 0.4, cy + s)]), Color(col, 0.7))
 		else:
 			draw_colored_polygon(PackedVector2Array([Vector2(px, cy - s), Vector2(px + s, cy + s * 0.8), Vector2(px - s, cy + s * 0.8)]), col)
+	var proches := {-1: 1e9, 1: 1e9}   # menace hostile la plus proche de chaque côté : sa distance s'affiche
+	for e in m.ennemis:
+		if e.actif() and not e.allie:
+			var dd: float = (e.x + e.longueur * 0.5) - xt
+			var cote := 1 if dd >= 0.0 else -1
+			proches[cote] = minf(proches[cote], absf(dd))
+	for cote in [-1, 1]:
+		if proches[cote] < 1e8:
+			var ax: float = w * 0.5 + float(cote) * (w * 0.5 - 56.0) - 24.0
+			draw_string(ThemeDB.fallback_font, Vector2(ax, h - 6.0), "%d m" % int(proches[cote]), HORIZONTAL_ALIGNMENT_CENTER, 48.0, 14, Color("#F2B8B0"))
 	if m.ville_active() and m.ville_phase() != "fin":
 		var dv: float = float(m.ville.x0) - xt
 		var pv := clampf(w * 0.5 + dv / PORTEE * (w * 0.5), 10.0, w - 10.0)

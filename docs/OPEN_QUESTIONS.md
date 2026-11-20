@@ -345,6 +345,5 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 ## OQ-054 — Interface tactique : suites (20/11, DEC-258)
 
 - **Radar** : portée (140 m), position (sous le bandeau, centré) et lisibilité à régler sur iPhone ; pas d'étiquettes de distance pour l'instant.
-- **Vitesse x1/x2/x3 et régime moteur** sont maintenant dans le menu ≡ : à confirmer que c'est assez accessible.
-- **Lot 2** : feuille du bas pour les panneaux restants, annonces et cartes de convoi au nouveau style, icônes à la place du texte.
+- **Reste** : cartes de convoi plus compactes, icônes à la place du texte, polices (DEC-259 a fait le reste du lot 2).
 
