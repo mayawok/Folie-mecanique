@@ -691,7 +691,7 @@ func _rencontres() -> void:
 	var niveau: int = monde.niveau_a(_prochain_x)
 	var liste := []
 	var total := 0.0
-	for e in R.liste:
+	for e in rencontres_liste():
 		if niveau >= e.niveau_min and niveau <= e.niveau_max:
 			liste.append(e)
 			total += e.poids

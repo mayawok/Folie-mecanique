@@ -23,6 +23,14 @@
         "requiert": [
           "cadre_r75",
           "panier_r75",
+          "arme_pistolet"
+        ]
+      },
+      {
+        "type": "bmw_r75",
+        "requiert": [
+          "cadre_r75",
+          "panier_r75",
           "arme_mitrailleuse"
         ]
       },
@@ -727,7 +735,8 @@
         6,
         2
       ],
-      "metal": 3
+      "metal": 3,
+      "cache": true
     },
     "chassis_m4_sherman": {
       "famille": "chassis",
@@ -805,7 +814,8 @@
         10,
         2
       ],
-      "metal": 5
+      "metal": 5,
+      "cache": true
     },
     "chassis_tiger_1": {
       "famille": "chassis",
@@ -882,7 +892,8 @@
         16,
         2
       ],
-      "metal": 8
+      "metal": 8,
+      "cache": true
     },
     "cadre_r75": {
       "famille": "chassis",
@@ -1156,7 +1167,8 @@
         2,
         2
       ],
-      "metal": 2
+      "metal": 2,
+      "cache": true
     },
     "arme_lance_flammes": {
       "famille": "arme",
@@ -2513,6 +2525,41 @@
         2
       ],
       "metal": 6,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      },
+      "cache": true
+    },
+    "arme_pistolet": {
+      "famille": "arme",
+      "nom": "Pistolet",
+      "arme": "pistolet",
+      "poids_kg": 40,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      }
+    },
+    "arme_fusil_chasse": {
+      "famille": "arme",
+      "nom": "Fusil de chasse",
+      "arme": "fusil_chasse",
+      "poids_kg": 40,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1,
       "dessin": {
         "ref": "bmw_r75",
         "armes": [

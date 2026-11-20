@@ -73,7 +73,7 @@ func mission_plan(t: String, dest: int) -> Dictionary:
 	var niveau := maxi(int(monde.secteurs[monde.secteur].niveau), int(monde.secteurs[dest].niveau))
 	var r := RandomNumberGenerator.new()
 	r.seed = int(ville.get("graine", 0)) * 53 + dest * 11 + String(t).hash() % 1000
-	var table: Array = donnees().rencontres.liste.filter(func(e): return not e.get("vehicules", []).is_empty() and niveau >= int(e.niveau_min) and niveau <= int(e.niveau_max))
+	var table: Array = rencontres_liste().filter(func(e): return not e.get("vehicules", []).is_empty() and niveau >= int(e.niveau_min) and niveau <= int(e.niveau_max))
 	var n: int = int(Me.vagues_par_niveau[clampi(niveau, 0, Me.vagues_par_niveau.size() - 1)])
 	var parts := []
 	for i in n:

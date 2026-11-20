@@ -317,3 +317,11 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Pacifique et méfiant arrivent seulement par la droite** (pas de convoi qui nous rattrape par l'arrière) : en vouloir par la gauche ?
 - Un groupe **méfiant** devient-il hostile si on le tire dessus ou si on le fouille ? Mécanique de bascule d'agressivité à concevoir.
 - Compositions, tailles et nombre d'abordeurs à régler en essai.
+
+## OQ-051 — Armes de fortune : suites (20/11, DEC-254)
+
+- **Dessin** : les pistolets et fusils de chasse sont dessinés comme l'ancienne mitrailleuse (même affût) ; les versions graphiques sont à faire.
+- **Textes** : les fiches de véhicules (`formes_vehicules.json`) parlent encore de « mitrailleuse sur la cabine » : à réécrire.
+- **Poids et métal d'affût** : volontairement conservés (40 kg, 1 métal) pour ne pas bouger les profils ; à caler avec les nouvelles armes.
+- **Gamme d'armes** : revolver, carabine, arbalète, bidons incendiaires, chausse-trappes artisanales : lesquels créer, et quel prix en métal ?
+- **Ennemis des niveaux 5 et plus** : sans chars, les niveaux élevés reposent sur des groupes plus nombreux et des bunkers ; à régler en essai.

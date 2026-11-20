@@ -139,7 +139,7 @@ func _camp(dt: float) -> void:
 func _camp_attaque(force: float) -> void:
 	var niveau := monde.niveau_a(x_tete)
 	var liste := []
-	for e in donnees().rencontres.liste:
+	for e in rencontres_liste():
 		if niveau >= int(e.niveau_min) and niveau <= int(e.niveau_max) and not e.get("vehicules", []).is_empty() and String(e.get("mode", "")) != "poursuite":
 			liste.append(e)
 	var type := "citroen_traction"

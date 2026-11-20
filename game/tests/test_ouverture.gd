@@ -74,9 +74,9 @@ func _init() -> void:
 
 	# 3. L'arme et les munitions
 	ru = _fouiller_suivante(m)
-	verifier(ru != null and m.stocks.ammo >= 80 and "arme_mitrailleuse" in m.ids_stock(), "troisième trouvaille : mitrailleuse et munitions")
-	verifier(m.atelier_possible().get("plan", "") == "bmw_r75", "l'atelier propose de monter la mitrailleuse")
-	verifier(m.assembler(moto.uid, Assemblage.de_type("bmw_r75")), "mitrailleuse montée")
+	verifier(ru != null and m.stocks.ammo >= 80 and "arme_pistolet" in m.ids_stock(), "troisième trouvaille : pistolet et munitions")
+	verifier(m.atelier_possible().get("plan", "") == "bmw_r75", "l'atelier propose de monter le pistolet")
+	verifier(m.assembler(moto.uid, Assemblage.de_type("bmw_r75")), "pistolet monté")
 	verifier(moto.type == "bmw_r75" and moto.armes.size() == 1 and not m.calme_ouverture(), "side-car armé : l'ouverture est finie")
 
 	# 4. Puis viennent les ennemis

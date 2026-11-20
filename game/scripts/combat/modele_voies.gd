@@ -336,7 +336,9 @@ func _assigner_gardes() -> void:
 	var menace := {-1: 0, 1: 0}
 	for e in ennemis:
 		if e.actif() and not e.allie and e.mode in ["poursuite", "harcele", "contourne"]:
-			menace[_cote_de(e)] += 1
+			var cd := _cote_de(e)
+			if cd != 0:
+				menace[cd] += 1
 	for v in candidats:
 		var cote := -1 if (occupees[-1].size() < occupees[1].size() or (occupees[-1].size() == occupees[1].size() and menace[-1] >= menace[1])) else 1
 		if occupees[cote].size() >= cap:

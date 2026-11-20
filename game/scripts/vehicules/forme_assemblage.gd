@@ -79,7 +79,7 @@ static func forme(a: Dictionary) -> Dictionary:
 	# Tourelles : un bloc sous chaque canon, du sommet de la coque au-dessus du tube
 	var tourelles := []   # {x0, x1, haut}
 	for p in places:
-		if p.fiche.famille == "arme" and not String(p.fiche.get("arme", "mitrailleuse")).begins_with("mitrailleuse"):
+		if p.fiche.famille == "arme" and not _arme_legere(String(p.fiche.get("arme", "mitrailleuse"))):
 			var r := _rect(p)
 			var tw := minf(r.size.x * 0.55, 2.2)
 			var haut := r.end.y + 0.12
@@ -126,7 +126,7 @@ static func forme(a: Dictionary) -> Dictionary:
 					equipage.append({"x": r.position.x + r.size.x * 0.5, "y": r.end.y, "role": "chef", "h": 0.26, "_cabine": true})
 			"arme":
 				var wid := String(f.get("arme", "mitrailleuse"))
-				if wid.begins_with("mitrailleuse"):
+				if _arme_legere(wid):
 					var mx := clampf(r.position.x + r.size.x * 0.35, 0.3, L - 0.5)
 					var appui := y_coque
 					for t in tourelles:
@@ -168,3 +168,8 @@ static func _chenille(r: Rect2) -> Dictionary:
 		galets.append(x0 + (x1 - x0) * float(i) / float(n - 1))
 	return {"barbotin": [r.end.x - hr * 0.5, hr * 0.72, hr * 0.33], "tendeur": [r.position.x + hr * 0.45, hr * 0.55, hr * 0.3],
 		"galets": galets, "r_galet": rg, "rouleaux": [], "ep": ep}
+
+
+# Armes légères montées (dessinées comme une petite arme sur affût) : mitrailleuse, pistolet, fusil de chasse (DEC-254)
+static func _arme_legere(wid: String) -> bool:
+	return wid.begins_with("mitrailleuse") or wid in ["pistolet", "fusil_chasse", "fusil"]

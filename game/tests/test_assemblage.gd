@@ -6,13 +6,13 @@ extends SceneTree
 
 var echecs := 0
 const ATTENDU := {   # profils de combat avant G1 (valeurs de référence)
-	"willys_mb": [6.5, 2, 1.0, 12, 8, 2, true, ["mitrailleuse"], [55, 35, 25, 30, 25]],
-	"bmw_r75": [7.5, 1, 0.8, 8, 6, 2, true, ["mitrailleuse"], [40, 28, 20, 28, 18]],
-	"citroen_traction": [6.0, 4, 1.4, 14, 10, 2, false, ["mitrailleuse"], [70, 40, 28, 35, 30]],
-	"citroen_t23": [5.0, 5, 2.5, 25, 16, 2, false, ["mitrailleuse"], [90, 50, 35, 45, 35]],
-	"diamond_t": [4.5, 8, 4.0, 40, 25, 2, false, ["mitrailleuse"], [130, 70, 50, 70, 45]],
-	"dukw": [3.8, 6, 4.5, 40, 22, 2, true, ["mitrailleuse"], [140, 65, 45, 60, 40]],
-	"m3_half_track": [5.0, 12, 3.5, 30, 24, 3, true, ["mitrailleuse"], [150, 70, 45, 65, 50]],
+	"willys_mb": [6.5, 2, 1.0, 12, 8, 2, true, ["pistolet"], [55, 35, 25, 30, 25]],
+	"bmw_r75": [7.5, 1, 0.8, 8, 6, 2, true, ["pistolet"], [40, 28, 20, 28, 18]],
+	"citroen_traction": [6.0, 4, 1.4, 14, 10, 2, false, ["pistolet"], [70, 40, 28, 35, 30]],
+	"citroen_t23": [5.0, 5, 2.5, 25, 16, 2, false, ["fusil_chasse"], [90, 50, 35, 45, 35]],
+	"diamond_t": [4.5, 8, 4.0, 40, 25, 2, false, ["fusil_chasse"], [130, 70, 50, 70, 45]],
+	"dukw": [3.8, 6, 4.5, 40, 22, 2, true, ["fusil_chasse"], [140, 65, 45, 60, 40]],
+	"m3_half_track": [5.0, 12, 3.5, 30, 24, 3, true, ["fusil_chasse"], [150, 70, 45, 65, 50]],
 	"m3_stuart": [5.5, 28, 3.5, 30, 30, 3, false, ["canon_leger", "mitrailleuse"], [170, 80, 50, 70, 55]],
 	"m4_sherman": [4.5, 45, 5.0, 60, 45, 3, false, ["canon_75", "mitrailleuse"], [240, 110, 70, 100, 80]],
 	"tiger_1": [3.2, 80, 9.0, 90, 70, 3, false, ["canon_88"], [380, 160, 100, 140, 120]],

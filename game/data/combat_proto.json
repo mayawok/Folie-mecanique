@@ -11,8 +11,17 @@
   "eau": 12,
   "vivres": 12
  },
- "ravitaillement": {"_doc": "Eau et vivres (DEC-148) : unités par survivant et par jour (jour = 400 s de jeu). À sec : l'équipage perd des points de vie, jamais sous pv_min. Alerte quand il reste moins de alerte_jours.", "eau_jour": 1.0, "vivres_jour": 1.0, "soif_pv_s": 0.06, "faim_pv_s": 0.025, "pv_min": 1.0, "alerte_jours": 1.0},
- "ecart_convoi": 1.4, "ecart_remorque": 0.6,
+ "ravitaillement": {
+  "_doc": "Eau et vivres (DEC-148) : unités par survivant et par jour (jour = 400 s de jeu). À sec : l'équipage perd des points de vie, jamais sous pv_min. Alerte quand il reste moins de alerte_jours.",
+  "eau_jour": 1.0,
+  "vivres_jour": 1.0,
+  "soif_pv_s": 0.06,
+  "faim_pv_s": 0.025,
+  "pv_min": 1.0,
+  "alerte_jours": 1.0
+ },
+ "ecart_convoi": 1.4,
+ "ecart_remorque": 0.6,
  "equipage_pv": 20,
  "fouille": {
   "portee": 5.0,
@@ -127,10 +136,48 @@
    "pv": 30,
    "vitesse": 45
   },
-  "molotov": {"nom": "Cocktail Molotov", "classe": "incendiaire", "degats": 6, "penetration": 4, "cadence": 3.2, "portee": 24, "precision": 0.55, "munitions": 1, "pv": 5, "vitesse": 22, "feu": 6.0, "feu_dps": 4.0},
-    "chausse_trappes": {"nom": "Chausse-trappes", "classe": "piege", "degats": 0, "penetration": 0, "cadence": 2.2, "portee": 32, "precision": 1.0, "munitions": 1, "pv": 5, "vitesse": 0, "charges": 3, "duree": 45.0},
-    "lance_explosive": {"nom": "Lance \u00e0 pointe explosive", "classe": "lance", "degats": 24, "penetration": 30, "cadence": 3.8, "portee": 30, "precision": 0.5, "munitions": 1, "pv": 5, "vitesse": 34, "explosion": 2.4},
-    "lance_flammes": {
+  "molotov": {
+   "nom": "Cocktail Molotov",
+   "classe": "incendiaire",
+   "degats": 6,
+   "penetration": 4,
+   "cadence": 3.2,
+   "portee": 24,
+   "precision": 0.55,
+   "munitions": 1,
+   "pv": 5,
+   "vitesse": 22,
+   "feu": 6.0,
+   "feu_dps": 4.0
+  },
+  "chausse_trappes": {
+   "nom": "Chausse-trappes",
+   "classe": "piege",
+   "degats": 0,
+   "penetration": 0,
+   "cadence": 2.2,
+   "portee": 32,
+   "precision": 1.0,
+   "munitions": 1,
+   "pv": 5,
+   "vitesse": 0,
+   "charges": 3,
+   "duree": 45.0
+  },
+  "lance_explosive": {
+   "nom": "Lance à pointe explosive",
+   "classe": "lance",
+   "degats": 24,
+   "penetration": 30,
+   "cadence": 3.8,
+   "portee": 30,
+   "precision": 0.5,
+   "munitions": 1,
+   "pv": 5,
+   "vitesse": 34,
+   "explosion": 2.4
+  },
+  "lance_flammes": {
    "nom": "Lance-flammes",
    "classe": "flamme",
    "degats": 16,
@@ -142,6 +189,30 @@
    "carburant": 1.2,
    "pv": 25,
    "vitesse": 25
+  },
+  "pistolet": {
+   "nom": "Pistolet",
+   "classe": "fusil",
+   "degats": 3,
+   "penetration": 0,
+   "cadence": 1.1,
+   "portee": 16,
+   "precision": 0.5,
+   "munitions": 0,
+   "pv": 8,
+   "vitesse": 100
+  },
+  "fusil_chasse": {
+   "nom": "Fusil de chasse",
+   "classe": "fusil",
+   "degats": 7,
+   "penetration": 1,
+   "cadence": 2.2,
+   "portee": 28,
+   "precision": 0.5,
+   "munitions": 0,
+   "pv": 12,
+   "vitesse": 110
   }
  },
  "zones": {
@@ -164,8 +235,29 @@
   "visee_chance": 0.65,
   "visee_precision": 0.8
  },
- "feu": {"_note": "DEC-220 : incendies et explosions. Un v\u00e9hicule en feu perd des PV par seconde ; une \u00e9pave peut exploser (r\u00e9servoir) et blesser les voisins.", "explosion_carburant": 0.5, "rayon": 5.0, "degats": 12, "epave_feu": 10.0, "equipage": 0.25, "degats_ennemi": 1.5, "jets": {"moto_bmw": "molotov", "moto_zundapp": "molotov", "moto_harley": "molotov", "moto_gnome": "lance_explosive", "juvaquatre": "molotov", "kubelwagen": "lance_explosive"}},
- "effets": {"crevaison_facteur": 0.35, "crevaison_duree": 9.0, "_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75", "roue_perdue": 0.75, "roues_tombent": 0.6,
+ "feu": {
+  "_note": "DEC-220 : incendies et explosions. Un véhicule en feu perd des PV par seconde ; une épave peut exploser (réservoir) et blesser les voisins.",
+  "explosion_carburant": 0.5,
+  "rayon": 5.0,
+  "degats": 12,
+  "epave_feu": 10.0,
+  "equipage": 0.25,
+  "degats_ennemi": 1.5,
+  "jets": {
+   "moto_bmw": "molotov",
+   "moto_zundapp": "molotov",
+   "moto_harley": "molotov",
+   "moto_gnome": "lance_explosive",
+   "juvaquatre": "molotov",
+   "kubelwagen": "lance_explosive"
+  }
+ },
+ "effets": {
+  "crevaison_facteur": 0.35,
+  "crevaison_duree": 9.0,
+  "_note_roues": "DEC-080 : roues arrachées quand les roues sont abîmées ; chacune ralentit de x0,75",
+  "roue_perdue": 0.75,
+  "roues_tombent": 0.6,
   "roulement_bas": 0.7,
   "moteur_bas": 0.7,
   "suspension_bas": 0.8,
@@ -274,7 +366,7 @@
    "pv": 320,
    "blindage": 24,
    "tireurs": 3,
-   "arme": "mitrailleuse",
+   "arme": "fusil_chasse",
    "butin": {
     "ammo": [
      20,
@@ -319,7 +411,7 @@
    "pv": 520,
    "blindage": 18,
    "tireurs": 6,
-   "arme": "mitrailleuse",
+   "arme": "fusil",
    "butin": {
     "ammo": [
      40,
@@ -369,22 +461,427 @@
   }
  },
  "regime": [
-  {"nom": "Ralenti", "vitesse": 0.55, "conso": 0.45, "usure": 0.4},
-  {"nom": "Économe", "vitesse": 0.8, "conso": 0.75, "usure": 0.7},
-  {"nom": "Normal", "vitesse": 1.0, "conso": 1.0, "usure": 1.0},
-  {"nom": "Forcé", "vitesse": 1.2, "conso": 1.4, "usure": 1.6},
-  {"nom": "Maximum", "vitesse": 1.4, "conso": 1.9, "usure": 2.6}],
- "halte": {"_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.", "montage_s": 25.0, "eclaireurs_s": 20.0, "eclaireurs_portee_m": 700.0, "cache_pillage": 0.25, "cache_rayon_m": 25.0},
- "oiseau": {"_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).", "delai_min_s": 900.0, "delai_max_s": 2400.0, "duree_s": 9.0, "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."},
- "carburants": {"_note": "Deux carburants (DEC-094, DEC-190). Capacité par carburant = réservoirs des véhicules qui le brûlent + citerne du module + bidons (jerrycans, DEC-206).", "bidons_l": 100, "citerne_l": 3000},
- "equilibrage": {"_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.", "ennemi_degats_subis": 1.5, "ennemi_degats_infliges": 0.7, "ennemi_precision": 0.85, "rythme_vitesse": 1.4, "joueur_jet_precision": 1.35, "joueur_jet_degats": 1.5, "rodeurs_delai": 95.0, "rodeurs_delai_abri": 60.0},
- "route": {"_note": "Convois croisés sur la route selon la réputation (DEC-187, DEC-218). Valeurs à régler en essai.", "proba_convoi": 0.14, "types_allie": ["citroen_t23", "willys_mb"], "types_hostile": ["citroen_t23", "m3_half_track", "m16_mgmc", "citroen_traction"], "salut_rep": 1, "cadeau_l": 10},
- "region": {"_note": "Difficulté forcée hors de la région de la quête principale (DEC-172, DEC-216). malus = niveaux de rencontre ajoutés ; quete_depart = région de la quête au début de la partie.", "malus": 3, "quete_depart": "armorique"},
- "choc": {"_note": "Chocs entre véhicules (DEC-215). Dégâts = k × masse du frappeur (t) × vitesse relative (m/s) × lame. Valeurs à régler en essai.", "k": 6.0, "vitesse_min": 1.5, "elan": 2.0, "contact": 1.2, "delai": 1.5, "recul": 4.0, "esquive_moto": 0.667, "proba_ennemi": 0.35, "part_frappeur": 0.6, "penetration": 60, "equipage": 0.15, "lame_absorbe": 0.5, "fort": 120, "seuil_belier": 0.85, "charge": 1.15, "distance_esquive": 18.0, "esquive_leger": 0.4, "harcele_min": 16.0, "harcele_max": 26.0},
- "voies": {"_note": "Trois voies de profondeur (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite). dy = décalage vertical à l'écran en m (positif = plus haut), echelle = taille apparente (indices : fond, route, devant). Valeurs à régler en essai.", "dy": [0.75, 0.0, -0.85], "echelle": [0.9, 1.0, 1.1], "duree_changement": 1.2, "croisement_avant": 60.0, "depassement_avant": 14.0, "marge_occupee": 1.0, "placement": 40.0, "batiment_devant": 0.2, "combat_entree": 75.0, "combat_sortie": 100.0, "combat_delai_sortie": 4.0, "garde_poids_max": 0.8, "garde_attente": 8.0, "contour_delai": 3.0, "contour_anticipation": 25.0, "contour_recul": 8.0, "contour_recul_vitesse": 2.0, "contour_marge": 4.0, "contour_libre": 12.0, "contour_max_s": 45.0, "coup_proba_s": 0.5, "coup_elan": 3.0, "coup_facteur": 0.6, "coup_recouvrement": 0.4, "coup_ecart_voie": 0.25, "chute_moto": 0.5, "chute_rapport_masse": 2.0, "couvert_facteur": 0.3, "couvert_recouvrement": 0.5, "couvert_hauteur": 0.8},
- "groupes": {"_note": "Groupes d'ennemis prêts à lancer (DEC-253). cotes : droite = devant le convoi, gauche = derrière ; valeur = mode d'arrivée (face, approche, poursuite). agr : 0 pacifique, 1 méfiant, 2 hostile, 3 meurtrier. Valeurs à régler en essai.", "annonce_s": 5.0, "espacement": 7.0, "agressivite": [{"id": "pacifique", "couleur": "#5FB36B"}, {"id": "mefiant", "couleur": "#E8C33D"}, {"id": "hostile", "couleur": "#E0762C"}, {"id": "meurtrier", "couleur": "#D9302A"}], "scenarios": [{"id": "marchands", "agr": 0, "cotes": {"droite": "face"}, "compos": {"petit": [["citroen_t23", "willys_mb"], ["citroen_h", "juvaquatre"]], "moyen": [["citroen_h", "juvaquatre", "citroen_t23"], ["opel_blitz", "peugeot_202", "willys_mb"]], "grand": [["opel_blitz", "citroen_h", "peugeot_202", "juvaquatre", "willys_mb"]]}}, {"id": "patrouille", "agr": 1, "cotes": {"droite": "face"}, "compos": {"petit": [["willys_mb", "bmw_r75"], ["kubelwagen", "moto_bmw"]], "moyen": [["kubelwagen", "willys_mb", "citroen_t23"], ["bmw_r75", "kubelwagen", "opel_blitz"]], "grand": [["kubelwagen", "willys_mb", "m3_half_track", "citroen_t23"]]}}, {"id": "raid", "agr": 2, "abordeurs": 2, "cotes": {"droite": "approche", "gauche": "poursuite"}, "compos": {"petit": [["moto_bmw", "moto_bmw", "bmw_r75"], ["moto_zundapp", "moto_harley"]], "moyen": [["bmw_r75", "citroen_traction", "willys_mb", "moto_zundapp"], ["kubelwagen", "moto_bmw", "moto_gnome", "juvaquatre"]], "grand": [["bmw_r75", "moto_zundapp", "citroen_traction", "willys_mb", "kubelwagen", "m3_half_track"]]}}, {"id": "embuscade", "agr": 2, "abordeurs": 3, "cotes": {"droite": "approche", "gauche": "poursuite"}, "compos": {"petit": [["citroen_traction", "willys_mb"]], "moyen": [["citroen_traction", "willys_mb", "citroen_t23"], ["kubelwagen", "opel_blitz", "bmw_r75"]], "grand": [["citroen_traction", "willys_mb", "citroen_t23", "kubelwagen", "moto_zundapp"]]}}, {"id": "assaut", "agr": 3, "abordeurs": 4, "cotes": {"droite": "approche", "gauche": "poursuite"}, "compos": {"petit": [["m3_half_track", "citroen_t23", "willys_mb"]], "moyen": [["m3_stuart", "m3_half_track", "kubelwagen", "bmw_r75"]], "grand": [["m4_sherman", "m3_stuart", "m3_half_track", "kubelwagen", "willys_mb", "bmw_r75"]]}}]},
- "kit_convois": {"_note": "Convois de départ du Mode créatif (DEC-253). Le premier véhicule est le camion principal.", "defaut": "patrouille", "liste": [{"id": "patrouille", "types": ["berliet_gdr", "willys_mb", "bmw_r75"]}, {"id": "colonne", "types": ["berliet_gdr", "willys_mb", "citroen_t23", "bmw_r75"]}, {"id": "blinde", "types": ["berliet_gdr", "m3_half_track", "m3_stuart", "willys_mb"]}]},
- "abordage": {"_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.", "depart_arriere": 70, "vitesse_poursuite": 1.25, "avance_poursuite": 3.0, "ecart_saut": 2.5, "premier_saut": 3.0, "delai_saut": 5.0, "duree_saut": 0.9, "abordeurs_defaut": 2, "pv_abordeur": 18, "defense_par_membre": 10, "degats_piques": 6, "degats_lame": 6, "cadence_lame": 1.5, "bombe_degats": 70, "bombe_penetration": 30, "bombe_equipage": 22},
+  {
+   "nom": "Ralenti",
+   "vitesse": 0.55,
+   "conso": 0.45,
+   "usure": 0.4
+  },
+  {
+   "nom": "Économe",
+   "vitesse": 0.8,
+   "conso": 0.75,
+   "usure": 0.7
+  },
+  {
+   "nom": "Normal",
+   "vitesse": 1.0,
+   "conso": 1.0,
+   "usure": 1.0
+  },
+  {
+   "nom": "Forcé",
+   "vitesse": 1.2,
+   "conso": 1.4,
+   "usure": 1.6
+  },
+  {
+   "nom": "Maximum",
+   "vitesse": 1.4,
+   "conso": 1.9,
+   "usure": 2.6
+  }
+ ],
+ "halte": {
+  "_note": "Halte dans la nature (DEC-161) et caches (DEC-157). Valeurs à régler en essai.",
+  "montage_s": 25.0,
+  "eclaireurs_s": 20.0,
+  "eclaireurs_portee_m": 700.0,
+  "cache_pillage": 0.25,
+  "cache_rayon_m": 25.0
+ },
+ "oiseau": {
+  "_note": "Oiseau rare, de jour (DEC-097, DEV-004). Valeurs à régler en essai (OQ-013).",
+  "delai_min_s": 900.0,
+  "delai_max_s": 2400.0,
+  "duree_s": 9.0,
+  "message": "Un oiseau ! L'équipage lève les yeux et le suit du regard."
+ },
+ "carburants": {
+  "_note": "Deux carburants (DEC-094, DEC-190). Capacité par carburant = réservoirs des véhicules qui le brûlent + citerne du module + bidons (jerrycans, DEC-206).",
+  "bidons_l": 100,
+  "citerne_l": 3000
+ },
+ "equilibrage": {
+  "_note": "Ennemis plus fragiles que le convoi du joueur (DEC-113) : un combat se gagne sans tout risquer. Valeurs à régler en essai.",
+  "ennemi_degats_subis": 1.5,
+  "ennemi_degats_infliges": 0.7,
+  "ennemi_precision": 0.85,
+  "rythme_vitesse": 1.4,
+  "joueur_jet_precision": 1.35,
+  "joueur_jet_degats": 1.5,
+  "rodeurs_delai": 95.0,
+  "rodeurs_delai_abri": 60.0
+ },
+ "route": {
+  "_note": "Convois croisés sur la route selon la réputation (DEC-187, DEC-218). Valeurs à régler en essai.",
+  "proba_convoi": 0.14,
+  "types_allie": [
+   "citroen_t23",
+   "willys_mb"
+  ],
+  "types_hostile": [
+   "citroen_t23",
+   "m3_half_track",
+   "m16_mgmc",
+   "citroen_traction"
+  ],
+  "salut_rep": 1,
+  "cadeau_l": 10
+ },
+ "region": {
+  "_note": "Difficulté forcée hors de la région de la quête principale (DEC-172, DEC-216). malus = niveaux de rencontre ajoutés ; quete_depart = région de la quête au début de la partie.",
+  "malus": 3,
+  "quete_depart": "armorique"
+ },
+ "choc": {
+  "_note": "Chocs entre véhicules (DEC-215). Dégâts = k × masse du frappeur (t) × vitesse relative (m/s) × lame. Valeurs à régler en essai.",
+  "k": 6.0,
+  "vitesse_min": 1.5,
+  "elan": 2.0,
+  "contact": 1.2,
+  "delai": 1.5,
+  "recul": 4.0,
+  "esquive_moto": 0.667,
+  "proba_ennemi": 0.35,
+  "part_frappeur": 0.6,
+  "penetration": 60,
+  "equipage": 0.15,
+  "lame_absorbe": 0.5,
+  "fort": 120,
+  "seuil_belier": 0.85,
+  "charge": 1.15,
+  "distance_esquive": 18.0,
+  "esquive_leger": 0.4,
+  "harcele_min": 16.0,
+  "harcele_max": 26.0
+ },
+ "voies": {
+  "_note": "Trois voies de profondeur (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite). dy = décalage vertical à l'écran en m (positif = plus haut), echelle = taille apparente (indices : fond, route, devant). Valeurs à régler en essai.",
+  "dy": [
+   0.75,
+   0.0,
+   -0.85
+  ],
+  "echelle": [
+   0.9,
+   1.0,
+   1.1
+  ],
+  "duree_changement": 1.2,
+  "croisement_avant": 60.0,
+  "depassement_avant": 14.0,
+  "marge_occupee": 1.0,
+  "placement": 40.0,
+  "batiment_devant": 0.2,
+  "combat_entree": 75.0,
+  "combat_sortie": 100.0,
+  "combat_delai_sortie": 4.0,
+  "garde_poids_max": 0.8,
+  "garde_attente": 8.0,
+  "contour_delai": 3.0,
+  "contour_anticipation": 25.0,
+  "contour_recul": 8.0,
+  "contour_recul_vitesse": 2.0,
+  "contour_marge": 4.0,
+  "contour_libre": 12.0,
+  "contour_max_s": 45.0,
+  "coup_proba_s": 0.5,
+  "coup_elan": 3.0,
+  "coup_facteur": 0.6,
+  "coup_recouvrement": 0.4,
+  "coup_ecart_voie": 0.25,
+  "chute_moto": 0.5,
+  "chute_rapport_masse": 2.0,
+  "couvert_facteur": 0.3,
+  "couvert_recouvrement": 0.5,
+  "couvert_hauteur": 0.8
+ },
+ "groupes": {
+  "_note": "Groupes d'ennemis prêts à lancer (DEC-253). cotes : droite = devant le convoi, gauche = derrière ; valeur = mode d'arrivée (face, approche, poursuite). agr : 0 pacifique, 1 méfiant, 2 hostile, 3 meurtrier. Valeurs à régler en essai.",
+  "annonce_s": 5.0,
+  "espacement": 7.0,
+  "agressivite": [
+   {
+    "id": "pacifique",
+    "couleur": "#5FB36B"
+   },
+   {
+    "id": "mefiant",
+    "couleur": "#E8C33D"
+   },
+   {
+    "id": "hostile",
+    "couleur": "#E0762C"
+   },
+   {
+    "id": "meurtrier",
+    "couleur": "#D9302A"
+   }
+  ],
+  "scenarios": [
+   {
+    "id": "marchands",
+    "agr": 0,
+    "cotes": {
+     "droite": "face"
+    },
+    "compos": {
+     "petit": [
+      [
+       "citroen_t23",
+       "willys_mb"
+      ],
+      [
+       "citroen_h",
+       "juvaquatre"
+      ]
+     ],
+     "moyen": [
+      [
+       "citroen_h",
+       "juvaquatre",
+       "citroen_t23"
+      ],
+      [
+       "opel_blitz",
+       "peugeot_202",
+       "willys_mb"
+      ]
+     ],
+     "grand": [
+      [
+       "opel_blitz",
+       "citroen_h",
+       "peugeot_202",
+       "juvaquatre",
+       "willys_mb"
+      ]
+     ]
+    }
+   },
+   {
+    "id": "patrouille",
+    "agr": 1,
+    "cotes": {
+     "droite": "face"
+    },
+    "compos": {
+     "petit": [
+      [
+       "willys_mb",
+       "bmw_r75"
+      ],
+      [
+       "kubelwagen",
+       "moto_bmw"
+      ]
+     ],
+     "moyen": [
+      [
+       "kubelwagen",
+       "willys_mb",
+       "citroen_t23"
+      ],
+      [
+       "bmw_r75",
+       "kubelwagen",
+       "opel_blitz"
+      ]
+     ],
+     "grand": [
+      [
+       "kubelwagen",
+       "willys_mb",
+       "m3_half_track",
+       "citroen_t23"
+      ]
+     ]
+    }
+   },
+   {
+    "id": "raid",
+    "agr": 2,
+    "abordeurs": 2,
+    "cotes": {
+     "droite": "approche",
+     "gauche": "poursuite"
+    },
+    "compos": {
+     "petit": [
+      [
+       "moto_bmw",
+       "moto_bmw",
+       "bmw_r75"
+      ],
+      [
+       "moto_zundapp",
+       "moto_harley"
+      ]
+     ],
+     "moyen": [
+      [
+       "bmw_r75",
+       "citroen_traction",
+       "willys_mb",
+       "moto_zundapp"
+      ],
+      [
+       "kubelwagen",
+       "moto_bmw",
+       "moto_gnome",
+       "juvaquatre"
+      ]
+     ],
+     "grand": [
+      [
+       "bmw_r75",
+       "moto_zundapp",
+       "citroen_traction",
+       "willys_mb",
+       "kubelwagen",
+       "m3_half_track"
+      ]
+     ]
+    }
+   },
+   {
+    "id": "embuscade",
+    "agr": 2,
+    "abordeurs": 3,
+    "cotes": {
+     "droite": "approche",
+     "gauche": "poursuite"
+    },
+    "compos": {
+     "petit": [
+      [
+       "citroen_traction",
+       "willys_mb"
+      ]
+     ],
+     "moyen": [
+      [
+       "citroen_traction",
+       "willys_mb",
+       "citroen_t23"
+      ],
+      [
+       "kubelwagen",
+       "opel_blitz",
+       "bmw_r75"
+      ]
+     ],
+     "grand": [
+      [
+       "citroen_traction",
+       "willys_mb",
+       "citroen_t23",
+       "kubelwagen",
+       "moto_zundapp"
+      ]
+     ]
+    }
+   },
+   {
+    "id": "assaut",
+    "agr": 3,
+    "abordeurs": 4,
+    "cotes": {
+     "droite": "approche",
+     "gauche": "poursuite"
+    },
+    "compos": {
+     "petit": [
+      [
+       "m3_half_track",
+       "citroen_t23",
+       "willys_mb"
+      ]
+     ],
+     "moyen": [
+      [
+       "m3_stuart",
+       "m3_half_track",
+       "kubelwagen",
+       "bmw_r75"
+      ]
+     ],
+     "grand": [
+      [
+       "m4_sherman",
+       "m3_stuart",
+       "m3_half_track",
+       "kubelwagen",
+       "willys_mb",
+       "bmw_r75"
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ "kit_convois": {
+  "_note": "Convois de départ du Mode créatif (DEC-253). Le premier véhicule est le camion principal.",
+  "defaut": "patrouille",
+  "liste": [
+   {
+    "id": "patrouille",
+    "types": [
+     "berliet_gdr",
+     "willys_mb",
+     "bmw_r75"
+    ]
+   },
+   {
+    "id": "colonne",
+    "types": [
+     "berliet_gdr",
+     "willys_mb",
+     "citroen_t23",
+     "bmw_r75"
+    ]
+   },
+   {
+    "id": "blinde",
+    "types": [
+     "berliet_gdr",
+     "m3_half_track",
+     "m3_stuart",
+     "willys_mb"
+    ]
+   }
+  ]
+ },
+ "abordage": {
+  "_note": "Poursuites et abordages (DEC-077). Valeurs à régler en essai.",
+  "depart_arriere": 70,
+  "vitesse_poursuite": 1.25,
+  "avance_poursuite": 3.0,
+  "ecart_saut": 2.5,
+  "premier_saut": 3.0,
+  "delai_saut": 5.0,
+  "duree_saut": 0.9,
+  "abordeurs_defaut": 2,
+  "pv_abordeur": 18,
+  "defense_par_membre": 10,
+  "degats_piques": 6,
+  "degats_lame": 6,
+  "cadence_lame": 1.5,
+  "bombe_degats": 70,
+  "bombe_penetration": 30,
+  "bombe_equipage": 22
+ },
  "rencontres": {
   "intervalle": [
    110,
@@ -392,21 +889,128 @@
   ],
   "palier_m": 400,
   "liste": [
-   {"niveau_min": 0, "niveau_max": 2, "poids": 3, "vehicules": ["moto_gnome", "moto_harley"], "mode": "approche"},
-   {"niveau_min": 1, "niveau_max": 4, "poids": 3, "vehicules": ["moto_zundapp", "moto_gnome"], "mode": "approche"},
-   {"niveau_min": 1, "niveau_max": 5, "poids": 3, "vehicules": ["peugeot_202", "juvaquatre"], "mode": "approche"},
-   {"niveau_min": 2, "niveau_max": 6, "poids": 2, "vehicules": ["kubelwagen", "moto_zundapp"], "mode": "approche"},
-   {"niveau_min": 2, "niveau_max": 7, "poids": 2, "vehicules": ["opel_blitz", "kubelwagen"], "mode": "approche"},
-   {"niveau_min": 3, "niveau_max": 99, "poids": 2, "vehicules": ["gmc_cckw", "citroen_h"], "mode": "approche"},
-   {"niveau_min": 2, "niveau_max": 6, "poids": 2, "vehicules": ["laffly_s15", "peugeot_202"], "mode": "approche"},
-   {"niveau_min": 1, "niveau_max": 4, "poids": 2, "vehicules": ["bmw_r75", "moto_bmw"], "mode": "poursuite", "abordeurs": 1, "types": ["lame"]},
-   {"niveau_min": 2, "niveau_max": 7, "poids": 3, "vehicules": ["citroen_traction", "bmw_r75"], "mode": "poursuite", "abordeurs": 2, "types": ["lame", "bombe"]},
-   {"niveau_min": 4, "niveau_max": 7, "poids": 2, "vehicules": ["willys_mb", "citroen_traction"], "mode": "poursuite", "abordeurs": 3, "types": ["bombe", "lame"]},
+   {
+    "niveau_min": 0,
+    "niveau_max": 2,
+    "poids": 3,
+    "vehicules": [
+     "moto_gnome",
+     "moto_harley"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 4,
+    "poids": 3,
+    "vehicules": [
+     "moto_zundapp",
+     "moto_gnome"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 5,
+    "poids": 3,
+    "vehicules": [
+     "peugeot_202",
+     "juvaquatre"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 6,
+    "poids": 2,
+    "vehicules": [
+     "kubelwagen",
+     "moto_zundapp"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 7,
+    "poids": 2,
+    "vehicules": [
+     "opel_blitz",
+     "kubelwagen"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 3,
+    "niveau_max": 99,
+    "poids": 2,
+    "vehicules": [
+     "gmc_cckw",
+     "citroen_h"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 6,
+    "poids": 2,
+    "vehicules": [
+     "laffly_s15",
+     "peugeot_202"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 1,
+    "niveau_max": 4,
+    "poids": 2,
+    "vehicules": [
+     "bmw_r75",
+     "moto_bmw"
+    ],
+    "mode": "poursuite",
+    "abordeurs": 1,
+    "types": [
+     "lame"
+    ]
+   },
+   {
+    "niveau_min": 2,
+    "niveau_max": 7,
+    "poids": 3,
+    "vehicules": [
+     "citroen_traction",
+     "bmw_r75"
+    ],
+    "mode": "poursuite",
+    "abordeurs": 2,
+    "types": [
+     "lame",
+     "bombe"
+    ]
+   },
+   {
+    "niveau_min": 4,
+    "niveau_max": 7,
+    "poids": 2,
+    "vehicules": [
+     "willys_mb",
+     "citroen_traction"
+    ],
+    "mode": "poursuite",
+    "abordeurs": 3,
+    "types": [
+     "bombe",
+     "lame"
+    ]
+   },
    {
     "niveau_min": 0,
     "niveau_max": 1,
     "poids": 3,
-    "vehicules": ["bmw_r75", "moto_bmw"],
+    "vehicules": [
+     "bmw_r75",
+     "moto_bmw"
+    ],
     "mode": "approche"
    },
    {
@@ -428,7 +1032,10 @@
     "niveau_min": 1,
     "niveau_max": 4,
     "poids": 3,
-    "vehicules": ["citroen_traction", "bmw_r75"],
+    "vehicules": [
+     "citroen_traction",
+     "bmw_r75"
+    ],
     "mode": "approche"
    },
    {
@@ -451,7 +1058,10 @@
     "niveau_min": 2,
     "niveau_max": 6,
     "poids": 2,
-    "vehicules": ["citroen_t23", "willys_mb"],
+    "vehicules": [
+     "citroen_t23",
+     "willys_mb"
+    ],
     "mode": "barrage"
    },
    {
@@ -488,7 +1098,10 @@
     "batiments": [
      "grange"
     ],
-    "vehicules": ["bmw_r75", "moto_bmw"],
+    "vehicules": [
+     "bmw_r75",
+     "moto_bmw"
+    ],
     "mode": "approche"
    },
    {
@@ -517,7 +1130,8 @@
     "poids": 2,
     "trouvailles": [
      "m3_stuart"
-    ]
+    ],
+    "cache": true
    },
    {
     "niveau_min": 4,
@@ -527,7 +1141,8 @@
      "m3_stuart",
      "citroen_traction"
     ],
-    "mode": "approche"
+    "mode": "approche",
+    "cache": true
    },
    {
     "niveau_min": 5,
@@ -537,7 +1152,8 @@
      "m4_sherman",
      "m3_half_track"
     ],
-    "mode": "approche"
+    "mode": "approche",
+    "cache": true
    },
    {
     "niveau_min": 5,
@@ -545,7 +1161,8 @@
     "poids": 2,
     "trouvailles": [
      "m4_sherman"
-    ]
+    ],
+    "cache": true
    },
    {
     "niveau_min": 6,
@@ -557,7 +1174,8 @@
     "batiments": [
      "bunker"
     ],
-    "mode": "barrage"
+    "mode": "barrage",
+    "cache": true
    },
    {
     "niveau_min": 0,
@@ -660,6 +1278,31 @@
     "batiments": [
      "hangar"
     ]
+   },
+   {
+    "niveau_min": 5,
+    "niveau_max": 99,
+    "poids": 3,
+    "vehicules": [
+     "m3_half_track",
+     "kubelwagen",
+     "bmw_r75",
+     "citroen_traction"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 6,
+    "niveau_max": 99,
+    "poids": 2,
+    "vehicules": [
+     "kubelwagen",
+     "opel_blitz"
+    ],
+    "batiments": [
+     "bunker"
+    ],
+    "mode": "barrage"
    }
   ],
   "premiere": {
@@ -777,7 +1420,9 @@
   "jour_s": 400
  },
  "tempete": {
-  "zones": ["sable"],
+  "zones": [
+   "sable"
+  ],
   "_note": "DEC-027 ; DEC-218 : les tempêtes ne tombent que dans les zones listées (déserts). Délais en secondes de jeu. proba_nuit : chance qu'une tempête qui tombe de nuit ait lieu (sinon reportée).",
   "intervalle": [
    240,
@@ -891,7 +1536,7 @@
     "annonce": "Un vieux bunker. Peut-être une arme.",
     "butin_fixe": {
      "pieces": [
-      "arme_mitrailleuse"
+      "arme_pistolet"
      ],
      "ammo": 80,
      "metal": 8

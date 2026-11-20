@@ -614,6 +614,11 @@ func _replacer(immediat := false) -> void:
 			v.x = v.x_cible
 
 
+# Table des rencontres sans les entrées cachées (gros canons et chars retirés du jeu, DEC-254) ; le Kit les garde
+func rencontres_liste() -> Array:
+	return donnees().rencontres.liste.filter(func(e): return bac_a_sable or not bool(e.get("cache", false)))
+
+
 # Contournement d'un obstacle (DEC-252) : redéfini par modele_voies.gd
 func _contour_vitesse(vit: float, _P: Dictionary, _dt: float) -> float:
 	return vit

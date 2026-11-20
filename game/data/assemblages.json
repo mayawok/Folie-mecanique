@@ -35,7 +35,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             5,
             7
@@ -105,7 +105,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             5,
             3
@@ -147,7 +147,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             8,
             6
@@ -189,7 +189,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             10,
             9
@@ -273,7 +273,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             13,
             11
@@ -315,7 +315,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             17,
             10
@@ -357,7 +357,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             11,
             9
@@ -749,7 +749,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             8,
             6
@@ -791,7 +791,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             7,
             6
@@ -833,7 +833,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_pistolet",
           "pos": [
             6,
             6
@@ -875,7 +875,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             8,
             8
@@ -917,7 +917,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             10,
             9
@@ -959,7 +959,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             11,
             9
@@ -1001,7 +1001,7 @@
           ]
         },
         {
-          "piece": "arme_mitrailleuse",
+          "piece": "arme_fusil_chasse",
           "pos": [
             9,
             9
