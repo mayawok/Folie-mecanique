@@ -325,3 +325,11 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Poids et métal d'affût** : volontairement conservés (40 kg, 1 métal) pour ne pas bouger les profils ; à caler avec les nouvelles armes.
 - **Gamme d'armes** : revolver, carabine, arbalète, bidons incendiaires, chausse-trappes artisanales : lesquels créer, et quel prix en métal ?
 - **Ennemis des niveaux 5 et plus** : sans chars, les niveaux élevés reposent sur des groupes plus nombreux et des bunkers ; à régler en essai.
+
+## OQ-052 — Corps à corps : suites (20/11, DEC-255)
+
+- **Sprite de l'Opel Blitz** : la caisse flotte au-dessus des roues (déjà le cas avant ce lot, art provisoire). Les tôles du blindé de fortune sont dessinées en jupes sous la caisse : à refaire avec un vrai dessin.
+- **Butin** : les armes variantes des ennemis (revolver, carabine, arbalète) ne tombent pas encore en pièces récupérables ; seul le Kit les offre. Où les trouver dans le jeu (butin de bunker, épaves, marchands) ?
+- **Armes de mêlée** (barre de fer, hache) : refusées pour l'instant. À reprendre si l'abordage reste trop passif.
+- **Réglages** : fréquence des coups de volant, proportion de pillards repoussés, nombre d'abordeurs, dégâts des chocs : à régler en essai sur iPhone.
+- **Étincelles et débris** : pas de secousse d'écran ni de son dédié (le bruit de choc réutilise l'impact de blindage).

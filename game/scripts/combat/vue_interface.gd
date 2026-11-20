@@ -547,6 +547,7 @@ func _nouvelle_partie(g: int, sauve := {}, ouverture := false, bac := false) -> 
 	noeuds.clear()
 	_tirs.clear()
 	_etincelles.clear()
+	_debris.clear()
 	_explosions.clear()
 	_bouffees.clear()
 	_cartes_sig = ""

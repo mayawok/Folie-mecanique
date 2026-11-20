@@ -2566,6 +2566,68 @@
           0
         ]
       }
+    },
+    "arme_revolver": {
+      "famille": "arme",
+      "nom": "Revolver",
+      "arme": "revolver",
+      "poids_kg": 40,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      }
+    },
+    "arme_carabine": {
+      "famille": "arme",
+      "nom": "Carabine de guerre",
+      "arme": "carabine",
+      "poids_kg": 40,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      }
+    },
+    "arme_arbalete": {
+      "famille": "arme",
+      "nom": "Arbalète",
+      "arme": "arbalete",
+      "poids_kg": 40,
+      "emprise": [
+        3,
+        1
+      ],
+      "metal": 1,
+      "dessin": {
+        "ref": "bmw_r75",
+        "armes": [
+          0
+        ]
+      }
+    },
+    "arme_bidon_incendiaire": {
+      "famille": "arme",
+      "nom": "Bidon incendiaire",
+      "arme": "bidon_incendiaire",
+      "poids_kg": 15,
+      "emprise": [
+        2,
+        1
+      ],
+      "metal": 0
     }
   }
 }

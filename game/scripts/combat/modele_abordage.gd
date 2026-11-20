@@ -53,15 +53,29 @@ func _ia_poursuite(dt: float) -> void:
 		_pours[e.uid] = P
 		P.cd = maxf(0.0, float(P.cd) - dt)
 		var flanc: bool = absf(absf(e.voie_f - c.voie_f) - 1.0) < 0.3   # sur la voie d'à côté de sa cible (DEC-250)
-		if flanc and absf(d) < float(AB().ecart_saut) and int(P.restants) > 0 and P.cd <= 0.0 and e.equipage_vivant() > 1:
+		var cs = c   # véhicule visé par le saut
+		var saut_ok: bool = flanc and absf(d) < float(AB().ecart_saut)
+		if not saut_ok:
+			var g = _garde_devant(e)   # flanc bouché : il saute sur le garde juste devant lui
+			if g != null:
+				cs = g
+				saut_ok = true
+		if saut_ok and int(P.restants) > 0 and P.cd <= 0.0 and e.equipage_vivant() > 1:
 			var types: Array = P.types
-			var type: String = types[rng.randi() % types.size()]
-			_uid_ab += 1
-			abordeurs.append({"uid": _uid_ab, "type": type, "de": e.uid, "vers": c.uid, "etat": "saut", "t": 0.0,
-				"x0": e.x + e.longueur * 0.5, "x": e.x + e.longueur * 0.5, "pv": float(AB().pv_abordeur), "cd": 0.0})
-			P.restants = int(P.restants) - 1
+			var n: int = mini(int(P.restants), rng.randi_range(int(AB().saut_groupe_min), int(AB().saut_groupe_max)))   # plusieurs hommes sautent d'un coup
+			for i in n:
+				var type: String = types[rng.randi() % types.size()]
+				_uid_ab += 1
+				abordeurs.append({"uid": _uid_ab, "type": type, "de": e.uid, "vers": cs.uid, "etat": "saut", "t": -0.12 * i,
+					"x0": e.x + e.longueur * 0.5 + 0.35 * i, "x": e.x + e.longueur * 0.5, "pv": float(AB().pv_abordeur), "cd": 0.0})
+				log_(Textes.t("abordage.001", [cs.nom, Textes.t("abordage.001a") if type == "bombe" else ""]), "alerte")
+			P.restants = int(P.restants) - n
 			P.cd = float(AB().delai_saut)
-			log_(Textes.t("abordage.001", [c.nom, Textes.t("abordage.001a") if type == "bombe" else ""]), "alerte")
+
+
+# Garde de flanc juste devant le poursuivant, sur la même voie (redéfini par modele_voies.gd)
+func _garde_devant(_e: Veh):
+	return null
 
 
 func _veh_uid(uid: int):
@@ -81,7 +95,7 @@ func _abordages(dt: float) -> void:
 		var xc: float = v.x + v.longueur * 0.5
 		if ab.etat == "saut":
 			ab.t = minf(1.0, float(ab.t) + dt / float(A.duree_saut))
-			ab.x = lerpf(float(ab.x0), xc, float(ab.t))
+			ab.x = lerpf(float(ab.x0), xc, maxf(0.0, float(ab.t)))
 			if ab.t >= 1.0:
 				if ab.type == "bombe":
 					_exploser(ab, v)
@@ -91,17 +105,26 @@ func _abordages(dt: float) -> void:
 			continue
 		ab.x = xc - v.longueur * 0.25   # sur le toit, à l'arrière
 		var defenseurs: int = v.equipage_vivant()
+		var autres := 0   # plus ils sont nombreux sur le même véhicule, plus la bagarre tourne mal pour l'équipage
+		for o in abordeurs:
+			if o != ab and int(o.vers) == v.uid and o.etat == "bord":
+				autres += 1
 		ab.pv = float(ab.pv) - float(A.defense_par_membre) * defenseurs * dt
 		ab.pv = float(ab.pv) - float(A.get("degats_piques", 6.0)) * int(v.profil.get("piques", 0)) * dt   # piques de toit (DEC-079)
 		ab.cd = float(ab.cd) - dt
 		if ab.cd <= 0.0:
 			ab.cd = float(A.cadence_lame)
-			_blesser_equipage(v, float(A.degats_lame))
+			_blesser_equipage(v, float(A.degats_lame) * (1.0 + float(A.bagarre_bonus) * autres))
+			evt({"t": "melee", "x": float(ab.x), "voie": v.voie_f, "uid": v.uid})   # étincelles et bruit de bagarre sur le toit
 			if v.equipage_vivant() == 0 and v.actif():
 				_neutraliser(v)
 		if float(ab.pv) <= 0.0:
 			abordeurs.erase(ab)
-			log_(Textes.t("abordage.002", [v.nom]), "ok")
+			if defenseurs > 0 and rng.randf() < float(A.repousse_proba):   # jeté du plateau : il tombe sur la route
+				evt({"t": "repousse", "x": float(ab.x), "voie": v.voie_f, "uid": v.uid})
+				log_(Textes.t("abordage.004", [v.nom]), "ok")
+			else:
+				log_(Textes.t("abordage.002", [v.nom]), "ok")
 
 
 func _exploser(ab: Dictionary, v: Veh) -> void:

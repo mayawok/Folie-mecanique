@@ -95,6 +95,7 @@ var _btn_sortir: Button
 var _btn_camo: Button
 var _etincelles := []           # {p: Vector2 (m), age}
 var _explosions := []           # {p: Vector2 (m), age, taille}
+var _debris := []               # pièces qui volent après un choc (DEC-255) : {p, v, age, forme, rot, vrot, taille}
 var _roues_tombees := []        # roues arrachées qui roulent sur la route (DEC-080) : {p, v, r, age}
 var _bouffees := []             # {p: Vector2 (m), age} lueur de tir des tireurs
 var _temps := 0.0

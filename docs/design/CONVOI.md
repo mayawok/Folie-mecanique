@@ -279,3 +279,7 @@ Un barrage ennemi ou une épave ennemie sur la route arrête le convoi : après 
 ### Groupes d'ennemis et convoi de départ du Kit (DEC-253)
 
 Le Kit démarre avec un convoi constitué (patrouille légère par défaut). Cinq scénarios (marchands, patrouille, raid, embuscade, assaut) en trois tailles. Droite = devant le convoi, gauche = derrière. Quatre niveaux d'agressivité : pacifique (vert), méfiant (jaune), hostile (orange), meurtrier (rouge). Une annonce colorée indique le côté d'arrivée, le nom, le nombre de véhicules et le niveau.
+
+### Corps à corps (DEC-255)
+
+Les combats sont des affrontements rapprochés : portées courtes, poursuivants qui se collent, chocs latéraux et arrière contre les gardes de flanc, étincelles et pièces qui volent, abordages en grappe (un à trois hommes), bagarres sur le toit, pillards jetés du plateau. Les niveaux élevés envoient des blindés de fortune (béliers bardés de tôles) au lieu de chars.

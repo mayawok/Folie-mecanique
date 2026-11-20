@@ -175,7 +175,7 @@ func _choc(a: Veh, b: Veh, vrel: float, cote_a: String, cote_b: String, par_joue
 		log_(Textes.t("choc.005", [nom_ennemi, nom_nous]), "alerte")
 	else:
 		log_(Textes.t("choc.006", [nom_ennemi, nom_nous]), "alerte")
-	evt({"t": "choc", "x": xc, "fort": vers_b + vers_a > float(C.fort)})
+	evt({"t": "choc", "x": xc, "fort": vers_b + vers_a > float(C.fort), "voie": (a.voie_f + b.voie_f) * 0.5, "lat": false})
 
 
 func _degats_choc(v: Veh, d: float, cote: String) -> void:

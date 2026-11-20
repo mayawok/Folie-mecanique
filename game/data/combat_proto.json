@@ -44,7 +44,7 @@
    "degats": 8,
    "penetration": 7,
    "cadence": 0.8,
-   "portee": 55,
+   "portee": 40,
    "precision": 0.55,
    "munitions": 1,
    "pv": 25,
@@ -105,7 +105,7 @@
    "degats": 6,
    "penetration": 2,
    "cadence": 1.5,
-   "portee": 40,
+   "portee": 32,
    "precision": 0.45,
    "munitions": 0,
    "pv": 0,
@@ -196,7 +196,7 @@
    "degats": 3,
    "penetration": 0,
    "cadence": 1.1,
-   "portee": 16,
+   "portee": 14,
    "precision": 0.5,
    "munitions": 0,
    "pv": 8,
@@ -208,11 +208,61 @@
    "degats": 7,
    "penetration": 1,
    "cadence": 2.2,
-   "portee": 28,
+   "portee": 22,
    "precision": 0.5,
    "munitions": 0,
    "pv": 12,
    "vitesse": 110
+  },
+  "revolver": {
+   "nom": "Revolver",
+   "classe": "fusil",
+   "degats": 4,
+   "penetration": 0,
+   "cadence": 1.3,
+   "portee": 17,
+   "precision": 0.55,
+   "munitions": 0,
+   "pv": 8,
+   "vitesse": 105
+  },
+  "carabine": {
+   "nom": "Carabine de guerre",
+   "classe": "fusil",
+   "degats": 9,
+   "penetration": 3,
+   "cadence": 1.9,
+   "portee": 30,
+   "precision": 0.6,
+   "munitions": 0,
+   "pv": 12,
+   "vitesse": 140
+  },
+  "arbalete": {
+   "nom": "Arbalète",
+   "classe": "fusil",
+   "degats": 5,
+   "penetration": 1,
+   "cadence": 2.4,
+   "portee": 20,
+   "precision": 0.65,
+   "munitions": 0,
+   "pv": 8,
+   "vitesse": 70
+  },
+  "bidon_incendiaire": {
+   "nom": "Bidon incendiaire",
+   "classe": "incendiaire",
+   "degats": 9,
+   "penetration": 3,
+   "cadence": 3.8,
+   "portee": 15,
+   "precision": 0.55,
+   "munitions": 1,
+   "pv": 6,
+   "vitesse": 22,
+   "feu": 9.0,
+   "feu_dps": 5.0
   }
  },
  "zones": {
@@ -553,7 +603,7 @@
   "delai": 1.5,
   "recul": 4.0,
   "esquive_moto": 0.667,
-  "proba_ennemi": 0.35,
+  "proba_ennemi": 0.6,
   "part_frappeur": 0.6,
   "penetration": 60,
   "equipage": 0.15,
@@ -563,8 +613,8 @@
   "charge": 1.15,
   "distance_esquive": 18.0,
   "esquive_leger": 0.4,
-  "harcele_min": 16.0,
-  "harcele_max": 26.0
+  "harcele_min": 7.0,
+  "harcele_max": 13.0
  },
  "voies": {
   "_note": "Trois voies de profondeur (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite). dy = décalage vertical à l'écran en m (positif = plus haut), echelle = taille apparente (indices : fond, route, devant). Valeurs à régler en essai.",
@@ -588,7 +638,7 @@
   "combat_sortie": 100.0,
   "combat_delai_sortie": 4.0,
   "garde_poids_max": 0.8,
-  "garde_attente": 8.0,
+  "garde_attente": 2.0,
   "contour_delai": 3.0,
   "contour_anticipation": 25.0,
   "contour_recul": 8.0,
@@ -596,10 +646,10 @@
   "contour_marge": 4.0,
   "contour_libre": 12.0,
   "contour_max_s": 45.0,
-  "coup_proba_s": 0.5,
+  "coup_proba_s": 0.9,
   "coup_elan": 3.0,
   "coup_facteur": 0.6,
-  "coup_recouvrement": 0.4,
+  "coup_recouvrement": 0.3,
   "coup_ecart_voie": 0.25,
   "chute_moto": 0.5,
   "chute_rapport_masse": 2.0,
@@ -870,9 +920,9 @@
   "avance_poursuite": 3.0,
   "ecart_saut": 2.5,
   "premier_saut": 3.0,
-  "delai_saut": 5.0,
+  "delai_saut": 3.0,
   "duree_saut": 0.9,
-  "abordeurs_defaut": 2,
+  "abordeurs_defaut": 3,
   "pv_abordeur": 18,
   "defense_par_membre": 10,
   "degats_piques": 6,
@@ -880,7 +930,12 @@
   "cadence_lame": 1.5,
   "bombe_degats": 70,
   "bombe_penetration": 30,
-  "bombe_equipage": 22
+  "bombe_equipage": 22,
+  "saut_groupe_min": 1,
+  "saut_groupe_max": 3,
+  "repousse_proba": 0.4,
+  "bagarre_bonus": 0.5,
+  "bagarre_cadence": 1.2
  },
  "rencontres": {
   "intervalle": [
@@ -1303,6 +1358,55 @@
      "bunker"
     ],
     "mode": "barrage"
+   },
+   {
+    "niveau_min": 5,
+    "niveau_max": 99,
+    "poids": 3,
+    "vehicules": [
+     "opel_blitz",
+     "citroen_traction",
+     "kubelwagen"
+    ],
+    "blindes": [
+     "opel_blitz"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 6,
+    "niveau_max": 99,
+    "poids": 3,
+    "vehicules": [
+     "gmc_cckw",
+     "opel_blitz",
+     "m3_half_track"
+    ],
+    "blindes": [
+     "gmc_cckw",
+     "opel_blitz"
+    ],
+    "mode": "approche"
+   },
+   {
+    "niveau_min": 5,
+    "niveau_max": 99,
+    "poids": 2,
+    "vehicules": [
+     "citroen_h",
+     "kubelwagen",
+     "bmw_r75"
+    ],
+    "blindes": [
+     "citroen_h"
+    ],
+    "abordeurs": 4,
+    "types": [
+     "lame",
+     "lame",
+     "bombe"
+    ],
+    "mode": "poursuite"
    }
   ],
   "premiere": {
@@ -1568,5 +1672,46 @@
   "distance_calme": 90.0,
   "vitesse_rembarquement": 3.4,
   "cible_poids": 0.7
+ },
+ "variantes_arme": {
+  "_note": "Armes d'ennemis : chaque pistolet ou fusil de chasse monté est remplacé au hasard par l'une de ces variantes (poids = chances). DEC-255.",
+  "pistolet": [
+   [
+    "pistolet",
+    4
+   ],
+   [
+    "revolver",
+    3
+   ],
+   [
+    "arbalete",
+    1
+   ]
+  ],
+  "fusil_chasse": [
+   [
+    "fusil_chasse",
+    4
+   ],
+   [
+    "carabine",
+    3
+   ],
+   [
+    "arbalete",
+    1
+   ]
+  ]
+ },
+ "fortune": {
+  "_note": "Blindés de fortune (DEC-255) : camion ou voiture bardé de tôles, bélier lourd à la place des chars. Valeurs à régler en essai.",
+  "blindage": 14,
+  "lame_choc": 1.7,
+  "lame_pv": 40,
+  "poids_kg": 600,
+  "vitesse": 0.9,
+  "pv_chassis": 1.5,
+  "pv_cabine": 1.3
  }
 }

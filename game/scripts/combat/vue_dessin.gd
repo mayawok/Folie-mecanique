@@ -35,12 +35,28 @@ func _evenement(e: Dictionary) -> void:
 				_poussieres.append({"p": Vector2(e.x, maxf(e.y, 0.0)), "age": 0.0, "gros": e.classe in ["canon", "mortier"]})
 				if e.classe in ["canon", "mortier"]:
 					_explosions.append({"p": p, "age": 0.0, "taille": 0.7})
-		"choc":   # éperonnage (DEC-215)
+		"choc":   # éperonnage, frottement entre voies (DEC-215, DEC-255) : gerbe d'étincelles, pièces arrachées
 			_aide("008")
-			var pc := Vector2(float(e.x), 0.8)
+			var yl: float = 0.8 + CombatModele.voie_dy(float(e.get("voie", 0.0)))
+			var pc := Vector2(float(e.x), yl)
 			_etincelles.append({"p": pc, "age": 0.0, "gros": true})
 			_explosions.append({"p": pc, "age": 0.0, "taille": 0.5 if e.fort else 0.3})
 			_son("sfx_impact_blindage", 0.0)
+			if bool(e.get("lat", false)):   # tôles qui frottent : traînée d'étincelles le long du flanc
+				for k in 4:
+					_etincelles.append({"p": pc + Vector2((k - 1.5) * 0.9, -0.2), "age": -0.08 * k, "gros": false})
+			_lancer_debris(pc, 7 if e.fort else 4, bool(e.fort))
+			if e.fort:
+				_son("sfx_explosion", -9.0)
+		"melee":   # bagarre sur le toit
+			var ym: float = 1.7 + CombatModele.voie_dy(float(e.get("voie", 0.0)))
+			_etincelles.append({"p": Vector2(float(e.x), ym), "age": 0.0, "gros": false})
+			_son("sfx_impact_blindage", -10.0)
+		"repousse":   # un pillard est jeté du plateau : il vole puis retombe sur la route
+			var yr: float = 1.7 + CombatModele.voie_dy(float(e.get("voie", 0.0)))
+			_debris.append({"p": Vector2(float(e.x), yr), "v": Vector2(_rng.randf_range(-2.5, 2.5), 3.5), "age": 0.0, "forme": "homme", "rot": 0.0, "vrot": _rng.randf_range(-7.0, 7.0), "taille": 1.0})
+			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": true})
+			_son("sfx_impact_blindage", -4.0)
 		"explosion":   # obus, cocktail Molotov, lance explosive, réservoir (DEC-220)
 			var pe := Vector2(float(e.x), float(e.y))
 			_explosions.append({"p": pe, "age": 0.0, "taille": float(e.taille)})
@@ -157,7 +173,27 @@ func _evenement(e: Dictionary) -> void:
 				_explosions.append({"p": _centre_veh(v), "age": 0.0, "taille": 2.6})
 				_son("sfx_explosion")
 
+# Pièces arrachées par un choc : tôles, rétroviseurs, portières, boulons (DEC-255)
+func _lancer_debris(p: Vector2, n: int, grosses: bool) -> void:
+	var formes := ["tole", "tole", "boulon", "retro", "porte"] if grosses else ["tole", "boulon", "retro"]
+	for i in n:
+		var fm: String = formes[_rng.randi() % formes.size()]
+		_debris.append({"p": p + Vector2(_rng.randf_range(-0.4, 0.4), 0.0), "v": Vector2(_rng.randf_range(-4.5, 4.5), _rng.randf_range(2.5, 6.0)),
+			"age": 0.0, "forme": fm, "rot": _rng.randf() * TAU, "vrot": _rng.randf_range(-12.0, 12.0), "taille": 1.4 if fm == "porte" else (0.7 if fm == "boulon" else 1.0)})
+
+
 func _vieillir(delta: float) -> void:
+	for d in _debris:   # vol, rebonds, puis la pièce reste un moment sur la route
+		d.age += delta
+		d.v.y -= 9.8 * delta
+		d.p += d.v * delta
+		d.rot += d.vrot * delta
+		if d.p.y < 0.1:
+			d.p.y = 0.1
+			d.v.y = -d.v.y * 0.3
+			d.v.x *= 0.7
+			d.vrot *= 0.6
+	_debris = _debris.filter(func(d): return d.age < 5.0)
 	if not _annonce.is_empty():
 		_annonce.age += delta
 		if _annonce.age > float(CombatModele.donnees().groupes.annonce_s):
@@ -679,6 +715,8 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var pr3 := _px(s3.p)
 		c.draw_line(pr3, pr3 + Vector2(s3.sens * 70.0 * k3, -110.0 * k3 + 90.0 * k3 * k3), Color(1.0, 0.9, 0.5, 1.0 - k3), 2.5)
 	for s in _etincelles:
+		if s.age < 0.0:
+			continue
 		var p := _px(s.p)
 		var fade2: float = 1.0 - s.age / 0.3
 		var gros: bool = s.get("gros", false)
@@ -687,6 +725,41 @@ func dessiner_fx(c: CanvasItem) -> void:
 			c.draw_line(p, p + Vector2.from_angle(k * TAU / nb + s.age * 3) * ((9 if gros else 6) + (34 if gros else 22) * s.age), Color(1, 0.8, 0.3, fade2), 2.0)
 	for s in _bouffees:
 		c.draw_circle(_px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
+	for d in _debris:   # pièces et hommes qui volent (DEC-255)
+		var pd := _px(d.p)
+		var k: float = ppm * 0.22 * float(d.taille)
+		var a: float = clampf(5.0 - d.age, 0.0, 1.0)
+		c.draw_set_transform(pd, d.rot, Vector2.ONE)
+		match String(d.forme):
+			"tole":
+				c.draw_colored_polygon(PackedVector2Array([Vector2(-k, -k * 0.4), Vector2(k * 1.2, -k * 0.2), Vector2(k * 0.8, k * 0.5), Vector2(-k * 0.9, k * 0.3)]), Color(0.42, 0.38, 0.33, a))
+			"porte":
+				c.draw_rect(Rect2(-k * 1.2, -k * 0.7, k * 2.4, k * 1.4), Color(0.4, 0.36, 0.3, a))
+				c.draw_rect(Rect2(-k * 0.9, -k * 0.45, k * 1.2, k * 0.5), Color(0.2, 0.26, 0.28, a))
+			"retro":
+				c.draw_rect(Rect2(-k * 0.2, -k * 0.2, k * 0.9, k * 0.4), Color(0.2, 0.2, 0.19, a))
+				c.draw_circle(Vector2(k * 0.9, 0), k * 0.4, Color(0.75, 0.8, 0.82, a))
+			"homme":
+				Silhouette.dessiner(c, Vector2.ZERO, ppm, "pillard", {"phase": d.age * 9.0, "miroir": false, "peau": 1, "bras": "vise"})
+			_:
+				c.draw_circle(Vector2.ZERO, k * 0.35, Color(0.55, 0.5, 0.45, a))
+		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	for e in m.ennemis:   # blindés de fortune : tôles boulonnées, pointes aux deux bouts (DEC-255)
+		if e.actif() and bool(e.profil.get("fortune", false)):
+			var ech: float = CombatModele.voie_echelle(e.voie_f)
+			var rx: float = _rx(e)
+			var dyl: float = CombatModele.voie_dy(e.voie_f)
+			for k in 3:
+				var xp: float = rx + e.longueur * (0.18 + 0.3 * k)
+				var r := Rect2(_px(Vector2(xp, 1.05 + dyl)), Vector2(e.longueur * 0.26 * ppm * ech, 0.62 * ppm * ech))
+				c.draw_rect(r, Color(0.38, 0.34, 0.29, 0.92))
+				c.draw_rect(r, Color(0.12, 0.11, 0.1, 0.9), false, 2.0)
+				c.draw_circle(r.position + Vector2(5, 5), 2.0, Color(0.7, 0.66, 0.6))
+				c.draw_circle(r.position + Vector2(r.size.x - 5, r.size.y - 5), 2.0, Color(0.7, 0.66, 0.6))
+			for xp2 in [rx - 0.1, rx + e.longueur + 0.1]:
+				var p0 := _px(Vector2(xp2, 0.7 + dyl))
+				var sens: float = -1.0 if xp2 < rx + e.longueur * 0.5 else 1.0
+				c.draw_colored_polygon(PackedVector2Array([p0 + Vector2(0, -0.2 * ppm * ech), p0 + Vector2(sens * 0.55 * ppm * ech, 0), p0 + Vector2(0, 0.2 * ppm * ech)]), Color(0.55, 0.5, 0.45))
 	for v in m.convoi:   # timon entre une remorque et son tracteur (DEC-080)
 		if v.remorque() and v.actif() and v.garage == 0:
 			var t = m.tracteur_de(v)

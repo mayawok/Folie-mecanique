@@ -428,6 +428,8 @@ func creer_depuis_assemblage(a: Dictionary, camp: String, x: float, type := "", 
 	for i in (int(v.profil.equipage) if equipage < 0 else equipage):
 		v.equipage.append(float(D.equipage_pv))
 		v.noms.append(_nom_survivant())
+	if camp == "ennemi":
+		_varier_armes(v)   # revolvers, carabines, arbalètes : chaque ennemi a son arme (DEC-255)
 	if camp == "ennemi" and D.feu.jets.has(v.type):   # pillards : cocktails Molotov et lances explosives (DEC-220)
 		var wid: String = String(D.feu.jets[v.type])
 		var pid := "a%d" % v.armes.size()
@@ -436,6 +438,54 @@ func creer_depuis_assemblage(a: Dictionary, camp: String, x: float, type := "", 
 		v.pieces[pid] = {"id": pid, "nom": D.armes[wid].nom, "pv": float(D.armes[wid].pv), "max": float(D.armes[wid].pv)}
 		v.armes.append({"piece": pid, "id": wid, "cd": rng.randf_range(0.6, float(D.armes[wid].cadence)), "idx": v.armes.size()})
 	return v
+
+# Remplace les pistolets et fusils de chasse montés par une variante tirée au hasard (DEC-255)
+func _varier_armes(v: Veh) -> void:
+	var D := donnees()
+	if not D.has("variantes_arme"):
+		return
+	var rv := RandomNumberGenerator.new()   # tirage à part : ne décale pas la suite aléatoire de la partie
+	rv.seed = v.uid * 7919 + 13
+	v.profil = v.profil.duplicate()
+	var noms: Array = v.profil.armes.duplicate()
+	for a in v.armes:
+		var table = D.variantes_arme.get(String(a.id), null)
+		if table == null:
+			continue
+		var total := 0.0
+		for e in table:
+			total += float(e[1])
+		var t := rv.randf() * total
+		var wid: String = String(table[0][0])
+		for e in table:
+			t -= float(e[1])
+			if t <= 0.0:
+				wid = String(e[0])
+				break
+		noms[int(a.idx)] = wid
+		a.id = wid
+		var w: Dictionary = D.armes[wid]
+		v.pieces[a.piece] = {"id": a.piece, "nom": w.nom, "pv": float(w.pv), "max": float(w.pv)}
+	v.profil.armes = noms
+
+
+# Blindé de fortune : tôles soudées, lame et pointes, plus lourd et plus lent ; il charge toujours de face (DEC-255)
+func fortune(v: Veh) -> void:
+	var F: Dictionary = donnees().fortune
+	v.profil = v.profil.duplicate()
+	v.profil.blindage = int(v.profil.get("blindage", 0)) + int(F.blindage)
+	v.profil.lame_choc = float(F.lame_choc)
+	v.profil.lame_pv = int(F.lame_pv)
+	v.profil.poids_kg = float(v.profil.get("poids_kg", 1500.0)) + float(F.poids_kg)
+	v.profil.vitesse = float(v.profil.get("vitesse", 5.0)) * float(F.vitesse)
+	v.profil.fortune = true
+	for id in ["chassis", "cabine"]:
+		if v.pieces.has(id):
+			var k := float(F.pv_chassis if id == "chassis" else F.pv_cabine)
+			v.pieces[id].max = float(v.pieces[id].max) * k
+			v.pieces[id].pv = float(v.pieces[id].pv) * k
+	v.nom = Textes.t("fortune.001", [v.nom])
+
 
 # (Re)construit un véhicule à partir d'un assemblage. etats : famille -> état 0..1 des pièces montées
 # (pièces abîmées récupérées) ; une famille absente est neuve. L'équipage n'est pas touché.

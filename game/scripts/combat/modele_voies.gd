@@ -167,6 +167,7 @@ func _voie_joueur(v: Veh, t) -> int:
 # --- Coups de flanc entre voies voisines -------------------------------------------------------------------
 func _coups_lateraux(dt: float) -> void:
 	var V := VO()
+	_percutes_gardes()
 	for a in convoi:
 		if not a.actif() or not a.mobile() or a.garage != 0:
 			continue
@@ -185,6 +186,30 @@ func _coups_lateraux(dt: float) -> void:
 				_coup_lateral(a, e, true)
 			elif eperonne(e) and rng.randf() < proba:
 				_coup_lateral(e, a, false)
+
+
+func _garde_devant(e: Veh):
+	for g in convoi:
+		if g.garde != 0 and g.actif() and g.garage == 0 and meme_voie(e, g):
+			var ecart: float = g.x - (e.x + e.longueur)
+			if ecart > -0.5 and ecart < float(AB().ecart_saut):
+				return g
+	return null
+
+
+# Un poursuivant bloqué derrière un garde de flanc lui rentre dans l'arrière (corps à corps, DEC-255)
+func _percutes_gardes() -> void:
+	var ct := float(CH().contact)
+	for g in convoi:
+		if g.garde == 0 or not g.actif() or g.garage != 0:
+			continue
+		for e in ennemis:
+			if not e.actif() or e.allie or e.mode != "poursuite" or not meme_voie(e, g):
+				continue
+			var ecart: float = g.x - (e.x + e.longueur)
+			if ecart > ct or ecart < -g.longueur * 0.5 or float(_cd_choc.get(e.uid, 0.0)) > 0.0 or not eperonne(e):
+				continue
+			_choc(e, g, absf(e.vitesse_act - vitesse_convoi) + float(CH().elan), "avant", "arriere", false)
 
 
 # a donne un coup de volant dans b, sur la voie d'à côté
@@ -212,7 +237,7 @@ func _coup_lateral(a: Veh, b: Veh, par_joueur: bool) -> void:
 		log_(Textes.t("voie.001", [a.nom, b.nom, int(vers_b)]), "info")
 	else:
 		log_(Textes.t("voie.002", [a.nom, b.nom]), "alerte")
-	evt({"t": "choc", "x": xc, "fort": vers_a + vers_b > float(C.fort)})
+	evt({"t": "choc", "x": xc, "fort": vers_a + vers_b > float(C.fort), "voie": (a.voie_f + b.voie_f) * 0.5, "lat": true})
 
 
 # --- Couvert ---------------------------------------------------------------------------------------------

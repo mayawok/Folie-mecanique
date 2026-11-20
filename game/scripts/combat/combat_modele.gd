@@ -716,6 +716,8 @@ func _rencontres() -> void:
 		for t in choix.get("vehicules", []):
 			var e := creer_vehicule(t, "ennemi", xp)
 			e.faction = rep_faction_ennemie()
+			if t in choix.get("blindes", []):
+				fortune(e)
 			preparer_poursuivant(e, choix)
 			ennemis.append(e)
 			xp -= e.longueur + r.randf_range(6.0, 14.0)
@@ -727,6 +729,9 @@ func _rencontres() -> void:
 		var e := creer_vehicule(t, "ennemi", x)
 		e.mode = choix.get("mode", "approche")
 		e.faction = rep_faction_ennemie()
+		if t in choix.get("blindes", []):
+			fortune(e)
+			_role[e.uid] = "belier"
 		ennemis.append(e)
 		x += e.longueur + r.randf_range(5.0, 12.0)
 	for bt in choix.get("batiments", []):
