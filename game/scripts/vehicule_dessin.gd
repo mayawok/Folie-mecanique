@@ -438,7 +438,7 @@ func _quad(t: Texture2D, hg: Vector2, hd: Vector2, bg: Vector2, teinte: Color, m
 	var flip := (hd - hg).cross(bg - hg) < 0.0   # véhicule tourné vers la gauche : l'image se retourne
 	var x0 := 0.0   # une largeur négative retourne l'image sans la déplacer
 	var lx := -larg if miroir_h else larg
-	var dest := Rect2(x0, haut, lx, -haut) if flip else Rect2(x0, 0, lx, haut)
+	var dest := Rect2(x0, 0, lx, -haut) if flip else Rect2(x0, 0, lx, haut)
 	if uv.size() == 4:
 		var ts := t.get_size()
 		draw_texture_rect_region(t, dest, Rect2(float(uv[0]) * ts.x, float(uv[1]) * ts.y, (float(uv[2]) - float(uv[0])) * ts.x, (float(uv[3]) - float(uv[1])) * ts.y), teinte)
