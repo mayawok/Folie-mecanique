@@ -1,0 +1,93 @@
+{
+ "_lisez_moi": "Décor dessiné par le code propre à chaque région de la carte (DEV-008, DEC-264), d'après le thème de carte_monde.json. ciel : teintes visées pour le zénith et l'horizon (mêlées à celles de l'heure). sol, crete, trace, couches : couleurs du sol (remplacent celles du type de zone). lointain : deux plans très lointains [plan à 0,02, plan à 0,05] ; ligne : ce qui est planté sur le rang de dunes proche (poteaux, pylones, barbeles, pins, aucune) ; proche : objets du bord de route [genre, seuil cumulé] ; particules : neige, cendres, embruns ou rien. Ajouter une région = une entrée ici ; un genre nouveau se dessine dans decor_region.gd.",
+ "armorique": {
+  "ciel": {"zen": "#7E9AB4", "hor": "#D9DDD2"},
+  "lointain": ["mer", "phares"],
+  "ligne": "poteaux",
+  "proche": [["calvaire", 0.08], ["menhir", 0.16], ["rocher", 0.40], ["bateau", 0.50], ["herbe", 0.78], ["poteau", 0.86], ["epave", 0.92]],
+  "particules": "embruns"
+ },
+ "pertuis": {
+  "ciel": {"zen": "#8AA2AE", "hor": "#DCD8C6"},
+  "lointain": ["mer", "digues"],
+  "ligne": "pieux",
+  "proche": [["pieu", 0.22], ["roseau", 0.46], ["bateau", 0.56], ["herbe", 0.80], ["epave", 0.88]],
+  "particules": "embruns"
+ },
+ "estuaire": {
+  "ciel": {"zen": "#7C8C98", "hor": "#CFC8B6"},
+  "lointain": ["bocage", "grues"],
+  "ligne": "poteaux",
+  "proche": [["haie_brulee", 0.20], ["arbre", 0.36], ["epave", 0.48], ["cloture", 0.58], ["herbe", 0.82], ["poteau", 0.90]],
+  "particules": ""
+ },
+ "pays_noir": {
+  "ciel": {"zen": "#4E5260", "hor": "#B9A48A"},
+  "sol": "#4A4642", "crete": "#2F2D2B", "trace": "#3A3633", "couches": ["#8A8580", "#6E6A66", "#56524E"],
+  "lointain": ["terrils", "centrale"],
+  "ligne": "pylones",
+  "proche": [["wagonnet", 0.14], ["terril_petit", 0.30], ["rocher", 0.48], ["pylone", 0.58], ["carcasse", 0.72], ["poteau", 0.86]],
+  "particules": "cendres"
+ },
+ "ile_capitale": {
+  "ciel": {"zen": "#6E7E92", "hor": "#D8C7A8"},
+  "sol": "#6A625A", "crete": "#4E4842", "trace": "#55504A", "couches": ["#A39A8E", "#8C8379", "#756D64"],
+  "lointain": ["tour_fer", "ville"],
+  "ligne": "reverberes",
+  "proche": [["reverbere", 0.14], ["carcasse", 0.34], ["gravats", 0.56], ["derrick", 0.66], ["baril", 0.80], ["rocher", 0.90]],
+  "particules": ""
+ },
+ "marche_est": {
+  "ciel": {"zen": "#7C8796", "hor": "#D4D3CC"},
+  "sol": "#7C786E", "crete": "#5C5A52", "trace": "#66625A", "couches": ["#C9C9C2", "#A8A69E", "#8E8C84"],
+  "lointain": ["foret_morte", "front"],
+  "ligne": "barbeles",
+  "proche": [["herisson", 0.16], ["barbele", 0.34], ["cratere", 0.50], ["arbre_brise", 0.64], ["bunker_petit", 0.74], ["rocher", 0.88]],
+  "particules": "neige"
+ },
+ "beauce_loire": {
+  "ciel": {"zen": "#7FA4C4", "hor": "#ECD5A4"},
+  "lointain": ["silos", "pont_effondre"],
+  "ligne": "poteaux",
+  "proche": [["silo_petit", 0.10], ["poteau", 0.26], ["rocher", 0.44], ["carcasse", 0.56], ["arbre", 0.70], ["obj_charrette", 0.80]],
+  "particules": ""
+ },
+ "landes": {
+  "ciel": {"zen": "#7A9CBC", "hor": "#E6CC9C"},
+  "lointain": ["pins_morts", "raffinerie"],
+  "ligne": "pins",
+  "proche": [["pin_mort", 0.22], ["derrick", 0.32], ["baril", 0.48], ["rocher", 0.60], ["carcasse", 0.72], ["poteau", 0.86]],
+  "particules": ""
+ },
+ "hautes_terres": {
+  "ciel": {"zen": "#728EA8", "hor": "#D6CDB8"},
+  "sol": "#5E5048", "crete": "#463C36", "trace": "#4E443E", "couches": ["#8E8078", "#766A62", "#5E544E"],
+  "lointain": ["puys", "viaduc"],
+  "ligne": "poteaux",
+  "proche": [["basalte", 0.20], ["rocher", 0.44], ["signal", 0.54], ["herbe", 0.74], ["carcasse", 0.84], ["poteau", 0.92]],
+  "particules": ""
+ },
+ "confluent": {
+  "ciel": {"zen": "#6E7C8C", "hor": "#CDBFA6"},
+  "sol": "#615A54", "crete": "#47423E", "trace": "#504A45", "couches": ["#958C84", "#7C746C", "#655E58"],
+  "lointain": ["barrage", "usines"],
+  "ligne": "pylones",
+  "proche": [["gravats", 0.20], ["baril", 0.36], ["pylone", 0.46], ["carcasse", 0.62], ["rocher", 0.78], ["poteau", 0.88]],
+  "particules": "cendres"
+ },
+ "provence": {
+  "ciel": {"zen": "#6F9CC8", "hor": "#F0D3A0"},
+  "sol": "#A88A62", "crete": "#7C6A48", "trace": "#8A7452", "couches": ["#D2BC94", "#C2A67A", "#B09068"],
+  "lointain": ["etang", "raffinerie"],
+  "ligne": "poteaux",
+  "proche": [["buisson_sec", 0.26], ["cypres", 0.36], ["sel", 0.48], ["rocher", 0.64], ["carcasse", 0.76], ["poteau", 0.88]],
+  "particules": ""
+ },
+ "alpes": {
+  "ciel": {"zen": "#7898B8", "hor": "#E2E8EC"},
+  "lointain": ["montagnes", "fort"],
+  "ligne": "sapins",
+  "proche": [["sapin", 0.26], ["rocher_neige", 0.52], ["poteau", 0.62], ["carcasse", 0.72], ["borne", 0.82]],
+  "particules": "neige"
+ }
+}

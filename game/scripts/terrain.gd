@@ -6,6 +6,7 @@ extends Control
 
 # Type de sol (Kit, DEC-110) : sable, terre, cailloux ou eau. sol, crête, cailloux de premier plan, trois couches lointaines
 static var zone := "terre"
+static var region := ""   # région de la carte (DEV-008, DEC-264) : son propre décor (data/decors_regions.json), vide = décor du type de sol seul
 const PALETTES := {
 	"sable": {"sol": "#A87A4A", "crete": "#8C6238", "trace": "#7E5A34", "couches": ["#C9A57A", "#BC925F", "#B08452"],
 		"decor": [["poteau", 0.18], ["cactus", 0.38], ["arbre", 0.55], ["rocher", 0.78], ["carcasse", 0.86]]},
@@ -179,6 +180,21 @@ static func texture(nom: String) -> Texture2D:
 	return _tex[nom]
 
 
+# Couleurs du sol : celles du type de zone, remplacées par celles de la région quand elle en donne
+func _palette() -> Dictionary:
+	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
+	var R := DecorRegion.region(region)
+	if R.is_empty() or not (R.has("sol") or R.has("proche")):
+		return pal
+	pal = pal.duplicate()
+	for k in ["sol", "crete", "trace", "couches"]:
+		if R.has(k):
+			pal[k] = R[k]
+	if R.has("proche"):
+		pal["decor"] = R.proche
+	return pal
+
+
 func _avec_images() -> bool:
 	return zone == "terre" and texture("terre_ciel") != null and texture("terre_sol") != null
 
@@ -298,6 +314,10 @@ func _ciel() -> Array:
 		hor = Color("#DCE3E8")
 	elif zone == "eau" or zone == "boue":
 		hor = Color("#D9D2B8")
+	var R := DecorRegion.region(region)
+	if R.has("ciel"):   # teinte propre à la région (DEC-264)
+		zen = zen.lerp(Color(R.ciel.zen), 0.75)
+		hor = hor.lerp(Color(R.ciel.hor), 0.75)
 	zen = zen.lerp(Color("#4B5C86"), soir)
 	hor = hor.lerp(Color("#E8955A"), soir)
 	zen = zen.lerp(Color("#5A5F66"), orage * 0.8)
@@ -461,9 +481,17 @@ func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var cl: Array = pal.couches
 	# Six plans, du plus lointain au plus proche ; la brume s'intercale entre eux
-	_mesas(w, hgt, 0.02, y_h + 8.0, Color(cl[0]).lerp(hor, 0.7))
+	var RG := DecorRegion.region(region)
+	var loin: Array = RG.get("lointain", [])
+	if loin.size() >= 1:   # plans lointains de la région (DEC-264)
+		DecorRegion.lointain(self, String(loin[0]), w, hgt, 0.02, y_h + 8.0, Color(cl[0]).darkened(0.35).lerp(hor, 0.35), hor)
+	else:
+		_mesas(w, hgt, 0.02, y_h + 8.0, Color(cl[0]).lerp(hor, 0.7))
 	_brume(y_h - 50.0, y_h + 30.0, hor, 0.55, w)
-	_ville_ruine(w, hgt, 0.05, sol_y * 0.77, Color(cl[0]).darkened(0.15).lerp(hor, 0.55))
+	if loin.size() >= 2:
+		DecorRegion.lointain(self, String(loin[1]), w, hgt, 0.05, sol_y * 0.75, Color(cl[0]).darkened(0.42).lerp(hor, 0.25), hor)
+	else:
+		_ville_ruine(w, hgt, 0.05, sol_y * 0.77, Color(cl[0]).darkened(0.15).lerp(hor, 0.55))
 	_brume(sol_y * 0.70, sol_y * 0.80, hor, 0.4, w)
 	_dune(w, hgt, 0.1, 0.75, 55.0, Color(cl[0]).lerp(hor, 0.38), 1.0)
 	_brume(sol_y * 0.74, sol_y * 0.84, hor, 0.3, w)
@@ -478,7 +506,8 @@ func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
 			Disque.d(self, Vector2.ZERO, 16.0, Color(hor.lightened(0.15), 0.09 * (1.0 - nuit)))
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_brume(sol_y * 0.80, sol_y * 0.92, hor, 0.22, w)
-	_ligne_poteaux(w, 0.38, 0.9, 34.0, 3.0, Color("#3E3024").lerp(hor, 0.35))
+	if not DecorRegion.ligne(self, String(RG.get("ligne", "")), w, 0.38, 0.9, 34.0, 3.0, Color("#3E3024").lerp(hor, 0.35)):
+		_ligne_poteaux(w, 0.38, 0.9, 34.0, 3.0, Color("#3E3024").lerp(hor, 0.35))
 	_dune(w, hgt, 0.38, 0.9, 34.0, Color(cl[2]).lerp(hor, 0.08), 3.0)
 
 
@@ -488,7 +517,7 @@ const VIT_AVANT := 1.6
 func _avant_code() -> void:
 	var w := size.x
 	var hgt := size.y
-	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
+	var pal := _palette()
 	var sombre := Color(pal.sol).darkened(0.62).lerp(Color(0.03, 0.035, 0.06), 0.7 * nuit)
 	var s := ppm * VIT_AVANT
 	var dec := camera_x * s
@@ -530,6 +559,7 @@ func _avant_code() -> void:
 
 
 func _dessiner_avant() -> void:
+	DecorRegion.particules(self, String(DecorRegion.region(region).get("particules", "")), size.x, size.y)   # neige, cendres, embruns (DEC-264)
 	if not _avec_images():
 		_avant_code()
 		return
@@ -564,7 +594,7 @@ func _draw() -> void:
 				draw_texture_rect(tc, Rect2(0, 0, w, hgt), false, Color(teinte.r, teinte.g, teinte.b, float(var_ciel[1])))
 		_bande("terre_lointain", 0.08, sol_y * 0.93 - g * 0.25)
 		_bande("terre_moyen", 0.2, sol_y * 1.0 - g * 0.5)
-	var pal: Dictionary = PALETTES[zone] if PALETTES.has(zone) else PALETTES.sable
+	var pal := _palette()
 	if img:
 		_etoiles(w)
 	else:
@@ -605,7 +635,9 @@ func _draw() -> void:
 			if r < float(dk[1]):
 				genre = dk[0]
 				break
-		if img and (ELEMENTS.has(genre) or GROUPES.has(genre)):
+		if not (img and (ELEMENTS.has(genre) or GROUPES.has(genre))) and DecorRegion.objet(self, genre, pied, ppm, kk):
+			pass   # objet propre à la région (DEC-264)
+		elif img and (ELEMENTS.has(genre) or GROUPES.has(genre)):
 			var te: Texture2D = null
 			var hm := 1.0
 			if GROUPES.has(genre):

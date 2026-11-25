@@ -90,6 +90,7 @@ func _generer_carte() -> void:
 	secteur = indice_lieu("kerbrume")
 	region_quete = String(CombatModele.donnees().get("region", {}).get("quete_depart", "armorique"))
 	Terrain.zone = String(secteurs[secteur].zone)
+	Terrain.region = String(secteurs[secteur].region)
 	maj_attitudes()
 
 
@@ -182,6 +183,7 @@ func choisir_destination(id: int) -> bool:
 	var total := 250.0 + distance_secteur(id) * 900.0
 	trajet = {"dest": id, "reste": total, "total": total}
 	Terrain.zone = String(secteurs[secteur].zone)
+	Terrain.region = String(secteurs[secteur].region)
 	m._prochain_x = INF
 	var route := Textes.t("monde.de_route") if m.mission_active() else Textes.t("monde.de_route_calme")   # en mission, la route est dangereuse (DEC-146)
 	m.log_(Textes.t("monde.001", [secteurs[id].nom, secteurs[id].faction_nom, secteurs[id].niveau, int(total), route]), "info")
@@ -365,6 +367,7 @@ func _cap(dt: float) -> void:
 			var reste := plan.duplicate()
 			m.log_(Textes.t("monde.020", [s.nom, secteurs[suite].nom]), "info")
 			Terrain.zone = String(s.zone)
+			Terrain.region = String(s.region)
 			if choisir_destination(suite):
 				plan = reste
 				return
@@ -372,6 +375,7 @@ func _cap(dt: float) -> void:
 		plan = []
 		m.log_(Textes.t("monde.007", [s.nom, s.faction_nom, ATTITUDE[s.faction], s.niveau]), "ok")
 		Terrain.zone = String(s.zone)   # le décor suit la région (DEV-008)
+		Terrain.region = String(s.region)
 		m.evt({"t": "secteur"})
 		if m.mission_en_route():   # mission du maire : la ville de destination est au bout de l'étape (DEC-146)
 			m.ville_creer(m.x_tete + float(m.MD().ville_arrivee_m))

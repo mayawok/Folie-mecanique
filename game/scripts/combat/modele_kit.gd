@@ -31,6 +31,19 @@ func kit_regler_zone(z: String) -> bool:
 		return false
 	kit_zone = z
 	Terrain.zone = z
+	Terrain.region = ""   # type de sol seul, sans le décor d'une région
+	return true
+
+
+# Décor d'une région de la carte (DEC-264) : son type de sol et ses plans, objets et particules propres
+func kit_regler_decor_region(id: String) -> bool:
+	var R := CarteMonde.region(id)
+	if R.is_empty() and id != "":
+		return false
+	Terrain.region = id
+	if not R.is_empty():
+		kit_zone = String(R.get("decor", "terre"))
+		Terrain.zone = kit_zone
 	return true
 
 

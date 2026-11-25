@@ -129,6 +129,11 @@ func _init(modele, son: Callable = Callable(), ouvrir_berliet: Callable = Callab
 	_lbl_groupe.add_theme_font_size_override("font_size", 24)
 	v.add_child(_lbl_groupe)
 	_bouton(v, "Lancer le groupe", func(): _lancer_groupe())
+	_titre(v, "Décor d'une région (DEC-264)")
+	var decs := [["Aucun", ""]]
+	for R in CarteMonde.regions():
+		decs.append([String(R.nom), String(R.id)])
+	_rangee(v, decs, func(id): m.kit_regler_decor_region(String(id)); _maj())
 	_titre(v, "Région de la quête (difficulté forcée)")
 	_lbl_region = Label.new()
 	_lbl_region.add_theme_font_size_override("font_size", 24)

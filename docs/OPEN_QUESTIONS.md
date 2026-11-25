@@ -361,3 +361,9 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Mesures sur l'iPhone** : images/s, temps d'une image et chaleur en gros combat, avec le compteur d'images (Options). Tout le reste en dépend.
 - **Résolution de rendu** : garder la pleine résolution native (2 796 × 1 290) ou proposer un réglage « Économie » proche du site web (≈ 1 864 × 860) si le remplissage coûte trop.
 - **Décor lointain en cache**, **atlas des pièces de véhicules**, **plafonds d'effets** : à décider selon les mesures.
+
+## OQ-057 — Décor par région : suites (26/11, DEC-264)
+
+- **Régions peintes** (Armorique, Pertuis, Estuaire) : leurs fonds restent les images génériques « terre et herbe » ; faut-il des fonds peints propres (mer et phares, marais, ports) à faire avec ChatGPT, ou passer ces régions au décor dessiné par le code ?
+- **Valeurs à régler sur iPhone** : densité des objets, contraste des plans lointains (la brume les pâlit beaucoup en Marche de l'Est), quantité de neige et de cendres.
+- **Lieux marquants** : la centrale électrique du Pays Noir est dessinée au loin ; un vrai lieu traversé (DEV-029) reste à faire.
