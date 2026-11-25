@@ -17,7 +17,7 @@ var mission_bilan := {}    # dernière livraison ou dernier échec : {ok, titre,
 static func MD() -> Dictionary:
 	if _mdata.is_empty():
 		var f := FileAccess.open("res://data/missions.json", FileAccess.READ)
-		_mdata = JSON.parse_string(f.get_as_text())
+		_mdata = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _mdata
 
 

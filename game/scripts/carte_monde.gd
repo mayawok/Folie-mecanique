@@ -11,7 +11,7 @@ static var _index := {}
 static func donnees() -> Dictionary:
 	if _data.is_empty():
 		var f := FileAccess.open("res://data/carte_monde.json", FileAccess.READ)
-		_data = JSON.parse_string(f.get_as_text())
+		_data = Textes.traduire(JSON.parse_string(f.get_as_text()))
 		_index = {}
 		for l in _data.lieux:
 			_index[String(l.id)] = l

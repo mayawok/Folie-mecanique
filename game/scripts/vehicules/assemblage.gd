@@ -16,13 +16,13 @@ static var _assemblages := {}
 
 static func catalogue() -> Dictionary:
 	if _pieces.is_empty():
-		_pieces = JSON.parse_string(FileAccess.get_file_as_string("res://data/pieces.json"))
+		_pieces = Textes.traduire(JSON.parse_string(FileAccess.get_file_as_string("res://data/pieces.json")))
 	return _pieces
 
 
 static func historiques() -> Dictionary:
 	if _assemblages.is_empty():
-		_assemblages = JSON.parse_string(FileAccess.get_file_as_string("res://data/assemblages.json")).assemblages
+		_assemblages = Textes.traduire(JSON.parse_string(FileAccess.get_file_as_string("res://data/assemblages.json"))).assemblages
 	return _assemblages
 
 

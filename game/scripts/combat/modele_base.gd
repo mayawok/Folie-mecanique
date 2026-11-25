@@ -21,7 +21,7 @@ static var _data := {}
 static func donnees() -> Dictionary:
 	if _data.is_empty():
 		var f := FileAccess.open("res://data/combat_proto.json", FileAccess.READ)
-		_data = JSON.parse_string(f.get_as_text())
+		_data = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _data
 
 static func ancre(v, id: String, x := NAN) -> Vector2:

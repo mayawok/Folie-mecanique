@@ -22,7 +22,7 @@ var _n_villes := 0
 static func VD() -> Dictionary:
 	if _vdata.is_empty():
 		var f := FileAccess.open("res://data/villes.json", FileAccess.READ)
-		_vdata = JSON.parse_string(f.get_as_text())
+		_vdata = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _vdata
 
 

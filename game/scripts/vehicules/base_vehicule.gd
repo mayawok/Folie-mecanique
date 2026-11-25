@@ -18,7 +18,7 @@ static var _donnees := {}
 
 static func donnees() -> Dictionary:
 	if _donnees.is_empty():
-		_donnees = JSON.parse_string(FileAccess.get_file_as_string("res://data/bases.json"))
+		_donnees = Textes.traduire(JSON.parse_string(FileAccess.get_file_as_string("res://data/bases.json")))
 	return _donnees
 
 

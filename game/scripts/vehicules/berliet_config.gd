@@ -14,7 +14,7 @@ static var _d := {}
 static func donnees() -> Dictionary:
 	if _d.is_empty():
 		var f := FileAccess.open(CHEMIN, FileAccess.READ)
-		_d = JSON.parse_string(f.get_as_text())
+		_d = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _d
 
 

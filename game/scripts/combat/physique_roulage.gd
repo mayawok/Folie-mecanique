@@ -14,7 +14,7 @@ const NEUTRE := {"surface": "terre", "pression": 0.0, "adherence": 1.0, "rouleme
 static func donnees() -> Dictionary:
 	if _data.is_empty():
 		var f := FileAccess.open("res://data/surfaces.json", FileAccess.READ)
-		_data = JSON.parse_string(f.get_as_text())
+		_data = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _data
 
 

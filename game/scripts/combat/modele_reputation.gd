@@ -11,7 +11,7 @@ var reputation := {}   # id de faction -> valeur (les factions jamais touchées 
 static func REPU() -> Dictionary:
 	if _rep_data.is_empty():
 		var f := FileAccess.open("res://data/reputation.json", FileAccess.READ)
-		_rep_data = JSON.parse_string(f.get_as_text())
+		_rep_data = Textes.traduire(JSON.parse_string(f.get_as_text()))
 	return _rep_data
 
 
