@@ -494,6 +494,7 @@ func avancer(dt := DT) -> void:
 	_ia_comportements(dt)
 	_formation(dt)
 	_voies(dt)
+	_vols(dt)
 	_chocs(dt)
 	_coups_lateraux(dt)
 	_feux(dt)
@@ -869,6 +870,9 @@ func _params_conduite(actifs: Array) -> Dictionary:
 		a_base = minf(a_base, Transmission.accel_base(float(v.profil.get("puissance_ch", 0.0)), M + Mr))
 		adh = minf(adh, float(PhysiqueRoulage.evaluer(v.profil).adherence))
 		masse_f = minf(masse_f, sqrt(M / (M + Mr)))
+		if Mr > 0.0:   # en descente, la remorque pousse son tracteur : il freine moins bien (DEC-261)
+			var desc := maxf(0.0, -Terrain.pente(x_tete))
+			masse_f = minf(masse_f, sqrt(M / (M + Mr)) / (1.0 + float(Transmission.donnees().remorques.poussee) * desc * Mr / M))
 	if vtop == INF:
 		vtop = 8.0
 		a_base = 1.5
@@ -977,20 +981,87 @@ func _tenue(dt: float, vit: float, actifs: Array) -> void:
 				v.ecart_acc = prec.ecart_acc + (float(donnees().ecart_convoi) - float(A.ecart_min) - 0.4)
 		if v.actif():
 			prec = v
-	# 4) saut : sur sol très cassé et à bonne vitesse, une bosse plus grosse que les autres décolle le convoi
-	var S: Dictionary = D.saut
-	if float(trans.air_prev) > 0.0 and float(trans.air) <= 0.0:
+	# 4) sauts : voir _vols (crêtes du relief, DEC-261)
+	# 5) basculement d'un véhicule très instable au freinage brusque ou en accélérant fort, aggravé par la pente (DEC-233, DEC-261)
+	var BA: Dictionary = D.basculement
+	var a_long := float(trans.accel)
+	var desc := -Terrain.pente(x_tete)   # positive en descente
+	if absf(a_long) >= float(BA.accel_min):
 		for v in actifs:
-			var deb := float(v.profil.get("physique", {}).get("debattement", 0.2))
-			var dsaut := float(S.degats) * float(trans.air_dur) / (1.0 + float(S.use_suspension) * deb)
-			_degats_choc(v, dsaut, "bas")
-			_blesser_equipage(v, dsaut * float(S.equipage))
-		if tete != null:
-			log_(Textes.t("trans.atterrit"), "alerte")
-	trans.air_prev = float(trans.air)
-	if tete != null and vit > float(S.vitesse_min) and float(trans.air) <= 0.0:
-		var ev := PhysiqueRoulage.evaluer(tete.profil)
-		if float(ev.chocs) >= float(S.chocs_min) and rng_physique.randf() < float(S.proba_m) * vit * dt:
-			trans.air = lerpf(float(S.duree[0]), float(S.duree[1]), rng_physique.randf())
-			trans.air_dur = float(trans.air)
-			log_(Textes.t("trans.saut"), "info")
+			if v.cd_bascule > 0.0:
+				continue
+			var stab := float(v.profil.get("stabilite", 99.0))
+			var charge := (-a_long / 9.81 + desc) if a_long < 0.0 else (a_long / 9.81 - desc)   # vers l'avant au freinage, vers l'arrière à l'accélération
+			if Transmission.bascule(stab, charge):
+				v.cd_bascule = float(BA.delai)
+				_degats_choc(v, float(BA.degats), "bas")
+				evt({"t": "bascule", "uid": v.uid, "avant": a_long < 0.0, "x": v.x + v.longueur * 0.5, "voie": v.voie_f})
+				log_(Textes.t("trans.bascule_av" if a_long < 0.0 else "trans.bascule_ar", [v.nom]), "alerte")
+	for v in convoi:
+		v.cd_bascule = maxf(0.0, v.cd_bascule - dt)
+
+
+# --- Sauts sur les crêtes (DEC-233, DEC-261) ----------------------------------------------------------------
+# Chaque véhicule suit le sol sous son centre. Si le sol devant se dérobe plus vite que la chute libre (lèvre d'une crête
+# prise vite), il décolle avec la vitesse verticale qu'il avait : vol balistique jusqu'à retoucher le sol. L'atterrissage
+# secoue d'autant plus que la vitesse verticale d'impact est forte et la suspension courte. La tête en l'air : plus de traction.
+func _vols(dt: float) -> void:
+	var S: Dictionary = Transmission.donnees().saut
+	var g := 9.81
+	var tete = _tete()
+	var tete_vol := false
+	var n := maxi(1, int(S.sous_pas))   # sous-pas : le modèle avance par 0,1 s, un vol en dure quelques dixièmes
+	var h := dt / float(n)
+	for v in convoi + ennemis:
+		v.haut_prev = v.haut
+		if not v.actif() or not v.mobile() or v.garage != 0 or dt <= 0.0:
+			v.en_vol = false
+			v.haut = 0.0
+			v.sol_prev = Terrain.relief(v.x + v.longueur * 0.5)
+			continue
+		var vx: float = (v.x - v.x_prev) / dt
+		for k in n:
+			var xc: float = lerpf(v.x_prev, v.x, float(k + 1) / float(n)) + v.longueur * 0.5
+			var sol := Terrain.relief(xc)
+			if v.en_vol:
+				v.vol_vy -= g * h
+				v.vol_y += v.vol_vy * h
+				v.vol_t += h
+				if v.vol_y <= sol:
+					var pente_sol: float = Terrain.relief(xc + 0.25) - Terrain.relief(xc - 0.25)
+					var impact: float = maxf(0.0, vx * pente_sol * 2.0 - v.vol_vy)   # vitesse verticale d'impact, relative au sol
+					v.en_vol = false
+					v.vol_y = sol
+					_atterrir(v, impact, S)
+			elif v.sol_prev != INF and absf(vx) >= float(S.vitesse_min):
+				var vy_sol: float = (sol - v.sol_prev) / h
+				var devant := Terrain.relief(xc + vx * h)
+				if sol + vy_sol * h - 0.5 * g * h * h > devant + float(S.decolle):
+					v.en_vol = true
+					v.vol_y = sol
+					v.vol_vy = vy_sol
+					v.vol_t = 0.0
+					if v == tete and vy_sol > 1.2:
+						log_(Textes.t("trans.saut"), "info")
+			v.sol_prev = sol
+		v.haut = maxf(0.0, v.vol_y - v.sol_prev) if v.en_vol else 0.0
+		if v.en_vol and v == tete:
+			tete_vol = true
+	trans.air = 2.0 * dt if tete_vol else 0.0
+
+
+# Hauteur au-dessus du sol d'un véhicule en vol (0 au sol), pour le dessin
+func hauteur_vol(v: Veh) -> float:
+	return v.haut
+
+
+func _atterrir(v: Veh, impact: float, S: Dictionary) -> void:
+	evt({"t": "atterrit", "x": v.x + v.longueur * 0.5, "voie": v.voie_f, "fort": impact, "uid": v.uid})
+	var deb := float(v.profil.get("physique", {}).get("debattement", 0.2))
+	var d := float(S.degats_par_ms) * maxf(0.0, impact - float(S.impact_seuil)) / (1.0 + float(S.use_suspension) * deb)
+	if d <= 0.0:
+		return
+	_degats_choc(v, d, "bas")
+	_blesser_equipage(v, d * float(S.equipage))
+	if convoi.has(v) and impact >= float(S.log_impact):
+		log_(Textes.t("trans.atterrit"), "alerte")

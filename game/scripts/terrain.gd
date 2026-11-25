@@ -55,12 +55,73 @@ static func _base(x: float) -> float:
 
 
 static func relief(x: float) -> float:
+	var h := _base(x) + crete(x)
+	for p in plats:
+		var w := _poids_plat(p, x)
+		if w > 0.0:
+			h = lerpf(h, float(p[2]), w)
+	return h
+
+
+# Relief de la route sans les crêtes : pente ressentie par le convoi (vitesse en côte) et hauteur suivie par la caméra
+static func route(x: float) -> float:
 	var h := _base(x)
 	for p in plats:
 		var w := _poids_plat(p, x)
 		if w > 0.0:
 			h = lerpf(h, float(p[2]), w)
 	return h
+
+
+# --- Crêtes (DEC-233, DEC-261) : bosses isolées, rampe douce puis lèvre et retombée, comme une dune et sa face sous le vent,
+# un bourrelet de route soulevé ou la lèvre d'un cratère. Un véhicule rapide y décolle vraiment (CombatModele._vols).
+# Placées par un pseudo-hasard stable (même x, même crête) ; fréquence selon le sol (data/transmission.json, bloc « cretes »).
+static var _cr := {}
+
+static func _cretes() -> Dictionary:
+	if _cr.is_empty():
+		_cr = Transmission.donnees().get("cretes", {"pas": 240.0, "proba": {}})
+	return _cr
+
+
+# Probabilité qu'une case de `pas` mètres porte une crête : selon la zone de décor, ou nulle sur route forcée (Kit)
+static func proba_crete() -> float:
+	var C := _cretes()
+	if PhysiqueRoulage.surface_forcee == "route":
+		return 0.0
+	var z := PhysiqueRoulage.surface_forcee if PhysiqueRoulage.surface_forcee != "" else zone
+	return float(C.proba.get(z, 0.0))
+
+
+# Crête de la case i : [début, longueur de montée, longueur de descente, hauteur], ou [] s'il n'y en a pas
+static func crete_case(i: float) -> Array:
+	var C := _cretes()
+	if alea(i, 17.3) >= proba_crete():
+		return []
+	var a := lerpf(float(C.montee[0]), float(C.montee[1]), alea(i, 41.9))
+	var h := minf(lerpf(float(C.hauteur[0]), float(C.hauteur[1]), alea(i, 73.1)), float(C.pente_max) * a * 0.5)
+	var b := a * float(C.descente)
+	var pas := float(C.pas)
+	var marge := float(C.marge)
+	var x0 := i * pas + marge + maxf(0.0, pas - 2.0 * marge - a - b) * alea(i, 5.7)
+	return [x0, a, b, h]
+
+
+static func crete(x: float) -> float:
+	var C := _cretes()
+	if C.proba.is_empty():
+		return 0.0
+	var c := crete_case(floorf(x / float(C.pas)))
+	if c.is_empty():
+		return 0.0
+	var s := x - float(c[0])
+	if s <= 0.0 or s >= float(c[1]) + float(c[2]):
+		return 0.0
+	if s < float(c[1]):
+		var u := s / float(c[1])
+		return float(c[3]) * u * u   # montée : de plus en plus raide jusqu'à la lèvre
+	var w := (s - float(c[1])) / float(c[2])
+	return float(c[3]) * (1.0 - w) * (1.0 - w)   # retombée qui s'adoucit jusqu'au sol
 
 
 # Zones aplanies (villes, DEC-140) : [x0, x1, hauteur] ; rampe douce de RAMPE m de chaque côté
@@ -101,8 +162,9 @@ static func sol(x: float) -> float:
 
 
 # Pente moyenne (m/m) sur 6 m autour de x : positive en montée
+# Les crêtes n'y comptent pas : une bosse de quelques mètres se passe sur l'élan, elle ne ralentit pas la marche.
 static func pente(x: float) -> float:
-	return (relief(x + 3.0) - relief(x - 3.0)) / 6.0
+	return (route(x + 3.0) - route(x - 3.0)) / 6.0
 
 
 # Pseudo-hasard stable pour semer le décor

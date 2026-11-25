@@ -129,6 +129,16 @@ class Veh extends RefCounted:
 	var retour := false           # le combat est fini : il rejoint sa place dans la ligne en restant sur son flanc
 	var voie := 0                 # voie voulue (DEC-250) : -1 fond (gauche du sens de marche), 0 route, 1 devant (droite)
 	var voie_f := 0.0             # voie réelle, glisse vers « voie » pendant le changement (non sauvegardée : on repart au milieu)
+	var en_vol := false           # sauts sur les crêtes (DEC-261), non sauvegardé : en l'air au-dessus du sol
+	var vol_y := 0.0              # hauteur du centre (m, même repère que Terrain.relief)
+	var vol_vy := 0.0             # vitesse verticale (m/s, positive vers le haut)
+	var vol_t := 0.0              # durée du vol en cours (s)
+	var haut := 0.0               # hauteur au-dessus du sol à ce pas et au pas précédent (dessin fluide)
+	var haut_prev := 0.0
+	var sol_prev := INF           # hauteur du sol sous le centre au pas précédent
+	var balance := 0.0            # remorque : écart de voie dû au balancement (DEC-261), positif vers « devant »
+	var balance_v := 0.0
+	var cd_bascule := 0.0         # délai entre deux basculements (DEC-261)
 
 	func remorque() -> bool:
 		return bool(profil.get("remorque", false))

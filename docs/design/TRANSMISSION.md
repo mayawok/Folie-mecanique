@@ -1,6 +1,6 @@
 # Transmission, accélération et son moteur — Folie Mécanique
 
-Statut : **conception décidée le 11/11 (DEC-232), pas encore codée.** Lot de code : DEV-042.
+Statut : **codé et validé** (DEC-234, 11/11) ; **limites levées le 25/11 (DEC-261)** : sauts réels sur des crêtes du relief, balancement et poussée des remorques, basculement au freinage. Lot de code : DEV-042 (fait).
 
 ## Constat
 
@@ -33,3 +33,11 @@ Distances parcourues en baisse : équilibrage du combat à revoir (DEC-113, 229)
 ## Ouvert
 
 Valeurs des rapports et du freinage à régler en essai sur iPhone ; rôle du bruit moteur sur l'attention des ennemis (non décidé).
+
+## Complément du 25/11 (DEC-261)
+
+- **Crêtes** : `Terrain.crete(x)`, bosses isolées (rampe douce, lèvre, retombée), fréquence selon le sol (bloc `cretes` de `transmission.json`). `Terrain.route(x)` = relief sans les crêtes (pente ressentie, caméra).
+- **Sauts** : `CombatModele._vols` (sous-pas), `hauteur_vol(v)`, événement `atterrit` ; dessin dans `convoi_vue.gd` et `VehiculeDessin.atterrir`.
+- **Remorques** : `_balancer_remorques` (`modele_voies.gd`), poussée en descente dans `_params_conduite`.
+- **Basculement** : `Transmission.bascule`, section 5 de `_tenue`, événement `bascule`, `VehiculeDessin.basculer`.
+- **Reste ouvert** : bruit moteur et attention des ennemis ; thèmes reportés de DEC-233 (couple, surchauffe, calage, grand froid, roues motrices, différentiel).

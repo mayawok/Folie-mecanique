@@ -55,10 +55,34 @@ func _voies(dt: float) -> void:
 			if v.camp == "ennemi" and t != null and ecart(v.x, v.longueur, t.x, t.longueur) > float(V.placement):
 				v.voie_f = float(v.voie)   # il arrive de loin : déjà sur sa voie
 				continue
+		if v.remorque() and v.garde == 0 and tracteur_de(v) != null:
+			continue   # la remorque suit son tracteur avec un balancement (_balancer_remorques)
 		var cible := float(v.voie)
 		if absf(cible - v.voie_f) > 0.01 and _voie_occupee(v, v.voie):
 			cible = float(roundi(v.voie_f))   # la place est prise : il reste (ou revient) sur sa voie
 		v.voie_f = move_toward(v.voie_f, cible, pas)
+	_balancer_remorques(dt)
+
+
+# Remorques (DEC-233, DEC-261) : au changement de voie, la remorque suit son tracteur en retard puis le dépasse un peu
+# et revient : un balancement d'autant moins amorti que l'on va vite et que la remorque pèse lourd devant le tracteur.
+func _balancer_remorques(dt: float) -> void:
+	var B: Dictionary = Transmission.donnees().remorques
+	var w := float(B.pulsation)
+	for v in convoi:
+		if not v.remorque() or v.garde != 0:
+			continue
+		var tr = tracteur_de(v)
+		if tr == null or not v.actif():
+			v.balance_v = 0.0
+			if tr != null:
+				v.voie_f = tr.voie_f
+			continue
+		v.voie = tr.voie
+		var r: float = float(v.profil.get("poids_kg", 0.0)) / maxf(1.0, float(tr.profil.get("poids_kg", 1000.0)))
+		var amorti := clampf(float(B.amorti_bas) - float(B.amorti_vitesse) * absf(vitesse_convoi) * (float(B.part_fixe) + minf(r, 2.0)), float(B.amorti_min), 1.0)
+		v.balance_v += (w * w * (tr.voie_f - v.voie_f) - 2.0 * amorti * w * v.balance_v) * dt
+		v.voie_f = clampf(v.voie_f + v.balance_v * dt, -1.0 - float(B.ecart_max), 1.0 + float(B.ecart_max))
 
 
 # Un autre véhicule roule déjà sur cette voie, à hauteur (marge en m de chaque côté)

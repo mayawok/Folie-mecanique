@@ -122,6 +122,11 @@ static func se_renverse(stabilite: float, v: float) -> bool:
 	return absf(v) > float(D.vitesse_max) and stabilite < float(D.renverse_stab) * absf(v) / 8.0
 
 
+# Basculement en long (DEC-261) : la charge (accélération en g, plus la pente) dépasse la stabilité du véhicule
+static func bascule(stabilite: float, charge: float) -> bool:
+	return charge > 0.0 and stabilite < 98.0 and charge > stabilite
+
+
 # Effet accordéon : un suiveur réagit avec un retard tau à la vitesse h de la tête. u = sa vitesse retardée, e = son écart (m) par
 # rapport à sa place : négatif quand la tête accélère (il s'éloigne), positif quand elle freine (il se rapproche) ; l'écart revient à zéro.
 static func suiveur(u: float, e: float, h: float, tau: float, dt: float) -> Array:

@@ -60,6 +60,7 @@ var surface := "route"       # surface sous les roues : poussière, sable, neige
 var _poussiere := []         # {x, y, vx, age, teinte} : projections des roues
 var _t_pous := 0.0
 var _vit_prec := 0.0
+var en_vol := false          # saut sur une crête (DEC-261) : les roues pendent au bout de leur débattement
 
 
 static func donnees() -> Dictionary:
@@ -249,7 +250,7 @@ func _process(delta: float) -> void:
 	for a in _appuis:
 		var repos: float = a.y0 + _h + _p * (a.x - _xc)
 		# chaque roue a son propre ressort : elle rebondit après une bosse, plus ou moins selon l'amortissement
-		var cible: float = _sol(a.x) + a.y0
+		var cible: float = _sol(a.x) + a.y0 if not en_vol else a.y0 - course
 		var kw := raideur * 2.5
 		a.vs += (kw * (cible - a.ys) - amorti * 2.4 * a.vs) * delta
 		a.ys += a.vs * delta
@@ -278,6 +279,20 @@ func _process(delta: float) -> void:
 		f.age += delta
 	_fumee = _fumee.filter(func(f): return f.age < 1.6)
 	queue_redraw()
+
+
+# Retombée d'un saut : la caisse s'écrase sur ses ressorts puis rebondit, d'autant plus que l'impact est fort (m/s)
+func atterrir(impact: float) -> void:
+	_hv -= clampf(impact, 0.0, 6.0) * 0.6
+	_pv += clampf(impact, 0.0, 6.0) * 0.08
+	for a in _appuis:
+		a.vs -= clampf(impact, 0.0, 6.0) * 0.5
+
+
+# Basculement (DEC-261) : la caisse pique fort du nez (freinage) ou se cabre (accélération), puis retombe sur ses ressorts
+func basculer(vers_l_avant: bool) -> void:
+	_pv += -2.6 if vers_l_avant else 2.6
+	_hv -= 0.8
 
 
 func _sol(xl: float) -> float:

@@ -260,7 +260,7 @@ func _camera(delta: float) -> void:
 	var decal_zoom := (vue_base - 1560.0 / cible) * 0.5   # le zoom du joueur reste centré sur la zone cadrée
 	terrain.camera_x = lerpf(terrain.camera_x, gauche - 2.0 + _look_x + decal_zoom, 1.0 - exp(-4.0 * delta))
 	var centre: float = (gauche + droite) * 0.5 + _look_x
-	cam_h = lerpf(cam_h, Terrain.sol(centre) * 0.6 + Terrain.sol(_rtete()) * 0.4 - 0.5, 1.0 - exp(-3.0 * delta))
+	cam_h = lerpf(cam_h, Terrain.route(centre) * 0.6 + Terrain.route(_rtete()) * 0.4 - 0.5, 1.0 - exp(-3.0 * delta))   # sans les crêtes : la caméra ne saute pas avec elles
 	terrain.sol_y = SOL_Y + cam_h * ppm
 
 func _vehicule_monte():
@@ -332,7 +332,15 @@ func _synchroniser() -> void:
 		n.position = Vector2(terrain.ecran_x(cxv) - n.size.x * 0.5, _sy(cxv, true) - n.size.y - _dyv(v))
 		if v.camp == "joueur" and m.ville_repaire() and v == _vehicule_monte():   # monte-charge du repaire (DEC-166)
 			n.position.y -= m.repaire_levee() * ppm
-		n.rotation = -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
+		var rot_sol := -atan2(Terrain.relief(x + v.longueur) - Terrain.relief(x), v.longueur)
+		var hv: float = lerpf(v.haut_prev, v.haut, _alpha) if v is CombatModele.Veh else 0.0
+		n.en_vol = hv > 0.0
+		if n.en_vol:   # saut sur une crête (DEC-261) : au-dessus du sol, le nez suit la trajectoire
+			n.position.y -= hv * ppm * ech
+			var vxv: float = maxf(1.0, absf(v.vitesse_act))
+			n.rotation = lerpf(n.rotation, clampf(-atan2(v.vol_vy, vxv) * signf(v.vitesse_act if v.vitesse_act != 0.0 else 1.0), -0.35, 0.35), 0.25)
+		else:
+			n.rotation = rot_sol
 		n.visible = v.garage == 0
 	for b in m.batiments:
 		vus[b.uid] = true

@@ -71,6 +71,23 @@ func _evenement(e: Dictionary) -> void:
 			_etincelles.append({"p": pe, "age": 0.0, "gros": true})
 			if float(e.taille) >= 2.0:
 				_son("sfx_explosion", -3.0)
+		"atterrit":   # retombée après un saut sur une crête (DEC-261) : poussière, caisse qui s'écrase sur ses ressorts
+			var fa := float(e.fort)
+			var pa := Vector2(float(e.x), CombatModele.voie_dy(float(e.get("voie", 0.0))))
+			_poussieres.append({"p": pa + Vector2(-1.2, 0.0), "age": 0.0, "gros": fa > 2.0})
+			_poussieres.append({"p": pa + Vector2(1.2, 0.0), "age": 0.05, "gros": fa > 2.0})
+			var na = noeuds.get(e.uid)
+			if na is VehiculeDessin:
+				na.atterrir(fa)
+			if fa > 1.6 and _temps - _t_son.get("atterrit", -9.0) > 0.3:
+				_t_son["atterrit"] = _temps
+				_son("sfx_impact_blindage", clampf(-16.0 + 3.0 * fa, -16.0, -3.0))
+		"bascule":   # véhicule instable qui pique du nez ou se cabre (DEC-261)
+			var nb = noeuds.get(e.uid)
+			if nb is VehiculeDessin:
+				nb.basculer(bool(e.avant))
+			_poussieres.append({"p": Vector2(float(e.x), CombatModele.voie_dy(float(e.get("voie", 0.0)))), "age": 0.0, "gros": true})
+			_son("sfx_impact_blindage", -5.0)
 		"crevaison":
 			_etincelles.append({"p": Vector2(float(e.x), 0.2), "age": 0.0, "gros": true})
 			_poussieres.append({"p": Vector2(float(e.x), 0.0), "age": 0.0, "gros": true})
