@@ -11,12 +11,26 @@ static var _css := []       # [gauche, haut, droite, bas, largeur CSS] lus une f
 
 
 static func _lire() -> void:
-	if not _css.is_empty() or not OS.has_feature("web"):
-		return
-	var r = JavaScriptBridge.eval("window.fmZonesSures ? window.fmZonesSures() : ''", true)
-	if typeof(r) == TYPE_STRING and String(r).count(",") == 4:
-		for t in String(r).split(","):
-			_css.append(float(t))
+	if OS.has_feature("web"):
+		if not _css.is_empty():
+			return
+		var r = JavaScriptBridge.eval("window.fmZonesSures ? window.fmZonesSures() : ''", true)
+		if typeof(r) == TYPE_STRING and String(r).count(",") == 4:
+			for t in String(r).split(","):
+				_css.append(float(t))
+	elif OS.has_feature("mobile"):
+		# Appli native (iOS, plus tard Android) : le système donne la zone sûre en pixels d'écran. Relue à chaque appel,
+		# car elle change quand on retourne le téléphone (l'île passe de gauche à droite).
+		_css = ZonesSures.depuis_zone_systeme(DisplayServer.get_display_safe_area(), DisplayServer.window_get_size())
+
+
+# Zone sûre du système (pixels d'écran) → [gauche, haut, droite, bas, largeur], au même format que le navigateur.
+# Séparée pour être testée sans téléphone.
+static func depuis_zone_systeme(sure: Rect2i, ecran: Vector2i) -> Array:
+	if ecran.x <= 0 or ecran.y <= 0 or sure.size.x <= 0 or sure.size.y <= 0:
+		return []
+	return [float(sure.position.x), float(sure.position.y), float(ecran.x - sure.end.x), float(ecran.y - sure.end.y),
+		float(ecran.x)]
 
 
 # Marges en unités de l'interface pour une zone de taille `taille` : {g, h, d, b}.

@@ -347,3 +347,11 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Radar** : portée (140 m), position (sous le bandeau, centré) et lisibilité à régler sur iPhone ; pas d'étiquettes de distance pour l'instant.
 - **Reste** : cartes de convoi plus compactes, icônes à la place du texte, polices (DEC-259 a fait le reste du lot 2).
 
+## OQ-055 — Appli iPhone native : suites (25/11, DEC-260)
+
+- **Identifiant définitif** de l'appli (provisoire : `fr.foliemecanique.prototype`) : à choisir par le créateur avant la première publication ; il ne change plus ensuite.
+- **Team ID** Apple du créateur : à inscrire dans le préréglage iOS quand il l'aura récupéré (guide `docs/MAC_IPHONE.md`, étape 4).
+- **Nom sous l'icône** : « Folie Mécanique (prototype) » est tronqué par l'iPhone ; nom court à choisir avant publication.
+- **Version de Godot** : rester en 4.3 (tests et site web) ou passer à une version plus récente (meilleur support iPhone, mais tout à revérifier).
+- **Compte payant** (99 €/an) : TestFlight et publication ; décision du créateur, pas de date.
+- **iPad** : exclu pour l'instant (iPhone seulement).
