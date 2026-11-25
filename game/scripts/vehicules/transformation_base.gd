@@ -4,7 +4,7 @@ class_name TransformationBase
 # contexte : {niveau, atelier_mobile, mecaniciens, metal, reserve: [{piece, etat}]}
 # Les opérations lourdes (rallonge, essieu ajouté, renfort) exigent un atelier de checkpoint (DEC-121 à 125).
 
-const ONGLETS := [["base", "Base"], ["structure", "Structure"], ["plateau", "Plateau"], ["blindage", "Blindage et options"]]
+static var ONGLETS := [["base", Textes.t("transfo.onglet.base")], ["structure", Textes.t("transfo.onglet.structure")], ["plateau", Textes.t("transfo.onglet.plateau")], ["blindage", Textes.t("transfo.onglet.blindage")]]
 
 
 static func _entree(onglet: String, id: String, nom: String, op: String, args: Dictionary, a: Dictionary, ctx: Dictionary, crans := 1) -> Dictionary:
@@ -22,7 +22,7 @@ static func _entree(onglet: String, id: String, nom: String, op: String, args: D
 			e.metal = float(r.get("cout", {}).get("metal", 0.0))
 			if e.metal > float(ctx.get("metal", 0.0)) and not bool(ctx.get("bac_a_sable", false)):
 				e.ok = false
-				e.raison = "il faut %d métal (vous en avez %d)" % [int(ceil(e.metal)), int(ctx.get("metal", 0.0))]
+				e.raison = Textes.t("transfo.metal") % [int(ceil(e.metal)), int(ctx.get("metal", 0.0))]
 	e.duree_s = BaseVehicule.duree_s(op, ctx, int(ctx.get("mecaniciens", 1)), crans)
 	return e
 
@@ -45,7 +45,7 @@ static func appliquer(a: Dictionary, e: Dictionary) -> Dictionary:
 			return BaseVehicule.poser_module(a, String(g.module))
 		"blinder_zone":
 			return BaseVehicule.blinder_zone(a, String(g.zone), String(g.niveau))
-	return {"ok": false, "a": a, "raison": "action inconnue"}
+	return {"ok": false, "a": a, "raison": Textes.t("transfo.action_inconnue")}
 
 
 static func _de_famille(reserve: Array, famille: String) -> Array:
@@ -80,28 +80,28 @@ static func entrees(a: Dictionary, ctx: Dictionary) -> Array:
 	# Base : moteur, boîte
 	for r in _de_famille(reserve, "moteur"):
 		var n := String(Assemblage.piece(String(r.piece)).get("nom", r.piece))
-		res.append(_entree("base", "moteur_" + String(r.piece), "Moteur : " + n, "changer_moteur", {"moteur": String(r.piece)}, a, ctx))
+		res.append(_entree("base", "moteur_" + String(r.piece), Textes.t("transfo.moteur") + n, "changer_moteur", {"moteur": String(r.piece)}, a, ctx))
 	for bid in R.boites:
 		if bid == String(a.base.boite):
 			continue
-		res.append(_entree("base", "boite_" + String(bid), "Boîte : " + String(R.boites[bid].get("nom", bid)), "changer_boite", {"boite": String(bid)}, a, ctx))
+		res.append(_entree("base", "boite_" + String(bid), Textes.t("transfo.boite") + String(R.boites[bid].get("nom", bid)), "changer_boite", {"boite": String(bid)}, a, ctx))
 	# Structure : rallonge par zone, renfort, essieu ajouté
 	for z in BaseVehicule.ZONES:
-		var nom := {"avant": "Porte-à-faux avant", "milieu": "Empattement", "arriere": "Porte-à-faux arrière"}[z] as String
-		res.append(_entree("structure", "rallonge_" + String(z), "%s +1 cran (%d/%d)" % [nom, int(a.base.crans[z]), int(f.rallonge_max[z])], "rallonger", {"zone": z, "crans": 1}, a, ctx))
-	res.append(_entree("structure", "renfort", "Renforcer le châssis (%d/%d)" % [int(a.base.renforts), int(R.renfort.max)], "renforcer", {}, a, ctx))
+		var nom := {"avant": Textes.t("transfo.porte_a_faux_avant"), "milieu": Textes.t("transfo.empattement"), "arriere": Textes.t("transfo.porte_a_faux_arriere")}[z] as String
+		res.append(_entree("structure", "rallonge_" + String(z), Textes.t("transfo.cran") % [nom, int(a.base.crans[z]), int(f.rallonge_max[z])], "rallonger", {"zone": z, "crans": 1}, a, ctx))
+	res.append(_entree("structure", "renfort", Textes.t("transfo.renfort") % [int(a.base.renforts), int(R.renfort.max)], "renforcer", {}, a, ctx))
 	var essieux := _de_famille(reserve, "essieu")
 	var trains := _de_famille(reserve, "train")
 	if essieux.is_empty() or trains.is_empty():
-		var vide := _entree("structure", "essieu_ajoute", "Ajouter un essieu", "ajouter_essieu", {"x": 0, "essieu": "", "train": ""}, a, ctx)
+		var vide := _entree("structure", "essieu_ajoute", Textes.t("transfo.essieu"), "ajouter_essieu", {"x": 0, "essieu": "", "train": ""}, a, ctx)
 		vide.ok = false
-		vide.raison = "il faut un essieu et un train de roues en réserve"
+		vide.raison = Textes.t("transfo.essieu_reserve")
 		res.append(vide)
 	else:
 		var ei := String(essieux[0].piece)
 		var ti := String(trains[0].piece)
 		var x := colonne_essieu(a, ei, ti)
-		res.append(_entree("structure", "essieu_ajoute", "Ajouter un essieu (%d/%d)" % [a.essieux.size(), int(f.essieux_max)], "ajouter_essieu", {"x": maxi(x, 0), "essieu": ei, "train": ti}, a, ctx))
+		res.append(_entree("structure", "essieu_ajoute", Textes.t("transfo.essieu_n") % [a.essieux.size(), int(f.essieux_max)], "ajouter_essieu", {"x": maxi(x, 0), "essieu": ei, "train": ti}, a, ctx))
 	# Plateau
 	for mid in f.modules:
 		var m: Dictionary = R.modules[mid]
@@ -109,7 +109,7 @@ static func entrees(a: Dictionary, ctx: Dictionary) -> Array:
 		e.actif = String(a.base.module) == String(mid)
 		if e.actif:
 			e.ok = false
-			e.raison = "déjà monté"
+			e.raison = Textes.t("transfo.deja_monte")
 		res.append(e)
 	# Blindage : zone × niveau
 	for z in R.blindage.zones:
@@ -118,7 +118,7 @@ static func entrees(a: Dictionary, ctx: Dictionary) -> Array:
 			e.actif = String(a.base.blindage.get(z, "aucun")) == String(nid)
 			if e.actif:
 				e.ok = false
-				e.raison = "déjà en place"
+				e.raison = Textes.t("transfo.deja_place")
 			res.append(e)
 	return res
 

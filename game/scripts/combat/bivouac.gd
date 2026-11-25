@@ -20,12 +20,12 @@ const ALLUMAGE := 4.0         # s pour que le feu prenne
 const EXTINCTION := 2.5       # s pour l'éteindre
 
 # Équipage par défaut : rôle, silhouette, portière
-const EQUIPAGE := [
-	{"nom": "Chef", "role": "vigie", "variante": "chef", "porte": "trappe"},
-	{"nom": "Mécano", "role": "mecanicien", "variante": "mecano", "porte": "porte_avant", "poste": "moteur"},
-	{"nom": "Mécano 2", "role": "mecanicien", "variante": "mecano", "porte": "porte_arriere", "poste": "roue"},
-	{"nom": "Cuisinière", "role": "cuisinier", "variante": "survivante", "porte": "porte_arriere"},
-	{"nom": "Tireur", "role": "repos", "variante": "tireur", "porte": "porte_arriere"},
+static var EQUIPAGE := [
+	{"nom": Textes.t("bivouac.chef"), "role": "vigie", "variante": "chef", "porte": "trappe"},
+	{"nom": Textes.t("bivouac.mecano"), "role": "mecanicien", "variante": "mecano", "porte": "porte_avant", "poste": "moteur"},
+	{"nom": Textes.t("bivouac.mecano2"), "role": "mecanicien", "variante": "mecano", "porte": "porte_arriere", "poste": "roue"},
+	{"nom": Textes.t("bivouac.cuisiniere"), "role": "cuisinier", "variante": "survivante", "porte": "porte_arriere"},
+	{"nom": Textes.t("bivouac.tireur"), "role": "repos", "variante": "tireur", "porte": "porte_arriere"},
 ]
 
 var phase := "route"

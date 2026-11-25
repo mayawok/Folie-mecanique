@@ -626,9 +626,9 @@ func _dortoir() -> void:
 # Maire, mécanicien, chef d'atelier ; bulles des habitants
 func _personnages(V: Dictionary) -> void:
 	var dedans: bool = String(V.phase) in ["entree", "dedans", "depart", "rassemblement"] or (_pillee and String(V.phase) == "approche")
-	var roles := [["mairie", 90.0, "Le maire"], ["garage", 56.0, "Mécanicien"], ["atelier", 39.0, "Atelier"]]
+	var roles := [["mairie", 90.0, Textes.t("ville.role_maire")], ["garage", 56.0, Textes.t("ville.role_mecanicien")], ["atelier", 39.0, Textes.t("ville.role_atelier")]]
 	if _pillee:
-		roles = [["mairie", 90.0, "Rattrapez-les !"]]
+		roles = [["mairie", 90.0, Textes.t("ville.rattrapez")]]
 	for rr in roles:
 		var x: float = _x0 + float(rr[1])
 		if not _visible(x - 2.0, x + 2.0):
@@ -644,7 +644,7 @@ func _personnages(V: Dictionary) -> void:
 		var hb := pied + Vector2(0, -2.6 * _ppm - (4.0 * sin(_t * 3.0) if dedans else 0.0))
 		var mot := String(rr[2])
 		if rr[0] == "mairie" and String(V.phase) == "rassemblement" and float(V.t) >= 4.0:
-			mot = "Bonne chance !"   # le maire salue le départ en mission (DEC-145)
+			mot = Textes.t("ville.bonne_chance")   # le maire salue le départ en mission (DEC-145)
 		_bulle(hb, mot, dedans)
 	if not dedans or String(V.phase) == "rassemblement":   # pendant la scène, on n'entend que l'escorte
 		return

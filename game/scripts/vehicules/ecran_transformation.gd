@@ -62,9 +62,9 @@ func _ready() -> void:
 	var pieds := HBoxContainer.new()
 	pieds.add_theme_constant_override("separation", 10)
 	gauche.add_child(pieds)
-	pieds.add_child(_bouton("Annuler la dernière", _annuler_derniere, 56))
-	pieds.add_child(_bouton("Quitter", func(): ferme.emit(false, a, 0.0, 0.0), 56))
-	pieds.add_child(_bouton("Valider", func(): ferme.emit(true, a, _metal, _duree), 56, true))
+	pieds.add_child(_bouton(Textes.t("transfo.annuler"), _annuler_derniere, 56))
+	pieds.add_child(_bouton(Textes.t("transfo.quitter"), func(): ferme.emit(false, a, 0.0, 0.0), 56))
+	pieds.add_child(_bouton(Textes.t("transfo.valider"), func(): ferme.emit(true, a, _metal, _duree), 56, true))
 	var droite := VBoxContainer.new()
 	droite.size_flags_horizontal = SIZE_EXPAND_FILL
 	racine.add_child(droite)
@@ -144,7 +144,7 @@ func _ajuster() -> void:
 
 
 func _duree_txt(s: float) -> String:
-	return "%d min %02d s" % [int(s) / 60, int(s) % 60]
+	return Textes.t("transfo.duree") % [int(s) / 60, int(s) % 60]
 
 
 func _maj() -> void:
@@ -167,7 +167,7 @@ func _maj() -> void:
 		b.disabled = not bool(e.ok)
 		carte.add_child(b)
 		if bool(e.ok):
-			carte.add_child(_texte("%d métal · %s" % [int(e.metal), _duree_txt(float(e.duree_s))], 16, C_DISCRET))
+			carte.add_child(_texte(Textes.t("transfo.cout") % [int(e.metal), _duree_txt(float(e.duree_s))], 16, C_DISCRET))
 		else:
 			carte.add_child(_texte(String(e.raison), 16, C_ROUGE))
 		_liste.add_child(carte)

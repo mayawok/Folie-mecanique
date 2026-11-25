@@ -98,10 +98,10 @@ static func niveau_effectif(contexte: Dictionary) -> int:
 static func permis(op_id: String, contexte := {}) -> Dictionary:
 	var op := operation(op_id)
 	if op.is_empty():
-		return {"ok": false, "raison": "opération inconnue"}
+		return {"ok": false, "raison": Textes.t("base.op_inconnue")}
 	var requis := int(op.niveau)
 	if niveau_effectif(contexte) < requis:
-		return {"ok": false, "raison": "%s : il faut %s" % [String(op.nom), String(regles().niveaux_lieu[str(requis)])]}
+		return {"ok": false, "raison": Textes.t("base.il_faut") % [String(op.nom), String(regles().niveaux_lieu[str(requis)])]}
 	return {"ok": true, "raison": ""}
 
 
@@ -206,20 +206,20 @@ static func _inserer(a: Dictionary, cut: int, n: int, source: int) -> Dictionary
 # "arriere" (porte-à-faux arrière). Garage seulement (voir permis("rallonger")).
 static func rallonger(a: Dictionary, zone: String, crans: int, ecart := -1) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	if not zone in ZONES or crans < 1:
-		return _non(a, "zone ou nombre de crans invalide")
+		return _non(a, Textes.t("base.crans_invalides"))
 	var f := fiche(id_de(a))
 	var deja := int(a.base.crans[zone])
 	var plafond := int(f.rallonge_max[zone])
 	if deja + crans > plafond:
-		return _non(a, "rallonge maximale de cette base : %d cran(s) en %s" % [plafond, zone])
+		return _non(a, Textes.t("base.rallonge_max") % [plafond, zone])
 	var n := crans * int(regles().cran_cases)
 	var bx := bornes_x(a)
 	if bx.x > bx.y:
-		return _non(a, "pas de châssis")
+		return _non(a, Textes.t("base.pas_chassis"))
 	if bx.y + n >= ConstructionLibre.taille().x:
-		return _non(a, "la grille n'a plus de place")
+		return _non(a, Textes.t("base.grille_pleine"))
 	var cut := 0
 	var source := 0
 	if zone == "avant":
@@ -231,10 +231,10 @@ static func rallonger(a: Dictionary, zone: String, crans: int, ecart := -1) -> D
 	else:
 		cut = _coupe_milieu(a, ecart)
 		if cut < 0:
-			return _non(a, "pas de coupe possible entre les essieux (une pièce est à cheval)")
+			return _non(a, Textes.t("base.pas_coupe"))
 		source = cut - 1
 	if zone != "milieu" and not _coupe_possible(a, cut):
-		return _non(a, "une pièce est à cheval sur la coupe")
+		return _non(a, Textes.t("base.a_cheval"))
 	var b := _inserer(a, cut, n, source)
 	b.base.crans[zone] = deja + crans
 	var metal := float(crans) * float(operation("rallonger").metal_par_cran)
@@ -243,10 +243,10 @@ static func rallonger(a: Dictionary, zone: String, crans: int, ecart := -1) -> D
 
 static func renforcer(a: Dictionary) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	var RF: Dictionary = regles().renfort
 	if int(a.base.renforts) >= int(RF.max):
-		return _non(a, "renforts au maximum (%d)" % int(RF.max))
+		return _non(a, Textes.t("base.renforts_max") % int(RF.max))
 	var b := a.duplicate(true)
 	b.base.renforts = int(b.base.renforts) + 1
 	b.base.etat_chassis = minf(1.0, float(b.base.etat_chassis) + float(RF.etat_gain))   # le renfort soudé remet le châssis en état
@@ -256,17 +256,17 @@ static func renforcer(a: Dictionary) -> Dictionary:
 # --- P1 : essieux, roues, moteur, boîte -----------------------------------------------------------
 static func ajouter_essieu(a: Dictionary, x: int, essieu_id: String, train_id: String, etat := 1.0) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	var f := fiche(id_de(a))
 	if a.essieux.size() >= int(f.essieux_max):
-		return _non(a, "nombre maximal d'essieux atteint (%d)" % int(f.essieux_max))
+		return _non(a, Textes.t("base.essieux_max") % int(f.essieux_max))
 	if not ConstructionLibre.essieu_en(a, x).is_empty():
-		return _non(a, "il y a déjà un essieu à cette colonne")
+		return _non(a, Textes.t("base.essieu_present"))
 	if String(Assemblage.piece(essieu_id).get("famille", "")) != "essieu":
-		return _non(a, "ce n'est pas un essieu")
+		return _non(a, Textes.t("base.pas_essieu"))
 	var b := ConstructionLibre.poser_essieu(a, x, essieu_id, train_id)
 	if b.is_empty():
-		return _non(a, "pas de châssis à cette colonne")
+		return _non(a, Textes.t("base.pas_chassis_colonne"))
 	for e in b.essieux:
 		if int(e.x) == x:
 			e.etat = etat
@@ -277,12 +277,12 @@ static func ajouter_essieu(a: Dictionary, x: int, essieu_id: String, train_id: S
 static func changer_essieu(a: Dictionary, x: int, essieu_id: String, train_id: String, etat := 1.0) -> Dictionary:
 	var ancien := ConstructionLibre.essieu_en(a, x)
 	if ancien.is_empty():
-		return _non(a, "aucun essieu à cette colonne")
+		return _non(a, Textes.t("base.aucun_essieu"))
 	if String(Assemblage.piece(essieu_id).get("famille", "")) != "essieu":
-		return _non(a, "ce n'est pas un essieu")
+		return _non(a, Textes.t("base.pas_essieu"))
 	var b := ConstructionLibre.poser_essieu(a, x, essieu_id, train_id)
 	if b.is_empty():
-		return _non(a, "essieu impossible à cette colonne")
+		return _non(a, Textes.t("base.essieu_impossible"))
 	for e in b.essieux:
 		if int(e.x) == x:
 			e.etat = etat
@@ -295,10 +295,10 @@ static func changer_essieu(a: Dictionary, x: int, essieu_id: String, train_id: S
 static func changer_roue(a: Dictionary, x: int, train_id: String, etat := 1.0) -> Dictionary:
 	var ancien := ConstructionLibre.essieu_en(a, x)
 	if ancien.is_empty():
-		return _non(a, "aucun essieu à cette colonne")
+		return _non(a, Textes.t("base.aucun_essieu"))
 	var b := ConstructionLibre.monter_train(a, x, train_id)
 	if b.is_empty():
-		return _non(a, "roue impossible")
+		return _non(a, Textes.t("base.roue_impossible"))
 	var retire := []
 	if String(ancien.get("train", "")) != "":
 		retire.append({"piece": String(ancien.train), "etat": float(ancien.get("etat", 0.5))})
@@ -307,30 +307,30 @@ static func changer_roue(a: Dictionary, x: int, train_id: String, etat := 1.0) -
 
 static func changer_moteur(a: Dictionary, nouveau_id: String, etat := 1.0) -> Dictionary:
 	if String(Assemblage.piece(nouveau_id).get("famille", "")) != "moteur":
-		return _non(a, "ce n'est pas un moteur")
+		return _non(a, Textes.t("base.pas_moteur"))
 	var idx := -1
 	for i in a.pieces.size():
 		if String(Assemblage.piece(String(a.pieces[i].piece)).get("famille", "")) == "moteur":
 			idx = i
 			break
 	if idx < 0:
-		return _non(a, "aucun moteur à remplacer")
+		return _non(a, Textes.t("base.aucun_moteur"))
 	var vieux: Dictionary = a.pieces[idx]
 	var pos := Vector2i(int(vieux.pos[0]), int(vieux.pos[1]))
 	var b := a.duplicate(true)
 	b.pieces.remove_at(idx)
 	var c := ConstructionLibre.poser(b, nouveau_id, pos)
 	if c.is_empty():
-		return _non(a, "ce moteur ne rentre pas à cet emplacement")
+		return _non(a, Textes.t("base.moteur_rentre_pas"))
 	c.pieces[c.pieces.size() - 1].etat = etat
 	return {"ok": true, "a": c, "raison": "", "retire": [{"piece": String(vieux.piece), "etat": float(vieux.get("etat", 0.5))}]}
 
 
 static func changer_boite(a: Dictionary, boite_id: String, etat := 1.0) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	if not regles().boites.has(boite_id):
-		return _non(a, "boîte inconnue")
+		return _non(a, Textes.t("base.boite_inconnue"))
 	var b := a.duplicate(true)
 	var retire := [{"piece": String(b.base.boite), "etat": float(b.base.etat_boite)}]
 	b.base.boite = boite_id
@@ -347,14 +347,14 @@ static func plateau_cases(a: Dictionary) -> int:   # longueur du plateau : base 
 
 static func poser_module(a: Dictionary, module_id: String) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	var f := fiche(id_de(a))
 	var M: Dictionary = regles().modules
 	if not M.has(module_id) or not module_id in f.modules:
-		return _non(a, "ce module ne se monte pas sur cette base")
+		return _non(a, Textes.t("base.module_refuse"))
 	var m: Dictionary = M[module_id]
 	if plateau_cases(a) < int(m.cases_min):
-		return _non(a, "plateau trop court : %d cases, il en faut %d" % [plateau_cases(a), int(m.cases_min)])
+		return _non(a, Textes.t("base.plateau_court") % [plateau_cases(a), int(m.cases_min)])
 	var b := a.duplicate(true)
 	var ancien := String(b.base.module)
 	b.base.module = module_id
@@ -376,10 +376,10 @@ static func effets_module(a: Dictionary) -> Dictionary:
 
 static func blinder_zone(a: Dictionary, zone: String, niveau_id: String) -> Dictionary:
 	if not est_base(a):
-		return _non(a, "ce véhicule n'est pas une base")
+		return _non(a, Textes.t("base.pas_base"))
 	var B: Dictionary = regles().blindage
 	if not zone in B.zones or not B.niveaux.has(niveau_id):
-		return _non(a, "zone ou niveau de blindage inconnu")
+		return _non(a, Textes.t("base.blindage_inconnu"))
 	var b := a.duplicate(true)
 	if niveau_id == "aucun":
 		b.base.blindage.erase(zone)

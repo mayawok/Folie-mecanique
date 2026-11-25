@@ -84,7 +84,7 @@ func _generer_carte() -> void:
 		var fac: String = String(l.get("faction", ""))
 		secteurs.append({"id": secteurs.size(), "lieu": String(l.id), "nom": String(l.nom), "pos": CarteMonde.pos(String(l.id)),
 			"niveau": int(l.get("niveau", 0)), "faction": 2, "fac": fac,
-			"faction_nom": String(CarteMonde.donnees().factions.get(fac, {}).get("nom", "Sans faction")),
+			"faction_nom": String(CarteMonde.donnees().factions.get(fac, {}).get("nom", Textes.t("faction.aucune"))),
 			"region": String(l.get("region", "")), "zone": String(l.get("zone", "terre")),
 			"ville": String(l.nom), "maire": String(l.get("maire", "Morel"))})
 	secteur = indice_lieu("kerbrume")
@@ -183,7 +183,7 @@ func choisir_destination(id: int) -> bool:
 	trajet = {"dest": id, "reste": total, "total": total}
 	Terrain.zone = String(secteurs[secteur].zone)
 	m._prochain_x = INF
-	var route := "de route" if m.mission_active() else "de route calme"   # en mission, la route est dangereuse (DEC-146)
+	var route := Textes.t("monde.de_route") if m.mission_active() else Textes.t("monde.de_route_calme")   # en mission, la route est dangereuse (DEC-146)
 	m.log_(Textes.t("monde.001", [secteurs[id].nom, secteurs[id].faction_nom, secteurs[id].niveau, int(total), route]), "info")
 	m.log_(rumeur(id), "info")   # indice diffus de ce qui attend (DEC-172)
 	m.evt({"t": "cap"})
@@ -209,14 +209,14 @@ func nuit() -> bool:
 
 func periode() -> String:
 	if heure < 0.2:
-		return "Aube"
+		return Textes.t("heure.aube")
 	if heure < 0.5:
-		return "Matin"
+		return Textes.t("heure.matin")
 	if heure < CREPUSCULE:
-		return "Après-midi"
+		return Textes.t("heure.apres_midi")
 	if heure < 0.72:
-		return "Soir"
-	return "Nuit" if heure < AUBE else "Aube"
+		return Textes.t("heure.soir")
+	return Textes.t("heure.nuit") if heure < AUBE else Textes.t("heure.aube")
 
 
 func a_abri() -> bool:
@@ -653,7 +653,7 @@ func _assauts(dt: float) -> void:
 	var n: int = 2 + m.rng.randi() % 2 + mini(2, niv / 2)
 	for i in n:
 		creer_pieton("loup" if loups else "pillard", x0 + (i * 3.0) * (1.0 if devant else -1.0))
-	m.log_(Textes.t("monde.009", [("loups" if loups else "pillards à pied")]), "alerte")
+	m.log_(Textes.t("monde.009", [(Textes.t("monde.loups") if loups else Textes.t("monde.pillards_a_pied"))]), "alerte")
 	m.evt({"t": "meute" if loups else "pillards"})
 
 
@@ -710,7 +710,7 @@ func generer(choix: Dictionary, x: float, r: RandomNumberGenerator) -> float:
 		var idx: int = r.randi() % offres.size()
 		_uid += 1
 		var types := ["marchand", "refugie", "mecano", "eclaireur"]
-		pnj.append({"uid": _uid, "x": x + 12.0, "type": types[idx % types.size()], "nom": offres[idx].get("nom", "Voyageur"),
+		pnj.append({"uid": _uid, "x": x + 12.0, "type": types[idx % types.size()], "nom": offres[idx].get("nom", Textes.t("monde.voyageur")),
 			"offre": idx, "statut": "attend", "peau": r.randi() % 4})
 		x += 14.0
 		m.log_(Textes.t("monde.011"), "info")
@@ -786,11 +786,11 @@ func _quete() -> void:
 
 func actions_camp() -> Array:
 	return [
-		{"id": "munitions", "txt": "40 munitions contre 10 métal", "prend": {"metal": 10}, "donne": {"ammo": 40}},
-		{"id": "carburant", "txt": "25 L de gazole contre 10 métal", "prend": {"metal": 10}, "donne": {"gazole": 25}},
-		{"id": "essence", "txt": "25 L d'essence contre 12 métal", "prend": {"metal": 12}, "donne": {"essence": 25}},
-		{"id": "atelier", "txt": "Atelier : toutes les pièces remises à 70 % (15 métal)", "prend": {"metal": 15}, "donne": {}},
-		{"id": "repos", "txt": "Se reposer : soigne l'équipage (la nuit passe vite)", "prend": {}, "donne": {}},
+		{"id": "munitions", "txt": Textes.t("offre.munitions"), "prend": {"metal": 10}, "donne": {"ammo": 40}},
+		{"id": "carburant", "txt": Textes.t("offre.gazole"), "prend": {"metal": 10}, "donne": {"gazole": 25}},
+		{"id": "essence", "txt": Textes.t("offre.essence"), "prend": {"metal": 12}, "donne": {"essence": 25}},
+		{"id": "atelier", "txt": Textes.t("offre.atelier"), "prend": {"metal": 15}, "donne": {}},
+		{"id": "repos", "txt": Textes.t("offre.repos"), "prend": {}, "donne": {}},
 	]
 
 

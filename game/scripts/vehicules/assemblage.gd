@@ -7,8 +7,8 @@ class_name Assemblage
 extends RefCounted
 
 const FAMILLES_PV := ["chassis", "roulement", "suspension", "moteur", "cabine"]
-const NOMS_FAMILLES := {"chassis": "un châssis", "roulement": "des roues", "suspension": "une suspension", "moteur": "un moteur",
-	"cabine": "un siège", "arme": "une arme", "attelage": "un attelage"}
+static var NOMS_FAMILLES := {"chassis": Textes.t("famille.chassis"), "roulement": Textes.t("famille.roulement"), "suspension": Textes.t("famille.suspension"), "moteur": Textes.t("famille.moteur"),
+	"cabine": Textes.t("famille.cabine"), "arme": Textes.t("famille.arme"), "attelage": Textes.t("famille.attelage")}
 
 static var _pieces := {}
 static var _assemblages := {}
@@ -80,28 +80,28 @@ static func valider(a: Dictionary) -> Array:
 	var err := []
 	var ch := piece(a.get("chassis", ""))
 	if ch.is_empty() or ch.famille != "chassis":
-		return [{"code": "chassis", "texte": "Aucun châssis"}]
+		return [{"code": "chassis", "texte": Textes.t("assemb.err.chassis")}]
 	var gw := int(ch.grille[0])
 	var gh := int(ch.grille[1])
 	var occupe := {}   # couche -> {Vector2i: id}
 	for p in _places(a):
 		if p.fiche.is_empty():
-			err.append({"code": "inconnue", "texte": "Pièce inconnue : %s" % p.id})
+			err.append({"code": "inconnue", "texte": Textes.t("assemb.err.inconnue") % p.id})
 			continue
 		var fam: String = p.fiche.famille
 		var e := Vector2i(int(p.fiche.emprise[0]), int(p.fiche.emprise[1]))
 		var pos: Vector2i = p.pos
 		if pos.x < 0 or pos.y < 0 or pos.x + e.x > gw or pos.y + e.y > gh:
-			err.append({"code": "hors_grille", "texte": "%s dépasse du châssis" % p.fiche.nom})
+			err.append({"code": "hors_grille", "texte": Textes.t("assemb.err.hors_grille") % p.fiche.nom})
 			continue
 		if fam == "roulement" and pos.y != 0:
-			err.append({"code": "roulement_haut", "texte": "%s doit toucher le sol" % p.fiche.nom})
+			err.append({"code": "roulement_haut", "texte": Textes.t("assemb.err.roulement_haut") % p.fiche.nom})
 		if fam == "arme" and pos.y + e.y < gh / 2:
-			err.append({"code": "arme_basse", "texte": "%s doit être en haut" % p.fiche.nom})
+			err.append({"code": "arme_basse", "texte": Textes.t("assemb.err.arme_basse") % p.fiche.nom})
 		var couche: String = p.fiche.get("couche", R.couches.get(fam, fam))
 		for req in p.fiche.get("requiert", []):
 			if _famille(a, req).is_empty():
-				err.append({"code": "requiert", "texte": "%s demande : %s" % [p.fiche.nom, NOMS_FAMILLES.get(req, req)]})
+				err.append({"code": "requiert", "texte": Textes.t("assemb.err.requiert") % [p.fiche.nom, NOMS_FAMILLES.get(req, req)]})
 		if not occupe.has(couche):
 			occupe[couche] = {}
 		var chevauche := ""
@@ -112,21 +112,21 @@ static func valider(a: Dictionary) -> Array:
 					chevauche = occupe[couche][c]
 				occupe[couche][c] = p.fiche.nom
 		if chevauche != "":
-			err.append({"code": "chevauchement", "texte": "%s chevauche %s" % [p.fiche.nom, chevauche]})
+			err.append({"code": "chevauchement", "texte": Textes.t("assemb.err.chevauchement") % [p.fiche.nom, chevauche]})
 	if _famille(a, "roulement").is_empty():
-		err.append({"code": "roulement", "texte": "Pas de roues ni de chenilles"})
+		err.append({"code": "roulement", "texte": Textes.t("assemb.err.roulement")})
 	if _famille(a, "moteur").size() != 1:
-		err.append({"code": "moteur", "texte": "Il faut un moteur, et un seul"})
+		err.append({"code": "moteur", "texte": Textes.t("assemb.err.moteur")})
 	if _famille(a, "suspension").is_empty():
-		err.append({"code": "suspension", "texte": "Pas de suspension"})
+		err.append({"code": "suspension", "texte": Textes.t("assemb.err.suspension")})
 	var sieges := 0
 	for p in _famille(a, "cabine"):
 		sieges += int(p.fiche.sieges)
 	if sieges < 1:
-		err.append({"code": "cabine", "texte": "Aucun siège"})
+		err.append({"code": "cabine", "texte": Textes.t("assemb.err.cabine")})
 	var charge := charge_admissible(a)
 	if charge > 0.0 and poids(a) > charge * float(R.surcharge_max):
-		err.append({"code": "surcharge", "texte": "Trop lourd pour le train de roulement"})
+		err.append({"code": "surcharge", "texte": Textes.t("assemb.err.surcharge")})
 	return err
 
 
@@ -248,7 +248,7 @@ static func manquantes(plan: Dictionary, dispo: Array) -> Array:
 const DEFAUTS_POSE := ["hors_grille", "chevauchement", "roulement_haut", "arme_basse", "inconnue"]
 
 
-static func nouvelle(chassis_id: String, nom := "Assemblage libre") -> Dictionary:
+static func nouvelle(chassis_id: String, nom := Textes.t("assemb.libre")) -> Dictionary:
 	return {"nom": nom, "chassis": chassis_id, "pieces": [], "plaques": 0}
 
 

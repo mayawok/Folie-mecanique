@@ -27,17 +27,17 @@ const C_SOL := Color(0.55, 0.45, 0.3)
 const C_TUILE := Color(0.12, 0.115, 0.11, 0.82)
 # Barre d'icônes : deux actions, puis les catégories dans l'ordre de construction
 const ACTIONS := ["valider", "quitter"]
-const ONGLETS := [["voitures", "Voitures"], ["chassis", "Châssis"], ["essieux", "Essieux"], ["roues", "Roues"], ["suspension", "Suspension"], ["moteur", "Moteurs"],
-	["poste", "Postes"], ["coque", "Carrosserie"], ["toles", "Tôles"], ["arme", "Armes"], ["equipement", "Options"], ["equipage", "Équipage"],
-	["peinture", "Peinture"], ["vehicule", "Véhicule"], ["plans", "Plans"], ["vehicules", "Véhicules"]]
-const AIDES := {"voitures": "Plateforme et garde au sol", "chassis": "Glissez d'un coin à l'autre", "essieux": "Touchez une colonne", "roues": "Glissez vers un essieu",
-	"suspension": "Glissez sur un pont rigide", "moteur": "Glissez sur la grille", "poste": "Glissez sur la grille",
-	"coque": "Glissez ; se superposent", "toles": "Glissez d'un point à un autre", "arme": "Glissez sur la grille",
-	"equipement": "Collées à l'extérieur", "equipage": "Touchez un siège", "peinture": "Ton de tout le véhicule",
-	"vehicule": "Glissez le véhicule entier", "plans": "Enregistrer ou charger", "vehicules": "Partir d'un véhicule"}
+static var ONGLETS := [["voitures", Textes.t("grille.onglet.voitures")], ["chassis", Textes.t("grille.onglet.chassis")], ["essieux", Textes.t("grille.onglet.essieux")], ["roues", Textes.t("grille.onglet.roues")], ["suspension", Textes.t("grille.onglet.suspension")], ["moteur", Textes.t("grille.onglet.moteur")],
+	["poste", Textes.t("grille.onglet.poste")], ["coque", Textes.t("grille.onglet.coque")], ["toles", Textes.t("grille.onglet.toles")], ["arme", Textes.t("grille.onglet.arme")], ["equipement", Textes.t("grille.onglet.equipement")], ["equipage", Textes.t("grille.onglet.equipage")],
+	["peinture", Textes.t("grille.onglet.peinture")], ["vehicule", Textes.t("grille.onglet.vehicule")], ["plans", Textes.t("grille.onglet.plans")], ["vehicules", Textes.t("grille.onglet.vehicules")]]
+static var AIDES := {"voitures": Textes.t("grille.aide.voitures"), "chassis": Textes.t("grille.aide.chassis"), "essieux": Textes.t("grille.aide.essieux"), "roues": Textes.t("grille.aide.roues"),
+	"suspension": Textes.t("grille.aide.suspension"), "moteur": Textes.t("grille.aide.grille"), "poste": Textes.t("grille.aide.grille"),
+	"coque": Textes.t("grille.aide.coque"), "toles": Textes.t("grille.aide.toles"), "arme": Textes.t("grille.aide.grille"),
+	"equipement": Textes.t("grille.aide.equipement"), "equipage": Textes.t("grille.aide.equipage"), "peinture": Textes.t("grille.aide.peinture"),
+	"vehicule": Textes.t("grille.aide.vehicule"), "plans": Textes.t("grille.aide.plans"), "vehicules": Textes.t("grille.aide.vehicules")}
 # Peintures de bande (DEC-080) : un ton par faction, à régler
-const PEINTURES := [["", "Sans"], ["#5E6238", "Kaki"], ["#B0623A", "Rouille"], ["#3A3A38", "Suie"], ["#C9A23A", "Jaune"],
-	["#6A86A8", "Bleu horizon"], ["#8A3030", "Sang"], ["#D8D4C8", "Hiver"], ["#4E6E58", "Vert-de-gris"]]
+static var PEINTURES := [["", Textes.t("peinture.sans")], ["#5E6238", Textes.t("peinture.kaki")], ["#B0623A", Textes.t("peinture.rouille")], ["#3A3A38", Textes.t("peinture.suie")], ["#C9A23A", Textes.t("peinture.jaune")],
+	["#6A86A8", Textes.t("peinture.bleu_horizon")], ["#8A3030", Textes.t("peinture.sang")], ["#D8D4C8", Textes.t("peinture.hiver")], ["#4E6E58", Textes.t("peinture.vert_de_gris")]]
 const COULEURS := {"moteur": Color("#A8552F"), "radiateur": Color("#6A6A60"), "cabine": Color("#5E6238"), "poste": Color("#6E5A3A"), "arme": Color("#9A2F2F"),
 	"equipement": Color("#8A7A3A"), "coque": Color("#7A6A55"), "greffe": Color("#6A5A4A")}
 # Essieux, roues et liaisons : lus dans le catalogue par famille (ajouter un modèle = une entrée dans pieces.json)
@@ -45,10 +45,10 @@ static func _famille(fam: String) -> Array:
 	var res: Array = Assemblage.catalogue().pieces.keys().filter(func(id): return Assemblage.piece(id).get("famille", "") == fam and not Assemblage.piece(id).get("retire", false))
 	res.sort_custom(func(p, q): return float(Assemblage.piece(p).get("charge_kg", 0)) < float(Assemblage.piece(q).get("charge_kg", 0)))
 	return res
-const NOMS_ROLES := {"conducteur": "Conducteur", "tireur": "Tireur", "chargeur": "Chargeur", "chef": "Chef de char",
-	"mecanicien": "Mécanicien", "infirmier": "Infirmier", "passager": "Passager"}
-const AIDE_ROLES := {"conducteur": "obligatoire", "tireur": "sert une arme", "chargeur": "recharge plus vite", "chef": "précision +10 %",
-	"mecanicien": "répare plus vite", "infirmier": "soigne", "passager": "aucun rôle"}
+static var NOMS_ROLES := {"conducteur": Textes.t("role.conducteur"), "tireur": Textes.t("role.tireur"), "chargeur": Textes.t("role.chargeur"), "chef": Textes.t("role.chef"),
+	"mecanicien": Textes.t("role.mecanicien"), "infirmier": Textes.t("role.infirmier"), "passager": Textes.t("role.passager")}
+static var AIDE_ROLES := {"conducteur": Textes.t("role.aide.conducteur"), "tireur": Textes.t("role.aide.tireur"), "chargeur": Textes.t("role.aide.chargeur"), "chef": Textes.t("role.aide.chef"),
+	"mecanicien": Textes.t("role.aide.mecanicien"), "infirmier": Textes.t("role.aide.infirmier"), "passager": Textes.t("role.aide.passager")}
 const BROUILLON := "user://grille_brouillon.json"
 const DECALAGE_DOIGT := 1.6   # la pièce glissée flotte au-dessus du doigt (en cases) pour rester visible
 const ZOOM_MIN := 0.4         # vue de la grille : taille d'une case, de 0,4 à 3,5 fois le cadrage de base
@@ -126,7 +126,7 @@ func ouvrir(modele, vehicule_uid: int) -> void:
 	var b := _lire_brouillon()
 	if not b.is_empty():
 		a = b
-		_dire("Brouillon repris.")
+		_dire(Textes.t("grille.brouillon"))
 
 
 func _notification(what: int) -> void:
@@ -557,19 +557,19 @@ func _appuyer(cell: Vector2i) -> void:
 	if _verrou_berliet() and onglet != "vehicule":   # Berliet (DEC-167) : châssis, cabine, sièges et essieu avant ne bougent pas
 		var ipb := ConstructionLibre.piece_en(a, cell)
 		if ipb >= 0 and ConstructionLibre.fixe_berliet(a, "piece", a.pieces[ipb].piece) and onglet != "coque":
-			_dire("Berliet : la cabine et les sièges sont fixes.")
+			_dire(Textes.t("grille.berliet_cabine"))
 			return
 		if onglet == "essieux":
 			var exb := ConstructionLibre.essieu_en(a, cell.x)
 			if not exb.is_empty() and ConstructionLibre.fixe_berliet(a, "essieu", exb.x):
-				_dire("Berliet : l'essieu avant est fixe.")
+				_dire(Textes.t("grille.berliet_essieu"))
 				return
 	if _verrou() and onglet in ["chassis", "essieux"]:
 		var ipv := ConstructionLibre.piece_en(a, cell)
 		if ipv >= 0 and not _est_coque(String(a.pieces[ipv].piece)):
 			_prendre(ipv)
 		else:
-			_dire("Voiture : le châssis ne change pas (mode créatif seulement).")
+			_dire(Textes.t("grille.voiture_chassis"))
 		return
 	if onglet == "vehicule":
 		_depl = true
@@ -603,11 +603,11 @@ func _appuyer(cell: Vector2i) -> void:
 				return
 			var b := ConstructionLibre.poser_essieu(a, cell.x, outil.essieux, String(ex.get("train", "")), cell.y)
 			if b.is_empty():
-				_dire("Pas de châssis au-dessus.")
+				_dire(Textes.t("grille.pas_chassis"))
 				return
 			a = b
 			if Assemblage.piece(outil.essieux).get("pont", false):
-				_dire("Pont à %d cm sous le châssis : reliez-le (Suspension)." % (ConstructionLibre.ecart_pont(a, ConstructionLibre.essieu_en(a, cell.x)) * 25))
+				_dire(Textes.t("grille.pont_sous") % (ConstructionLibre.ecart_pont(a, ConstructionLibre.essieu_en(a, cell.x)) * 25))
 			_son()
 			_maj()
 		"roues":   # un simple toucher monte la roue sur l'essieu le plus proche (DEC-081)
@@ -615,7 +615,7 @@ func _appuyer(cell: Vector2i) -> void:
 		"suspension":   # la liaison posée se reprend au doigt ; sinon on relie le pont touché avec la pièce choisie (DEC-081)
 			var x_pont := _pont_cible(_doigt)
 			if x_pont < 0:
-				_dire("Posez d'abord un pont rigide en l'air (Essieux).")
+				_dire(Textes.t("grille.pont_dabord"))
 				return
 			var lid_actuel := String(ConstructionLibre.essieu_en(a, x_pont).get("liaison", ""))
 			if lid_actuel != "":
@@ -635,7 +635,7 @@ func _appuyer(cell: Vector2i) -> void:
 			if i >= 0 and _scie != "":
 				var bs := ConstructionLibre.scier(a, i, cell, _scie)
 				if bs.is_empty():
-					_dire("Touchez l'intérieur de la coque.")
+					_dire(Textes.t("grille.interieur_coque"))
 				else:
 					a = bs
 					_son()
@@ -652,7 +652,7 @@ func _relacher(pos: Vector2) -> void:
 			a = _depl_b
 			_son()
 		elif _dans_grille(pos) and _case(pos) != _depl0:
-			_dire("Le véhicule sortirait de la grille.")
+			_dire(Textes.t("grille.hors_grille"))
 		_depl_b = {}
 		_maj(true)
 		return
@@ -669,7 +669,7 @@ func _relacher(pos: Vector2) -> void:
 			return
 		var b := ConstructionLibre.poser_tole(a, q0, q1)
 		if b.is_empty():
-			_dire("Une tôle part du véhicule ou d'une autre tôle.")
+			_dire(Textes.t("grille.tole_depart"))
 		else:
 			a = b
 			_son()
@@ -683,7 +683,7 @@ func _relacher(pos: Vector2) -> void:
 				b = ConstructionLibre.peindre(b, Vector2i(x, y), sorte)
 		_rect0 = Vector2i(-99, -99)
 		if _verrou_berliet() and ConstructionLibre.fixe_berliet(b, "cases", b.cases):
-			_dire("Berliet : le châssis d'origine ne change pas ; on peut l'agrandir.")
+			_dire(Textes.t("grille.berliet_chassis"))
 			b = a
 		if b != a:
 			a = b
@@ -703,9 +703,9 @@ func _relacher(pos: Vector2) -> void:
 				a = b
 				_son()
 			else:
-				_dire("Pas de châssis au-dessus : essieu retiré.")
+				_dire(Textes.t("grille.essieu_retire_sans"))
 		else:
-			_dire("Essieu retiré.")
+			_dire(Textes.t("grille.essieu_retire"))
 		_maj(true)
 		return
 	if _glisse == "":
@@ -720,23 +720,23 @@ func _relacher(pos: Vector2) -> void:
 			if _dans_grille(pos):
 				_poser_liaison(_visee(pos), tenue)
 			elif reprise:
-				_dire("Suspension retirée.")
+				_dire(Textes.t("grille.suspension_retiree"))
 				_maj(true)
 		elif _dans_grille(pos):
 			_monter_roue(_roue_cible(_visee(pos), tenue), tenue)
 		return
 	if not _dans_grille(pos):
-		_dire("%s retiré." % Assemblage.piece(_glisse).get("nom", "Pièce"))
+		_dire(Textes.t("grille.retire") % Assemblage.piece(_glisse).get("nom", Textes.t("grille.piece")))
 	else:
 		var r := _poser_ici(_cible(pos, _glisse))
 		if r.has("refus"):
 			_dire(r.refus)
 		elif r.is_empty():
-			_dire("Pas de place ni d'appui ici.")
+			_dire(Textes.t("grille.pas_de_place"))
 		else:
 			a = r.a
 			if String(r.get("remplace", "")) != "" and String(r.remplace) != _glisse:
-				_dire("%s remplace %s." % [Assemblage.piece(_glisse).get("nom", ""), Assemblage.piece(String(r.remplace)).get("nom", "")])
+				_dire(Textes.t("grille.remplace") % [Assemblage.piece(_glisse).get("nom", ""), Assemblage.piece(String(r.remplace)).get("nom", "")])
 			_son()
 	_glisse = ""
 	_maj(true)
@@ -745,11 +745,11 @@ func _relacher(pos: Vector2) -> void:
 # Monte (train_id) ou démonte ("") la roue de l'essieu de la colonne x ; x < 0 : aucun essieu à portée
 func _monter_roue(x: int, train_id: String) -> void:
 	if x < 0:
-		_dire("Approchez la roue d'un essieu." if train_id != "" else "Touchez un essieu pour démonter sa roue.")
+		_dire(Textes.t("grille.roue_approcher") if train_id != "" else Textes.t("grille.roue_demonter"))
 		return
 	var b := ConstructionLibre.monter_train(a, x, train_id)
 	if b.is_empty():
-		_dire("Posez d'abord un essieu ici.")
+		_dire(Textes.t("grille.essieu_dabord"))
 		return
 	a = b
 	_son()
@@ -768,7 +768,7 @@ func _prendre_liaison(id: String) -> void:
 	_tenir(id)
 	var ponts: Array = a.get("essieux", []).filter(func(ex): return bool(Assemblage.piece(String(ex.piece)).get("pont", false)))
 	if ponts.is_empty():
-		_dire("Posez d'abord un pont rigide en l'air (Essieux).")
+		_dire(Textes.t("grille.pont_dabord"))
 
 
 # --- Aimantation (DEC-081) ------------------------------------------------------------------------------
@@ -821,7 +821,7 @@ func _pont_cible(pos: Vector2) -> int:
 func _poser_liaison(pos: Vector2, lid: String) -> void:
 	var x := _pont_cible(pos)
 	if x < 0:
-		_dire("Approchez la suspension d'un pont rigide (Essieux).")
+		_dire(Textes.t("grille.suspension_approcher"))
 		return
 	var ex := ConstructionLibre.essieu_en(a, x)
 	var b := ConstructionLibre.relier(a, x, lid)
@@ -829,11 +829,11 @@ func _poser_liaison(pos: Vector2, lid: String) -> void:
 		var h := ConstructionLibre.ecart_pont(a, ex)
 		var ok_ids := ConstructionLibre.liaisons_pour(h)
 		if ok_ids.is_empty():
-			_dire("Pont trop loin du châssis (%d cm)." % (h * 25))
+			_dire(Textes.t("grille.pont_loin") % (h * 25))
 			return
 		lid = ok_ids[0]
 		b = ConstructionLibre.relier(a, x, lid)
-		_dire("À %d cm : %s." % [h * 25, Assemblage.piece(lid).nom])
+		_dire(Textes.t("grille.a_cm") % [h * 25, Assemblage.piece(lid).nom])
 	a = b
 	_son()
 	_maj(true)
@@ -860,7 +860,7 @@ func _poser_ici(cell: Vector2i) -> Dictionary:
 	if a.has("plateforme"):
 		var t := String(Assemblage.piece(_glisse).get("taille", ""))
 		if _verrou() and t != "" and t != ConstructionLibre.plateforme_de(a):
-			return {"refus": "Cette carrosserie n'est pas faite pour ce châssis."}
+			return {"refus": Textes.t("grille.carrosserie_refus")}
 		var r := ConstructionLibre.poser_emplacement(a, _glisse, cell, _extra)
 		if not r.is_empty():
 			return r
@@ -889,7 +889,7 @@ func _charger_plan(plan: Dictionary) -> void:
 	var r := PlansGrille.adapter(plan.a, _palette)
 	a = r.a
 	a.nom_choisi = true
-	_dire("Plan chargé." if r.manquantes.is_empty() else "Absent de la réserve : " + ", ".join(r.manquantes))
+	_dire(Textes.t("grille.plan_charge") if r.manquantes.is_empty() else Textes.t("grille.absent_reserve") + ", ".join(r.manquantes))
 	_maj(true)
 
 
@@ -900,14 +900,14 @@ func _charger_vehicule(type: String) -> void:
 		return
 	a = ConstructionLibre.convertir(h, type)
 	a.nom_choisi = true
-	_dire("%s : modifiez-le librement." % String(a.nom))
+	_dire(Textes.t("grille.modifier_librement") % String(a.nom))
 	_maj(true)
 
 
 # Transforme la grille en remorque : moteurs et radiateurs démontés, timon posé à l'avant (DEC-080)
 func _en_remorque() -> void:
 	a = ConstructionLibre.en_remorque(a)
-	_dire("Remorque : elle sera tirée par le véhicule devant elle dans le convoi.")
+	_dire(Textes.t("grille.remorque_info"))
 	_maj(true)
 
 
@@ -935,12 +935,12 @@ func _quitter() -> void:
 func _terminer() -> void:
 	if not _peut_construire():
 		var errs: Array = _an.get("erreurs", [])
-		_dire(String(errs[0].texte) if not errs.is_empty() else "Pas assez de métal.")
+		_dire(String(errs[0].texte) if not errs.is_empty() else Textes.t("grille.metal"))
 		return
 	var manque := ConstructionLibre.tireurs_requis(a) - ConstructionLibre.roles_de(a).count("tireur")
 	if manque > 0 and not _confirmer:
 		_confirmer = true
-		_dire("%d arme%s sans tireur. Touchez encore la coche pour construire." % [manque, "s" if manque > 1 else ""])
+		_dire(Textes.t("grille.armes_sans_tireur") % [manque, "s" if manque > 1 else ""])
 		_choisir_onglet("equipage")
 		return
 	if m.construire_grille(uid, a):
@@ -948,7 +948,7 @@ func _terminer() -> void:
 		ferme.emit(true)
 		queue_free()
 	else:
-		_dire(m.journal[-1].txt if not m.journal.is_empty() else "Impossible de construire.")
+		_dire(m.journal[-1].txt if not m.journal.is_empty() else Textes.t("grille.impossible"))
 
 
 func _dire(t: String) -> void:
@@ -1019,7 +1019,7 @@ func _items() -> Array:
 	var res := []
 	match onglet:
 		"chassis":
-			for s in [["tube", "Tubes"], ["poutre", "Poutres"], ["acier", "Acier"], ["blindage", "Blindage"], ["", "Gomme"]]:
+			for s in [["tube", Textes.t("grille.mat.tube")], ["poutre", Textes.t("grille.mat.poutre")], ["acier", Textes.t("grille.mat.acier")], ["blindage", Textes.t("grille.mat.blindage")], ["", Textes.t("grille.mat.gomme")]]:
 				var sorte: String = s[0]
 				res.append({"titre": s[1], "choisi": outil.chassis == sorte, "action": func(): outil.chassis = sorte,
 					"mini": func(c, r): _mini_case(c, r, sorte)})
@@ -1034,20 +1034,20 @@ func _items() -> Array:
 				res.append({"titre": _court(f.nom), "choisi": outil.roues == id, "ar": 2.0 if String(f.get("type", "")) == "chenilles" else 1.0, "action": func():
 					outil.roues = id
 					_tenir(id), "mini": func(c, r): _mini_roue(c, r, id)})
-			res.append({"titre": "Démonter", "choisi": outil.roues == "", "action": func(): _vider_outil("roues"),
+			res.append({"titre": Textes.t("grille.demonter"), "choisi": outil.roues == "", "action": func(): _vider_outil("roues"),
 				"mini": func(c, r): _mini_icone(c, r, "croix", C_ROUGE)})
 		"suspension":   # vraie pièce : on la glisse sur un pont rigide, on la reprend au doigt pour la déplacer ou la retirer (DEC-081)
 			for id in _famille("liaison"):
 				var f := Assemblage.piece(id)
 				res.append({"titre": _court(f.nom), "detail": "%d-%d cm" % [int(f.hauteur_min) * 25, int(f.hauteur_max) * 25], "choisi": outil.suspension == id, "ar": 1.7,
 					"action": func(): _prendre_liaison(id), "mini": func(c, r): _mini_liaison(c, r, String(f.get("dessin", "lames")))})
-			res.append({"titre": "Détacher", "choisi": outil.suspension == "", "action": func(): _vider_outil("suspension"),
+			res.append({"titre": Textes.t("grille.detacher"), "choisi": outil.suspension == "", "action": func(): _vider_outil("suspension"),
 				"mini": func(c, r): _mini_icone(c, r, "croix", C_ROUGE)})
 		"toles":
 			var n_t: int = a.get("toles", []).size()
-			res.append({"ligne": true, "titre": "%d tôle%s" % [n_t, "s" if n_t > 1 else ""], "detail": "inclinée = plus épaisse ; fermée = caisse blindée", "actif": false})
-			res.append({"ligne": true, "titre": "Toucher une tôle", "detail": "la retire", "actif": false})
-			res.append({"ligne": true, "titre": "Tout retirer", "detail": "enlève toutes les tôles", "actif": n_t > 0, "action": func():
+			res.append({"ligne": true, "titre": Textes.t("grille.n_toles") % [n_t, "s" if n_t > 1 else ""], "detail": Textes.t("grille.toles_aide"), "actif": false})
+			res.append({"ligne": true, "titre": Textes.t("grille.toucher_tole"), "detail": Textes.t("grille.la_retire"), "actif": false})
+			res.append({"ligne": true, "titre": Textes.t("grille.tout_retirer"), "detail": Textes.t("grille.toutes_toles"), "actif": n_t > 0, "action": func():
 				a.toles = []
 				_maj()})
 		"voitures":   # plateformes (DEC-083) : longueur au choix en mode créatif seulement ; garde au sol toujours
@@ -1056,25 +1056,25 @@ func _items() -> Array:
 			for t in ConstructionLibre.tailles_plateforme():
 				var fp: Dictionary = P[t]
 				if creatif:
-					res.append({"titre": String(fp.nom).replace("Châssis ", "").capitalize(), "detail": "%.2f m" % (float(fp.longueur) * 0.25),
+					res.append({"titre": String(fp.nom).replace(Textes.t("grille.chassis_prefixe"), "").capitalize(), "detail": "%.2f m" % (float(fp.longueur) * 0.25),
 						"choisi": ConstructionLibre.plateforme_de(a) == t, "ar": 2.6, "action": func():
 							a = ConstructionLibre.changer_plateforme(a, t)
 							_son()
 							_maj(true), "mini": func(c, r): _tex_dans(c, r, VehiculeDessin._tex("coques/" + String(fp.carrosserie)))})
 				elif ConstructionLibre.plateforme_de(a) == t:
-					res.append({"ligne": true, "titre": String(fp.nom), "detail": "ne change pas (mode créatif seulement)", "actif": false})
+					res.append({"ligne": true, "titre": String(fp.nom), "detail": Textes.t("grille.ne_change_pas"), "actif": false})
 			if not a.has("plateforme") and not creatif:
-				res.append({"ligne": true, "titre": "Pas une voiture", "detail": "construction libre", "actif": false})
+				res.append({"ligne": true, "titre": Textes.t("grille.pas_voiture"), "detail": Textes.t("grille.construction_libre"), "actif": false})
 			if a.has("plateforme"):
 				var rh := int(a.plateforme.get("rehausse", 0))
 				for k in int(P.base.rehausse_max) + 1:
 					var crans: int = k
-					res.append({"ligne": true, "titre": "Garde au sol d'origine" if crans == 0 else "Garde au sol +%d cm" % (crans * 25), "choisi": rh == crans, "actif": rh != crans, "action": func():
+					res.append({"ligne": true, "titre": Textes.t("grille.garde_origine") if crans == 0 else Textes.t("grille.garde_plus") % (crans * 25), "choisi": rh == crans, "actif": rh != crans, "action": func():
 						a = ConstructionLibre.rehausser(a, crans)
 						_son()
 						_maj(true)})
 		"vehicule":
-			res.append({"ligne": true, "titre": "Glisser le véhicule", "detail": "le déplace sur la grille", "actif": false})
+			res.append({"ligne": true, "titre": Textes.t("grille.glisser_vehicule"), "detail": Textes.t("grille.deplace_grille"), "actif": false})
 		"peinture":
 			for pe in PEINTURES:
 				var hex: String = pe[0]
@@ -1085,59 +1085,59 @@ func _items() -> Array:
 						a.peinture = hex
 					_maj(), "mini": func(c, r): _mini_couleur(c, r, hex)})
 		"plans":   # plans enregistrés (DEC-071)
-			var nom := String(a.get("nom", "Plan"))
-			res.append({"ligne": true, "titre": "Enregistrer « %s »" % nom, "detail": "remplace un plan du même nom",
+			var nom := String(a.get("nom", Textes.t("grille.plan")))
+			res.append({"ligne": true, "titre": Textes.t("grille.enregistrer") % nom, "detail": Textes.t("grille.remplace_plan"),
 				"actif": not a.get("cases", []).is_empty(), "action": func():
 					PlansGrille.enregistrer(a)
-					_dire("Plan « %s » enregistré." % nom)})
-			res.append({"ligne": true, "titre": "Supprimer : %s" % ("oui, touchez un plan" if _suppr_plans else "non"), "detail": "", "choisi": _suppr_plans,
+					_dire(Textes.t("grille.plan_enregistre") % nom)})
+			res.append({"ligne": true, "titre": Textes.t("grille.supprimer") % (Textes.t("grille.supprimer_oui") if _suppr_plans else "non"), "detail": "", "choisi": _suppr_plans,
 				"action": func(): _suppr_plans = not _suppr_plans})
 			for pl in PlansGrille.lire():
 				var plan: Dictionary = pl
-				res.append({"ligne": true, "titre": String(plan.nom), "detail": "%d cases · %d pièces" % [plan.a.get("cases", []).size(), plan.a.get("pieces", []).size()],
+				res.append({"ligne": true, "titre": String(plan.nom), "detail": Textes.t("grille.plan_detail") % [plan.a.get("cases", []).size(), plan.a.get("pieces", []).size()],
 					"action": func():
 						if _suppr_plans:
 							PlansGrille.supprimer(String(plan.nom))
-							_dire("Plan supprimé.")
+							_dire(Textes.t("grille.plan_supprime"))
 						else:
 							_charger_plan(plan)})
 		"vehicules":   # remorque ; véhicules du jeu en bac à sable (DEC-080)
-			res.append({"ligne": true, "titre": "Remorque : %s" % ("oui" if ConstructionLibre.remorque(a) else "non"),
-				"detail": "démonte moteurs et radiateurs, pose un timon", "choisi": ConstructionLibre.remorque(a), "action": func():
+			res.append({"ligne": true, "titre": Textes.t("grille.remorque") % ("oui" if ConstructionLibre.remorque(a) else "non"),
+				"detail": Textes.t("grille.remorque_detail"), "choisi": ConstructionLibre.remorque(a), "action": func():
 					if ConstructionLibre.remorque(a):
 						a.erase("remorque")
 						_maj()
 					else:
 						_en_remorque()})
 			if m.bac_a_sable:
-				res.append({"ligne": true, "titre": "Grille vide", "detail": "repartir de zéro", "action": func():
+				res.append({"ligne": true, "titre": Textes.t("grille.vide"), "detail": Textes.t("grille.repartir_zero"), "action": func():
 					a = ConstructionLibre.nouvelle()
 					_maj(true)})
 				for type in VehiculeDessin.donnees().vehicules:
 					if Assemblage.de_type(type).is_empty():
 						continue
 					var t: String = type
-					res.append({"ligne": true, "titre": String(VehiculeDessin.donnees().vehicules[t].nom), "detail": "véhicule du jeu", "action": func(): _charger_vehicule(t)})
+					res.append({"ligne": true, "titre": String(VehiculeDessin.donnees().vehicules[t].nom), "detail": Textes.t("grille.vehicule_jeu"), "action": func(): _charger_vehicule(t)})
 		"equipage":
 			var sieges := ConstructionLibre.sieges_equipage(a)
 			if sieges.is_empty():
-				res.append({"ligne": true, "titre": "Aucun siège", "detail": "posez un poste", "actif": false})
+				res.append({"ligne": true, "titre": Textes.t("grille.aucun_siege"), "detail": Textes.t("grille.poser_poste"), "actif": false})
 			for i in sieges.size():
 				var s: Dictionary = sieges[i]
 				var k: int = s.k
 				var r: String = s.role
-				res.append({"ligne": true, "titre": "%d · %s" % [i + 1, NOMS_ROLES[r]], "detail": AIDE_ROLES[r] + (" · fixe" if s.fixe else ""),
+				res.append({"ligne": true, "titre": "%d · %s" % [i + 1, NOMS_ROLES[r]], "detail": AIDE_ROLES[r] + (Textes.t("grille.fixe") if s.fixe else ""),
 					"actif": not s.fixe, "action": func(): _changer_role(k)})
 			var nt := ConstructionLibre.places_troupes(a)
 			if nt > 0:
-				res.append({"ligne": true, "titre": "Bancs : %d soldat%s" % [nt, "s" if nt > 1 else ""], "detail": "débarquables en combat", "actif": false})
+				res.append({"ligne": true, "titre": Textes.t("grille.bancs") % [nt, "s" if nt > 1 else ""], "detail": Textes.t("grille.debarquables"), "actif": false})
 		_:
 			if onglet == "coque":   # réglages du plan carrosserie (DEC-067)
-				res.append({"titre": "Retourner", "choisi": _miroir, "action": func(): _miroir = not _miroir,
+				res.append({"titre": Textes.t("grille.retourner"), "choisi": _miroir, "action": func(): _miroir = not _miroir,
 					"mini": func(c, r): _mini_icone(c, r, "retourner", C_TEXTE)})
-				res.append({"titre": {"": "Scie", "v": "Scie |", "h": "Scie —"}[_scie], "choisi": _scie != "",
+				res.append({"titre": {"": Textes.t("grille.scie"), "v": Textes.t("grille.scie_v"), "h": Textes.t("grille.scie_h")}[_scie], "choisi": _scie != "",
 					"action": func(): _scie = {"": "v", "v": "h", "h": ""}[_scie], "mini": func(c, r): _mini_icone(c, r, "scie", C_TEXTE)})
-				res.append({"titre": "Écorché", "choisi": _ecorche, "action": _basculer_ecorche,
+				res.append({"titre": Textes.t("grille.ecorche"), "choisi": _ecorche, "action": _basculer_ecorche,
 					"mini": func(c, r): _mini_icone(c, r, "oeil", C_TEXTE)})
 			for it in _palette:
 				var f := Assemblage.piece(it.id)
@@ -1156,7 +1156,7 @@ func _items() -> Array:
 					"ar": float(emp[0]) / maxf(1.0, float(emp[1])),   # la vignette a la proportion de la pièce
 					"action": func(): _tenir(id), "mini": func(c, r): _mini_piece(c, r, id)})
 			if res.is_empty():
-				res.append({"ligne": true, "titre": "Rien en réserve", "detail": "fouillez des épaves", "actif": false})
+				res.append({"ligne": true, "titre": Textes.t("grille.rien_reserve"), "detail": Textes.t("grille.fouillez"), "actif": false})
 	return res
 
 
@@ -1268,7 +1268,7 @@ func _dessiner_surcouche() -> void:
 		if d.has("charge") and float(d.charge) > float(d.capacite):
 			c.draw_string(police, ctr + Vector2(-60, 26), "%.1f/%.1f t" % [float(d.charge) / 1000.0, float(d.capacite) / 1000.0], HORIZONTAL_ALIGNMENT_CENTER, 120, 16, C_ROUGE)
 		elif not d.get("touche", true):
-			c.draw_string(police, ctr + Vector2(-60, 26), "en l'air", HORIZONTAL_ALIGNMENT_CENTER, 120, 18, C_ROUGE)
+			c.draw_string(police, ctr + Vector2(-60, 26), Textes.t("grille.en_l_air"), HORIZONTAL_ALIGNMENT_CENTER, 120, 18, C_ROUGE)
 	if det.has("cg"):
 		var cg := _px(det.cg.x, det.cg.y)
 		c.draw_circle(cg, 9.0, Color(1, 1, 1, 0.9))
@@ -1355,7 +1355,7 @@ func _dessiner_dessus() -> void:
 			_mini_piece_ou_roue(c, Rect2(_doigt - Vector2(44, 88), Vector2(88, 88)), _glisse)
 	# Nom (touchez pour renommer) et message
 	c.draw_rect(_rect_nom, Color(0, 0, 0, 0.35))
-	c.draw_string(police, _rect_nom.position + Vector2(12, 31), "✎ " + String(a.get("nom", "Véhicule")) + ("   ·   remorque" if ConstructionLibre.remorque(a) else ""),
+	c.draw_string(police, _rect_nom.position + Vector2(12, 31), "✎ " + String(a.get("nom", Textes.t("grille.onglet.vehicule"))) + (Textes.t("grille.suffixe_remorque") if ConstructionLibre.remorque(a) else ""),
 		HORIZONTAL_ALIGNMENT_LEFT, _rect_nom.size.x - 20, 22, C_TEXTE)
 	_cartes.append({"rect": _rect_nom, "action": _renommer, "actif": true})
 	if _msg_t > 0.0:
@@ -1387,7 +1387,7 @@ func _dessiner_boutons_vue(c: Control, police: Font) -> void:
 
 func _basculer_deplacer() -> void:
 	_deplacer = not _deplacer
-	_dire("Glissez un doigt pour déplacer la vue." if _deplacer else "Déplacement terminé : on construit de nouveau.")
+	_dire(Textes.t("grille.deplacer_vue") if _deplacer else Textes.t("grille.deplacement_fini"))
 
 
 func _dessiner_rail(c: Control, police: Font) -> void:
@@ -1525,11 +1525,11 @@ func _dessiner_bilan(c: Control, police: Font) -> void:
 		return
 	var s: Dictionary = _an.stats
 	var roule := float(s.vitesse) > 0.0
-	c.draw_string(police, Vector2(x, y), ("▶ %.1f m/s" % s.vitesse) if roule else "■ immobile", HORIZONTAL_ALIGNMENT_LEFT, 170, 22, C_VERT if roule else C_ROUGE)
-	var ligne := ("Véhicule léger   ·   " if String(s.get("classe", "")) == "intercepteur" else "") + "%d kg   ·   blindage %d   ·   %d place%s" % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
+	c.draw_string(police, Vector2(x, y), ("▶ %.1f m/s" % s.vitesse) if roule else Textes.t("grille.immobile"), HORIZONTAL_ALIGNMENT_LEFT, 170, 22, C_VERT if roule else C_ROUGE)
+	var ligne := (Textes.t("grille.vehicule_leger") if String(s.get("classe", "")) == "intercepteur" else "") + Textes.t("grille.resume") % [int(s.poids_kg), int(s.blindage), int(s.equipage), "s" if int(s.equipage) > 1 else ""]
 	var cout: float = m.cout_grille(uid, a)
 	if cout > 0.0:
-		ligne += "   ·   %d / %d métal" % [int(ceil(cout)), int(m.stocks.metal)]
+		ligne += Textes.t("grille.metal_resume") % [int(ceil(cout)), int(m.stocks.metal)]
 	c.draw_string(police, Vector2(x + 180, y), ligne, HORIZONTAL_ALIGNMENT_LEFT, lw - 180, 18, C_DISCRET)
 	var defauts: Array = _an.defauts
 	if not defauts.is_empty():

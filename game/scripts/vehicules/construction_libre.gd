@@ -85,8 +85,8 @@ static func en_remorque(a: Dictionary) -> Dictionary:
 			var t := poser(b, "greffe_timon", Vector2i(xmax + 1, ymin))
 			if not t.is_empty():
 				b = t
-	if not String(b.get("nom", "")).ends_with("(remorque)"):
-		b.nom = String(b.get("nom", "Remorque")) + " (remorque)"
+	if not String(b.get("nom", "")).ends_with(Textes.t("constr.suffixe_remorque")):
+		b.nom = String(b.get("nom", Textes.t("constr.remorque"))) + Textes.t("constr.suffixe_remorque")
 	return nettoyer(b)
 
 
@@ -94,7 +94,7 @@ static func est_libre(a: Dictionary) -> bool:
 	return bool(a.get("libre", false))
 
 
-static func nouvelle(nom := "Frankenstein") -> Dictionary:
+static func nouvelle(nom := Textes.t("constr.frankenstein")) -> Dictionary:
 	return {"libre": true, "nom": nom, "cases": [], "essieux": [], "pieces": [], "plaques": 0, "v": 2}   # v 2 : radiateur exigé (DEC-080)
 
 
@@ -890,9 +890,9 @@ static func _defaut(liste: Array, code: String, texte: String, grave := false) -
 static func erreurs(a: Dictionary) -> Array:
 	var err := []
 	if _cases(a).is_empty():
-		_defaut(err, "chassis", "Peignez au moins une case de châssis", true)
+		_defaut(err, "chassis", Textes.t("constr.def.peindre"), true)
 	if not roles_de(a).has("conducteur") and not remorque(a):
-		_defaut(err, "cabine", "Aucun poste de conduite : personne pour conduire", true)
+		_defaut(err, "cabine", Textes.t("constr.def.conduite"), true)
 	return err
 
 
@@ -950,12 +950,12 @@ static func analyser(a: Dictionary) -> Dictionary:
 		debattement /= essieux.size()
 	for e in ponts_libres(a):
 		masses.append([float(Assemblage.piece(String(e.piece)).poids_kg), int(e.x) + 0.5, float(e.get("y", y_essieu(a, int(e.x))))])
-		var txt := "sans liaison" if String(e.get("liaison", "")) == "" else "mal relié (liaison trop courte ou trop longue pour %d cm)" % (ecart_pont(a, e) * 25)
-		_defaut(defauts, "pont_libre", "Pont rigide %s (colonne %d) : il ne porte rien, reliez-le au châssis (onglet Suspension)" % [txt, int(e.x)], true)
+		var txt := Textes.t("constr.sans_liaison") if String(e.get("liaison", "")) == "" else Textes.t("constr.mal_relie") % (ecart_pont(a, e) * 25)
+		_defaut(defauts, "pont_libre", Textes.t("constr.def.pont_libre") % [txt, int(e.x)], true)
 	for e in essieux_nus(a):
 		var fe := Assemblage.piece(String(e.piece))
 		masses.append([float(fe.poids_kg), int(e.x) + 0.5, float(y_essieu(a, int(e.x)))])
-		_defaut(defauts, "sans_roue", "Essieu sans roue (colonne %d) : montez une roue ou une chenille" % int(e.x))
+		_defaut(defauts, "sans_roue", Textes.t("constr.def.sans_roue") % int(e.x))
 	var plaques := int(a.get("plaques", 0))
 	var PL: Dictionary = Assemblage.catalogue().regles.plaque
 	var x_avant := 0.0
@@ -1034,14 +1034,14 @@ static func analyser(a: Dictionary) -> Dictionary:
 				essieux[k].piste = i if j > i else -1
 			if j == i:
 				essieux[i].touche = false
-				_defaut(defauts, "chenille_seule", "Chenille sur un seul galet : elle ne tient pas")
+				_defaut(defauts, "chenille_seule", Textes.t("constr.def.chenille_seule"))
 			i = j + 1
 		else:
 			essieux[i].piste = -1
 			i += 1
 	var en_air := essieux.filter(func(e): return not e.touche).size()
 	if en_air > 0 and not defauts.any(func(d): return d.code == "chenille_seule"):
-		_defaut(defauts, "roue_air", "%d roue%s en l'air : elle%s ne porte%s rien" % [en_air, "s" if en_air > 1 else "", "s" if en_air > 1 else "", "nt" if en_air > 1 else ""])
+		_defaut(defauts, "roue_air", Textes.t("constr.def.roue_air_n" if en_air > 1 else "constr.def.roue_air_1", [en_air]))
 	# Roues qui se touchent (hors chenille)
 	for k in range(essieux.size() - 1):
 		var p0: Dictionary = essieux[k]
@@ -1049,7 +1049,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		if p0.piste >= 0 and p0.piste == p1.piste:
 			continue
 		if float(p1.x - p0.x) < p0.r + p1.r - 0.01:
-			_defaut(defauts, "frottent", "Des roues se touchent : elles frottent et s'usent")
+			_defaut(defauts, "frottent", Textes.t("constr.def.frottent"))
 			break
 	var garde := (corps_bas - sol) * C
 	var vitesse := INF
@@ -1062,36 +1062,36 @@ static func analyser(a: Dictionary) -> Dictionary:
 		sable = minf(sable, float(e.fiche_t.sable))
 	if corps_bas - sol <= 0.001:
 		if appuis.is_empty():
-			immobile = "le châssis repose sur le sol" if essieux.is_empty() else "le châssis touche le sol avant les roues"
+			immobile = Textes.t("constr.imm.sol") if essieux.is_empty() else Textes.t("constr.imm.touche")
 		else:
 			f_vit *= 0.15
-			_defaut(defauts, "traine", "Le châssis frotte le sol : très lent", true)
+			_defaut(defauts, "traine", Textes.t("constr.def.traine"), true)
 	elif garde < float(RL.garde_min_m):
 		f_vit *= 0.85
-		_defaut(defauts, "garde", "Garde au sol faible (%d cm) : on accroche les bosses" % int(round(garde * 100.0)))
+		_defaut(defauts, "garde", Textes.t("constr.def.garde") % int(round(garde * 100.0)))
 	# Assiette : un peu penché passe, très penché se renverse (DEC-081)
 	var angle_deg := rad_to_deg(atan(assiette))
 	if absf(angle_deg) > 0.5 and immobile == "":
 		var INC: Dictionary = RL.get("inclinaison", {"max_deg": 30.0, "vitesse_par_deg": 0.012, "precision_par_deg": 0.008})
 		if absf(angle_deg) > float(INC.max_deg):
-			immobile = "trop penché (%d°) : il se renverse" % int(round(absf(angle_deg)))
+			immobile = Textes.t("constr.imm.penche") % int(round(absf(angle_deg)))
 		else:
 			f_vit *= maxf(0.4, 1.0 - float(INC.vitesse_par_deg) * absf(angle_deg))
-			_defaut(defauts, "penche", "Véhicule penché de %d° (%s) : plus lent, tir moins précis" % [int(round(absf(angle_deg))), "nez en bas" if angle_deg > 0.0 else "nez en haut"])
+			_defaut(defauts, "penche", Textes.t("constr.def.penche") % [int(round(absf(angle_deg))), Textes.t("constr.nez_bas") if angle_deg > 0.0 else Textes.t("constr.nez_haut")])
 	# Répartition du poids : poutre rigide sur appuis élastiques égaux
 	var charges := []
 	var surcharge := 0.0
 	if immobile == "":
 		if appuis.is_empty():
-			immobile = "aucune roue ne touche le sol"
+			immobile = Textes.t("constr.imm.aucune_roue")
 		elif appuis.size() == 1:
-			immobile = "un seul essieu au sol : il bascule"
+			immobile = Textes.t("constr.imm.un_essieu")
 		else:
 			var xs: Array = appuis.map(func(e): return e.x + 0.5)
 			if xg < float(xs.front()) - 0.05:
-				immobile = "il bascule vers l'arrière (centre de gravité derrière les roues)"
+				immobile = Textes.t("constr.imm.arriere")
 			elif xg > float(xs.back()) + 0.05:
-				immobile = "il bascule vers l'avant (centre de gravité devant les roues)"
+				immobile = Textes.t("constr.imm.avant")
 			else:
 				var xm := 0.0
 				for x in xs:
@@ -1113,10 +1113,10 @@ static func analyser(a: Dictionary) -> Dictionary:
 					e.capacite = cap
 					surcharge = maxf(surcharge, charges[k] / cap)
 				if surcharge > float(RL.surcharge_casse):
-					immobile = "un essieu casse sous la charge (×%.1f)" % surcharge
+					immobile = Textes.t("constr.imm.casse") % surcharge
 				elif surcharge > 1.0:
 					f_vit /= surcharge * surcharge
-					_defaut(defauts, "surcharge", "Surcharge ×%.1f sur un essieu : lent, s'use vite" % surcharge)
+					_defaut(defauts, "surcharge", Textes.t("constr.def.surcharge") % surcharge)
 	# Moteurs
 	var puissance := 0.0
 	var conso := 0.0
@@ -1146,7 +1146,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		var MM: Dictionary = RL.get("moteurs_multiples", {"rendement": 0.85, "conso_k": 0.6})
 		puissance *= pow(float(MM.rendement), n_moteurs - 1)
 		conso *= 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)
-		_defaut(defauts, "moteurs", "%d moteurs couplés : rendement ×%.2f, consommation ×%.1f" % [n_moteurs,
+		_defaut(defauts, "moteurs", Textes.t("constr.def.moteurs") % [n_moteurs,
 			pow(float(MM.rendement), n_moteurs - 1), 1.0 + float(MM.conso_k) * pow(n_moteurs - 1, 2)], n_moteurs > 2)
 	# Gazogène (DEC-158) : le moteur brûle le gaz de bois ou de charbon ; il perd de la puissance mais consomme peu de carburant.
 	# Pour l'instant monté sur tous les moteurs ; la règle « essence seulement » viendra avec les deux carburants (DEC-094).
@@ -1156,7 +1156,7 @@ static func analyser(a: Dictionary) -> Dictionary:
 		var G: Dictionary = gazo[0].fiche.gazogene
 		puissance *= float(G.puissance)
 		conso *= float(G.conso)
-		_defaut(defauts, "gazogene", "Gazogène : puissance ×%.2f, carburant ×%.2f (brûle du bois ou du charbon)" % [float(G.puissance), float(G.conso)], false)
+		_defaut(defauts, "gazogene", Textes.t("constr.def.gazogene") % [float(G.puissance), float(G.conso)], false)
 	# Phares (DEC-048) : la dynamo prend un peu de puissance au moteur
 	puissance = maxf(0.0, puissance - ch_phares)
 	var tonnes := M / 1000.0
@@ -1165,25 +1165,25 @@ static func analyser(a: Dictionary) -> Dictionary:
 	if est_remorque:   # remorque (DEC-080) : tirée par un autre véhicule ; un moteur posé dessus n'est qu'un poids mort
 		conso = 0.0
 		if n_moteurs > 0:
-			_defaut(defauts, "remorque_moteur", "Remorque : le moteur ne sert à rien, c'est du poids mort")
+			_defaut(defauts, "remorque_moteur", Textes.t("constr.def.remorque_moteur"))
 		if not pieces.any(func(q): return int(q.fiche.get("timon", 0)) > 0):
-			immobile = "pas de timon pour l'atteler (onglet Options)"
+			immobile = Textes.t("constr.imm.timon")
 	elif immobile == "":
 		if puissance <= 0.0:
-			immobile = "pas de moteur"
+			immobile = Textes.t("constr.imm.moteur")
 		elif ch_t < float(RL.ch_par_tonne_min):
-			immobile = "moteur bien trop faible (%.1f ch/t)" % ch_t
+			immobile = Textes.t("constr.imm.faible") % ch_t
 		elif ch_t < float(RL.ch_par_tonne_requis):
 			f_vit *= ch_t / float(RL.ch_par_tonne_requis)
-			_defaut(defauts, "puissance", "Moteur faible pour le poids (%.0f ch/t) : lent en côte" % ch_t)
+			_defaut(defauts, "puissance", Textes.t("constr.def.puissance") % ch_t)
 	# Radiateur (DEC-080) : obligatoire pour un moteur refroidi par eau, à 2 cases au plus du moteur
 	var refr := refroidissement(a)
 	if immobile == "" and not est_remorque and int(a.get("v", 1)) >= 2 and not a.has("origine") and float(refr.besoin) > 0.0:
 		if float(refr.capacite) <= 0.0:
-			immobile = "pas de radiateur : le moteur chauffe et cale" if int(refr.loin) == 0 else "radiateur trop loin du moteur (2 cases au plus)"
+			immobile = Textes.t("constr.imm.radiateur") if int(refr.loin) == 0 else Textes.t("constr.imm.radiateur_loin")
 		elif float(refr.capacite) < float(refr.besoin):
 			f_vit *= maxf(0.4, float(refr.capacite) / float(refr.besoin))
-			_defaut(defauts, "radiateur", "Radiateur trop petit (%d ch pour %d ch) : le moteur chauffe, lent" % [int(refr.capacite), int(refr.besoin)])
+			_defaut(defauts, "radiateur", Textes.t("constr.def.radiateur") % [int(refr.capacite), int(refr.besoin)])
 	if defauts.any(func(d): return d.code == "frottent"):
 		f_vit *= 0.5
 	# Stabilité : demi-empattement rapporté à la hauteur du centre de gravité
@@ -1195,31 +1195,31 @@ static func analyser(a: Dictionary) -> Dictionary:
 		if stab < float(RL.stabilite_critique):
 			f_vit *= 0.6
 			precision *= 0.6
-			_defaut(defauts, "instable", "Très instable : se couche dans les virages et au tir", true)
+			_defaut(defauts, "instable", Textes.t("constr.def.tres_instable"), true)
 		elif stab < float(RL.stabilite_instable):
 			precision *= 0.85
-			_defaut(defauts, "instable", "Instable : centre de gravité haut ou trop près d'un essieu")
+			_defaut(defauts, "instable", Textes.t("constr.def.instable"))
 	# Armes : servies (un servant par arme en plus du conducteur), masquées, recul
 	var armes := []
 	var f_recul := 1.0
 	for w in armes_ordonnees(a):
 		if w.masquee:
-			_defaut(defauts, "masquee", "%s : tir masqué par une pièce ou le châssis" % w.fiche.nom, true)
+			_defaut(defauts, "masquee", Textes.t("constr.def.masquee") % w.fiche.nom, true)
 		elif not w.servie:
-			_defaut(defauts, "servant", "%s : aucun tireur, elle ne tirera pas" % w.fiche.nom, true)
+			_defaut(defauts, "servant", Textes.t("constr.def.servant") % w.fiche.nom, true)
 		else:
 			armes.append(String(w.fiche.arme))
 			var req := float(RL.recul_t.get(String(w.fiche.arme), 0.0))
 			if req > 0.0 and tonnes < req:
 				f_recul = minf(f_recul, clampf(sqrt(tonnes / req), 0.3, 1.0))
-				_defaut(defauts, "recul", "%s : trop lourd pour %.1f t, le recul secoue le véhicule" % [w.fiche.nom, tonnes])
+				_defaut(defauts, "recul", Textes.t("constr.def.recul") % [w.fiche.nom, tonnes])
 	precision *= f_recul * (0.92 + 0.16 * debattement)
 	if absf(angle_deg) > 0.5:
 		precision *= maxf(0.5, 1.0 - float(RL.get("inclinaison", {"precision_par_deg": 0.008}).precision_par_deg) * absf(angle_deg))
 	for k in pv:
 		pv[k] = maxf(1.0, pv[k])
 	if immobile != "":
-		_defaut(defauts, "immobile", "Ne roule pas : " + immobile, true)
+		_defaut(defauts, "immobile", Textes.t("constr.def.immobile") + immobile, true)
 	var classe := ""   # classe Intercepteur (DEC-083) : petite voiture rapide, une arme au plus, à l'arrière
 	var IC: Dictionary = RL.get("plateformes", {}).get("intercepteur", {})
 	if not IC.is_empty() and immobile == "" and not remorque(a) and essieux.size() == 2 and n_moteurs == 1:
@@ -1409,7 +1409,7 @@ static func tireurs_requis(a: Dictionary) -> int:
 static func nom_propose(a: Dictionary) -> String:
 	var an := analyser(a)
 	if not an.ok:
-		return "Frankenstein"
+		return Textes.t("constr.frankenstein")
 	var s: Dictionary = an.stats
 	var t := float(s.poids_kg) / 1000.0
 	var chenilles := false
@@ -1419,25 +1419,25 @@ static func nom_propose(a: Dictionary) -> String:
 	var canon := armes.any(func(w): return String(w).begins_with("canon"))
 	var base := ""
 	if int(s.moteurs) > 2 or t > 45.0:
-		base = "Mastodonte"
+		base = Textes.t("constr.nom.mastodonte")
 	elif chenilles and canon:
-		base = "Char lourd" if t > 25.0 else "Char"
+		base = Textes.t("constr.nom.char_lourd") if t > 25.0 else Textes.t("constr.nom.char")
 	elif chenilles and armes.has("mortier"):
-		base = "Porte-mortier chenillé"
+		base = Textes.t("constr.nom.porte_mortier_chenille")
 	elif chenilles:
-		base = "Chenillette" if t < 8.0 else "Porte-chenilles"
+		base = Textes.t("constr.nom.chenillette") if t < 8.0 else Textes.t("constr.nom.porte_chenilles")
 	elif canon:
-		base = "Auto-canon"
+		base = Textes.t("constr.nom.auto_canon")
 	elif armes.has("mortier"):
-		base = "Porte-mortier"
+		base = Textes.t("constr.nom.porte_mortier")
 	elif armes.has("lance_flammes"):
-		base = "Brûleur"
+		base = Textes.t("constr.nom.bruleur")
 	elif not armes.is_empty():
-		base = "Auto-mitrailleuse" if t < 4.0 else "Camion armé"
+		base = Textes.t("constr.nom.automitrailleuse") if t < 4.0 else Textes.t("constr.nom.camion_arme")
 	else:
-		base = "Éclaireur" if t < 2.0 else "Camion"
-	var surnoms := ["la Bricole", "le Rafistolé", "la Ferraille", "le Boiteux", "la Chimère", "le Sanglier", "la Rouille", "le Grognard", "la Teigne", "le Cafard"]
-	return "%s « %s »" % [base, surnoms[absi(hash(signature_forme(a))) % surnoms.size()]]
+		base = Textes.t("constr.nom.eclaireur") if t < 2.0 else Textes.t("constr.nom.camion")
+	var surnoms := [Textes.t("constr.surnom.bricole"), Textes.t("constr.surnom.rafistole"), Textes.t("constr.surnom.ferraille"), Textes.t("constr.surnom.boiteux"), Textes.t("constr.surnom.chimere"), Textes.t("constr.surnom.sanglier"), Textes.t("constr.surnom.rouille"), Textes.t("constr.surnom.grognard"), Textes.t("constr.surnom.teigne"), Textes.t("constr.surnom.cafard")]
+	return Textes.t("constr.nom_surnom") % [base, surnoms[absi(hash(signature_forme(a))) % surnoms.size()]]
 
 
 static func signature_forme(a: Dictionary) -> String:
@@ -1455,7 +1455,7 @@ static func convertir(a: Dictionary, type: String) -> Dictionary:
 	var D: Dictionary = VD.get(type, {})
 	if D.is_empty() and a.has("chassis"):
 		D = VD.get(Assemblage.apparence(a), {})
-	b.nom = String(D.get("nom", a.get("nom", "Véhicule")))
+	b.nom = String(D.get("nom", a.get("nom", Textes.t("grille.onglet.vehicule"))))
 	var x0 := 2
 	var roues := []   # [{x, train}]
 	for r in D.get("roues", []):

@@ -179,9 +179,8 @@ static func apparence_de(nom: String, femme: bool) -> Dictionary:
 
 
 static func description(a: Dictionary) -> String:
-	var c: String = "crâne rasé" if a.coupe == "chauve" else "cheveux %s %s" % [a.cheveux_nom,
-		{"longue": "longs", "chignon": "en chignon", "courte": "courts", "rase": "ras"}[a.coupe]]
-	return "Yeux %s, %s%s" % [a.yeux_nom, c, ", barbe" if a.barbe else ""]
+	var c: String = Textes.t("visage.crane_rase") if a.coupe == "chauve" else Textes.t("visage.cheveux_" + String(a.coupe), [Textes.t("couleur_cheveux." + String(a.cheveux_nom))])
+	return Textes.t("visage.description", [Textes.t("couleur_yeux." + String(a.yeux_nom)), c, Textes.t("visage.barbe") if a.barbe else ""])
 
 
 # Portrait (tête et épaules) dans un carré de côté « cote », centré sur « c ».

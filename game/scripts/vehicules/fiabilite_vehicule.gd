@@ -58,7 +58,7 @@ static func _verdict(indice: float) -> String:
 	for v in BaseVehicule.regles().verdicts:
 		if indice < float(v[0]):
 			return String(v[1])
-	return "à bout"
+	return Textes.t("fiab.a_bout")
 
 
 static func evaluer(a: Dictionary) -> Dictionary:
@@ -81,9 +81,9 @@ static func evaluer(a: Dictionary) -> Dictionary:
 		m_moteur = 1.0 + float(U.moteur_sous_dimensionne) * (1.0 - rapport)
 		if rapport < 0.5:
 			m_moteur += float(U.moteur_inadapte_en_plus) * (0.5 - rapport) / 0.5
-			defauts.append("Moteur inadapté : %d ch pour %.1f t" % [int(puissance), tonnes])
+			defauts.append(Textes.t("fiab.moteur_inadapte") % [int(puissance), tonnes])
 		else:
-			defauts.append("Moteur juste : %d ch pour %.1f t" % [int(puissance), tonnes])
+			defauts.append(Textes.t("fiab.moteur_juste") % [int(puissance), tonnes])
 	else:
 		m_moteur = maxf(float(U.moteur_plancher), 1.0 - float(U.moteur_surpuissant_gain) * (rapport - 1.0))
 	var etat_m := 1.0
@@ -99,7 +99,7 @@ static func evaluer(a: Dictionary) -> Dictionary:
 	var charge_b := puissance / maxf(1.0, cap_boite)
 	var m_boite := minf(plafond, _mult_charge(charge_b, float(U.boite_plancher), float(U.boite_surcharge)) * _fe(float(bs.get("etat_boite", 1.0)), U))
 	if charge_b > 1.0:
-		defauts.append("Boîte dépassée : %d ch pour une boîte de %d ch" % [int(puissance), int(cap_boite)])
+		defauts.append(Textes.t("fiab.boite") % [int(puissance), int(cap_boite)])
 	# Essieux : charge portée / capacité, aggravée par la flexion du châssis rallongé
 	var flex := souplesse(a)
 	var ess: Array = det.essieux
@@ -117,7 +117,7 @@ static func evaluer(a: Dictionary) -> Dictionary:
 		var m := _mult_charge(ratio, float(U.essieu_plancher), float(U.essieu_surcharge)) * _fe(etat_e, U) * (1.0 + float(BaseVehicule.regles().rigidite.essieu_par_souplesse) * flex)
 		m = minf(plafond, m)
 		if ratio > 1.0:
-			defauts.append("Essieu %d surchargé : %d kg pour %d kg" % [i + 1, int(charges[i]), int(cap)])
+			defauts.append(Textes.t("fiab.essieu") % [i + 1, int(charges[i]), int(cap)])
 		liste.append({"x": int(e.x), "mult": m, "charge_kg": float(charges[i]), "capacite_kg": cap})
 		somme += m
 	var m_essieux := somme / float(maxi(1, ess.size()))
@@ -125,7 +125,7 @@ static func evaluer(a: Dictionary) -> Dictionary:
 	var m_chassis := _fe(float(bs.get("etat_chassis", 1.0)), U) * (1.0 + float(BaseVehicule.regles().rigidite.chassis_par_souplesse) * flex)
 	m_chassis = minf(plafond, m_chassis * pow(float(BaseVehicule.regles().renfort.usure_chassis), float(bs.get("renforts", 0))))   # châssis renforcé : plus costaud que l'original
 	if flex > 0.2:
-		defauts.append("Châssis rallongé sans assez de renforts (souplesse %.2f)" % flex)
+		defauts.append(Textes.t("fiab.chassis") % flex)
 	var indice := 0.3 * m_moteur + 0.25 * m_boite + 0.25 * m_essieux + 0.2 * m_chassis
 	return {"ok": true, "usure": {"moteur": m_moteur, "boite": m_boite, "essieux": liste, "chassis": m_chassis}, "indice": indice,
 		"verdict": _verdict(indice), "defauts": defauts, "masse_kg": masse}

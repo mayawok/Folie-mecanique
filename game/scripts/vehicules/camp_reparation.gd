@@ -64,7 +64,7 @@ static func attaques_prevues(duree_s: float, niveau_secteur: int, graine: int) -
 # contexte : {niveau, atelier_mobile} ; mecaniciens : survivants qui réparent. {"ok", "raison", "camp"}
 static func demarrer(op: String, params: Dictionary, a: Dictionary, reserve: Array, contexte: Dictionary, mecaniciens: int, niveau_secteur: int, graine: int) -> Dictionary:
 	if not op in OPS_CAMP:
-		return {"ok": false, "raison": "cette opération ne se fait pas en camp : garage requis"}
+		return {"ok": false, "raison": Textes.t("camp_r.garage")}
 	var p := BaseVehicule.permis(op, contexte)
 	if not bool(p.ok):
 		return {"ok": false, "raison": String(p.raison)}
@@ -75,7 +75,7 @@ static func demarrer(op: String, params: Dictionary, a: Dictionary, reserve: Arr
 		if _compter(reserve, String(id)) < int(vues[id]):
 			manque.append(String(id))
 	if not manque.is_empty():
-		return {"ok": false, "raison": "pièce(s) manquante(s) : %s" % ", ".join(manque), "manque": manque}
+		return {"ok": false, "raison": Textes.t("camp_r.manquantes") % ", ".join(manque), "manque": manque}
 	var d := BaseVehicule.duree_s(op, contexte, mecaniciens)
 	return {"ok": true, "raison": "", "camp": {"op": op, "params": params.duplicate(true), "duree_s": d, "restant_s": d, "t": 0.0,
 		"etat": "en_cours", "immobilise": true, "attaques": attaques_prevues(d, niveau_secteur, graine)}}
@@ -121,7 +121,7 @@ static func reprendre(camp: Dictionary) -> Dictionary:
 # Applique le résultat. Atomique : {"ok", "a", "reserve", "camp", "raison"} ; en cas d'échec rien n'est modifié.
 static func terminer(camp: Dictionary, a: Dictionary, reserve: Array) -> Dictionary:
 	if camp.etat != "pret":
-		return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": "la réparation n'est pas finie"}
+		return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": Textes.t("camp_r.pas_finie")}
 	var op := String(camp.op)
 	var P: Dictionary = camp.params
 	var res := reserve
@@ -129,7 +129,7 @@ static func terminer(camp: Dictionary, a: Dictionary, reserve: Array) -> Diction
 	for id in pieces_requises(op, P, a):
 		var t := _prendre(res, String(id))
 		if not bool(t.ok):
-			return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": "pièce manquante : %s" % id}
+			return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": Textes.t("camp_r.manquante") % id}
 		res = t.reserve
 		etats[String(id)] = float(t.etat)
 	var r := {}
@@ -142,7 +142,7 @@ static func terminer(camp: Dictionary, a: Dictionary, reserve: Array) -> Diction
 	elif op == "changer_boite":
 		r = BaseVehicule.changer_boite(a, String(P.boite), float(P.get("etat", 1.0)))
 	if r.is_empty() or not bool(r.ok):
-		return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": String(r.get("raison", "opération impossible"))}
+		return {"ok": false, "a": a, "reserve": reserve, "camp": camp, "raison": String(r.get("raison", Textes.t("camp_r.impossible")))}
 	for pr in r.get("retire", []):
 		if float(pr.etat) > 0.05 and op != "changer_boite":
 			res = res.duplicate(true)

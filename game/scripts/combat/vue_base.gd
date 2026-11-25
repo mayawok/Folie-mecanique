@@ -260,12 +260,12 @@ class Carte extends Button:
 		var txt := ""   # l'essentiel seulement : on n'affiche que ce qui cloche
 		var col2 := ConvoiVue.C_ROUGE
 		if not v.mobile():
-			txt = "IMMOBILISÉ"
+			txt = Textes.t("vehicule.immobilise")
 		elif v.reparation:
-			txt = "Réparation"
+			txt = Textes.t("vehicule.reparation")
 			col2 = Color("#5AA9E6")
 		elif not v.tir:
-			txt = "Feu coupé"
+			txt = Textes.t("vehicule.feu_coupe")
 			col2 = ConvoiVue.C_ORANGE
 		if txt != "":
 			draw_string(f, Vector2(size.x - 16 - 150, 80), txt, HORIZONTAL_ALIGNMENT_RIGHT, 150, 22, col2)

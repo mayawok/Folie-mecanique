@@ -42,7 +42,7 @@ func ouvrir(modele, vehicule_uid: int, plan_id: String) -> void:
 	_gh = int(ch.grille[1])
 	var v = m.trouver(uid) if uid != 0 else null
 	var montees: Array = Assemblage.ids(v.assemblage) if v != null else []
-	_titre = "Assembler : %s" % plan.nom if v == null else "%s → %s" % [v.nom, plan.nom]
+	_titre = Textes.t("assemb.titre") % plan.nom if v == null else "%s → %s" % [v.nom, plan.nom]
 	# Le châssis, puis les pièces du plan ; celles déjà montées sur le véhicule restent en place
 	var a_placer: Array = [{"piece": plan.chassis, "pos": [0, 0]}] + plan.pieces
 	for p in a_placer:
@@ -174,9 +174,9 @@ func _gui_input(e: InputEvent) -> void:
 
 func _prendre(it: Dictionary, doigt: Vector2) -> void:
 	if not _prete(it):
-		var manque: String = "le cadre" if it.fiche.famille != "chassis" and not items.any(func(o): return o.etat != "bac" and o.fiche.famille == "chassis") \
-			else Assemblage.NOMS_FAMILLES.get(it.fiche.get("requiert", [""])[0], "une autre pièce")
-		_dire("Posez d'abord %s." % manque)
+		var manque: String = Textes.t("assemb.le_cadre") if it.fiche.famille != "chassis" and not items.any(func(o): return o.etat != "bac" and o.fiche.famille == "chassis") \
+			else Assemblage.NOMS_FAMILLES.get(it.fiche.get("requiert", [""])[0], Textes.t("assemb.autre_piece"))
+		_dire(Textes.t("assemb.poser_dabord") % manque)
 		return
 	_drag = it
 	var centre := _slot_ecran(it).get_center() - _grille.position   # centre de la pièce dans le dessin
@@ -198,11 +198,11 @@ func _lacher(doigt: Vector2) -> void:
 		var so := get_node_or_null("/root/Son")
 		if so:
 			so.effet("sfx_atelier", -6.0)
-		_dire("%s en place." % it.fiche.nom if not _complet() else "Tout est en place : démarrez !")
+		_dire(Textes.t("assemb.en_place") % it.fiche.nom if not _complet() else Textes.t("assemb.complet"))
 		_disposer()
 	else:
 		tw.tween_property(it.noeud, "position", _grille.position, 0.15)
-		_dire("Ce n'est pas sa place : visez l'emplacement en pointillés.")
+		_dire(Textes.t("assemb.pas_sa_place"))
 	_teintes()
 
 
@@ -213,7 +213,7 @@ func _terminer() -> void:
 		ferme.emit(true)
 		queue_free()
 	else:
-		_dire(m.journal[-1].txt if not m.journal.is_empty() else "Impossible d'assembler.")
+		_dire(m.journal[-1].txt if not m.journal.is_empty() else Textes.t("assemb.impossible"))
 
 
 func _dire(t: String) -> void:
@@ -226,7 +226,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), C_FOND)
 	draw_string(police, Vector2(size.x * 0.05, size.y * 0.09), _titre, HORIZONTAL_ALIGNMENT_LEFT, -1, 44, C_TEXTE)
 	var reste := items.filter(func(o): return o.etat == "bac").size()
-	var aide := "Glissez chaque pièce à sa place sur la grille." if reste > 0 else "Le véhicule est complet."
+	var aide := Textes.t("assemb.aide") if reste > 0 else Textes.t("assemb.vehicule_complet")
 	if _msg_t > 0.0:
 		aide = _message
 	draw_string(police, Vector2(size.x * 0.05, size.y * 0.15), aide, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, C_ACCENT if _msg_t > 0.0 else C_DISCRET)
@@ -239,7 +239,7 @@ func _draw() -> void:
 		draw_line(Vector2(_grille.position.x, y), Vector2(_grille.end.x, y), C_GRILLE, 1.0)
 	draw_rect(_grille, C_CADRE, false, 2.0)
 	draw_line(Vector2(_grille.position.x - 30, _grille.end.y), Vector2(_grille.end.x + 30, _grille.end.y), Color(0.55, 0.45, 0.3), 4.0)
-	draw_string(police, _grille.position + Vector2(0, _grille.size.y + 44), "1 case = 25 cm", HORIZONTAL_ALIGNMENT_LEFT, -1, 22, C_DISCRET)
+	draw_string(police, _grille.position + Vector2(0, _grille.size.y + 44), Textes.t("assemb.echelle"), HORIZONTAL_ALIGNMENT_LEFT, -1, 22, C_DISCRET)
 	# Emplacements en pointillés des pièces prêtes à poser
 	for it in items:
 		if it.etat == "bac" and _prete(it) and it.fiche.famille != "chassis":
@@ -250,7 +250,7 @@ func _draw() -> void:
 				draw_dashed_line(seg[0], seg[1], c, 2.0, 10.0)
 	# Bac des pièces
 	var x_bac := _grille.end.x + size.x * 0.05
-	draw_string(police, Vector2(x_bac, size.y * 0.2 - 18), "Pièces (%d)" % reste if reste > 0 else "Pièces : tout est monté", HORIZONTAL_ALIGNMENT_LEFT, -1, 28, C_TEXTE)
+	draw_string(police, Vector2(x_bac, size.y * 0.2 - 18), Textes.t("assemb.pieces") % reste if reste > 0 else Textes.t("assemb.tout_monte"), HORIZONTAL_ALIGNMENT_LEFT, -1, 28, C_TEXTE)
 	for it in items:
 		if it.etat != "bac" or it == _drag:
 			continue
@@ -258,11 +258,11 @@ func _draw() -> void:
 		draw_rect(it.carte, Color(1, 1, 1, 0.08 if pr else 0.03))
 		draw_rect(it.carte, C_ACCENT if pr else Color(1, 1, 1, 0.15), false, 2.0)
 		draw_string(police, it.carte.position + Vector2(20, 40), it.fiche.nom, HORIZONTAL_ALIGNMENT_LEFT, it.carte.size.x - 40, 28, C_TEXTE if pr else C_DISCRET)
-		var sous: String = "à poser d'abord" if it.fiche.famille == "chassis" else ("prête" if pr else "attend une autre pièce")
+		var sous: String = Textes.t("assemb.a_poser") if it.fiche.famille == "chassis" else (Textes.t("assemb.prete") if pr else Textes.t("assemb.attend"))
 		draw_string(police, it.carte.position + Vector2(20, 74), sous, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, C_VERT if pr else C_DISCRET)
 	# Caractéristiques une fois complet
 	if reste == 0:
 		var s := Assemblage.statistiques(plan)
-		var txt := "Vitesse %.1f m/s · %d place%s · %s · %d kg" % [s.vitesse, s.equipage, "s" if s.equipage > 1 else "",
-			"sans arme" if s.armes.is_empty() else "armé", int(s.poids_kg)]
+		var txt := Textes.t("assemb.stats") % [s.vitesse, s.equipage, "s" if s.equipage > 1 else "",
+			Textes.t("assemb.sans_arme") if s.armes.is_empty() else Textes.t("assemb.arme"), int(s.poids_kg)]
 		draw_string(police, Vector2(x_bac, size.y - 170), txt, HORIZONTAL_ALIGNMENT_LEFT, size.x - x_bac - 30, 26, C_VERT)
