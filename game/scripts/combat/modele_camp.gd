@@ -30,11 +30,11 @@ func camp_options(uid: int) -> Array:
 		var ess := _meilleure_reserve("essieu")
 		var train := String(e.get("train", ""))
 		var p := {"x": int(e.x), "essieu": ess, "train": train}
-		res.append(_option(v, a, ctx, "changer_essieu", "Changer l'essieu", p, ess == "", "aucun essieu en réserve", meca))
+		res.append(_option(v, a, ctx, "changer_essieu", Textes.t("camp.changer_essieu"), p, ess == "", Textes.t("camp.pas_essieu"), meca))
 		var tr := _meilleure_reserve("train")
-		res.append(_option(v, a, ctx, "changer_roue", "Changer les roues", {"x": int(e.x), "train": tr}, tr == "", "aucune roue en réserve", meca))
+		res.append(_option(v, a, ctx, "changer_roue", Textes.t("camp.changer_roues"), {"x": int(e.x), "train": tr}, tr == "", Textes.t("camp.pas_roue"), meca))
 	var mo := _meilleure_reserve("moteur")
-	res.append(_option(v, a, ctx, "changer_moteur", "Changer le moteur", {"moteur": mo}, mo == "", "aucun moteur en réserve", meca))
+	res.append(_option(v, a, ctx, "changer_moteur", Textes.t("camp.changer_moteur"), {"moteur": mo}, mo == "", Textes.t("camp.pas_moteur"), meca))
 	return res
 
 
@@ -117,7 +117,7 @@ func appliquer_panne(v, organe: String) -> void:
 		return
 	var P: Dictionary = v.pieces[id]
 	P.pv = minf(float(P.pv), float(P.max) * 0.4)
-	log_("%s : %s." % [v.nom, NOMS_PANNE.get(organe, "panne")], "alerte")
+	log_(Textes.t("panne.ligne", [v.nom, Textes.t("panne." + organe) if NOMS_PANNE.has(organe) else Textes.t("panne.autre")]), "alerte")
 	evt({"t": "panne", "uid": v.uid, "organe": organe})
 
 
@@ -215,7 +215,7 @@ func transformer(uid: int, a: Dictionary, metal: float, duree_s: float) -> bool:
 		var deja := avant - float(stocks.metal)
 		stocks.metal = maxf(0.0, float(stocks.metal) - maxf(0.0, metal - deja))
 	var v = trouver(uid)
-	log_(Textes.t("camp.007", [v.nom if v != null else "Véhicule", int(ceil(duree_s / 60.0))]), "info")
+	log_(Textes.t("camp.007", [v.nom if v != null else Textes.t("camp.vehicule"), int(ceil(duree_s / 60.0))]), "info")
 	return true
 
 
@@ -233,9 +233,9 @@ func H() -> Dictionary:
 
 func halte_possible() -> String:
 	if bool(call("ville_dedans")) or ville_protegee():
-		return "En ville, le convoi est déjà à l'abri."
+		return Textes.t("camp.deja_abri")
 	if not ennemis.filter(func(e): return e.actif()).is_empty():
-		return "Impossible : des ennemis sont en vue."
+		return Textes.t("camp.ennemis_en_vue")
 	return ""
 
 
@@ -311,16 +311,16 @@ func eclaireurs_rapport_texte() -> String:
 	var portee := float(H().eclaireurs_portee_m)
 	var morceaux := []
 	var niv := monde.niveau_a(x_tete + portee * 0.5)
-	morceaux.append(["secteur calme", "secteur peu sûr", "secteur dangereux", "secteur très dangereux"][clampi(niv / 2, 0, 3)])
+	morceaux.append([Textes.t("eclaireurs.calme"), Textes.t("eclaireurs.peu_sur"), Textes.t("eclaireurs.dangereux"), Textes.t("eclaireurs.tres_dangereux")][clampi(niv / 2, 0, 3)])
 	var d := float(get("_prochain_x")) - x_tete
 	if d < portee and is_finite(d):
-		morceaux.append("traces de véhicules à %d m" % int(maxf(0.0, d)))
+		morceaux.append(Textes.t("eclaireurs.traces") % int(maxf(0.0, d)))
 	else:
-		morceaux.append("rien sur %d m" % int(portee))
+		morceaux.append(Textes.t("eclaireurs.rien") % int(portee))
 	var bats := batiments.filter(func(b): return b.x > x_tete and b.x < x_tete + portee)
 	if not bats.is_empty():
-		morceaux.append("%d bâtiment(s) devant" % bats.size())
-	return "Les éclaireurs reviennent : " + ", ".join(morceaux) + "."
+		morceaux.append(Textes.t("eclaireurs.batiments") % bats.size())
+	return Textes.t("eclaireurs.retour") + ", ".join(morceaux) + "."
 
 
 func _eclaireurs_rapport() -> void:

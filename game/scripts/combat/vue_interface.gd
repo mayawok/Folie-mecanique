@@ -78,20 +78,20 @@ func _construire_elements() -> void:
 	tray.visible = false
 	hb.add_child(tray)
 	_tray = tray
-	_btn_atelier = _bouton("Assembler", func(): _ouvrir_atelier(), tray, 190)
+	_btn_atelier = _bouton(Textes.t("ui.assembler"), func(): _ouvrir_atelier(), tray, 190)
 	_btn_atelier.visible = false
-	_btn_nouveau = _bouton("Construire", func(): _ouvrir_editeur(0), tray, 160)
+	_btn_nouveau = _bouton(Textes.t("ui.construire"), func(): _ouvrir_editeur(0), tray, 160)
 	_btn_nouveau.visible = false
-	_btn_kit = _bouton("Kit", _basculer_kit, tray, 90)
+	_btn_kit = _bouton(Textes.t("ui.kit"), _basculer_kit, tray, 90)
 	_btn_kit.visible = false
-	_btn_surv = _bouton("Survivants", func(): _ouvrir_surv(), tray, 150)
-	_btn_carte = _bouton("Carte", func(): _ouvrir_carte(), tray, 110)
+	_btn_surv = _bouton(Textes.t("ui.survivants"), func(): _ouvrir_surv(), tray, 150)
+	_btn_carte = _bouton(Textes.t("ui.carte"), func(): _ouvrir_carte(), tray, 110)
 	_btn_menu = _bouton("≡", func(): _tray.visible = not _tray.visible, hb, 76)
-	_btn_pause = _bouton("Pause", func(): _basculer_pause(), hb, 110)
+	_btn_pause = _bouton(Textes.t("ui.pause"), func(): _basculer_pause(), hb, 110)
 	# Un seul bouton de vitesse : chaque toucher passe de x1 à x2, x3, puis revient à x1
 	var bv := _bouton("x1", func(): vitesse_sim = vitesse_sim % 3 + 1, hb, 70)
 	_btns_vitesse.append(bv)
-	_btn_regime = _bouton("Moteur 3/5", func(): m.regime_suivant(), hb, 190)   # 5 régimes moteur, un toucher change
+	_btn_regime = _bouton(Textes.t("ui.moteur_initial"), func(): m.regime_suivant(), hb, 190)   # 5 régimes moteur, un toucher change
 	for b in [_btn_atelier, _btn_nouveau, _btn_kit, _btn_surv, _btn_carte]:   # un panneau s'ouvre : le menu se replie
 		b.pressed.connect(func(): _tray.visible = false)
 	_radar = RadarMenaces.new()   # radar des menaces (DEC-258)
@@ -155,17 +155,17 @@ func _construire_elements() -> void:
 	cadre_ord.add_child(ord)
 	ord.visible = true
 	_ord = cadre_ord
-	_rangee(ord, "Marche", [["Reculer", "recul"], ["Halte", "halte"], ["Avancer", "avancer"]],
+	_rangee(ord, Textes.t("ui.marche"), [[Textes.t("ui.reculer"), "recul"], [Textes.t("ui.halte"), "halte"], [Textes.t("ui.avancer"), "avancer"]],
 		func(): return m.ordres.marche, func(v): m.ordre_marche(v), 200.0)
-	_rangee(ord, "Visée", [["Libre", "libre"], ["Roues", "roulement"], ["Armes", "armement"], ["Châssis", "chassis"]],
+	_rangee(ord, Textes.t("ui.visee"), [[Textes.t("ui.visee_libre"), "libre"], [Textes.t("ui.visee_roues"), "roulement"], [Textes.t("ui.visee_armes"), "armement"], [Textes.t("ui.visee_chassis"), "chassis"]],
 		func(): return m.ordres.visee, func(v): m.ordre_visee(v), 150.0)
-	_rangee(ord, "Conduite", [["Éviter / doubler", "eviter"], ["Éperonner", "eperonner"]],
+	_rangee(ord, Textes.t("ui.conduite"), [[Textes.t("ui.conduite_eviter"), "eviter"], [Textes.t("ui.conduite_eperonner"), "eperonner"]],
 		func(): return m.conduite(), func(v): m.ordre_conduite(v), 260.0)
 	var hd := HBoxContainer.new()
 	ord.add_child(hd)
-	_bouton("Demi-tour du convoi", func(): _demi_tour(), hd, 330)
-	_bouton("Fermer", func(): _ord_t = 0.0, hd, 150)
-	_btn_ordres = _bouton("Ordres du convoi", func(): _ord_t = 8.0, self, 300)
+	_bouton(Textes.t("ui.demi_tour"), func(): _demi_tour(), hd, 330)
+	_bouton(Textes.t("ui.fermer"), func(): _ord_t = 0.0, hd, 150)
+	_btn_ordres = _bouton(Textes.t("ui.ordres"), func(): _ord_t = 8.0, self, 300)
 	_btn_ordres.set_anchors_and_offsets_preset(PRESET_BOTTOM_RIGHT)
 	_btn_ordres.offset_left = -320
 	_btn_ordres.offset_right = -16
@@ -201,19 +201,19 @@ func _construire_elements() -> void:
 	ab.add_theme_constant_override("h_separation", 10)
 	ab.add_theme_constant_override("v_separation", 8)
 	_bande_actions.add_child(ab)
-	_btn_feu = _bouton("Cessez-le-feu", func(): _basculer_feu(), ab, 230)
-	_btn_rep = _bouton("Réparer", func(): _basculer_rep(), ab, 160)
-	_bouton("Rang vers l'arrière", func(): m.descendre(selection), ab, 270)
-	_bouton("Rang vers l'avant", func(): m.monter(selection), ab, 250)
-	_bouton("Abandonner", func(): m.abandonner(selection), ab, 190)
-	_bouton("S'abriter", func(): m.ordre_debarquer(selection), ab, 190)
-	_btn_camo = _bouton("Camoufler", func(): _basculer_camo(), ab, 200)
-	_btn_garage = _bouton("Garer", func(): _basculer_garage(), ab, 170)
-	_btn_modifier = _bouton("Grille", func(): _ouvrir_editeur(selection), ab, 150)
-	_btn_demonter = _bouton("Démonter", func(): m.ordre_demonter(selection), ab, 170)
-	_btn_troupes = _bouton("Débarquer les troupes", func(): m.ordre_troupes(selection), ab, 300)
+	_btn_feu = _bouton(Textes.t("ui.cessez_le_feu"), func(): _basculer_feu(), ab, 230)
+	_btn_rep = _bouton(Textes.t("ui.reparer"), func(): _basculer_rep(), ab, 160)
+	_bouton(Textes.t("ui.rang_arriere"), func(): m.descendre(selection), ab, 270)
+	_bouton(Textes.t("ui.rang_avant"), func(): m.monter(selection), ab, 250)
+	_bouton(Textes.t("ui.abandonner"), func(): m.abandonner(selection), ab, 190)
+	_bouton(Textes.t("ui.abriter"), func(): m.ordre_debarquer(selection), ab, 190)
+	_btn_camo = _bouton(Textes.t("ui.camoufler"), func(): _basculer_camo(), ab, 200)
+	_btn_garage = _bouton(Textes.t("ui.garer"), func(): _basculer_garage(), ab, 170)
+	_btn_modifier = _bouton(Textes.t("ui.grille"), func(): _ouvrir_editeur(selection), ab, 150)
+	_btn_demonter = _bouton(Textes.t("ui.demonter"), func(): m.ordre_demonter(selection), ab, 170)
+	_btn_troupes = _bouton(Textes.t("ui.debarquer"), func(): m.ordre_troupes(selection), ab, 300)
 	_btn_troupes.visible = false
-	_btn_camp = _bouton("Camp", func(): _action_camp(), ab, 330)
+	_btn_camp = _bouton(Textes.t("ui.camp"), func(): _action_camp(), ab, 330)
 	# --- Alerte à droite : vague ennemie, embuscade, mines
 	_panneau_alerte = _panneau(self, Color(0.2, 0.05, 0.04, 0.88))
 	_panneau_alerte.set_anchors_and_offsets_preset(PRESET_TOP_RIGHT)
@@ -236,12 +236,12 @@ func _construire_elements() -> void:
 	_lbl_meteo = _label("", av, 29, Color("#FFD27A"))
 	_lbl_meteo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_meteo.custom_minimum_size = Vector2(500, 0)
-	_btn_demin_det = _bouton("Déminer : détecteur de métaux", func(): m.ordre_deminer("detecteur"), av, 0)
-	_btn_demin_chien = _bouton("Déminer : chien", func(): m.ordre_deminer("chien"), av, 0)
-	_btn_traverser = _bouton("Traverser à l'aveugle", func(): m.ordre_traverser(), av, 0)
-	_btn_embuscade = _bouton("Embuscade : s'abriter et se cacher", func(): _embuscade(), av, 0)
-	_btn_mines = _bouton("Poser des mines (12 métal)", func(): m.ordre_mines(3), av, 0)
-	_btn_sortir = _bouton("Reprendre la route", func(): _reprendre_route(), av, 0)
+	_btn_demin_det = _bouton(Textes.t("ui.demin_detecteur"), func(): m.ordre_deminer("detecteur"), av, 0)
+	_btn_demin_chien = _bouton(Textes.t("ui.demin_chien"), func(): m.ordre_deminer("chien"), av, 0)
+	_btn_traverser = _bouton(Textes.t("ui.traverser"), func(): m.ordre_traverser(), av, 0)
+	_btn_embuscade = _bouton(Textes.t("ui.embuscade"), func(): _embuscade(), av, 0)
+	_btn_mines = _bouton(Textes.t("ui.poser_mines"), func(): m.ordre_mines(3), av, 0)
+	_btn_sortir = _bouton(Textes.t("ui.reprendre_route"), func(): _reprendre_route(), av, 0)
 	_panneau_alerte.visible = false
 	# --- Bouton « Fouiller » flottant au-dessus de la ruine ou de l'épave
 	_btn_fouille = Button.new()
@@ -284,7 +284,7 @@ func _construire_elements() -> void:
 	_pied_surv = VBoxContainer.new()
 	_pied_surv.add_theme_constant_override("separation", 8)
 	sv.add_child(_pied_surv)
-	_bouton("Fermer", func(): _fermer_surv(), sv, 0)
+	_bouton(Textes.t("ui.fermer"), func(): _fermer_surv(), sv, 0)
 	# --- Dialogue : voyageur au bord de la route, camp allié
 	_panneau_dial = _panneau(self, Color(0.08, 0.09, 0.1, 0.95))
 	_panneau_dial.anchor_left = 1.0
@@ -333,7 +333,7 @@ func _construire_elements() -> void:
 	var cv := VBoxContainer.new()
 	cv.add_theme_constant_override("separation", 12)
 	pc.add_child(cv)
-	_label("CARTE DES SECTEURS", cv, 34, C_ACCENT)
+	_label(Textes.t("ui.carte_titre"), cv, 34, C_ACCENT)
 	var defil := ScrollContainer.new()   # le texte défile : les boutons restent toujours visibles en bas
 	defil.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	defil.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -342,8 +342,8 @@ func _construire_elements() -> void:
 	_lbl_carte_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_carte_info.custom_minimum_size = Vector2(440, 0)
 	_lbl_carte_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_btn_partir = _bouton("Partir vers ce secteur", func(): _partir(), cv, 0)
-	_bouton("Fermer la carte", func(): _fermer_carte(), cv, 0)
+	_btn_partir = _bouton(Textes.t("ui.partir_secteur"), func(): _partir(), cv, 0)
+	_bouton(Textes.t("ui.fermer_carte"), func(): _fermer_carte(), cv, 0)
 	# --- Fin de partie
 	_voile_fin = ColorRect.new()
 	_voile_fin.color = Color(0, 0, 0, 0.72)
@@ -358,8 +358,8 @@ func _construire_elements() -> void:
 	cc.add_child(vb)
 	_lbl_fin = _label("", vb, 40)
 	_lbl_fin.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_bouton("Nouvelle expédition", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vb, 420)
-	_bouton("Mode créatif", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
+	_bouton(Textes.t("ui.nouvelle_expedition"), func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1), vb, 420)
+	_bouton(Textes.t("ui.mode_creatif"), func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true), vb, 420)
 	# --- Écran d'accueil (DEC-086) : image plein cadre, quatre boutons sous le titre. Pas utilisé comme menu de pause.
 	_voile_menu = ColorRect.new()
 	_voile_menu.color = Color.BLACK
@@ -388,11 +388,11 @@ func _construire_elements() -> void:
 			an.mode = mode
 			scene.add_child(an)
 	var ver := Label.new()   # numéro de version et date de la dernière mise en ligne (écrit par le workflow web)
-	var txt := "version de développement"
+	var txt := Textes.t("ui.version_dev")
 	if FileAccess.file_exists("res://data/version.json"):
 		var vj = JSON.parse_string(FileAccess.get_file_as_string("res://data/version.json"))
 		if vj is Dictionary and vj.has("version"):
-			txt = "Version " + str(vj.version)
+			txt = Textes.t("ui.version") + str(vj.version)
 	ver.text = txt
 	ver.add_theme_font_size_override("font_size", 26)
 	ver.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
@@ -406,13 +406,13 @@ func _construire_elements() -> void:
 	_boite_titre = VBoxContainer.new()
 	_boite_titre.add_theme_constant_override("separation", 20)
 	_voile_menu.add_child(_boite_titre)
-	_btn_continuer = _bouton_titre("Continuer", func():
+	_btn_continuer = _bouton_titre(Textes.t("ui.continuer"), func():
 		_voile_menu.visible = false
 		_musique_ecran(false)
 		pause = _atelier != null or _editeur != null)
-	_bouton_titre("Recommencer", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1))
-	_bouton_titre("Bac à sable", func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true))
-	_bouton_titre("Options", func(): _panneau_options.visible = true; _feuille(_panneau_options))
+	_bouton_titre(Textes.t("ui.recommencer"), func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1))
+	_bouton_titre(Textes.t("ui.bac_a_sable"), func(): _nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1, {}, false, true))
+	_bouton_titre(Textes.t("ui.options"), func(): _panneau_options.visible = true; _feuille(_panneau_options))
 	_voile_menu.resized.connect(_placer_titre)
 	# Options : volumes (Son.regler les mémorise)
 	_panneau_options = ColorRect.new()
@@ -428,7 +428,7 @@ func _construire_elements() -> void:
 	co.add_child(vo)
 	_label("OPTIONS", vo, 48).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_curseurs_son(vo)
-	_bouton("Retour", func(): _panneau_options.visible = false, vo, 300)
+	_bouton(Textes.t("ui.retour"), func(): _panneau_options.visible = false, vo, 300)
 	_placer_titre()
 
 
@@ -439,7 +439,7 @@ func _curseurs_son(vo: Control) -> void:
 		var hbo := HBoxContainer.new()
 		hbo.add_theme_constant_override("separation", 20)
 		vo.add_child(hbo)
-		var l := _label(bus, hbo, 30)
+		var l := _label(Textes.t("son." + bus.to_lower()), hbo, 30)
 		l.custom_minimum_size = Vector2(160, 0)
 		var sl := HSlider.new()
 		sl.min_value = 0.0
@@ -482,10 +482,10 @@ func _construire_menu_pause() -> void:
 	vb.add_theme_constant_override("separation", 18)
 	pc.add_child(vb)
 	_label("PAUSE", vb, 44).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_bouton("Reprendre", func(): _fermer_menu_pause(), vb, 420)
-	_label("Son", vb, 30).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_bouton(Textes.t("ui.reprendre"), func(): _fermer_menu_pause(), vb, 420)
+	_label(Textes.t("ui.son"), vb, 30).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_curseurs_son(vb)
-	_bouton("Menu principal", func():
+	_bouton(Textes.t("ui.menu_principal"), func():
 		_fermer_menu_pause(false)
 		afficher_menu(true), vb, 420)
 	fond.theme = theme
@@ -718,11 +718,11 @@ func _maj_interface() -> void:
 	# Bannière
 	var ban := ""
 	if pause:
-		ban = "PAUSE : les ordres restent possibles"
+		ban = Textes.t("ui.bandeau_pause")
 	elif m.blocage != "" and m.ordres.marche != "halte":
 		ban = m.blocage
 	elif m.ordres.marche == "halte" and m.temps < 1.0:
-		ban = "Appuyez sur Avancer pour partir"
+		ban = Textes.t("ui.bandeau_depart")
 	_lbl_banniere.text = ban
 	# Cartes de véhicules
 	var sig := ""
@@ -766,27 +766,27 @@ func _maj_interface() -> void:
 	_btn_marche.disabled = m.ville_protegee() and not m.ville_dedans()
 	_btn_marche.texte = ""
 	if m.ville_dedans():
-		_btn_marche.texte = "Repartir…"
+		_btn_marche.texte = Textes.t("ui.repartir")
 	elif m.ville_protegee():
-		_btn_marche.texte = "Entrée en ville" if m.ville_phase() in ["ouverture", "entree"] else "Sortie de la ville"
+		_btn_marche.texte = Textes.t("ui.entree_ville") if m.ville_phase() in ["ouverture", "entree"] else Textes.t("ui.sortie_ville")
 	if _bande_actions.visible:
 		var ab_g = m.abri_garage()
-		_btn_garage.text = Textes.t("vue_interface.020") if sel.garage != 0 else "Garer (%s)" % ("ok" if ab_g != null else "aucun abri")
+		_btn_garage.text = Textes.t("vue_interface.020") if sel.garage != 0 else Textes.t("ui.garer_abri") % ("ok" if ab_g != null else Textes.t("ui.aucun_abri"))
 		_btn_garage.disabled = sel.garage == 0 and ab_g == null
 		_btn_modifier.visible = true
 		_btn_modifier.disabled = m.raison_grille(sel.uid) != ""
 		_btn_demonter.visible = sel.garage != 0
 		_maj_bouton_camp(sel)
 		var travaille: bool = not m.travaux.is_empty() and m.travaux.uid == sel.uid
-		_btn_demonter.text = Textes.t("vue_interface.021", [int(100.0 * (1.0 - m.travaux.reste / m.travaux.total))]) if travaille else "Démonter"
+		_btn_demonter.text = Textes.t("vue_interface.021", [int(100.0 * (1.0 - m.travaux.reste / m.travaux.total))]) if travaille else Textes.t("ui.demonter")
 		_btn_demonter.disabled = m.raison_demontage(sel.uid) != "" and not travaille
-		_btn_feu.text = Textes.t("vue_interface.022") if sel.tir else "Reprendre le feu"
-		_btn_rep.text = Textes.t("vue_interface.023") if sel.reparation else "Réparer"
+		_btn_feu.text = Textes.t("vue_interface.022") if sel.tir else Textes.t("ui.reprendre_feu")
+		_btn_rep.text = Textes.t("vue_interface.023") if sel.reparation else Textes.t("ui.reparer")
 		_btn_troupes.visible = int(sel.profil.get("places_troupes", 0)) > 0
 		if _btn_troupes.visible:   # troupes : descendre des bancs ou y remonter
 			var a_bord: int = sel.troupes_vivantes()
 			var dehors: int = m.monde.troupes_dehors(sel.uid)
-			_btn_troupes.text = ("Débarquer les troupes (%d)" % a_bord) if a_bord > 0 else (("Rembarquer les troupes (%d)" % dehors) if dehors > 0 else "Aucune troupe à bord")
+			_btn_troupes.text = (Textes.t("ui.debarquer_n") % a_bord) if a_bord > 0 else ((Textes.t("ui.rembarquer_n") % dehors) if dehors > 0 else Textes.t("ui.aucune_troupe"))
 			_btn_troupes.disabled = a_bord == 0 and dehors == 0
 	if m.fini and not _fin_son:
 		_fin_son = true
@@ -817,18 +817,18 @@ func _maj_interface() -> void:
 	if _panneau_alerte.visible:
 		var txt := ""
 		if not al.is_empty():
-			txt = "ENNEMIS EN APPROCHE\n%d véhicule(s), à %d m" % [al.n, int(al.dist)]
+			txt = Textes.t("ui.ennemis_approche") % [al.n, int(al.dist)]
 			if al.eta >= 0.0:
-				txt += ", contact dans %d s" % int(al.eta)
+				txt += Textes.t("ui.contact_dans") % int(al.eta)
 		elif poste or cache:
-			txt = "Embuscade en place : l'ennemi ne vous voit pas. La première salve surprend."
+			txt = Textes.t("ui.embuscade_prete")
 		if m.camp_actif():
 			txt = _texte_camp() + ("\n\n" + txt if txt != "" else "")
 		_lbl_alerte.text = txt
 		_lbl_alerte.visible = txt != ""
 		var lignes := ""
 		for an in ann:
-			lignes += "%s %s (%s) à %d m%s\n" % [an.nom, "ALLIÉ" if an.ami else "HOSTILE", MondeJeu.FACTIONS[an.faction], int(an.dist), " : fortifié" if an.fortifie else ""]
+			lignes += Textes.t("ui.ligne_rencontre") % [an.nom, Textes.t("ui.allie") if an.ami else Textes.t("ui.hostile"), MondeJeu.FACTIONS[an.faction], int(an.dist), Textes.t("ui.fortifie") if an.fortifie else ""]
 		_lbl_camp.text = lignes.strip_edges()
 		_lbl_camp.visible = lignes != ""
 		var hostile_annonce := false
@@ -842,11 +842,11 @@ func _maj_interface() -> void:
 		_btn_nuit.visible = (nuit_alerte or tempete) and not abri.is_empty()
 		var lm := ""
 		if m.tempete_annoncee():
-			lm = "TEMPÊTE DE SABLE dans %d s : précision et vitesse réduites." % int(m.tempete.reste)
+			lm = Textes.t("ui.tempete_annonce") % int(m.tempete.reste)
 		elif m.tempete_active():
-			lm = "TEMPÊTE DE SABLE (encore %d s) : précision ÷2, vitesse réduite, véhicules ouverts usés." % int(m.tempete.reste)
+			lm = Textes.t("ui.tempete_en_cours") % int(m.tempete.reste)
 		if champ_vu:
-			lm += ("\n" if lm != "" else "") + "CHAMP DE MINES à %d m (%d mines)%s" % [int(champ.dist), champ.n, " : déminage en cours" if not m.demin.is_empty() else ""]
+			lm += ("\n" if lm != "" else "") + Textes.t("ui.champ_mines") % [int(champ.dist), champ.n, Textes.t("ui.deminage_en_cours") if not m.demin.is_empty() else ""]
 		_lbl_meteo.text = lm
 		_lbl_meteo.visible = lm != ""
 		var moy: Array = m.moyens_demin()
@@ -875,8 +875,8 @@ func _maj_interface() -> void:
 				var o: Dictionary = w.offre_de(vf)
 				_lbl_dial_titre.text = vf.nom
 				_lbl_dial_texte.text = o.texte
-				_dialogue_bouton("Accepter : %s" % o.titre, func(): w.repondre(true), w.peut_accepter(o))
-				_dialogue_bouton("Refuser", func(): w.repondre(false))
+				_dialogue_bouton(Textes.t("ui.accepter") % o.titre, func(): w.repondre(true), w.peut_accepter(o))
+				_dialogue_bouton(Textes.t("ui.refuser"), func(): w.repondre(false))
 			else:
 				_lbl_dial_titre.text = Textes.t("vue_interface.026", [camp.nom, MondeJeu.FACTIONS[camp.faction]])
 				_lbl_dial_texte.text = Textes.t("vue_interface.027")
@@ -887,7 +887,7 @@ func _maj_interface() -> void:
 					var aid: String = a.id
 					_dialogue_bouton(a.txt, func(): w.camp_action(aid), ok)
 				var cuid: int = camp.uid
-				_dialogue_bouton("Fermer", func(): _camp_ferme = cuid)
+				_dialogue_bouton(Textes.t("ui.fermer"), func(): _camp_ferme = cuid)
 	else:
 		_dial_sig = ""
 	if camp == null:
@@ -920,18 +920,18 @@ func _maj_interface() -> void:
 		var inf := ""
 		if _carte_sel >= 0:
 			var ss: Dictionary = w.secteurs[_carte_sel]
-			inf = "%s\n%s : %s\nDifficulté : niveau %d sur 7\nDistance : environ %d m de route calme" % [ss.nom, ss.faction_nom, {"ami": "alliée", "neutre": "neutre", "hostile": "hostile"}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
+			inf = Textes.t("ui.secteur_info") % [ss.nom, ss.faction_nom, {"ami": Textes.t("ui.faction_alliee"), "neutre": Textes.t("ui.faction_neutre"), "hostile": Textes.t("ui.faction_hostile")}[MondeJeu.ATTITUDE[ss.faction]], ss.niveau, int(250.0 + w.distance_secteur(_carte_sel) * 900.0)]
 		else:
-			inf = "Touchez un secteur pour le choisir.\nLes anneaux vont du vert (calme) au rouge (dangereux). La couleur du centre est la faction."
+			inf = Textes.t("ui.secteur_aide")
 		if _carte_sel >= 0 and _carte_sel != w.secteur and not w.est_voisin(w.secteur, _carte_sel):
 			var et: int = w.prochaine_etape(_carte_sel)
 			var nb: int = CarteMonde.chemin(String(w.secteurs[w.secteur].lieu), String(w.secteurs[_carte_sel].lieu)).size() - 1
-			inf += "\nPas de route directe : voyage en %d étapes, par %s." % [nb, w.secteurs[et].nom] if et >= 0 else "\nAucune route."
+			inf += Textes.t("ui.pas_de_route_directe") % [nb, w.secteurs[et].nom] if et >= 0 else Textes.t("ui.aucune_route")
 		_lbl_carte_info.text = Textes.t("vue_interface.033", [sct.nom, inf]) + "\n\n" + _texte_reputation(_carte_sel if _carte_sel >= 0 else w.secteur)
 		var chemin_ok: bool = _carte_sel >= 0 and _carte_sel != w.secteur and CarteMonde.chemin(String(w.secteurs[w.secteur].lieu), String(w.secteurs[_carte_sel].lieu)).size() >= 2
 		_btn_partir.disabled = not chemin_ok or m.mission_active()
 	if _btn_camo != null:
-		_btn_camo.text = Textes.t("vue_interface.034") if (sel is CombatModele.Veh and sel.camo_voulu) else "Camoufler"
+		_btn_camo.text = Textes.t("vue_interface.034") if (sel is CombatModele.Veh and sel.camo_voulu) else Textes.t("ui.camoufler")
 	if m.fini:
 		_lbl_fin.text = Textes.t("vue_interface.035", [int(m.distance_max), m.ennemis_detruits])
 

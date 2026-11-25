@@ -152,7 +152,7 @@ func ordre_rembarquer(uid: int) -> bool:
 		for g in b.garnison:
 			if g.veh == uid and g.pv > 0.0:
 				sortants.append(g.pv)
-				noms_s.append(g.get("nom", "Survivant"))
+				noms_s.append(g.get("nom", Textes.t("nom.survivant")))
 			else:
 				restants.append(g)
 		if not sortants.is_empty():
@@ -432,14 +432,14 @@ func _recolter(c) -> void:
 	c.butin_pris = true
 	var res: Dictionary = c.butin.ressources
 	var morceaux := []
-	var noms := {"ammo": "munitions", "gazole": "L gazole", "essence": "L essence", "metal": "métal"}
+	var noms := {"ammo": Textes.t("butin.ammo"), "gazole": Textes.t("butin.gazole"), "essence": Textes.t("butin.essence"), "metal": Textes.t("butin.metal")}
 	for k in res:
 		if res[k] <= 0:
 			continue
 		if k == "survivants":
 			for i in int(res[k]):
 				if _recruter_survivant():
-					morceaux.append("un survivant se joint à vous")
+					morceaux.append(Textes.t("butin.survivant"))
 		else:
 			stocks[k] = stocks.get(k, 0.0) + res[k]
 			morceaux.append("+%d %s" % [int(res[k]), noms.get(k, k)])
@@ -459,5 +459,5 @@ func _recolter(c) -> void:
 		morceaux.append("%s %d %%" % [comp.nom, int(comp.etat * 100)])
 	if composants.size() > 20:
 		composants = composants.slice(composants.size() - 20)
-	log_("Butin : " + (", ".join(morceaux) if not morceaux.is_empty() else "rien d'utile."), "ok")
+	log_(Textes.t("butin.titre") + (", ".join(morceaux) if not morceaux.is_empty() else Textes.t("butin.rien")), "ok")
 	evt({"t": "butin", "uid": c.uid})

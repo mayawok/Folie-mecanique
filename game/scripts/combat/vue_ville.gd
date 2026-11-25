@@ -21,7 +21,7 @@ func _option_camp(v) -> Dictionary:
 func _maj_bouton_camp(sel) -> void:
 	if m.camp_actif():
 		var pause_camp: bool = String(m.camp_rep.camp.etat) == "interrompue"
-		_btn_camp.text = Textes.t("vue_interface.001") if pause_camp else "Interrompre le camp"
+		_btn_camp.text = Textes.t("vue_interface.001") if pause_camp else Textes.t("ville.interrompre_camp")
 		_btn_camp.disabled = false
 		return
 	var o := _option_camp(sel)
@@ -35,7 +35,7 @@ func _maj_bouton_camp(sel) -> void:
 	if not bool(o.ok):
 		_btn_camp.text += " — " + String(o.raison)
 	elif en_vue:
-		_btn_camp.text += " — ennemis en vue"
+		_btn_camp.text += Textes.t("ville.ennemis_en_vue")
 
 
 func _action_camp() -> void:
@@ -57,10 +57,10 @@ func _action_camp() -> void:
 func _texte_camp() -> String:
 	var C: Dictionary = m.camp_rep.camp
 	var fait := 1.0 - float(C.restant_s) / maxf(1.0, float(C.duree_s))
-	var etat := "TRAVAUX INTERROMPUS" if String(C.etat) == "interrompue" else "CAMP DE RÉPARATION"
-	var l := "%s : %d %%, encore %d s" % [etat, int(fait * 100.0), int(ceil(float(C.restant_s)))]
+	var etat := Textes.t("ville.travaux_interrompus") if String(C.etat) == "interrompue" else Textes.t("ville.camp_reparation")
+	var l := Textes.t("ville.camp_avancement") % [etat, int(fait * 100.0), int(ceil(float(C.restant_s)))]
 	if not m.ennemis.filter(func(e): return e.actif()).is_empty():
-		l += "\nATTAQUE : défendez le camp, les travaux sont suspendus."
+		l += Textes.t("ville.camp_attaque")
 	return l
 
 
@@ -96,17 +96,17 @@ func _maj_survivants() -> void:
 		var ln := _label(q.nom, ligne, 28)
 		ln.custom_minimum_size = Vector2(260, 0)
 		var etat: String = m.etat_sante(q.pv)
-		var le := _label("%s (%d/%d)" % [etat, int(q.pv), int(m.donnees().equipage_pv)], ligne, 26, {"En forme": C_VERT, "Blessé": C_ORANGE, "Gravement blessé": C_ROUGE, "Hors de combat": C_DISCRET}[etat])
+		var le := _label("%s (%d/%d)" % [Textes.t({"En forme": "sante.forme", "Blessé": "sante.blesse", "Gravement blessé": "sante.grave", "Hors de combat": "sante.hors"}.get(etat, "sante.forme")), int(q.pv), int(m.donnees().equipage_pv)], ligne, 26, {"En forme": C_VERT, "Blessé": C_ORANGE, "Gravement blessé": C_ROUGE, "Hors de combat": C_DISCRET}[etat])
 		le.custom_minimum_size = Vector2(380, 0)
 		var ll := _label(q.lieu, ligne, 31, C_DISCRET)
 		ll.custom_minimum_size = Vector2(300, 0)
 		if q.veh_uid >= 0 and q.pv > 0.0:
 			var qq: Dictionary = q
-			_bouton("Affecter", func():
+			_bouton(Textes.t("ville.affecter"), func():
 				_surv_sel = {"veh": qq.veh_uid, "idx": qq.idx, "nom": qq.nom}
 				_surv_sig = "", ligne, 190)
 	if not _surv_sel.is_empty():
-		_label("Affecter %s à :" % _surv_sel.nom, _pied_surv, 28, C_ACCENT)
+		_label(Textes.t("ville.affecter_a") % _surv_sel.nom, _pied_surv, 28, C_ACCENT)
 		var rang := HBoxContainer.new()
 		rang.add_theme_constant_override("separation", 12)
 		_pied_surv.add_child(rang)
@@ -119,9 +119,9 @@ func _maj_survivants() -> void:
 						_surv_sel = {}
 					_surv_sig = "", rang, 0)
 				bb.disabled = not libre
-		_bouton("Annuler", func(): _surv_sel = {}; _surv_sig = "", rang, 0)
+		_bouton(Textes.t("ville.annuler"), func(): _surv_sel = {}; _surv_sig = "", rang, 0)
 	if m.ordres.marche != "halte":
-		_label("Mettez le convoi en Halte pour changer les affectations.", _pied_surv, 29, C_ORANGE)
+		_label(Textes.t("ville.halte_pour_affecter"), _pied_surv, 29, C_ORANGE)
 
 func _ouvrir_carte() -> void:
 	_pause_avant = pause
@@ -174,17 +174,17 @@ func _maj_halte() -> void:
 	for ch in _panneau_halte.get_children():
 		ch.queue_free()
 	if H.is_empty():
-		_bouton("Monter le camp", func(): m.halte_bivouac(false), _panneau_halte, 300)
-		_bouton("Camper pour la nuit", func(): m.halte_bivouac(true), _panneau_halte, 300)
-		_bouton("Surveiller et réparer", func(): m.halte_garde(), _panneau_halte, 300)
-		_bouton("Tendre une embuscade", func(): _embuscade(), _panneau_halte, 300)
+		_bouton(Textes.t("ville.monter_camp"), func(): m.halte_bivouac(false), _panneau_halte, 300)
+		_bouton(Textes.t("ville.camper_nuit"), func(): m.halte_bivouac(true), _panneau_halte, 300)
+		_bouton(Textes.t("ville.surveiller_reparer"), func(): m.halte_garde(), _panneau_halte, 300)
+		_bouton(Textes.t("ville.tendre_embuscade"), func(): _embuscade(), _panneau_halte, 300)
 	else:
-		var b := _bouton("Éclaireurs partis…" if m._eclaireurs_t > 0.0 else "Envoyer des éclaireurs", func(): m.envoyer_eclaireurs(), _panneau_halte, 300)
+		var b := _bouton(Textes.t("ville.eclaireurs_partis") if m._eclaireurs_t > 0.0 else Textes.t("ville.envoyer_eclaireurs"), func(): m.envoyer_eclaireurs(), _panneau_halte, 300)
 		b.disabled = m._eclaireurs_t > 0.0
-		_bouton("Faire une cache (un quart des réserves)", func(): _cache_quart(), _panneau_halte, 300)
-		_bouton("Lever le camp", func(): m.halte_lever(), _panneau_halte, 300)
+		_bouton(Textes.t("ville.faire_cache"), func(): _cache_quart(), _panneau_halte, 300)
+		_bouton(Textes.t("ville.lever_camp"), func(): m.halte_lever(), _panneau_halte, 300)
 	if m.cache_proche() >= 0:
-		_bouton("Déterrer la cache", func(): m.cache_reprendre(), _panneau_halte, 300)
+		_bouton(Textes.t("ville.deterrer_cache"), func(): m.cache_reprendre(), _panneau_halte, 300)
 
 
 func _deposer_quart() -> void:
@@ -240,8 +240,8 @@ func _remplir_ville() -> void:
 	if m.ville_pillee() and _ville_onglet != "bilan":   # ville pillée : le récit du rescapé et la poursuite (DEC-151)
 		_lbl_dial_titre.text = Textes.t("vue_interface.004", [V.nom])
 		_lbl_dial_texte.text = String(CombatModele.VD().variantes.pillee.recit)
-		_dialogue_bouton("Prendre la poursuite", func(): m.ville_poursuite(), m.evenement.is_empty())
-		_dialogue_bouton("Fermer", func(): _ville_ferme = true)
+		_dialogue_bouton(Textes.t("ville.poursuite"), func(): m.ville_poursuite(), m.evenement.is_empty())
+		_dialogue_bouton(Textes.t("ui.fermer"), func(): _ville_ferme = true)
 		return
 	match "mission" if _ville_onglet.begins_with("mission:") else _ville_onglet:
 		"maire":
@@ -253,51 +253,51 @@ func _remplir_ville() -> void:
 				_lbl_dial_texte.text = Textes.t("vue_interface.006", [V.maire, V.nom])
 				for o in offres:
 					var ty: String = o.type
-					_dialogue_bouton("%s pour %s (%d m)" % [o.nom, o.dest_nom, o.distance_m], func(): _ville_aller("mission:" + ty))
-			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+					_dialogue_bouton(Textes.t("ville.sortie_vers") % [o.nom, o.dest_nom, o.distance_m], func(): _ville_aller("mission:" + ty))
+			_dialogue_bouton(Textes.t("ui.retour"), func(): _ville_aller("accueil"))
 		"marche":   # eau et vivres contre du métal (DEC-148)
 			_lbl_dial_titre.text = Textes.t("vue_interface.007", [V.nom])
-			_lbl_dial_texte.text = "Bidons d'eau et caisses de vivres, par lots de %d. Il vous reste %d jours d'eau et %d jours de vivres pour %d bouches." % [
+			_lbl_dial_texte.text = Textes.t("ville.marche_texte") % [
 				int(CombatModele.VD().marche.lot), int(minf(m.jours_de("eau"), 99.0)), int(minf(m.jours_de("vivres"), 99.0)), m.survivants_nourris()]
 			for k in ["eau", "vivres"]:
 				var kk: String = k
 				var p: int = m.ville_prix_lot(kk)
-				_dialogue_bouton("Acheter %d %s (%d métal)" % [int(CombatModele.VD().marche.lot), "bidons d'eau" if kk == "eau" else "caisses de vivres", p], func(): m.ville_acheter(kk); _ville_aller("marche"), m.bac_a_sable or m.stocks.metal >= p)
-			_dialogue_bouton("Déposer un quart des réserves (reçu)", func(): _deposer_quart(); _ville_aller("marche"))   # DEC-157
-			_dialogue_bouton("Présenter mes reçus (%d)" % m.recus.size(), func(): m.ville_retirer(); _ville_aller("marche"), not m.recus.is_empty())
-			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+				_dialogue_bouton(Textes.t("ville.acheter") % [int(CombatModele.VD().marche.lot), Textes.t("ville.bidons_eau") if kk == "eau" else Textes.t("ville.caisses_vivres"), p], func(): m.ville_acheter(kk); _ville_aller("marche"), m.bac_a_sable or m.stocks.metal >= p)
+			_dialogue_bouton(Textes.t("ville.deposer"), func(): _deposer_quart(); _ville_aller("marche"))   # DEC-157
+			_dialogue_bouton(Textes.t("ville.recus") % m.recus.size(), func(): m.ville_retirer(); _ville_aller("marche"), not m.recus.is_empty())
+			_dialogue_bouton(Textes.t("ui.retour"), func(): _ville_aller("accueil"))
 		"bilan":
 			var b: Dictionary = m.mission_bilan
 			_lbl_dial_titre.text = String(b.get("titre", V.nom))
 			_lbl_dial_texte.text = String(b.get("texte", ""))
-			_dialogue_bouton("Continuer", func(): _ville_aller("accueil"))
+			_dialogue_bouton(Textes.t("ui.continuer"), func(): _ville_aller("accueil"))
 		"garage":
 			_lbl_dial_titre.text = Textes.t("vue_interface.008")
 			var c: int = m.ville_cout_reparation()
 			if m.ville_a_reparer():
 				_lbl_dial_texte.text = Textes.t("vue_interface.009", [(0 if m.bac_a_sable else c)])
-				_dialogue_bouton("Faire réparer tout le convoi", func(): m.ville_reparer(); _ville_aller("garage"), m.bac_a_sable or m.stocks.metal >= c)
+				_dialogue_bouton(Textes.t("ville.reparer_tout"), func(): m.ville_reparer(); _ville_aller("garage"), m.bac_a_sable or m.stocks.metal >= c)
 			else:
 				_lbl_dial_texte.text = Textes.t("vue_interface.010")
-			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+			_dialogue_bouton(Textes.t("ui.retour"), func(): _ville_aller("accueil"))
 		"atelier":
 			_lbl_dial_titre.text = Textes.t("vue_interface.011", [V.nom])
 			_lbl_dial_texte.text = Textes.t("vue_interface.012")
 			var vp = m.vehicule_principal()
 			var cible: int = selection if m.trouver(selection) in m.convoi else (vp.uid if vp != null else 0)
-			_dialogue_bouton("Ouvrir la grille", func(): call("_ouvrir_editeur", cible), cible != 0)
-			_dialogue_bouton("Transformer (rallonge, plateau, blindage)", func(): call("_ouvrir_transformation", cible), cible != 0)
-			_dialogue_bouton("Retour", func(): _ville_aller("accueil"))
+			_dialogue_bouton(Textes.t("ville.ouvrir_grille"), func(): call("_ouvrir_editeur", cible), cible != 0)
+			_dialogue_bouton(Textes.t("ville.transformer"), func(): call("_ouvrir_transformation", cible), cible != 0)
+			_dialogue_bouton(Textes.t("ui.retour"), func(): _ville_aller("accueil"))
 		"sorties":
 			_lbl_dial_titre.text = Textes.t("vue_interface.013", [V.nom])
 			_lbl_dial_texte.text = Textes.t("vue_interface.014")
 			for o in m.ville_sorties():
 				var dest: int = o.id
-				var t := "%s : %s, niveau %d, %d m" % [o.porte, o.secteur, o.niveau, o.distance_m]
+				var t := Textes.t("ville.secteur_ligne") % [o.porte, o.secteur, o.niveau, o.distance_m]
 				if String(o.ville) != "":
-					t += " (ville : %s)" % o.ville
+					t += Textes.t("ville.secteur_ville") % o.ville
 				_dialogue_bouton(t, func(): m.ville_partir(dest))
-			_dialogue_bouton("Rester", func(): _ville_aller("accueil"))
+			_dialogue_bouton(Textes.t("ville.rester"), func(): _ville_aller("accueil"))
 		"mission":
 			var ty: String = _ville_onglet.substr(8)
 			var offre := {}
@@ -306,17 +306,17 @@ func _remplir_ville() -> void:
 					offre = o
 			_lbl_dial_titre.text = Textes.t("vue_interface.015", [String(offre.get("nom", ty)).to_lower()])
 			_lbl_dial_texte.text = String(offre.get("texte", ""))
-			_dialogue_bouton("Accepter", func(): m.mission_accepter(ty), not offre.is_empty())
-			_dialogue_bouton("Refuser", func(): _ville_aller("maire"))
+			_dialogue_bouton(Textes.t("ville.accepter"), func(): m.mission_accepter(ty), not offre.is_empty())
+			_dialogue_bouton(Textes.t("ui.refuser"), func(): _ville_aller("maire"))
 		_:
 			_lbl_dial_titre.text = V.nom
 			_lbl_dial_texte.text = Textes.t("vue_interface.016")
-			_dialogue_bouton("Mairie : parler au maire (missions)", func(): _ville_aller("maire"))
-			_dialogue_bouton("Marché : eau et vivres", func(): _ville_aller("marche"))
-			_dialogue_bouton("Garage : le mécanicien", func(): _ville_aller("garage"))
-			_dialogue_bouton("Atelier : la grille", func(): _ville_aller("atelier"))
-			_dialogue_bouton("Repartir : choisir la sortie", func(): _ville_aller("sorties"))
-			_dialogue_bouton("Fermer", func(): _ville_ferme = true)
+			_dialogue_bouton(Textes.t("ville.mairie"), func(): _ville_aller("maire"))
+			_dialogue_bouton(Textes.t("ville.marche"), func(): _ville_aller("marche"))
+			_dialogue_bouton(Textes.t("ville.garage"), func(): _ville_aller("garage"))
+			_dialogue_bouton(Textes.t("ville.atelier"), func(): _ville_aller("atelier"))
+			_dialogue_bouton(Textes.t("ville.repartir"), func(): _ville_aller("sorties"))
+			_dialogue_bouton(Textes.t("ui.fermer"), func(): _ville_ferme = true)
 
 func _dialogue_bouton(texte: String, action: Callable, actif := true) -> void:
 	var b := _bouton(texte, action, _boite_dial, 0)

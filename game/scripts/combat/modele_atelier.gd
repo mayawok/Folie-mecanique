@@ -30,9 +30,9 @@ func raison_atelier() -> String:
 	if en_kit:
 		return ""
 	if ordres.marche != "halte" or vitesse_convoi != 0.0:
-		return "Arrêtez-vous pour assembler."
+		return Textes.t("atelier.arret")
 	if menace():
-		return "Trop dangereux : des ennemis sont proches."
+		return Textes.t("atelier.danger")
 	return ""
 
 
@@ -148,24 +148,24 @@ func _etat_arme(v: Veh) -> float:
 func raison_demontage(uid: int) -> String:
 	var v = trouver(uid)
 	if not (v is Veh) or not convoi.has(v):
-		return "Ce véhicule n'est pas dans le convoi."
+		return Textes.t("atelier.pas_convoi")
 	if v.garage == 0:
-		return "Garez le véhicule dans une grange ou un hangar."
+		return Textes.t("atelier.garer")
 	if donnees().demontage.nuit_ou_tempete and not (monde.nuit() or tempete_active() or tempete_annoncee()):
-		return "Il faut attendre la nuit ou une tempête pour travailler à l'abri."
+		return Textes.t("atelier.attendre")
 	if not travaux.is_empty():
-		return "Un démontage est déjà en cours."
+		return Textes.t("atelier.deja")
 	if convoi.size() <= 1:
-		return "Impossible de démonter le dernier véhicule."
+		return Textes.t("atelier.dernier")
 	if v.principal:
-		return "Le camion de l'expédition ne se démonte pas : on le transforme au garage."
+		return Textes.t("atelier.berliet")
 	if menace():
-		return "Trop dangereux : des ennemis sont proches."
+		return Textes.t("atelier.danger")
 	var mecano := false
 	for w in convoi:
 		mecano = mecano or w.equipage_vivant() > 0
 	if not mecano and reserve_survivants <= 0:
-		return "Aucun mécanicien disponible."
+		return Textes.t("atelier.mecanicien")
 	return ""
 
 
@@ -220,9 +220,9 @@ func raison_atelier_libre() -> String:
 	for v in convoi:
 		grange = grange or v.garage != 0
 	if not grange:
-		return "Garez un véhicule dans une grange ou un hangar pour travailler."
+		return Textes.t("atelier.garer_un")
 	if donnees().demontage.nuit_ou_tempete and not (monde.nuit() or tempete_active() or tempete_annoncee()):
-		return "Il faut attendre la nuit ou une tempête pour travailler à l'abri."
+		return Textes.t("atelier.attendre")
 	return ""
 
 
@@ -253,18 +253,18 @@ func grille_de(uid: int) -> Dictionary:
 	var v = trouver(uid) if uid != 0 else null
 	if v is Veh:
 		return ConstructionLibre.convertir(v.assemblage, v.type)
-	return ConstructionLibre.nouvelle("Frankenstein %d" % (convoi.size() + 1))
+	return ConstructionLibre.nouvelle(Textes.t("atelier.frankenstein") % (convoi.size() + 1))
 
 
 func raison_grille(uid: int) -> String:
 	if en_kit:
-		return "Assemblez d'abord la moto."
+		return Textes.t("atelier.moto_dabord")
 	if fini:
-		return "La partie est terminée."
+		return Textes.t("atelier.fini")
 	if uid != 0:
 		var v = trouver(uid)
 		if not (v is Veh and convoi.has(v)):
-			return "Ce véhicule n'est pas dans le convoi."
+			return Textes.t("atelier.pas_convoi")
 	return ""
 
 

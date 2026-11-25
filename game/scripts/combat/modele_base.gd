@@ -513,9 +513,9 @@ func appliquer_assemblage(v: Veh, a: Dictionary, etats: Dictionary, type := "") 
 	v.armes = []
 	for id in PIECES_BASE:
 		var pv := float(p.pv[id])
-		v.pieces[id] = {"id": id, "nom": NOMS[id], "pv": pv * float(etats.get(id, 1.0)), "max": pv}
+		v.pieces[id] = {"id": id, "nom": Textes.t("piece." + id), "pv": pv * float(etats.get(id, 1.0)), "max": pv}
 	if v.chenille:
-		v.pieces.roulement.nom = "Chenilles"
+		v.pieces.roulement.nom = Textes.t("piece.chenilles")
 	appliquer_valeurs_berliet(v)
 	for i in p.armes.size():
 		var wid: String = p.armes[i]

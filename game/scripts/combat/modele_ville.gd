@@ -249,7 +249,7 @@ func _repaire_arene() -> void:
 			continue
 		e.set_meta("arene", true)
 		if i == 0:   # le Baron : son char, plus solide
-			e.nom = "Char du Baron"
+			e.nom = Textes.t("ville.char_baron")
 			for pid in e.pieces:
 				e.pieces[pid].max = float(e.pieces[pid].max) * float(A.pv_boss)
 				e.pieces[pid].pv = e.pieces[pid].max
@@ -322,7 +322,7 @@ func _ville_vitesse(vit: float, vmax: float) -> float:
 				return minf(vit, maxf(mini, vmax * k)) if x_tete < stop else 0.0
 			return vit
 		"ouverture", "ouverture_s", "dedans", "chargement", "rassemblement":
-			blocage = "" if ville_dedans() else ("Préparatifs du départ." if ville_phase() in ["chargement", "rassemblement"] else "Ouverture de la porte.")
+			blocage = "" if ville_dedans() else (Textes.t("ville.preparatifs") if ville_phase() in ["chargement", "rassemblement"] else Textes.t("ville.ouverture_porte"))
 			return 0.0
 		"monte_charge", "trone":
 			blocage = Textes.t("ville.013")
@@ -377,14 +377,14 @@ func ville_sorties() -> Array:
 		var d: Vector2 = s.pos - ici
 		var oct := int(round(fposmod(atan2(d.y, d.x), TAU) / (TAU / 8.0))) % 8   # y de la carte vers le bas = sud
 		var connue := bool(s.get("ville_connue", false))
-		res.append({"id": int(s.id), "porte": "Porte vers " + CARDINAUX[oct], "secteur": s.nom, "ville": String(s.get("ville", "")) if connue else "",
+		res.append({"id": int(s.id), "porte": Textes.t("ville.porte_vers", [Textes.t("cardinal.%d" % oct)]), "secteur": s.nom, "ville": String(s.get("ville", "")) if connue else "",
 			"niveau": int(s.niveau), "distance_m": int(250.0 + ici.distance_to(s.pos) * 900.0), "route": String(v.route.get("nom", ""))})
 	res.sort_custom(func(a, b): return int(a.distance_m) < int(b.distance_m))
 	# Demi-tour (DEC-168) : la porte qui ramène vers l'ancienne destination est toujours proposée
 	var p: int = monde.secteur_prec
 	if p >= 0 and p != monde.secteur and res.filter(func(e): return int(e.id) == p).is_empty():
 		var s0: Dictionary = monde.secteurs[p]
-		res.append({"id": p, "porte": "Porte du retour", "secteur": s0.nom, "ville": String(s0.get("ville", "")) if bool(s0.get("ville_connue", false)) else "",
+		res.append({"id": p, "porte": Textes.t("ville.porte_retour"), "secteur": s0.nom, "ville": String(s0.get("ville", "")) if bool(s0.get("ville_connue", false)) else "",
 			"niveau": int(s0.niveau), "distance_m": int(250.0 + ici.distance_to(s0.pos) * 900.0)})
 	for e in res:
 		e["retour"] = int(e.id) == p
@@ -463,7 +463,7 @@ func ville_acheter(k: String) -> bool:
 
 func ville_texte_maire() -> String:
 	var acc := rep_accueil(rep_faction_ici())   # accueil selon la réputation (DEC-217)
-	return (acc + "\n\n" if acc != "" else "") + "M. %s, maire de %s, vous reçoit dans son bureau, sous le portrait jauni d'un président dont plus personne ne se souvient.\n\n« Ici, la porte ouvre à qui ne tire pas. Restez le temps qu'il faut. Pour le travail, revenez plus tard : je n'ai rien pour vous aujourd'hui. »" % [ville.maire, ville.nom]
+	return (acc + "\n\n" if acc != "" else "") + Textes.t("ville.maire_rien") % [ville.maire, ville.nom]
 
 
 # --- Sauvegarde ------------------------------------------------------------------------------

@@ -134,15 +134,15 @@ func _equipe_arme() -> bool:
 func raison_demin(moyen: String) -> String:
 	var c := champ_devant()
 	if c.is_empty() or c.dist > float(mines_cfg().alerte_m):
-		return "Aucun champ de mines en vue."
+		return Textes.t("mines.aucun")
 	if not moyens_demin().has(moyen):
-		return "Vous n'avez pas ce moyen de déminage."
+		return Textes.t("mines.pas_moyen")
 	if ordres.marche != "halte":
-		return "Arrêtez le convoi."
+		return Textes.t("mines.arret")
 	if not _equipe_arme():
-		return "Il faut une arme et un équipage pour faire sauter les mines."
+		return Textes.t("mines.arme")
 	if stocks.ammo < 1.0:
-		return "Plus de munitions pour faire sauter les mines."
+		return Textes.t("mines.munitions")
 	return ""
 
 
@@ -153,7 +153,7 @@ func ordre_deminer(moyen: String) -> bool:
 		return false
 	var c := champ_devant()
 	demin = {"champ": c.id, "moyen": moyen, "t": 0.0}
-	log_(Textes.t("mines.003", [("détecteur de métaux" if moyen == "detecteur" else "chien")]), "info")
+	log_(Textes.t("mines.003", [(Textes.t("mines.detecteur") if moyen == "detecteur" else Textes.t("mines.chien"))]), "info")
 	return true
 
 
@@ -220,14 +220,14 @@ func _recolter(c) -> void:
 	if c is Bat:
 		if c.type in ["bunker", "maison", "eglise"] and not equip_demin.detecteur and rng_mines.randf() < float(C.trouvaille_detecteur):
 			equip_demin.detecteur = true
-			trouve.append("un détecteur de métaux")
+			trouve.append(Textes.t("mines.trouve_detecteur"))
 		if c.type in ["ferme", "grange"] and int(equip_demin.chien_pv) <= 0 and rng_mines.randf() < float(C.trouvaille_chien):
 			equip_demin.chien_pv = int(C.chien_pv)
-			trouve.append("un chien qui s'attache à vous")
+			trouve.append(Textes.t("mines.trouve_chien"))
 	elif c is Veh and c.type == "m4_sherman" and c.statut == "epave" and float(equip_demin.fleau_pv) <= 0.0 \
 			and rng_mines.randf() < float(C.trouvaille_fleau):
 		equip_demin.fleau_pv = float(C.fleau_pv)
-		trouve.append("un fléau à chaînes (monté sur chenilles)")
+		trouve.append(Textes.t("mines.trouve_fleau"))
 	if not trouve.is_empty():
 		log_(Textes.t("mines.010", [", ".join(trouve)]), "ok")
 		evt({"t": "pieces"})

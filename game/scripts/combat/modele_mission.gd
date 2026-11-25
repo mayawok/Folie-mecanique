@@ -60,7 +60,7 @@ func _texte_offre(t: String, dest_nom: String, dest: Dictionary) -> String:
 	var M := MD()
 	var T: Dictionary = M.types[t]
 	var plan := mission_plan(t, int(dest.id))
-	return "« J'ai %s qui doivent arriver à %s. C'est une seule étape, %d m par la %s, sans détour.\n\nSur la route, on me parle de %s.%s %s\n\nJe vous donne des hommes : %s. Livrez tout à %s et le maire là-bas vous paiera : %s. »" % [
+	return Textes.t("mission.proposition") % [
 		T.cargaison, dest_nom, int(dest.distance_m), String(dest.porte).to_lower(), plan.presence, (" " + String(M.menace.pillards)) if plan.pillards_annonces else "",
 		M.menace.incertitude, M.escorte_texte, dest_nom, texte_recompense(T.recompense)]
 
@@ -107,7 +107,7 @@ func mission_plan(t: String, dest: int) -> Dictionary:
 
 
 static func texte_recompense(rc: Dictionary) -> String:
-	var mots := {"gazole": "%d L de gazole", "essence": "%d L d'essence", "ammo": "%d munitions", "metal": "%d métal", "eau": "%d bidons d'eau", "vivres": "%d caisses de vivres", "pieces": "%d pièce(s) de véhicule"}
+	var mots := {"gazole": Textes.t("recompense.gazole"), "essence": Textes.t("recompense.essence"), "ammo": Textes.t("recompense.ammo"), "metal": Textes.t("recompense.metal"), "eau": Textes.t("recompense.eau"), "vivres": Textes.t("recompense.vivres"), "pieces": Textes.t("recompense.pieces")}
 	var l := []
 	for k in rc:
 		if mots.has(k):
@@ -213,7 +213,7 @@ func mission_sous_titre() -> String:
 func _mission_route() -> void:
 	var vp = vehicule_principal()
 	if vp == null or not vp.actif():
-		mission_echouer("Le Berliet est hors d'usage : la cargaison n'arrivera pas à %s." % mission.dest_nom)
+		mission_echouer(Textes.t("mission.berliet_hs") % mission.dest_nom)
 		return
 	if not monde.en_transit() or ville_protegee():
 		return
@@ -249,7 +249,7 @@ func _poser_vague(v: Dictionary) -> void:
 func mission_echouer(raison: String) -> void:
 	if not mission_active():
 		return
-	mission_bilan = {"ok": false, "titre": "Mission échouée", "texte": raison}
+	mission_bilan = {"ok": false, "titre": Textes.t("mission.echouee"), "texte": raison}
 	rep_acte("mission_echec", "origine", String(mission.get("fac_origine", "")), Textes.t("rep.005"))
 	mission = {}
 	log_(raison, "alerte")
@@ -281,8 +281,8 @@ func _mission_arrivee() -> void:
 	BerlietConfig.regler(berliet_config, "module", String(mission.module_avant))
 	_berliet_longueur()
 	_replacer(true)
-	mission_bilan = {"ok": true, "titre": "Livraison à %s" % ville.nom,
-		"texte": "« %s ! Vous êtes attendus depuis l'aube. » Le maire de %s vous remet : %s.\n\nLes hommes de %s restent ici ; on ne revoit jamais ceux qui s'éloignent." % [
+	mission_bilan = {"ok": true, "titre": Textes.t("mission.livraison") % ville.nom,
+		"texte": Textes.t("mission.livree") % [
 			String(T.nom), ville.nom, texte_recompense(rc), mission.origine]}
 	rep_acte("mission_livree", "destination", fac_dest, Textes.t("rep.006"))
 	rep_acte("mission_livree", "origine", String(mission.get("fac_origine", "")), "")
@@ -332,7 +332,7 @@ func _evenement() -> void:
 	if restants.is_empty():
 		for k in evenement.butin:
 			stocks[k] = float(stocks.get(k, 0.0)) + float(evenement.butin[k])
-		mission_bilan = {"ok": true, "titre": "Réserves reprises", "texte": "Le convoi des pillards est détruit. Vous récupérez les réserves de %s : %s." % [evenement.ville, texte_recompense(evenement.butin)]}
+		mission_bilan = {"ok": true, "titre": Textes.t("mission.reprises"), "texte": Textes.t("mission.reprises_texte") % [evenement.ville, texte_recompense(evenement.butin)]}
 		log_(Textes.t("mission.006", [texte_recompense(evenement.butin)]), "ok")
 		evenement = {}
 		evt({"t": "pillage", "etat": "reussi"})
@@ -341,7 +341,7 @@ func _evenement() -> void:
 	for e in restants:
 		devant = minf(devant, e.x - x_tete)
 	if devant > float(P.pillards_perdus_m):
-		mission_bilan = {"ok": false, "titre": "Pillards perdus", "texte": "Le convoi des pillards a disparu dans le no man's land avec les réserves de %s." % evenement.ville}
+		mission_bilan = {"ok": false, "titre": Textes.t("mission.perdus"), "texte": Textes.t("mission.perdus_texte") % evenement.ville}
 		log_(Textes.t("mission.007"), "alerte")
 		ennemis = ennemis.filter(func(e): return not evenement.pillards.has(e.uid))
 		evenement = {}

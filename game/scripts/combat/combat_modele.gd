@@ -170,10 +170,10 @@ func liste_survivants() -> Array:
 			res.append({"nom": v.noms[i], "pv": v.equipage[i], "lieu": v.nom, "veh_uid": v.uid, "idx": i})
 	for b in batiments:
 		for g in b.garnison:
-			res.append({"nom": g.get("nom", "Survivant"), "pv": g.pv, "lieu": b.nom, "veh_uid": -1, "idx": -1})
+			res.append({"nom": g.get("nom", Textes.t("nom.survivant")), "pv": g.pv, "lieu": b.nom, "veh_uid": -1, "idx": -1})
 	for t in transits:
 		for k in t.pvs.size():
-			res.append({"nom": t.noms[k], "pv": t.pvs[k], "lieu": "en chemin", "veh_uid": -1, "idx": -1})
+			res.append({"nom": t.noms[k], "pv": t.pvs[k], "lieu": Textes.t("survivants.en_chemin"), "veh_uid": -1, "idx": -1})
 	return res
 
 func etat_sante(pv: float) -> String:
@@ -265,7 +265,7 @@ func ordre_demi_tour() -> bool:
 	if ville_active():
 		_ville_retirer()   # la ville qu'on laisse derrière ne se retrouve pas sur cette route
 	if mission_en_route():
-		mission_echouer("Vous avez fait demi-tour : la cargaison n'arrivera pas à %s." % mission.dest_nom)
+		mission_echouer(Textes.t("mission.demi_tour") % mission.dest_nom)
 	log_(Textes.t("modele.014"), "info")
 	evt({"t": "demitour"})
 	return true
@@ -282,7 +282,7 @@ func sauver() -> Dictionary:
 			for g in b.garnison:
 				if g.veh == v.uid:
 					eq.append(g.pv)
-					nm.append(g.get("nom", "Survivant"))
+					nm.append(g.get("nom", Textes.t("nom.survivant")))
 		for t in transits:
 			if t.veh == v.uid:
 				eq.append_array(t.pvs)
@@ -432,7 +432,7 @@ static func depuis_sauvegarde(d: Dictionary) -> CombatModele:
 	m.rep_charger(d.get("reputation", {}))
 	m.mission_charger(d.get("mission", {}))
 	m.journal.clear()
-	m.log_(Textes.t("modele.017") if not m.ville_dedans() else "Partie reprise à %s." % m.ville.nom, "ok")
+	m.log_(Textes.t("modele.017") if not m.ville_dedans() else Textes.t("partie.reprise") % m.ville.nom, "ok")
 	return m
 
 func monter(uid: int) -> void:
@@ -605,7 +605,7 @@ func _marche(dt: float) -> void:
 			blocage = Textes.t("modele.031")
 		elif actifs.any(func(v): return float(v.profil.vitesse) <= 0.0):
 			var v0 = actifs.filter(func(v): return float(v.profil.vitesse) <= 0.0)[0]
-			blocage = Textes.t("modele.032", [v0.nom, v0.profil.get("immobile", "conception à revoir")])
+			blocage = Textes.t("modele.032", [v0.nom, v0.profil.get("immobile", Textes.t("grille.conception_a_revoir"))])
 		elif immobilise:
 			blocage = Textes.t("modele.033")
 		elif not carburant_manquant().is_empty():
@@ -777,7 +777,7 @@ func _rencontres() -> void:
 	x = monde.generer(choix, x, r)
 	var hostile := not ennemis.filter(func(e): return not e.allie).is_empty() or batiments.any(func(b): return b.actif()) or monde.vivants() > 0
 	evt({"t": "contact", "ennemi": hostile})
-	log_("%s à %d m." % ["Contact" if hostile else "Du nouveau", int(debut - x_tete)], "info")
+	log_("%s à %d m." % [Textes.t("rencontre.contact") if hostile else Textes.t("rencontre.nouveau"), int(debut - x_tete)], "info")
 	var iv: Array = ouv().intervalle if ouverture_en_cours() else R.intervalle
 	_prochain_x = x + r.randf_range(iv[0], iv[1])
 
