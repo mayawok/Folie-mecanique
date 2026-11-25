@@ -57,6 +57,7 @@ func _ready() -> void:
 	mission_calque.z_index = 10
 	add_child(mission_calque)
 	_construire_interface()
+	add_child(CompteurImages.new())   # compteur d'images, si activé dans Options (DEC-262)
 	var sv := _charger_sauvegarde()
 	if sv.is_empty():
 		_nouvelle_partie(int(Time.get_ticks_msec()) % 100000 + 1)
@@ -127,6 +128,7 @@ func _unhandled_key_input(e: InputEvent) -> void:
 # --- Boucle ----------------------------------------------------------------
 func _process(delta: float) -> void:
 	_temps += delta
+	_economie_menus()
 	_ord_t = maxf(0.0, _ord_t - delta)
 	_save_t += delta
 	if _save_t >= 10.0:
@@ -473,3 +475,12 @@ func _regler_physique(n: VehiculeDessin, v) -> void:
 	n.course_force = clampf(deb * 0.5, 0.05, 0.4)
 	n.ecrasement = clampf(0.05 + 0.25 * float(e.pression), 0.04, 0.3)
 	n.surface = String(e.surface)
+
+
+# Menus ouverts (accueil, options, pause) : rien ne bouge, 30 images par seconde suffisent (batterie, chaleur ; DEC-262).
+# L'éditeur et l'atelier restent fluides : on y fait glisser des pièces du doigt.
+func _economie_menus() -> void:
+	var menu: bool = (_voile_menu != null and _voile_menu.visible) or (_calque_pause != null and _calque_pause.visible)
+	var cible := 30 if menu else 0
+	if Engine.max_fps != cible:
+		Engine.max_fps = cible

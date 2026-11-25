@@ -196,8 +196,8 @@ class IconeRes extends Control:
 				var c := Vector2(17, 18)
 				for k in 8:
 					draw_line(c + Vector2.from_angle(k * TAU / 8.0) * 9.0, c + Vector2.from_angle(k * TAU / 8.0) * 14.0, Color("#8CC152"), 5.0)
-				draw_circle(c, 11.0, Color("#8CC152"))
-				draw_circle(c, 4.5, Color(0.1, 0.12, 0.1, 0.9))
+				Disque.d(self, c, 11.0, Color("#8CC152"))
+				Disque.d(self, c, 4.5, Color(0.1, 0.12, 0.1, 0.9))
 
 
 # Cadran jour/nuit (coin de l'écran)
@@ -256,7 +256,7 @@ class Carte extends Button:
 		draw_rect(Rect2(16, 48, size.x - 32, 9), Color(0, 0, 0, 0.55))
 		draw_rect(Rect2(16, 48, (size.x - 32) * q, 9), ConvoiVue.couleur_etat(q))
 		for k in v.equipage.size():
-			draw_circle(Vector2(26 + k * 22, 74), 7, ConvoiVue.C_VERT if v.equipage[k] > 0.0 else Color(0.3, 0.3, 0.3))
+			Disque.d(self, Vector2(26 + k * 22, 74), 7, ConvoiVue.C_VERT if v.equipage[k] > 0.0 else Color(0.3, 0.3, 0.3))
 		var txt := ""   # l'essentiel seulement : on n'affiche que ce qui cloche
 		var col2 := ConvoiVue.C_ROUGE
 		if not v.mobile():
@@ -381,9 +381,9 @@ class CarteMap extends Control:
 			var dif: float = clampf(float(s.niveau) / 7.0, 0.0, 1.0)
 			var anneau := Color(0.4, 0.85, 0.4).lerp(Color(0.9, 0.2, 0.15), dif)
 			var fac := Color(MondeJeuCouleurs.get_c(s.faction))
-			draw_circle(p, 22.0, Color(0, 0, 0, 0.6))
-			draw_circle(p, 18.0, anneau)
-			draw_circle(p, 12.0, fac)
+			Disque.d(self, p, 22.0, Color(0, 0, 0, 0.6))
+			Disque.d(self, p, 18.0, anneau)
+			Disque.d(self, p, 12.0, fac)
 			if s.id == vue._carte_sel:
 				draw_arc(p, 28.0, 0.0, TAU, 32, Color.WHITE, 3.0)
 			if s.id == w.secteur:

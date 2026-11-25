@@ -355,3 +355,9 @@ Répondu le 19/11 (DEC-251) : formation de combat automatique, pas d'ordre manue
 - **Version de Godot** : rester en 4.3 (tests et site web) ou passer à une version plus récente (meilleur support iPhone, mais tout à revérifier).
 - **Compte payant** (99 €/an) : TestFlight et publication ; décision du créateur, pas de date.
 - **iPad** : exclu pour l'instant (iPhone seulement).
+
+## OQ-056 — Performance : suites (26/11, DEC-262)
+
+- **Mesures sur l'iPhone** : images/s, temps d'une image et chaleur en gros combat, avec le compteur d'images (Options). Tout le reste en dépend.
+- **Résolution de rendu** : garder la pleine résolution native (2 796 × 1 290) ou proposer un réglage « Économie » proche du site web (≈ 1 864 × 860) si le remplissage coûte trop.
+- **Décor lointain en cache**, **atlas des pièces de véhicules**, **plafonds d'effets** : à décider selon les mesures.

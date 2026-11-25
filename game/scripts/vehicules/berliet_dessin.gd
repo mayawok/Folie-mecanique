@@ -157,7 +157,7 @@ func _ligne_u(a: Vector2, b: Vector2, col: Color, ep_u: float) -> void:
 func _rivets(x0: float, x1: float, y: float, pas := 40.0) -> void:
 	var x := x0 + pas * 0.5
 	while x < x1:
-		ci.draw_circle(pu(x, y), maxf(1.0, 4.0 * k()), _c(Color("#9A8A70")))
+		Disque.d(ci, pu(x, y), maxf(1.0, 4.0 * k()), _c(Color("#9A8A70")))
 		x += pas
 
 
@@ -257,8 +257,8 @@ func _citerne(x0: float, x1: float, r: float, col := Color("#5B6248"), etiquette
 		_rect_u(x - 30.0, yb - 40.0, x + 30.0, r, ACIER.darkened(0.2))
 	# corps : rectangle + deux fonds bombés
 	var rr := d / 2.0
-	ci.draw_circle(pu(a + rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
-	ci.draw_circle(pu(b - rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
+	Disque.d(ci, pu(a + rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
+	Disque.d(ci, pu(b - rr, yh + rr), rr * k(), _c(col.darkened(0.12)))
 	_rect_u(a + rr, yh, b - rr, yb, col, false)
 	_ligne_u(Vector2(a + rr, yh + 40.0), Vector2(b - rr, yh + 40.0), col.lightened(0.15), 18.0)   # reflet
 	_ligne_u(Vector2(a + rr, yb - 20.0), Vector2(b - rr, yb - 20.0), ROUILLE, 14.0)
@@ -310,8 +310,8 @@ func _benne(x0: float, x1: float, r: float) -> void:
 	var h := 220.0
 	var yh := r - 26.0 - h
 	# chargement d'épaves qui dépasse : roue, poutres tordues, portière, tôle
-	ci.draw_circle(pu(x0 + 220.0, yh + 10.0), 85.0 * k(), _c(Color("#2A2522")))
-	ci.draw_circle(pu(x0 + 220.0, yh + 10.0), 40.0 * k(), _c(ROUILLE))
+	Disque.d(ci, pu(x0 + 220.0, yh + 10.0), 85.0 * k(), _c(Color("#2A2522")))
+	Disque.d(ci, pu(x0 + 220.0, yh + 10.0), 40.0 * k(), _c(ROUILLE))
 	_ligne_u(Vector2(x0 + 360.0, yh + 40.0), Vector2(x0 + 560.0, yh - 110.0), ACIER.darkened(0.2), 22.0)
 	_ligne_u(Vector2(x0 + 560.0, yh - 110.0), Vector2(x0 + 640.0, yh - 60.0), ACIER.darkened(0.2), 22.0)
 	ci.draw_colored_polygon(PackedVector2Array([pu(x1 - 380.0, yh + 20.0), pu(x1 - 330.0, yh - 120.0), pu(x1 - 170.0, yh - 90.0),
@@ -330,7 +330,7 @@ func _benne(x0: float, x1: float, r: float) -> void:
 	# vérin de bennage
 	_ligne_u(Vector2(x1 - 160.0, r + 40.0), Vector2(x1 - 90.0, r - 10.0), Color("#8A8A80"), 16.0)
 	# charnière arrière
-	ci.draw_circle(pu(x0 + 14.0, r - 4.0), 14.0 * k(), _c(ACIER.darkened(0.3)))
+	Disque.d(ci, pu(x0 + 14.0, r - 4.0), 14.0 * k(), _c(ACIER.darkened(0.3)))
 
 
 func _grue(x0: float, x1: float, r: float) -> void:
@@ -376,7 +376,7 @@ func _grue(x0: float, x1: float, r: float) -> void:
 	var croc := Vector2(bout.x, r - 300.0)
 	_ligne_u(bout, croc, Color("#2A2A28"), 4.0)
 	ci.draw_arc(pu(croc.x, croc.y + 22.0), 22.0 * k(), -PI * 0.1, PI * 1.1, 10, _c(ACIER_C), maxf(1.0, 7.0 * k()))
-	ci.draw_circle(pu(bout.x, bout.y), 18.0 * k(), _c(ACIER.darkened(0.3)))
+	Disque.d(ci, pu(bout.x, bout.y), 18.0 * k(), _c(ACIER.darkened(0.3)))
 	# stabilisateurs arrière : descendent jusqu'au sol à l'arrêt
 	var y_sol := BerlietConfig.sol()
 	for x in [x0 + 40.0]:
@@ -417,7 +417,7 @@ func _ridelles_hautes(x0: float, x1: float, r: float) -> void:
 		var hc := 60.0 + 30.0 * float(i % 3)
 		_rect_u(x, yh - hc + 40.0, x + 110.0, yh + 40.0, BOIS_C.lightened(0.1))
 		for j in 4:
-			ci.draw_circle(pu(x + 18.0 + 25.0 * j, yh - hc + 30.0), 17.0 * k(), _c(couleurs[(i + j) % couleurs.size()]))
+			Disque.d(ci, pu(x + 18.0 + 25.0 * j, yh - hc + 30.0), 17.0 * k(), _c(couleurs[(i + j) % couleurs.size()]))
 		x += 130.0
 		i += 1
 	_ridelle(x0, x1, yh, r - 26.0, 46.0, 12.0)

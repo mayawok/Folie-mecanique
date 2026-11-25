@@ -4,7 +4,7 @@ Le journal complet et chronologique est [`DECISIONS.md`](DECISIONS.md). Cet inde
 
 ## Cadre, méthode, production
 - **Moteur et méthode** : DEC-001, 210 (découpage du code), 002, 031 à 033, 042, 073, 084, 090, 119, 175, 176. Test Godot : DEC-042 ; économie de crédits : DEC-175.
-- **Cible et publication** : DEC-056 (iPhone 14 Pro Max et plus, paysage), DEC-155 (paysage forcé), DEC-195 à 198, 204, **DEC-260 (appli iPhone native, guide `docs/MAC_IPHONE.md`)**. Modèle économique : **DEC-104** (démo + déblocage) remplace DEC-004 et DEC-012 ; prix visé DEC-198.
+- **Cible et publication** : DEC-056 (iPhone 14 Pro Max et plus, paysage), DEC-155 (paysage forcé), DEC-195 à 198, 204, **DEC-260 (appli iPhone native, guide `docs/MAC_IPHONE.md`)**, **DEC-262 (performance iPhone, `docs/design/PERFORMANCE.md`)**. Modèle économique : **DEC-104** (démo + déblocage) remplace DEC-004 et DEC-012 ; prix visé DEC-198.
 - **Langues, tutoriel, sauvegarde** : DEC-193 à 195, 208 (textes fr/en).
 - **Art et audio** : DEC-247 (évolution de la direction artistique), DEC-020, 021, 023, 024, 066, 084 à 090, 138, 153, 185, 201, 202.
 

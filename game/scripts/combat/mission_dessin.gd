@@ -92,7 +92,7 @@ func _fou(pied: Vector2, s: float, t: float, ph: float, fete: bool, _tambour: bo
 	var epaule := pied + Vector2(0, -0.15 * s)
 	draw_line(pied + Vector2(0, 0.35 * s), epaule, veste, maxf(3.0, 0.32 * s))   # buste qui dépasse de la portière
 	var tete := epaule + Vector2(0.05 * s, -0.22 * s)
-	draw_circle(tete, 0.15 * s, peau)
+	Disque.d(self, tete, 0.15 * s, peau)
 	draw_arc(tete + Vector2(0, -0.03 * s), 0.16 * s, PI, TAU, 8, Color("#3B3326"), maxf(2.0, 0.09 * s))   # casquette ou calot
 	draw_line(tete + Vector2(-0.08, -0.03) * s, tete + Vector2(0.12, -0.03) * s, Color("#2A2620"), maxf(1.5, 0.05 * s))   # lunettes de route
 	var lever := 0.5 + 0.5 * sin(t * 4.0 + ph) if fete else 0.2

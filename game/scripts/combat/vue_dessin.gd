@@ -314,7 +314,7 @@ func _loup(c: CanvasItem, pied: Vector2, dir: float, phase: float, mort: bool, t
 	c.draw_colored_polygon(PackedVector2Array([pied + Vector2(0.5 * d * k, -0.95 * k), pied + Vector2(0.95 * d * k, -0.75 * k), pied + Vector2(0.55 * d * k, -0.55 * k), pied + Vector2(0.4 * d * k, -0.72 * k)]), teinte.lightened(0.05))
 	c.draw_line(pied + Vector2(0.55 * d * k, -0.98 * k), pied + Vector2(0.5 * d * k, -1.15 * k), teinte, maxf(2.0, k * 0.06))
 	c.draw_line(pied + Vector2(-0.6 * d * k, -0.6 * k), pied + Vector2(-1.05 * d * k, -0.75 * k + courir * 0.08 * k), teinte, maxf(2.0, k * 0.07))
-	c.draw_circle(pied + Vector2(0.72 * d * k, -0.74 * k), maxf(1.5, k * 0.04), Color(1.0, 0.3, 0.2))
+	Disque.d(c, pied + Vector2(0.72 * d * k, -0.74 * k), maxf(1.5, k * 0.04), Color(1.0, 0.3, 0.2))
 
 func _dessiner_monde(c: CanvasItem) -> void:
 	var f := get_theme_default_font()
@@ -346,8 +346,8 @@ func _dessiner_monde(c: CanvasItem) -> void:
 		if ab.type == "bombe":   # lance explosive : hampe et charge, mèche qui crépite
 			var bout := pa + Vector2(0.9 * ppm, -1.5 * ppm)
 			c.draw_line(pa + Vector2(0.1 * ppm, -0.9 * ppm), bout, Color("#5A4632"), maxf(2.0, ppm * 0.06))
-			c.draw_circle(bout, ppm * 0.16, Color("#3A3A36"))
-			c.draw_circle(bout + Vector2(0.1, -0.2) * ppm, ppm * (0.06 + 0.04 * sin(_temps * 30.0)), Color(1.0, 0.75, 0.2))
+			Disque.d(c, bout, ppm * 0.16, Color("#3A3A36"))
+			Disque.d(c, bout + Vector2(0.1, -0.2) * ppm, ppm * (0.06 + 0.04 * sin(_temps * 30.0)), Color(1.0, 0.75, 0.2))
 		else:   # lame
 			c.draw_line(pa + Vector2(0.35 * ppm, -1.0 * ppm), pa + Vector2(0.9 * ppm, -1.35 * ppm + sin(_temps * 12.0) * 0.2 * ppm), Color("#C9C6BC"), maxf(2.0, ppm * 0.05))
 	# Lueur des feux allumés dans les bâtiments
@@ -357,8 +357,8 @@ func _dessiner_monde(c: CanvasItem) -> void:
 			for g in b.garnison:
 				if g.pv > 0.0:
 					var pf := _px(b.fenetre(g.slot))
-					c.draw_circle(pf, ppm * 1.8, Color(1.0, 0.55, 0.2, 0.12 * fl))
-					c.draw_circle(pf, ppm * 0.7, Color(1.0, 0.7, 0.3, 0.35 * fl))
+					Disque.d(c, pf, ppm * 1.8, Color(1.0, 0.55, 0.2, 0.12 * fl))
+					Disque.d(c, pf, ppm * 0.7, Color(1.0, 0.7, 0.3, 0.35 * fl))
 	_dessiner_halte(c)
 	# Voyageurs au bord de la route
 	for v in m.monde.pnj:
@@ -367,12 +367,12 @@ func _dessiner_monde(c: CanvasItem) -> void:
 		Silhouette.dessiner(c, pv, ppm, "survivant", {"phase": _temps * 7.0 if parti else 0.0, "miroir": parti, "peau": v.peau + 1})
 		if v.statut == "attend":
 			var hb: float = pv.y - 2.6 * ppm - 5.0 * sin(_temps * 3.0)
-			c.draw_circle(Vector2(pv.x, hb), 17.0, C_ACCENT)
+			Disque.d(c, Vector2(pv.x, hb), 17.0, C_ACCENT)
 			c.draw_string(f, Vector2(pv.x - 8, hb + 9), "!", HORIZONTAL_ALIGNMENT_CENTER, 16, 26, Color("#1A1A18"))
 			if v.type == "marchand":
 				c.draw_rect(Rect2(pv + Vector2(0.8 * ppm, -0.9 * ppm), Vector2(1.6 * ppm, 0.7 * ppm)), Color("#6A5238"))
-				c.draw_circle(pv + Vector2(1.2 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
-				c.draw_circle(pv + Vector2(2.0 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
+				Disque.d(c, pv + Vector2(1.2 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
+				Disque.d(c, pv + Vector2(2.0 * ppm, -0.15 * ppm), 0.28 * ppm, Color("#2A2622"))
 
 func _secteur(c: CanvasItem, ctr: Vector2, r: float, a0: float, a1: float, col: Color) -> void:
 	var pts := PackedVector2Array([ctr])
@@ -386,19 +386,19 @@ func _horloge(c: CanvasItem, ctr: Vector2, r: float) -> void:
 	var d: float = fposmod(w.heure - MondeJeu.AUBE, 1.0)
 	var phi: float = d / jour_len * PI if d < jour_len else PI + (d - jour_len) / (1.0 - jour_len) * PI
 	var a0: float = -PI / 2.0 - phi
-	c.draw_circle(ctr, r + 7.0, Color("#2A2018"))   # cadre en métal patiné
+	Disque.d(c, ctr, r + 7.0, Color("#2A2018"))   # cadre en métal patiné
 	c.draw_arc(ctr, r + 4.0, 0.0, TAU, 40, Color("#B8903A"), 3.0)
 	_secteur(c, ctr, r, a0, a0 + PI, Color("#8FC3E8"))
 	_secteur(c, ctr, r, a0 + PI, a0 + TAU, Color("#12163A"))
 	var ps := ctr + Vector2.from_angle(a0 + PI * 0.5) * r * 0.55
-	c.draw_circle(ps, r * 0.2, Color("#FFD84A"))
+	Disque.d(c, ps, r * 0.2, Color("#FFD84A"))
 	for k in 8:
 		c.draw_line(ps + Vector2.from_angle(k * TAU / 8.0) * r * 0.27, ps + Vector2.from_angle(k * TAU / 8.0) * r * 0.37, Color("#FFD84A"), 2.0)
 	var pl := ctr + Vector2.from_angle(a0 + PI * 1.5) * r * 0.55
-	c.draw_circle(pl, r * 0.2, Color("#E8ECF8"))
-	c.draw_circle(pl + Vector2(r * 0.09, -r * 0.05), r * 0.18, Color("#12163A"))
+	Disque.d(c, pl, r * 0.2, Color("#E8ECF8"))
+	Disque.d(c, pl + Vector2(r * 0.09, -r * 0.05), r * 0.18, Color("#12163A"))
 	for k2 in 5:
-		c.draw_circle(ctr + Vector2.from_angle(a0 + PI * (1.15 + 0.17 * k2)) * r * (0.75 if k2 % 2 == 0 else 0.35), 1.6, Color(1, 1, 0.9, 0.9))
+		Disque.d(c, ctr + Vector2.from_angle(a0 + PI * (1.15 + 0.17 * k2)) * r * (0.75 if k2 % 2 == 0 else 0.35), 1.6, Color(1, 1, 0.9, 0.9))
 	c.draw_arc(ctr, r, 0.0, TAU, 40, Color(0, 0, 0, 0.55), 2.0)
 	c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(-8, -r - 15), ctr + Vector2(8, -r - 15), ctr + Vector2(0, -r - 2)]), Color("#F2EEE6"))
 	c.draw_polyline(PackedVector2Array([ctr + Vector2(-8, -r - 15), ctr + Vector2(8, -r - 15), ctr + Vector2(0, -r - 2), ctr + Vector2(-8, -r - 15)]), Color(0, 0, 0, 0.8), 1.5)
@@ -451,7 +451,7 @@ func _dessiner_halte(c: CanvasItem) -> void:
 			var xf: float = (xq + xt) * 0.5
 			var pf := Vector2(terrain.ecran_x(xf), _sy(xf) + (bas + 0.4) * ppm)
 			var fl := 0.8 + 0.2 * sin(_temps * 14.0)
-			c.draw_circle(pf, 3.0 * ppm, Color(1.0, 0.55, 0.2, 0.1 * fl))
+			Disque.d(c, pf, 3.0 * ppm, Color(1.0, 0.55, 0.2, 0.1 * fl))
 			for j in 3:
 				var dx := (j - 1) * 0.22 * ppm
 				c.draw_colored_polygon(PackedVector2Array([pf + Vector2(dx - 0.2 * ppm, 0), pf + Vector2(dx + 0.2 * ppm, 0), pf + Vector2(dx + sin(_temps * 9.0 + j) * 0.08 * ppm, -(0.7 + 0.2 * sin(_temps * 11.0 + j)) * ppm * fl)]), Color(1.0, 0.6 + 0.2 * j * 0.5, 0.15))
@@ -470,7 +470,7 @@ func _dessiner_halte(c: CanvasItem) -> void:
 			if int(v.profil.get("mecaniciens", 0)) > 0 or i == 0:
 				Silhouette.dessiner(c, pm, ppm, "survivant", {"phase": 0.0, "miroir": true, "peau": i + 5})
 				if fposmod(_temps + i, 1.4) < 0.15:   # étincelle de clé ou de soudure
-					c.draw_circle(pm + Vector2(-0.5 * ppm, -1.0 * ppm), 0.12 * ppm, Color(1.0, 0.85, 0.4))
+					Disque.d(c, pm + Vector2(-0.5 * ppm, -1.0 * ppm), 0.12 * ppm, Color(1.0, 0.85, 0.4))
 			i += 1
 		for j in n_hommes:
 			var xg: float = xq - 1.5 + float(j) * (xt - xq + 3.0) / maxf(1.0, n_hommes - 1)
@@ -488,7 +488,7 @@ func _dessiner_oiseau(c: CanvasItem) -> void:
 	var e := ppm * 0.55
 	var b := sin(_temps * 11.0) * e * 0.6
 	var a := minf(1.0, minf(k * 6.0, (1.0 - k) * 6.0))
-	c.draw_circle(p, e * 2.2, Color(1.0, 0.9, 0.6, 0.12 * a))
+	Disque.d(c, p, e * 2.2, Color(1.0, 0.9, 0.6, 0.12 * a))
 	var col := Color(0.08, 0.07, 0.06, a)
 	c.draw_polyline(PackedVector2Array([p + Vector2(-e, b), p + Vector2(-e * 0.4, -e * 0.15), p]), col, maxf(1.5, e * 0.18), true)
 	c.draw_polyline(PackedVector2Array([p, p + Vector2(e * 0.4, -e * 0.15), p + Vector2(e, b)]), col, maxf(1.5, e * 0.18), true)
@@ -514,14 +514,14 @@ func dessiner_ombres(c: CanvasItem) -> void:
 		var ep := lerpf(0.16, 0.11, soir)   # aplatissement de l'ellipse
 		c.draw_set_transform(p, ang, Vector2(1.0, ep))
 		for k in 8:   # bord flou : huit ellipses empilées, de plus en plus petites
-			c.draw_circle(Vector2.ZERO, demi * (1.05 - 0.075 * k), Color(0.08, 0.06, 0.04, force * 0.14))
+			Disque.d(c, Vector2.ZERO, demi * (1.05 - 0.075 * k), Color(0.08, 0.06, 0.04, force * 0.14))
 		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 # Lueur additive : quatre disques empilés, plus vive au centre
 func _lueur(c: CanvasItem, p: Vector2, r: float, col: Color, a: float) -> void:
 	for k in 4:
-		c.draw_circle(p, r * (1.0 - 0.22 * k), Color(col, a * 0.3))
+		Disque.d(c, p, r * (1.0 - 0.22 * k), Color(col, a * 0.3))
 
 
 # Lumières en mélange additif, au-dessus des véhicules : phares (cône, flaque au sol, éblouissement), feux arrière,
@@ -544,7 +544,7 @@ func dessiner_lumieres(c: CanvasItem) -> void:
 			var pf := _px(Vector2(xf, dy))
 			c.draw_set_transform(pf, atan2(_sy(xf + 1.0) - _sy(xf - 1.0), 2.0 * ppm), Vector2(1.0, 0.16))
 			for k in 3:
-				c.draw_circle(Vector2.ZERO, 5.0 * ppm * (1.0 - 0.25 * k), Color(cc, 0.09 * obs))
+				Disque.d(c, Vector2.ZERO, 5.0 * ppm * (1.0 - 0.25 * k), Color(cc, 0.09 * obs))
 			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			_lueur(c, lampe, 0.6 * ppm, cc, 0.5 * obs)
 			_lueur(c, _px(Vector2(_rx(v) + 0.1, 0.8 + dy)), 0.4 * ppm, Color(1.0, 0.2, 0.1), 0.35 * obs)   # feu arrière
@@ -640,7 +640,7 @@ func _dessiner_gore(c: CanvasItem) -> void:
 		var al: float = 0.85 * clampf((120.0 - t.age) / 40.0, 0.0, 1.0)
 		var p := _px(Vector2(t.x, 0.0)) - Vector2(0.0, float(t.dy) * ppm)
 		c.draw_set_transform(p, 0.0, Vector2(1.0, 0.22))
-		c.draw_circle(Vector2.ZERO, float(t.r) * ppm, Color(0.3, 0.03, 0.03, al))
+		Disque.d(c, Vector2.ZERO, float(t.r) * ppm, Color(0.3, 0.03, 0.03, al))
 	for k in _corps:
 		var al2: float = clampf((180.0 - k.age) / 30.0, 0.0, 1.0)
 		var p2 := _px(Vector2(k.x, 0.0)) - Vector2(0.0, float(k.dy) * ppm)
@@ -650,10 +650,10 @@ func _dessiner_gore(c: CanvasItem) -> void:
 		c.draw_rect(Rect2(-0.6 * ppm, -0.08 * ppm, 1.9 * ppm, 0.12 * ppm), Color(0.3, 0.03, 0.03, 0.8 * al2))
 		c.draw_rect(Rect2(-0.45 * ppm, -0.26 * ppm, 0.85 * ppm, 0.24 * ppm), Color(0.27, 0.28, 0.2, al2))
 		c.draw_rect(Rect2(0.4 * ppm, -0.2 * ppm, 0.85 * ppm, 0.18 * ppm), Color(0.2, 0.19, 0.16, al2))
-		c.draw_circle(Vector2(-0.62 * ppm, -0.15 * ppm), 0.13 * ppm, Color(0.62, 0.48, 0.38, al2))
+		Disque.d(c, Vector2(-0.62 * ppm, -0.15 * ppm), 0.13 * ppm, Color(0.62, 0.48, 0.38, al2))
 	c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for g in _gouttes:
-		c.draw_circle(_px(g.p) - Vector2(0.0, float(g.dy) * ppm), maxf(1.5, float(g.r) * ppm), Color(0.58, 0.04, 0.04, 0.95))
+		Disque.d(c, _px(g.p) - Vector2(0.0, float(g.dy) * ppm), maxf(1.5, float(g.r) * ppm), Color(0.58, 0.04, 0.04, 0.95))
 
 
 func dessiner_fx(c: CanvasItem) -> void:
@@ -676,16 +676,16 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var ph := fposmod(_temps * 0.55 + k * 0.2 + v.uid * 0.13, 1.0)
 				var p := _px(base + Vector2(sin(k * 3.1 + ph * 3.0) * 0.4, ph * 3.5))
 				var rr: float = (0.25 + ph * 0.9) * ppm
-				c.draw_circle(p, rr, Color(0.12, 0.11, 0.1, 0.55 * (1.0 - ph) * intens))
+				Disque.d(c, p, rr, Color(0.12, 0.11, 0.1, 0.55 * (1.0 - ph) * intens))
 			if feu and not v.butin_pris:
 				var pf := _px(base)
-				c.draw_circle(pf, ppm * (0.3 + 0.08 * sin(_temps * 14.0 + v.uid)), Color(1.0, 0.55, 0.15, 0.8))
+				Disque.d(c, pf, ppm * (0.3 + 0.08 * sin(_temps * 14.0 + v.uid)), Color(1.0, 0.55, 0.15, 0.8))
 	for b in m.batiments:
 		if b.statut == "neutralise":
 			for k in 4:
 				var ph := fposmod(_temps * 0.5 + k * 0.25 + b.uid * 0.1, 1.0)
 				var p := _px(Vector2(b.x + b.longueur * (0.25 + 0.15 * k), 1.5 + ph * 4.0 + CombatModele.voie_dy(float(b.voie))))
-				c.draw_circle(p, (0.4 + ph * 1.2) * ppm, Color(0.12, 0.11, 0.1, 0.5 * (1.0 - ph)))
+				Disque.d(c, p, (0.4 + ph * 1.2) * ppm, Color(0.12, 0.11, 0.1, 0.5 * (1.0 - ph)))
 	# Barre de vie et équipage : seulement pour NOS véhicules (l'état de l'ennemi reste inconnu)
 	for v in m.convoi:
 		if not v.actif():
@@ -698,13 +698,13 @@ func dessiner_fx(c: CanvasItem) -> void:
 		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w, 6)), Color(0, 0, 0, 0.6))
 		c.draw_rect(Rect2(Vector2(x0, top), Vector2(w * q, 6)), couleur_etat(q))
 		for k in v.equipage.size():
-			c.draw_circle(Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_VERT if v.equipage[k] > 0.0 else Color(0.35, 0.35, 0.35))
+			Disque.d(c, Vector2(x0 + 6 + k * 12, top - 8), 4.0, C_VERT if v.equipage[k] > 0.0 else Color(0.35, 0.35, 0.35))
 		if v.camo_voulu:
 			var fr: float = 1.0 if v.camoufle else clampf(v.camo_t / CombatModele.donnees().embuscade.camo_s, 0.0, 1.0)
 			var cam := Rect2(Vector2(x0 - 4, _sy(_rx(v) + v.longueur * 0.5) - _dyv(v) - (float(D.hauteur) + 0.3) * ppm), Vector2(w + 8, (float(D.hauteur) + 0.3) * ppm))
 			c.draw_rect(cam, Color(0.25, 0.32, 0.18, 0.78 * fr))
 			for k in 9:
-				c.draw_circle(cam.position + Vector2(cam.size.x * (k + 0.5) / 9.0, cam.size.y * (0.2 + 0.5 * fposmod(k * 0.37, 1.0))), ppm * 0.45, Color(0.18, 0.26, 0.12, 0.8 * fr))
+				Disque.d(c, cam.position + Vector2(cam.size.x * (k + 0.5) / 9.0, cam.size.y * (0.2 + 0.5 * fposmod(k * 0.37, 1.0))), ppm * 0.45, Color(0.18, 0.26, 0.12, 0.8 * fr))
 		if v.uid == selection:
 			var cx := x0 + w * 0.5
 			c.draw_colored_polygon(PackedVector2Array([Vector2(cx - 10, top - 34), Vector2(cx + 10, top - 34), Vector2(cx, top - 20)]), C_ACCENT)
@@ -715,13 +715,13 @@ func dessiner_fx(c: CanvasItem) -> void:
 				_poussiere_veh.append({"p": Vector2(_rx(v) + 0.3, 0.2 + CombatModele.voie_dy(v.voie_f)), "age": 0.0})
 	for q in _poussiere_veh:
 		var kq: float = q.age / 0.9
-		c.draw_circle(_px(q.p) + Vector2(-kq * ppm * 1.6, -kq * ppm * 0.7), ppm * (0.2 + 0.5 * kq), Color(0.7, 0.6, 0.45, 0.35 * (1.0 - kq)))
+		Disque.d(c, _px(q.p) + Vector2(-kq * ppm * 1.6, -kq * ppm * 0.7), ppm * (0.2 + 0.5 * kq), Color(0.7, 0.6, 0.45, 0.35 * (1.0 - kq)))
 	# Mines posées (la LED rouge clignote quand elles sont armées)
 	for mn in m.mines:
 		var pm := _px(Vector2(mn.x, 0.0))
 		c.draw_rect(Rect2(pm + Vector2(-0.35, -0.12) * ppm, Vector2(0.7, 0.2) * ppm), Color("#3A3A32"))
 		if mn.armee and fmod(_temps, 1.0) < 0.2:
-			c.draw_circle(pm + Vector2(0, -0.15 * ppm), maxf(2.0, ppm * 0.07), C_ROUGE)
+			Disque.d(c, pm + Vector2(0, -0.15 * ppm), maxf(2.0, ppm * 0.07), C_ROUGE)
 	for pg in m.pieges:   # chausse-trappes : petites pointes sur la route
 		var pp2 := _px(Vector2(pg.x, 0.0))
 		for k in 3:
@@ -789,21 +789,21 @@ func dessiner_fx(c: CanvasItem) -> void:
 			for k in 4:
 				var tk: float = maxf(0.0, tt - 0.07 * k)
 				var pk := _px(pr.a.lerp(pr.b, tk) + Vector2(0, sin(PI * tk) * arc))
-				c.draw_circle(pk, ppm * (0.18 + 0.35 * tk), Color(1.0, 0.45 + 0.1 * k, 0.1, 0.75 - 0.15 * k))
+				Disque.d(c, pk, ppm * (0.18 + 0.35 * tk), Color(1.0, 0.45 + 0.1 * k, 0.1, 0.75 - 0.15 * k))
 		elif pr.classe == "incendiaire":   # bouteille qui tourne, traînée de flammes
 			for k in 3:
 				var tk2: float = maxf(0.0, tt - 0.05 * k)
 				var pk2 := _px(pr.a.lerp(pr.b, tk2) + Vector2(0, sin(PI * tk2) * arc))
-				c.draw_circle(pk2, maxf(3.0, ppm * (0.16 - 0.03 * k)), Color(1.0, 0.5 + 0.15 * k, 0.1, 0.9 - 0.25 * k))
-			c.draw_circle(sa, maxf(2.5, ppm * 0.08), Color(0.35, 0.6, 0.35))
+				Disque.d(c, pk2, maxf(3.0, ppm * (0.16 - 0.03 * k)), Color(1.0, 0.5 + 0.15 * k, 0.1, 0.9 - 0.25 * k))
+			Disque.d(c, sa, maxf(2.5, ppm * 0.08), Color(0.35, 0.6, 0.35))
 		elif pr.classe == "lance":   # hampe de bois et pointe qui rougeoie
 			c.draw_line(sb, sa, Color(0.45, 0.32, 0.18), maxf(2.5, ppm * 0.06))
-			c.draw_circle(sa, maxf(4.0, ppm * 0.12), Color(1.0, 0.55, 0.15))
-			c.draw_circle(sa, maxf(2.0, ppm * 0.06), Color(1.0, 0.95, 0.6))
+			Disque.d(c, sa, maxf(4.0, ppm * 0.12), Color(1.0, 0.55, 0.15))
+			Disque.d(c, sa, maxf(2.0, ppm * 0.06), Color(1.0, 0.95, 0.6))
 		elif pr.classe == "canon":
 			c.draw_line(sb, sa, Color(0.8, 0.8, 0.75, 0.35), maxf(3.0, ppm * 0.14))
 			c.draw_line(sb.lerp(sa, 0.4), sa, Color(1.0, 0.75, 0.3, 0.95), maxf(4.0, ppm * 0.12))
-			c.draw_circle(sa, maxf(3.5, ppm * 0.1), Color(1.0, 0.95, 0.7))
+			Disque.d(c, sa, maxf(3.5, ppm * 0.1), Color(1.0, 0.95, 0.7))
 		elif pr.classe == "fusil":
 			c.draw_line(sb, sa, Color(1.0, 1.0, 0.9, 0.85), 2.0)
 		else:
@@ -813,8 +813,8 @@ func dessiner_fx(c: CanvasItem) -> void:
 		var k2: float = s2.age / 0.7
 		var pd := _px(s2.p)
 		var rr: float = ppm * (0.25 if not s2.gros else 0.5) * (0.5 + k2)
-		c.draw_circle(pd + Vector2(0, -k2 * ppm * 0.6), rr, Color(0.55, 0.46, 0.34, 0.6 * (1.0 - k2)))
-		c.draw_circle(pd + Vector2(rr * 0.8, -k2 * ppm * 0.3), rr * 0.7, Color(0.5, 0.42, 0.3, 0.5 * (1.0 - k2)))
+		Disque.d(c, pd + Vector2(0, -k2 * ppm * 0.6), rr, Color(0.55, 0.46, 0.34, 0.6 * (1.0 - k2)))
+		Disque.d(c, pd + Vector2(rr * 0.8, -k2 * ppm * 0.3), rr * 0.7, Color(0.5, 0.42, 0.3, 0.5 * (1.0 - k2)))
 	for s3 in _ricochets:
 		var k3: float = s3.age / 0.35
 		var pr3 := _px(s3.p)
@@ -829,7 +829,7 @@ func dessiner_fx(c: CanvasItem) -> void:
 		for k in nb:
 			c.draw_line(p, p + Vector2.from_angle(k * TAU / nb + s.age * 3) * ((9 if gros else 6) + (34 if gros else 22) * s.age), Color(1, 0.8, 0.3, fade2), 2.0)
 	for s in _bouffees:
-		c.draw_circle(_px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
+		Disque.d(c, _px(s.p), 14.0 if s.get("grand", false) else 8.0, Color(1.0, 0.9, 0.5, 0.9))
 	_dessiner_gore(c)
 	for d in _debris:   # pièces et hommes qui volent (DEC-255)
 		var pd := _px(d.p)
@@ -844,20 +844,20 @@ func dessiner_fx(c: CanvasItem) -> void:
 				c.draw_rect(Rect2(-k * 0.9, -k * 0.45, k * 1.2, k * 0.5), Color(0.2, 0.26, 0.28, a))
 			"retro":
 				c.draw_rect(Rect2(-k * 0.2, -k * 0.2, k * 0.9, k * 0.4), Color(0.2, 0.2, 0.19, a))
-				c.draw_circle(Vector2(k * 0.9, 0), k * 0.4, Color(0.75, 0.8, 0.82, a))
+				Disque.d(c, Vector2(k * 0.9, 0), k * 0.4, Color(0.75, 0.8, 0.82, a))
 			"homme":
 				Silhouette.dessiner(c, Vector2.ZERO, ppm, "pillard", {"phase": d.age * 9.0, "miroir": false, "peau": 1, "bras": "vise"})
 			"bras":
 				c.draw_line(Vector2(-k * 1.6, 0), Vector2(k * 1.6, 0), Color(0.62, 0.48, 0.38, a), maxf(2.0, ppm * 0.1))
-				c.draw_circle(Vector2(-k * 1.6, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
+				Disque.d(c, Vector2(-k * 1.6, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
 			"jambe":
 				c.draw_line(Vector2(-k * 2.0, 0), Vector2(k * 2.0, 0), Color(0.28, 0.27, 0.22, a), maxf(3.0, ppm * 0.14))
-				c.draw_circle(Vector2(-k * 2.0, 0), maxf(2.0, ppm * 0.08), Color(0.6, 0.04, 0.04, a))
+				Disque.d(c, Vector2(-k * 2.0, 0), maxf(2.0, ppm * 0.08), Color(0.6, 0.04, 0.04, a))
 			"tete":
-				c.draw_circle(Vector2.ZERO, maxf(3.0, ppm * 0.15), Color(0.62, 0.48, 0.38, a))
-				c.draw_circle(Vector2(-ppm * 0.07, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
+				Disque.d(c, Vector2.ZERO, maxf(3.0, ppm * 0.15), Color(0.62, 0.48, 0.38, a))
+				Disque.d(c, Vector2(-ppm * 0.07, 0), maxf(2.0, ppm * 0.07), Color(0.6, 0.04, 0.04, a))
 			_:
-				c.draw_circle(Vector2.ZERO, k * 0.35, Color(0.55, 0.5, 0.45, a))
+				Disque.d(c, Vector2.ZERO, k * 0.35, Color(0.55, 0.5, 0.45, a))
 		c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for e in m.ennemis:   # blindés de fortune : tôles boulonnées, pointes aux deux bouts (DEC-255)
 		if e.actif() and bool(e.profil.get("fortune", false)):
@@ -869,8 +869,8 @@ func dessiner_fx(c: CanvasItem) -> void:
 				var r := Rect2(_px(Vector2(xp, 1.05 + dyl)), Vector2(e.longueur * 0.26 * ppm * ech, 0.62 * ppm * ech))
 				c.draw_rect(r, Color(0.38, 0.34, 0.29, 0.92))
 				c.draw_rect(r, Color(0.12, 0.11, 0.1, 0.9), false, 2.0)
-				c.draw_circle(r.position + Vector2(5, 5), 2.0, Color(0.7, 0.66, 0.6))
-				c.draw_circle(r.position + Vector2(r.size.x - 5, r.size.y - 5), 2.0, Color(0.7, 0.66, 0.6))
+				Disque.d(c, r.position + Vector2(5, 5), 2.0, Color(0.7, 0.66, 0.6))
+				Disque.d(c, r.position + Vector2(r.size.x - 5, r.size.y - 5), 2.0, Color(0.7, 0.66, 0.6))
 			for xp2 in [rx - 0.1, rx + e.longueur + 0.1]:
 				var p0 := _px(Vector2(xp2, 0.7 + dyl))
 				var sens: float = -1.0 if xp2 < rx + e.longueur * 0.5 else 1.0
@@ -895,14 +895,14 @@ func dessiner_fx(c: CanvasItem) -> void:
 			var ph: float = _temps * 9.0 + k * 1.7 + float(v.uid)
 			var off := Vector2((k - 1.5) * ppm * 0.45 + sin(ph) * ppm * 0.08, -ppm * (0.2 + 0.15 * absf(sin(ph * 0.7))))
 			var hf: float = ppm * (0.35 + 0.18 * sin(ph * 1.3)) * amp
-			c.draw_circle(pf + off, hf, Color(1.0, 0.42 + 0.2 * sin(ph), 0.1, 0.75))
-			c.draw_circle(pf + off + Vector2(0, -hf * 0.3), hf * 0.55, Color(1.0, 0.85, 0.3, 0.8))
-			c.draw_circle(pf + off + Vector2(sin(ph) * ppm * 0.2, -ppm * (0.9 + 0.3 * absf(sin(ph * 0.5)))), hf * 0.9, Color(0.14, 0.13, 0.12, 0.35 * amp))
+			Disque.d(c, pf + off, hf, Color(1.0, 0.42 + 0.2 * sin(ph), 0.1, 0.75))
+			Disque.d(c, pf + off + Vector2(0, -hf * 0.3), hf * 0.55, Color(1.0, 0.85, 0.3, 0.8))
+			Disque.d(c, pf + off + Vector2(sin(ph) * ppm * 0.2, -ppm * (0.9 + 0.3 * absf(sin(ph * 0.5)))), hf * 0.9, Color(0.14, 0.13, 0.12, 0.35 * amp))
 	for x in _explosions:
 		var p := _px(x.p)
 		var k: float = x.age / 1.4
-		c.draw_circle(p, x.taille * ppm * (0.4 + k * 1.2), Color(1.0, 0.55 - 0.3 * k, 0.15, 0.85 * (1.0 - k)))
-		c.draw_circle(p + Vector2(0, -k * ppm), x.taille * ppm * (0.3 + k), Color(0.15, 0.14, 0.13, 0.5 * (1.0 - k)))
+		Disque.d(c, p, x.taille * ppm * (0.4 + k * 1.2), Color(1.0, 0.55 - 0.3 * k, 0.15, 0.85 * (1.0 - k)))
+		Disque.d(c, p + Vector2(0, -k * ppm), x.taille * ppm * (0.3 + k), Color(0.15, 0.14, 0.13, 0.5 * (1.0 - k)))
 
 
 # --- Panneau d'état d'un véhicule (au toucher) ------------------------------
@@ -957,16 +957,16 @@ func _glyphe(c: CanvasItem, id: String, v: CombatModele.Veh, p: Vector2, col: Co
 			if v.chenille:
 				c.draw_rect(Rect2(p + Vector2(-23, 2), Vector2(46, 17)), col)
 				for k in 3:
-					c.draw_circle(p + Vector2(-14 + k * 14, 10.5), 5.0, fond)
+					Disque.d(c, p + Vector2(-14 + k * 14, 10.5), 5.0, fond)
 			else:
-				c.draw_circle(p + Vector2(0, 4), 16, col)
-				c.draw_circle(p + Vector2(0, 4), 7, fond)
-				c.draw_circle(p + Vector2(0, 4), 3, col)
+				Disque.d(c, p + Vector2(0, 4), 16, col)
+				Disque.d(c, p + Vector2(0, 4), 7, fond)
+				Disque.d(c, p + Vector2(0, 4), 3, col)
 		"moteur":
 			c.draw_rect(Rect2(p + Vector2(-17, -6), Vector2(34, 22)), col)
 			c.draw_rect(Rect2(p + Vector2(-13, -14), Vector2(8, 8)), col)
 			c.draw_rect(Rect2(p + Vector2(5, -14), Vector2(8, 8)), col)
-			c.draw_circle(p + Vector2(0, 5), 6, fond)
+			Disque.d(c, p + Vector2(0, 5), 6, fond)
 		"suspension":
 			var pts := PackedVector2Array()
 			for k in 7:
@@ -980,14 +980,14 @@ func _glyphe(c: CanvasItem, id: String, v: CombatModele.Veh, p: Vector2, col: Co
 		"chassis":
 			c.draw_rect(Rect2(p + Vector2(-23, -5), Vector2(46, 17)), col)
 			c.draw_rect(Rect2(p + Vector2(-17, -11), Vector2(22, 7)), col)
-			c.draw_circle(p + Vector2(-13, 14), 5, fond)
-			c.draw_circle(p + Vector2(13, 14), 5, fond)
+			Disque.d(c, p + Vector2(-13, 14), 5, fond)
+			Disque.d(c, p + Vector2(13, 14), 5, fond)
 		_:
 			var wid: String = v.profil.armes[int(id.substr(1))]
 			if CombatModele.donnees().armes[wid].classe == "canon":
 				c.draw_rect(Rect2(p + Vector2(-4, -5), Vector2(30, 9)), col)
 				c.draw_rect(Rect2(p + Vector2(-20, -10), Vector2(18, 20)), col)
-				c.draw_circle(p + Vector2(-11, 0), 5, fond)
+				Disque.d(c, p + Vector2(-11, 0), 5, fond)
 			else:
 				c.draw_line(p + Vector2(-4, -6), p + Vector2(24, -6), col, 4.0)
 				c.draw_rect(Rect2(p + Vector2(-16, -12), Vector2(14, 12)), col)

@@ -206,6 +206,23 @@ func _process(_d: float) -> void:
 	queue_redraw()
 
 
+# Ruban entre deux lignes de même nombre de points, de gauche à droite (DEC-262) : triangles donnés au moteur directement,
+# sans la triangulation qu'il refait à chaque image pour un polygone quelconque (des centaines de points par couche).
+# couleurs : une seule, ou une par point (haut puis bas).
+static var _indices_ruban := {}
+
+func _ruban(haut: PackedVector2Array, bas: PackedVector2Array, couleurs: PackedColorArray) -> void:
+	var n := haut.size()
+	if n < 2 or bas.size() != n:
+		return
+	if not _indices_ruban.has(n):
+		var ind := PackedInt32Array()
+		for i in n - 1:
+			ind.append_array([i, i + 1, n + i + 1, i, n + i + 1, n + i])
+		_indices_ruban[n] = ind
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), _indices_ruban[n], haut + bas, couleurs)
+
+
 func ecran_x(xm: float) -> float:
 	return ancre_x + (xm - camera_x) * ppm
 
@@ -215,7 +232,10 @@ func ecran_x(xm: float) -> float:
 func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dictionary) -> void:
 	var nuitc := Color(0.08, 0.1, 0.18)
 	var base := Color(pal.sol).lerp(nuitc, 0.62 * nuit)
-	draw_colored_polygon(sol_pts, base.darkened(0.25))
+	var fond_bas := PackedVector2Array()   # fond de terre : de la crête jusqu'au bas de l'écran
+	for q in crete:
+		fond_bas.append(Vector2(q.x, size.y + 4.0))
+	_ruban(crete, fond_bas, PackedColorArray([base.darkened(0.25)]))
 	# couches : [profondeur haute, profondeur basse (m), couleur]
 	# bas-côté du fond, chaussée large de trois voies (DEC-250), puis la terre en couches
 	var r1 := BAS_COTE + 1.2
@@ -223,14 +243,13 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 		[r1 + 0.85, r1 + 2.0, Color(pal.sol).darkened(0.12)], [r1 + 2.0, r1 + 3.9, Color(pal.sol).darkened(0.24)]]
 	for c in couches:
 		var col: Color = Color(c[2]).lerp(nuitc, 0.62 * nuit)
-		var pts := PackedVector2Array()
-		for p in crete:
-			pts.append(p + Vector2(0, float(c[0]) * ppm))
-		for i in range(crete.size() - 1, -1, -1):
-			var q: Vector2 = crete[i]
+		var h_pts := PackedVector2Array()
+		var b_pts := PackedVector2Array()
+		for q in crete:
+			h_pts.append(q + Vector2(0, float(c[0]) * ppm))
 			var ond := 0.12 * ppm * sin((q.x + camera_x * ppm) * 0.013 + float(c[1]))   # limite de couche un peu ondulée
-			pts.append(q + Vector2(0, float(c[1]) * ppm + ond))
-		draw_colored_polygon(pts, col)
+			b_pts.append(q + Vector2(0, float(c[1]) * ppm + ond))
+		_ruban(h_pts, b_pts, PackedColorArray([col]))
 	# ornières : deux traces par voie, plus fines et plus pâles vers le fond
 	for i in DY_VOIES.size():
 		var prof := BAS_COTE - float(DY_VOIES[i])
@@ -262,8 +281,8 @@ func _sol_code(sol_pts: PackedVector2Array, crete: PackedVector2Array, pal: Dict
 		var prof := (0.7 + 3.2 * alea(k, 35.0)) * ppm
 		var r := (0.04 + 0.1 * alea(k, 36.0)) * ppm
 		var cp := Vector2(ecran_x(xm2), sol_y - sol(xm2) * ppm + prof)
-		draw_circle(cp, r, Color(pal.trace).lightened(0.3 * alea(k, 37.0)).lerp(nuitc, 0.62 * nuit))
-		draw_circle(cp + Vector2(-r * 0.3, -r * 0.3), r * 0.45, Color(1, 1, 1, 0.08 * (1.0 - nuit)))
+		Disque.d(self, cp, r, Color(pal.trace).lightened(0.3 * alea(k, 37.0)).lerp(nuitc, 0.62 * nuit))
+		Disque.d(self, cp + Vector2(-r * 0.3, -r * 0.3), r * 0.45, Color(1, 1, 1, 0.08 * (1.0 - nuit)))
 
 
 # --- Lot profondeur (DEC-249) : décor dessiné par le code pour les zones sans images ---------------
@@ -291,7 +310,7 @@ func _ciel() -> Array:
 func _etoiles(w: float) -> void:
 	if nuit > 0.2:
 		for i in 70:
-			draw_circle(Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
+			Disque.d(self, Vector2(fposmod(i * 137.5 + 40.0, w), 20.0 + fposmod(i * 71.3, sol_y * 0.55)), 1.0 + 1.3 * alea(i, 11.0), Color(1, 1, 0.9, nuit * (0.4 + 0.5 * alea(i, 12.0))))
 
 
 # Bande de brume : transparente en haut et en bas, plus dense au milieu
@@ -324,17 +343,17 @@ func _dune(w: float, hgt: float, vit: float, niveau: float, amp: float, col: Col
 		cols.append(col.lerp(clair if pente > 0.0 else ombre, clampf(absf(pente) / 9.0, 0.0, 1.0)))
 		x += 20.0
 	var pied := col.darkened(0.12)
-	var pts := PackedVector2Array(haut)
-	for i in range(haut.size() - 1, -1, -1):
-		pts.append(haut[i] + Vector2(0, bande))
-		cols.append(pied)
-	draw_polygon(pts, cols)
-	var bas := PackedVector2Array()
+	var bas_b := PackedVector2Array()
+	var fond := PackedVector2Array()
 	for p in haut:
-		bas.append(p + Vector2(0, bande - 1.0))
-	bas.append(Vector2(w + 20.0, hgt))
-	bas.append(Vector2(-20.0, hgt))
-	draw_colored_polygon(bas, pied)
+		bas_b.append(p + Vector2(0, bande))
+		cols.append(pied)
+		fond.append(Vector2(p.x, hgt))
+	_ruban(haut, bas_b, cols)
+	var haut_f := PackedVector2Array()
+	for p in haut:
+		haut_f.append(p + Vector2(0, bande - 1.0))
+	_ruban(haut_f, fond, PackedColorArray([pied]))
 	draw_polyline(haut, Color(clair, 0.55 * jour), 2.0)
 
 
@@ -424,13 +443,13 @@ func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
 		var r := lerpf(46.0, 62.0, soir)
 		var voile := 1.0 - 0.75 * orage
 		for k in 14:   # halo doux : beaucoup de disques très transparents
-			draw_circle(sp, r * (1.0 + 0.28 * (14 - k)), Color(sc, 0.028 * voile))
-		draw_circle(sp, r, Color(sc, 0.95 * voile))
+			Disque.d(self, sp, r * (1.0 + 0.28 * (14 - k)), Color(sc, 0.028 * voile))
+		Disque.d(self, sp, r, Color(sc, 0.95 * voile))
 	else:
 		var lp := Vector2(w * 0.7, sol_y * 0.22)
 		for k in 4:
-			draw_circle(lp, 30.0 * (1.0 + 0.7 * (4 - k)), Color(0.75, 0.82, 1.0, 0.035 * nuit))
-		draw_circle(lp, 30.0, Color(0.88, 0.9, 1.0, 0.9 * nuit))
+			Disque.d(self, lp, 30.0 * (1.0 + 0.7 * (4 - k)), Color(0.75, 0.82, 1.0, 0.035 * nuit))
+		Disque.d(self, lp, 30.0, Color(0.88, 0.9, 1.0, 0.9 * nuit))
 	# Nuages étirés, pris dans la lumière de l'horizon
 	for i in 5:
 		var cx := fposmod(i * 460.0 + 120.0 - camera_x * ppm * 0.015 - Time.get_ticks_msec() * 0.004 * (1 + i % 2), w + 600.0) - 300.0
@@ -438,7 +457,7 @@ func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
 		var cn := Color.WHITE.lerp(hor, 0.5)
 		draw_set_transform(Vector2(cx, cy), 0.0, Vector2(2.2, 0.55))
 		for j in 4:
-			draw_circle(Vector2(j * 30.0, 8.0 * sin(j * 1.7)), 28.0 + 8.0 * alea(i + j, 5.0), Color(cn, 0.18 * (1.0 - 0.7 * nuit)))
+			Disque.d(self, Vector2(j * 30.0, 8.0 * sin(j * 1.7)), 28.0 + 8.0 * alea(i + j, 5.0), Color(cn, 0.18 * (1.0 - 0.7 * nuit)))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var cl: Array = pal.couches
 	# Six plans, du plus lointain au plus proche ; la brume s'intercale entre eux
@@ -456,7 +475,7 @@ func _fond_profondeur(w: float, hgt: float, pal: Dictionary) -> void:
 			var sx := fposmod(i * 311.0 - t * (140.0 + 45.0 * (i % 3)) - camera_x * ppm * 0.25, w + 500.0) - 250.0
 			var sy := sol_y * (0.78 + 0.018 * i) + 6.0 * sin(t * 0.7 + i)
 			draw_set_transform(Vector2(sx, sy), 0.0, Vector2(7.0, 0.45))
-			draw_circle(Vector2.ZERO, 16.0, Color(hor.lightened(0.15), 0.09 * (1.0 - nuit)))
+			Disque.d(self, Vector2.ZERO, 16.0, Color(hor.lightened(0.15), 0.09 * (1.0 - nuit)))
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_brume(sol_y * 0.80, sol_y * 0.92, hor, 0.22, w)
 	_ligne_poteaux(w, 0.38, 0.9, 34.0, 3.0, Color("#3E3024").lerp(hor, 0.35))
@@ -499,7 +518,7 @@ func _avant_code() -> void:
 				var g := float(e[0])
 				if genre < 0.45:   # amas de rochers
 					for j in 3:
-						draw_circle(pied + Vector2((j - 1) * 0.9 * s, -0.15 * s * j), (0.7 + 0.5 * alea(k + j, 54.0)) * s + g, c)
+						Disque.d(self, pied + Vector2((j - 1) * 0.9 * s, -0.15 * s * j), (0.7 + 0.5 * alea(k + j, 54.0)) * s + g, c)
 				elif genre < 0.7:   # poteau télégraphique tout proche
 					var tete := pied + Vector2(0.4 * s, -7.0 * s)
 					draw_line(pied, tete, c, 0.28 * s + 2.0 * g)
@@ -569,7 +588,7 @@ func _draw() -> void:
 		var xm2 := k * 3.0 + 1.5 * sin(k * 3.7)
 		var px := ecran_x(xm2)
 		var py := sol_y - sol(xm2) * ppm + 18 + 30 * absf(sin(k * 5.3))
-		draw_circle(Vector2(px, py), 3 + 4 * absf(sin(k * 9.1)), Color(pal.trace))
+		Disque.d(self, Vector2(px, py), 3 + 4 * absf(sin(k * 9.1)), Color(pal.trace))
 
 
 	# Décor semé sur la route : poteaux, cactus, arbres morts, rochers, carcasses
@@ -635,7 +654,7 @@ func _draw() -> void:
 			draw_line(pied + Vector2(0.1 * ppm, -ha * 0.7), pied + Vector2(-0.8 * ppm, -ha * 1.0), cb, maxf(2.0, ppm * 0.08))
 		elif genre == "rocher":
 			for j in 3:
-				draw_circle(pied + Vector2((j - 1) * 0.5 * ppm, 0.1 * ppm), (0.35 + 0.3 * alea(kk + j, 10.0)) * ppm, Color("#8A7358").darkened(0.1 * j))
+				Disque.d(self, pied + Vector2((j - 1) * 0.5 * ppm, 0.1 * ppm), (0.35 + 0.3 * alea(kk + j, 10.0)) * ppm, Color("#8A7358").darkened(0.1 * j))
 		elif genre == "herbe":   # touffes d'herbe
 			var cg := Color("#6C8A3C").darkened(0.2 * alea(kk, 13.0))
 			for j in 6:
@@ -651,8 +670,8 @@ func _draw() -> void:
 			var cr := Color("#6B4A3A")
 			draw_rect(Rect2(pied + Vector2(-1.6 * ppm, -0.9 * ppm), Vector2(3.2 * ppm, 0.7 * ppm)), cr)
 			draw_rect(Rect2(pied + Vector2(-0.8 * ppm, -1.5 * ppm), Vector2(1.7 * ppm, 0.6 * ppm)), cr.darkened(0.15))
-			draw_circle(pied + Vector2(-1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
-			draw_circle(pied + Vector2(1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
+			Disque.d(self, pied + Vector2(-1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
+			Disque.d(self, pied + Vector2(1.0 * ppm, -0.2 * ppm), 0.35 * ppm, Color("#2A2622"))
 		kk += 1.0
 	if nuit > 0.01:
 		draw_rect(Rect2(Vector2(0, 0), size), Color(0.02, 0.04, 0.12, 0.5 * nuit))

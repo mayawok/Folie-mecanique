@@ -454,6 +454,10 @@ func _curseurs_son(vo: Control) -> void:
 	bg.pressed.connect(func():
 		Gore.regler((Gore.lire() + 1) % 3)
 		bg.text = Textes.t("gore.%d" % Gore.lire()))
+	var bc: Button = _bouton(Textes.t("compteur.%d" % int(CompteurImages.actif())), func(): pass, vo, 420)   # mesure sur iPhone (DEC-262)
+	bc.pressed.connect(func():
+		CompteurImages.regler(not CompteurImages.actif())
+		bc.text = Textes.t("compteur.%d" % int(CompteurImages.actif())))
 
 
 # Menu de pause : Reprendre, Son, Menu principal (calque sous l'accueil)

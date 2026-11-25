@@ -71,7 +71,7 @@ static func dessiner(ci: CanvasItem, pied: Vector2, s: float, var_id: String, op
 			var c := bas.darkened(0.15 * k)
 			ci.draw_line(hanche, genou, c, 0.13 * s)
 			ci.draw_line(genou, p, c, 0.12 * s)
-			ci.draw_rect(Rect2(p + Vector2(-0.05 * s, -0.05 * s), Vector2(0.17 * s, 0.07 * s)), Color("#2A231C"))
+			Pinceau.rect(ci, Rect2(p + Vector2(-0.05 * s, -0.05 * s), Vector2(0.17 * s, 0.07 * s)), Color("#2A231C"))
 	# Buste (trapèze), manteau plus long
 	var h: float = opts.get("h", 0.58) * s
 	var bas_buste := hanche + Vector2(0, 0.12 * s if v.get("manteau", false) and not assis else 0.0)
@@ -79,8 +79,8 @@ static func dessiner(ci: CanvasItem, pied: Vector2, s: float, var_id: String, op
 	var buste := PackedVector2Array([
 		bas_buste + Vector2(-0.16 * s, 0), bas_buste + Vector2(0.16 * s, 0),
 		epaule + Vector2(0.18 * s, 0.04 * s), epaule + Vector2(-0.17 * s, 0.04 * s)])
-	ci.draw_colored_polygon(buste, tenue)
-	ci.draw_polyline(buste + PackedVector2Array([buste[0]]), contour, 1.5)
+	Pinceau.eventail(ci, buste, tenue)
+	Pinceau.contour(ci, buste, contour, 1.5, true)
 	# Bras
 	var bras: String = opts.get("bras", "")
 	var ep := epaule + Vector2(0.02 * s * dir, 0.08 * s)
@@ -101,11 +101,11 @@ static func dessiner(ci: CanvasItem, pied: Vector2, s: float, var_id: String, op
 	if v.objet == "fusil" and bras != "vise" and not assis:
 		ci.draw_line(epaule + Vector2(-0.18 * s * dir, -0.1 * s), hanche + Vector2(0.14 * s * dir, 0.2 * s), Color("#3B2E22"), 0.06 * s)
 	if v.has("foulard"):
-		ci.draw_rect(Rect2(epaule + Vector2(-0.12 * s, -0.02 * s), Vector2(0.24 * s, 0.09 * s)), Color(v.foulard))
+		Pinceau.rect(ci, Rect2(epaule + Vector2(-0.12 * s, -0.02 * s), Vector2(0.24 * s, 0.09 * s)), Color(v.foulard))
 	# Tête
 	var tete := epaule + Vector2(0.02 * s * dir, -0.15 * s)
 	var r := 0.115 * s
-	ci.draw_circle(tete, r, peau)
+	Pinceau.rond(ci, tete, r, peau, 10)
 	_coiffe(ci, v, tete, r, s, dir)
 
 
@@ -113,43 +113,43 @@ static func _coiffe(ci: CanvasItem, v: Dictionary, t: Vector2, r: float, s: floa
 	var sombre := Color(v.tenue).darkened(0.35)
 	match v.coiffe:
 		"casque":
-			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -0.01 * s), r * 1.25), Color("#4E5230"))
+			Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -0.01 * s), r * 1.25), Color("#4E5230"))
 			ci.draw_line(t + Vector2(-r * 1.4, -0.01 * s), t + Vector2(r * 1.4, -0.01 * s), Color("#3E4126"), 0.03 * s)
 		"calot":
-			ci.draw_colored_polygon(PackedVector2Array([t + Vector2(-r, -r * 0.6), t + Vector2(r * 0.9, -r * 0.6),
+			Pinceau.eventail(ci, PackedVector2Array([t + Vector2(-r, -r * 0.6), t + Vector2(r * 0.9, -r * 0.6),
 				t + Vector2(r * 0.6, -r * 1.25), t + Vector2(-r * 0.8, -r * 1.1)]), sombre)
 		"casquette":
-			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.3), r * 1.02), sombre)
+			Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.3), r * 1.02), sombre)
 			ci.draw_line(t + Vector2(0, -r * 0.3), t + Vector2(r * 1.6 * dir, -r * 0.2), sombre, 0.03 * s)
 		"bonnet":
-			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.1), r * 1.12), Color("#5B4532"))
+			Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.1), r * 1.12), Color("#5B4532"))
 			ci.draw_line(t + Vector2(-r * 0.2 * dir, -r * 0.45), t + Vector2(r * 1.05 * dir, -r * 0.45), Color("#B8B09A"), 0.045 * s)
 		"coupe":
 			var a: Dictionary = v.app
 			var c := Color(a.cheveux)
 			match a.coupe:
 				"longue":
-					ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.05), r * 1.1), c)
-					ci.draw_rect(Rect2(t + Vector2(-r * 1.1 * dir if dir > 0 else 0.4 * r, -r * 0.1), Vector2(r * 0.7, r * 1.4)), c)
+					Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.05), r * 1.1), c)
+					Pinceau.rect(ci, Rect2(t + Vector2(-r * 1.1 * dir if dir > 0 else 0.4 * r, -r * 0.1), Vector2(r * 0.7, r * 1.4)), c)
 				"chignon":
-					ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.05), r * 1.08), c)
-					ci.draw_circle(t + Vector2(-r * 1.0 * dir, -r * 0.2), r * 0.42, c)
+					Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.05), r * 1.08), c)
+					Pinceau.rond(ci, t + Vector2(-r * 1.0 * dir, -r * 0.2), r * 0.42, c)
 				"courte":
-					ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.2), r * 1.04), c)
+					Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.2), r * 1.04), c)
 				"rase":
-					ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.35), r * 0.98), c.lerp(Color(a.peau), 0.35))
+					Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.35), r * 0.98), c.lerp(Color(a.peau), 0.35))
 			if a.get("barbe", false):
-				ci.draw_colored_polygon(PackedVector2Array([t + Vector2(-r * 0.6, r * 0.2), t + Vector2(r * 0.9 * dir, r * 0.2),
+				Pinceau.eventail(ci, PackedVector2Array([t + Vector2(-r * 0.6, r * 0.2), t + Vector2(r * 0.9 * dir, r * 0.2),
 					t + Vector2(r * 0.5 * dir, r * 1.05), t + Vector2(-r * 0.3 * dir, r * 0.95)]), c)
 		"chapeau":
 			ci.draw_line(t + Vector2(-r * 1.7, -r * 0.55), t + Vector2(r * 1.7, -r * 0.55), Color("#3A2E24"), 0.04 * s)
-			ci.draw_rect(Rect2(t + Vector2(-r * 0.85, -r * 1.35), Vector2(r * 1.7, r * 0.8)), Color("#3A2E24"))
+			Pinceau.rect(ci, Rect2(t + Vector2(-r * 0.85, -r * 1.35), Vector2(r * 1.7, r * 0.8)), Color("#3A2E24"))
 		"cheveux":
-			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.05), r * 1.08), Color("#3B2A1E"))
-			ci.draw_circle(t + Vector2(-r * 1.0 * dir, -r * 0.2), r * 0.42, Color("#3B2A1E"))
+			Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.05), r * 1.08), Color("#3B2A1E"))
+			Pinceau.rond(ci, t + Vector2(-r * 1.0 * dir, -r * 0.2), r * 0.42, Color("#3B2A1E"))
 		"foulard":
-			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -r * 0.05), r * 1.15), Color("#4A3A2C"))
-			ci.draw_rect(Rect2(t + Vector2(-r, r * 0.05), Vector2(r * 2.05, r * 0.85)), Color(v.get("foulard", "#8C2F25")))
+			Pinceau.eventail(ci, _demi_disque(t + Vector2(0, -r * 0.05), r * 1.15), Color("#4A3A2C"))
+			Pinceau.rect(ci, Rect2(t + Vector2(-r, r * 0.05), Vector2(r * 2.05, r * 0.85)), Color(v.get("foulard", "#8C2F25")))
 			ci.draw_line(t + Vector2(-r * 0.3 * dir, -r * 0.3), t + Vector2(r * 1.1 * dir, -r * 0.3), Color("#1E1E1E"), 0.05 * s)
 
 
@@ -187,7 +187,7 @@ static func description(a: Dictionary) -> String:
 # Portrait (tête et épaules) dans un carré de côté « cote », centré sur « c ».
 static func portrait(ci: CanvasItem, c: Vector2, cote: float, a: Dictionary, tenue := Color("#6B5D45")) -> void:
 	var r := cote * 0.5
-	ci.draw_circle(c, r, Color("#2A2C2E"))
+	Disque.d(ci, c, r, Color("#2A2C2E"))
 	ci.draw_colored_polygon(_demi_disque(c + Vector2(0, r * 0.98), r * 0.78), tenue)
 	var t := c + Vector2(0, -r * 0.05)
 	var rt := r * 0.46
@@ -195,12 +195,12 @@ static func portrait(ci: CanvasItem, c: Vector2, cote: float, a: Dictionary, ten
 	if a.coupe == "longue":
 		ci.draw_rect(Rect2(t + Vector2(-rt * 1.12, -rt * 0.2), Vector2(rt * 2.24, rt * 1.5)), cheveux)
 	ci.draw_rect(Rect2(t + Vector2(-rt * 0.3, rt * 0.6), Vector2(rt * 0.6, rt * 0.7)), Color(a.peau).darkened(0.1))
-	ci.draw_circle(t, rt, Color(a.peau))
+	Disque.d(ci, t, rt, Color(a.peau))
 	match a.coupe:
 		"longue", "courte", "chignon":
 			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -rt * 0.25), rt * 1.06), cheveux)
 			if a.coupe == "chignon":
-				ci.draw_circle(t + Vector2(0, -rt * 1.25), rt * 0.38, cheveux)
+				Disque.d(ci, t + Vector2(0, -rt * 1.25), rt * 0.38, cheveux)
 		"rase":
 			ci.draw_colored_polygon(_demi_disque(t + Vector2(0, -rt * 0.4), rt * 0.98), cheveux.lerp(Color(a.peau), 0.35))
 	if a.barbe:
@@ -208,7 +208,7 @@ static func portrait(ci: CanvasItem, c: Vector2, cote: float, a: Dictionary, ten
 			t + Vector2(rt * 0.45, rt * 1.05), t + Vector2(-rt * 0.45, rt * 1.05)]), cheveux)
 	for k in [-1, 1]:
 		var o := t + Vector2(k * rt * 0.38, rt * 0.05)
-		ci.draw_circle(o, rt * 0.17, Color("#EDE6DA"))
-		ci.draw_circle(o, rt * 0.10, Color(a.yeux))
+		Disque.d(ci, o, rt * 0.17, Color("#EDE6DA"))
+		Disque.d(ci, o, rt * 0.10, Color(a.yeux))
 		ci.draw_line(o + Vector2(-rt * 0.18, -rt * 0.26), o + Vector2(rt * 0.18, -rt * 0.28), cheveux.darkened(0.2), maxf(1.5, rt * 0.08))
 	ci.draw_line(t + Vector2(-rt * 0.22, rt * 0.55), t + Vector2(rt * 0.22, rt * 0.55), Color(a.peau).darkened(0.45), maxf(1.5, rt * 0.07))

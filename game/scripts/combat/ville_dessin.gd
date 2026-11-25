@@ -174,7 +174,7 @@ func _incendies() -> void:
 		var s: float = f.s * _ppm
 		for i in 6:   # colonne de fumée
 			var u := fposmod(_t * 0.12 + i / 6.0 + f.ph, 1.0)
-			draw_circle(base + Vector2(u * 2.0 * s + sin(_t * 0.7 + i) * 0.3 * s, -u * 9.0 * s - 0.8 * s), (0.5 + u * 1.8) * s, Color(0.1, 0.09, 0.08, 0.55 * (1.0 - u)))
+			Disque.d(self, base + Vector2(u * 2.0 * s + sin(_t * 0.7 + i) * 0.3 * s, -u * 9.0 * s - 0.8 * s), (0.5 + u * 1.8) * s, Color(0.1, 0.09, 0.08, 0.55 * (1.0 - u)))
 		for c in [[Color(0.8, 0.18, 0.05, 0.9), 1.0], [Color(1.0, 0.5, 0.1, 0.9), 0.7], [Color(1.0, 0.85, 0.35, 0.95), 0.4]]:
 			var k: float = c[1]
 			var pts := PackedVector2Array()
@@ -186,7 +186,7 @@ func _incendies() -> void:
 			pts.append(base + Vector2(-0.8 * k * s, 0))
 			_poly(pts, c[0])
 		if fposmod(_t + f.ph, 0.6) < 0.3:   # braises
-			draw_circle(base + Vector2(sin(_t * 5.0 + f.ph) * s, -2.2 * s), maxf(1.5, 0.06 * _ppm), Color(1.0, 0.7, 0.2))
+			Disque.d(self, base + Vector2(sin(_t * 5.0 + f.ph) * s, -2.2 * s), maxf(1.5, 0.06 * _ppm), Color(1.0, 0.7, 0.2))
 
 
 # Repaire du Baron (DEC-166) : brasiers à la porte, puits du monte-charge, salle du trône à l'étage, réplique du chef
@@ -194,7 +194,7 @@ func _brasier(x: float) -> void:
 	var p := Vector2(_ex(x), _gy)
 	draw_rect(Rect2(p + Vector2(-0.4, -1.4) * _ppm, Vector2(0.8, 1.4) * _ppm), Color("#2A2420"))
 	var fl := 0.8 + 0.2 * sin(_t * 13.0 + x)
-	draw_circle(p + Vector2(0, -1.6 * _ppm), 2.6 * _ppm, Color(1.0, 0.4, 0.1, 0.12 * fl))
+	Disque.d(self, p + Vector2(0, -1.6 * _ppm), 2.6 * _ppm, Color(1.0, 0.4, 0.1, 0.12 * fl))
 	for j in 4:
 		var dx := (j - 1.5) * 0.18 * _ppm
 		_poly(PackedVector2Array([p + Vector2(dx - 0.18 * _ppm, -1.4 * _ppm), p + Vector2(dx + 0.18 * _ppm, -1.4 * _ppm), p + Vector2(dx + sin(_t * 9.0 + j) * 0.1 * _ppm, -(2.4 + 0.5 * sin(_t * 11.0 + j * 2.0)) * _ppm * fl)]), Color(1.0, 0.45 + 0.1 * j, 0.1, 0.9))
@@ -230,7 +230,7 @@ func _dessiner_repaire(m) -> void:
 	for k in 3:
 		var bx := gx1 + (4.0 + k * 6.0) * _ppm
 		_poly(PackedVector2Array([Vector2(bx, y_et - 6.5 * _ppm), Vector2(bx + 1.2 * _ppm, y_et - 6.5 * _ppm), Vector2(bx + 1.2 * _ppm, y_et - 3.2 * _ppm), Vector2(bx + 0.6 * _ppm, y_et - 3.7 * _ppm), Vector2(bx, y_et - 3.2 * _ppm)]), Color(0.45, 0.08, 0.05, vis))
-		draw_circle(Vector2(bx + 0.6 * _ppm, y_et - 5.6 * _ppm), 0.3 * _ppm, Color(0.1, 0.08, 0.06, vis))   # goutte de brut
+		Disque.d(self, Vector2(bx + 0.6 * _ppm, y_et - 5.6 * _ppm), 0.3 * _ppm, Color(0.1, 0.08, 0.06, vis))   # goutte de brut
 	var tx := gx1 + 12.0 * _ppm
 	_poly(PackedVector2Array([Vector2(tx - 1.0 * _ppm, y_et), Vector2(tx + 1.0 * _ppm, y_et), Vector2(tx + 1.0 * _ppm, y_et - 3.6 * _ppm), Vector2(tx, y_et - 4.2 * _ppm), Vector2(tx - 1.0 * _ppm, y_et - 3.6 * _ppm)]), Color(0.32, 0.26, 0.12, vis))   # trône de fûts et de tôle
 	for j in 2:
@@ -248,7 +248,7 @@ func _dessiner_repaire(m) -> void:
 
 func _brasier_haut(px: float, y: float) -> void:
 	var fl := 0.8 + 0.2 * sin(_t * 12.0 + px)
-	draw_circle(Vector2(px, y - 1.6 * _ppm), 1.8 * _ppm, Color(1.0, 0.4, 0.1, 0.15 * fl))
+	Disque.d(self, Vector2(px, y - 1.6 * _ppm), 1.8 * _ppm, Color(1.0, 0.4, 0.1, 0.15 * fl))
 	_poly(PackedVector2Array([Vector2(px - 0.3 * _ppm, y - 1.0 * _ppm), Vector2(px + 0.3 * _ppm, y - 1.0 * _ppm), Vector2(px, y - (2.2 + 0.4 * sin(_t * 10.0)) * _ppm)]), Color(1.0, 0.5, 0.12))
 	draw_line(Vector2(px, y), Vector2(px, y - 1.0 * _ppm), Color("#2A2420"), maxf(2.0, 0.15 * _ppm))
 
@@ -268,7 +268,7 @@ func _cadavres() -> void:
 			_poly(PackedVector2Array([Vector2(g, y), Vector2(g + w * 0.15, y - 0.36 * _ppm), Vector2(g + w * 0.85, y - 0.32 * _ppm), Vector2(g + w, y)]), Color("#B8B2A4").darkened(0.15 + 0.5 * _nuit))
 		else:
 			draw_rect(Rect2(g, y - 0.26 * _ppm, w * 0.8, 0.26 * _ppm), Color("#5A4A3A").darkened(0.5 * _nuit))
-			draw_circle(Vector2(b, y - 0.16 * _ppm), 0.16 * _ppm, Color("#B08A68").darkened(0.5 * _nuit))
+			Disque.d(self, Vector2(b, y - 0.16 * _ppm), 0.16 * _ppm, Color("#B08A68").darkened(0.5 * _nuit))
 			draw_rect(Rect2(g - 0.2 * _ppm, y - 0.03 * _ppm, w * 0.7, 0.06 * _ppm), Color(0.3, 0.05, 0.04, 0.6))
 
 
@@ -335,7 +335,7 @@ func _poly(pts: PackedVector2Array, col: Color) -> void:
 func _fumee(p: Vector2, s: float, graine: float) -> void:
 	for i in 4:
 		var u := fposmod(_t * 0.18 + i * 0.25 + graine * 0.13, 1.0)
-		draw_circle(p + Vector2(u * 2.5 * s + sin(_t + i) * 0.4 * s, -u * 7.0 * s), (0.5 + u * 1.6) * s, Color(0.55, 0.52, 0.5, 0.35 * (1.0 - u)))
+		Disque.d(self, p + Vector2(u * 2.5 * s + sin(_t + i) * 0.4 * s, -u * 7.0 * s), (0.5 + u * 1.6) * s, Color(0.55, 0.52, 0.5, 0.35 * (1.0 - u)))
 
 
 # Maisons rafistolées, à mi-distance (parallaxe 0,7)
@@ -362,7 +362,7 @@ func _maisons() -> void:
 				_poly(PackedVector2Array([Vector2(sx - 2, base - h * 0.65), Vector2(sx + w * 0.5, base - h * 0.75), Vector2(sx + w + 2, base - h * 0.65)]), col.darkened(0.25))
 				draw_rect(Rect2(sx + w * 0.42, base - h * 0.55, w * 0.16, h * 0.42), _c(Color("#2E2822")))
 				for wx in [0.15, 0.85]:
-					draw_circle(Vector2(sx + w * wx, base - h * 0.06), h * 0.07, _c(Color("#26221E")))
+					Disque.d(self, Vector2(sx + w * wx, base - h * 0.06), h * 0.07, _c(Color("#26221E")))
 			"pile":
 				for i in 3:
 					var y := base - h * (0.3 * i)
@@ -393,7 +393,7 @@ func _maisons() -> void:
 				var u := i / 8.0
 				var q := a.lerp(b, u) + Vector2(0, sin(u * PI) * 0.6 * _ppm * k)
 				draw_line(prev, q, _c(Color("#2A2622")), 1.0)
-				draw_circle(q, maxf(1.5, 0.12 * _ppm * k), _lampe(1.2))
+				Disque.d(self, q, maxf(1.5, 0.12 * _ppm * k), _lampe(1.2))
 				prev = q
 		x += 11.0
 
@@ -425,7 +425,7 @@ func _bonhomme(pied: Vector2, s: float, col: Color, ph: float, miroir: bool) -> 
 		var a := sin(ph + PI * i) * 0.4 if ph != 0.0 else 0.08 * (1 - 2 * i)
 		draw_line(hanche, hanche + Vector2(sin(a) * 0.85 * s * d, 0.85 * s), col.darkened(0.35), maxf(1.0, 0.13 * s))
 	draw_rect(Rect2(hanche + Vector2(-0.17 * s, -0.62 * s), Vector2(0.34 * s, 0.64 * s)), col)
-	draw_circle(hanche + Vector2(0, -0.8 * s), 0.16 * s, _c(Color("#C9A27E")))
+	Disque.d(self, hanche + Vector2(0, -0.8 * s), 0.16 * s, _c(Color("#C9A27E")))
 
 
 # Le long de la route : marché, atelier, garage, mairie, café, dortoirs
@@ -503,10 +503,10 @@ func _atelier() -> void:
 	# un châssis sur cales, des étincelles de soudure
 	draw_rect(Rect2(_p(b[0] + 5.0, 1.4), Vector2(8.0 * _ppm, 0.45 * _ppm)), _c(Color("#4A3A2C")))
 	for wx in [6.2, 11.5]:
-		draw_circle(_p(b[0] + wx, 0.55), 0.55 * _ppm, _c(Color("#2A2522")))
+		Disque.d(self, _p(b[0] + wx, 0.55), 0.55 * _ppm, _c(Color("#2A2522")))
 	if fposmod(_t, 2.3) < 1.2:
 		var sp := _p(b[0] + 9.0, 1.9)
-		draw_circle(sp, _ppm * 0.5, Color(1.0, 0.95, 0.7, 0.35))
+		Disque.d(self, sp, _ppm * 0.5, Color(1.0, 0.95, 0.7, 0.35))
 		for i in 6:
 			var a := _t * 9.0 + i
 			draw_line(sp, sp + Vector2(cos(a), -absf(sin(a))) * _ppm * 0.7, Color(1.0, 0.8, 0.3), 1.5)
@@ -524,8 +524,8 @@ func _garage() -> void:
 	draw_rect(Rect2(_p(b[0] + 2.0, 1.6), Vector2(4.8 * _ppm, 1.2 * _ppm)), _c(Color("#5C6A5E")))   # voiture sur cric
 	draw_rect(Rect2(_p(b[0] + 3.3, 0.4), Vector2(0.3 * _ppm, 0.6 * _ppm)), _c(Color("#8A8A80")))
 	for i in 4:   # pneus empilés
-		draw_circle(_p(b[1] - 2.2, 0.35 + i * 0.6), 0.55 * _ppm, _c(Color("#1E1C1A")))
-		draw_circle(_p(b[1] - 2.2, 0.35 + i * 0.6), 0.25 * _ppm, _c(Color("#3A3632")))
+		Disque.d(self, _p(b[1] - 2.2, 0.35 + i * 0.6), 0.55 * _ppm, _c(Color("#1E1C1A")))
+		Disque.d(self, _p(b[1] - 2.2, 0.35 + i * 0.6), 0.25 * _ppm, _c(Color("#3A3632")))
 	for i in 2:
 		draw_rect(Rect2(_p(b[1] - 0.9 - i * 0.9, 1.0), Vector2(0.7 * _ppm, 1.0 * _ppm)), _c(Color("#2E4A3A") if i == 0 else Color("#8A3A2A")))
 	_enseigne(b[0] + 0.8, 7.6, w - 1.6, "GARAGE · MÉCANIQUE", Color("#E3D6B0"), Color("#7A1E18"))
@@ -549,7 +549,7 @@ func _mairie() -> void:
 	_poly(PackedVector2Array([_p(x0 - 0.5, 9.0), _p(x0 + 0.8, 10.6), _p(x1 - 0.8, 10.6), _p(x1 + 0.5, 9.0)]), _c(Color("#4A5058")))
 	var cx := (x0 + x1) * 0.5
 	_poly(PackedVector2Array([_p(cx - 3.0, 9.0), _p(cx, 11.6), _p(cx + 3.0, 9.0)]), pierre.lightened(0.05))
-	draw_circle(_p(cx, 9.75), 0.62 * _ppm, _c(Color("#EDE6D2")))
+	Disque.d(self, _p(cx, 9.75), 0.62 * _ppm, _c(Color("#EDE6D2")))
 	draw_arc(_p(cx, 9.75), 0.62 * _ppm, 0.0, TAU, 24, _c(Color("#2A2520")), maxf(1.0, _ppm * 0.06))
 	draw_line(_p(cx, 9.75), _p(cx, 10.2), _c(Color("#2A2520")), maxf(1.0, _ppm * 0.06))
 	draw_line(_p(cx, 9.75), _p(cx + 0.3, 9.75), _c(Color("#2A2520")), maxf(1.0, _ppm * 0.06))
@@ -567,7 +567,7 @@ func _mairie() -> void:
 			draw_rect(Rect2(_p(fx - 0.45, fy), Vector2(0.4 * _ppm, 2.0 * _ppm)), _c(Color("#5E7A86")))
 			draw_rect(Rect2(_p(fx + 1.25, fy), Vector2(0.4 * _ppm, 2.0 * _ppm)), _c(Color("#5E7A86")))
 	draw_rect(Rect2(_p(cx - 1.2, 3.2), Vector2(2.4 * _ppm, 3.2 * _ppm)), _c(Color("#3A2A1E")))
-	draw_circle(_p(cx, 3.2), 1.2 * _ppm, _c(Color("#3A2A1E")))
+	Disque.d(self, _p(cx, 3.2), 1.2 * _ppm, _c(Color("#3A2A1E")))
 	for i in 3:
 		draw_rect(Rect2(_p(cx - 2.0 - 0.3 * i, 0.25 * (3 - i)), Vector2((4.0 + 0.6 * i) * _ppm, 0.25 * _ppm)), pierre.darkened(0.08 + 0.04 * i))
 	# mât et drapeau délavé
@@ -730,7 +730,7 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 		draw_line(Vector2(r.position.x, r.end.y), Vector2(r.end.x, r.position.y), _c(Color("#4E3A2A")), maxf(2.0, _ppm * 0.14))
 		for i in 6:
 			for j in 3:
-				draw_circle(Vector2(r.position.x + (i + 0.5) * r.size.x / 6.0, r.position.y + (j + 0.5) * r.size.y / 3.0), maxf(1.0, _ppm * 0.06), _c(Color("#A08060")))
+				Disque.d(self, Vector2(r.position.x + (i + 0.5) * r.size.x / 6.0, r.position.y + (j + 0.5) * r.size.y / 3.0), maxf(1.0, _ppm * 0.06), _c(Color("#A08060")))
 	# montants du passage
 	draw_rect(Rect2(_p(a, PORTE_H), Vector2(0.35 * _ppm, PORTE_H * _ppm)), metal.darkened(0.15))
 	draw_rect(Rect2(_p(b - 0.35, PORTE_H), Vector2(0.35 * _ppm, PORTE_H * _ppm)), metal.darkened(0.15))
@@ -775,8 +775,8 @@ func _porte(xg: float, ouverture: float, titre: String, cote: int) -> void:
 			l = dv.length() + 6.0 * _ppm
 			var lar := 0.06 + 2.2 * _ppm / maxf(1.0, l)
 			_poly(PackedVector2Array([src, src + Vector2.from_angle(ang - lar) * l, src + Vector2.from_angle(ang + lar) * l]), Color(1.0, 0.95, 0.75, 0.22 * _nuit))
-			draw_circle(cible, 2.2 * _ppm, Color(1.0, 0.95, 0.75, 0.12 * _nuit))
-			draw_circle(src, 0.35 * _ppm, Color(1.0, 0.97, 0.85, _nuit))
+			Disque.d(self, cible, 2.2 * _ppm, Color(1.0, 0.95, 0.75, 0.12 * _nuit))
+			Disque.d(self, src, 0.35 * _ppm, Color(1.0, 0.97, 0.85, _nuit))
 		else:
 			_poly(PackedVector2Array([src, src + Vector2(cos(ang - 0.08), sin(ang - 0.08) + 0.4) * l, src + Vector2(cos(ang + 0.08), sin(ang + 0.08) + 0.4) * l]), Color(1.0, 0.95, 0.75, 0.08 * _nuit))
 		if cote == 0:

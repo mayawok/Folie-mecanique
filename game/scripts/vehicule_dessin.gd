@@ -162,6 +162,7 @@ func _fanion() -> void:
 # Dessin à partir d'une description directe (atelier : une pièce seule, découpée dans un véhicule).
 func configurer_d(d: Dictionary) -> void:
 	D = d
+	_maillages.clear()
 	var teintes: Dictionary = donnees().teintes
 	_teinte = Color(teintes.pillards if ennemi else teintes[D.teinte])
 	_voile = Color.WHITE
@@ -394,19 +395,81 @@ func _dessiner_art() -> void:
 	draw_set_transform(_decal)
 
 
+# Carrosserie dessinée par le code (DEC-262) : les polygones qui se suivent dans un même plan, avec leurs contours, forment un
+# seul maillage construit une fois (dans le repère de la caisse, en mètres) puis posé chaque image avec la transformation de
+# la caisse (suspension, tangage, assiette, sens). Un appel de dessin par groupe au lieu de deux par polygone.
+var _maillages := {}          # "plan:indice du premier polygone" -> ArrayMesh
+var _maillages_teinte := Color(0, 0, 0, 0)
+
+
+func _repere_caisse() -> Transform2D:
+	var o := _c(Vector2.ZERO)
+	return Transform2D(_c(Vector2(1, 0)) - o, _c(Vector2(0, 1)) - o, o)
+
+
+func _maillage(z: int, i0: int) -> ArrayMesh:
+	if _maillages_teinte != _teinte:
+		_maillages.clear()
+		_maillages_teinte = _teinte
+	var cle := "%d:%d" % [z, i0]
+	if _maillages.has(cle):
+		return _maillages[cle]
+	var pts_m := PackedVector2Array()
+	var cols := PackedColorArray()
+	var ep := 0.025
+	var i := i0
+	while i < D.formes.size():
+		var f: Dictionary = D.formes[i]
+		if int(f.get("z", 1)) != z:
+			i += 1
+			continue
+		if not f.has("pts"):
+			break
+		var c := _coul(f.get("c", "caisse"))
+		var poly := PackedVector2Array()
+		for p in f.pts:
+			poly.append(Vector2(p[0], p[1]))
+		var ind := Geometry2D.triangulate_polygon(poly)
+		for k in ind:
+			pts_m.append(poly[k])
+			cols.append(c)
+		var cc := c.darkened(0.45)
+		for k in poly.size():   # contour : un ruban par côté
+			var a := poly[k]
+			var b := poly[(k + 1) % poly.size()]
+			var n := (b - a).orthogonal().normalized() * ep * 0.5
+			for q in [a + n, b + n, b - n, a + n, b - n, a - n]:
+				pts_m.append(q)
+				cols.append(cc)
+		i += 1
+	var mesh := ArrayMesh.new()
+	if not pts_m.is_empty():
+		var arr := []
+		arr.resize(Mesh.ARRAY_MAX)
+		arr[Mesh.ARRAY_VERTEX] = pts_m
+		arr[Mesh.ARRAY_COLOR] = cols
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	_maillages[cle] = mesh
+	return mesh
+
+
 func _formes(z: int) -> void:
-	for f in D.formes:
+	var dans_groupe := false
+	for i in D.formes.size():
+		var f: Dictionary = D.formes[i]
 		if int(f.get("z", 1)) != z:
 			continue
 		var c := _coul(f.get("c", "caisse"))
 		if f.has("pts"):
-			var pts := PackedVector2Array()
-			for p in f.pts:
-				pts.append(_c(Vector2(p[0], p[1])))
-			draw_colored_polygon(pts, c)
-			pts.append(pts[0])
-			draw_polyline(pts, c.darkened(0.45), maxf(1.0, ppm * 0.025), true)
-		elif f.has("sprite"):
+			if not dans_groupe:
+				dans_groupe = true
+				var mesh := _maillage(z, i)
+				draw_set_transform_matrix(Transform2D(0.0, _decal) * _repere_caisse())
+				draw_mesh(mesh, null)
+				draw_set_transform(_decal)
+			continue
+		dans_groupe = false
+		if f.has("sprite"):
 			var q: Array = f.r
 			if f.has("lr"):   # caisse relevée : plus haut à l'arrière (lr) qu'à l'avant (lf), l'image s'incline (DEC-225)
 				var lr: float = float(f.lr)
@@ -416,17 +479,17 @@ func _formes(z: int) -> void:
 				_sprite(String(f.sprite), q[0], q[1], q[2], q[3], 0.0, float(f.get("opac", 1.0)), bool(f.get("miroir", false)), f.get("uv", []))
 		elif f.has("cercle"):
 			var k: Array = f.cercle
-			draw_circle(_c(Vector2(k[0], k[1])), k[2] * ppm, c)
+			Disque.d(self, _c(Vector2(k[0], k[1])), k[2] * ppm, c)
 		elif f.has("ligne"):
 			var l: Array = f.ligne
 			draw_line(_c(Vector2(l[0][0], l[0][1])), _c(Vector2(l[1][0], l[1][1])), c, maxf(1.0, f.get("ep", 0.04) * ppm))
 		elif f.has("arc"):
 			var a: Array = f.arc
 			var pts := PackedVector2Array()
-			for i in 13:
-				var ang := deg_to_rad(lerpf(a[3], a[4], i / 12.0))
+			for k in 13:
+				var ang := deg_to_rad(lerpf(a[3], a[4], k / 12.0))
 				pts.append(_c(Vector2(a[0], a[1]) + Vector2(cos(ang), sin(ang)) * a[2]))
-			draw_polyline(pts, c, maxf(1.0, a[5] * ppm), true)
+			Pinceau.contour(self, pts, c, maxf(1.0, a[5] * ppm))
 
 
 # Visuel dessiné (planches de la grille) : quadrilatère texturé qui suit le relief et le sens du véhicule
@@ -474,9 +537,20 @@ func _roue(c: Vector2, r: float, clarte := 1.0) -> void:
 		var ang0 := dist / r * _sens()
 		_quad(t, c + Vector2(-rp, -rp).rotated(ang0), c + Vector2(rp, -rp).rotated(ang0), c + Vector2(-rp, rp).rotated(ang0), Color(clarte, clarte, clarte))
 		return
-	draw_circle(c, rp, _coul("pneu").lerp(Color.BLACK, 1.0 - clarte))
-	draw_circle(c, rp * 0.62, _teinte.darkened(0.25).lerp(Color.BLACK, 1.0 - clarte))
-	draw_circle(c, rp * 0.2, Color("#2B2A27"))
+	_roue_disques(c, r, clarte)
+	_roue_rayons(c, r)
+
+
+# Une roue en deux temps (DEC-262) : toutes les jantes d'abord, tous les rayons ensuite, pour que le moteur les regroupe
+func _roue_disques(c: Vector2, r: float, clarte := 1.0) -> void:
+	var rp := r * ppm
+	Disque.d(self, c, rp, _coul("pneu").lerp(Color.BLACK, 1.0 - clarte))
+	Disque.d(self, c, rp * 0.62, _teinte.darkened(0.25).lerp(Color.BLACK, 1.0 - clarte))
+	Disque.d(self, c, rp * 0.2, Color("#2B2A27"))
+
+
+func _roue_rayons(c: Vector2, r: float) -> void:
+	var rp := r * ppm
 	var ang := dist / r * _sens()
 	for k in 5:
 		var d := Vector2.from_angle(ang + k * TAU / 5)
@@ -494,7 +568,7 @@ func _ressort(a: Vector2, b: Vector2) -> void:
 	for i in range(1, n):
 		pts.append(a + dir * (float(i) / n) + perp * (1.0 if i % 2 else -1.0))
 	pts.append(b)
-	draw_polyline(pts, Color("#2F2E2B"), maxf(1.0, ppm * 0.03), true)
+	Pinceau.contour(self, pts, Color("#2F2E2B"), maxf(1.0, ppm * 0.03))
 
 
 func _couleur_projection(nom: String) -> Color:
@@ -511,7 +585,7 @@ func _train() -> void:
 		var k: float = f.age / 0.9
 		var c := _couleur_projection(String(f.teinte))
 		c.a = 0.5 * (1.0 - k)
-		draw_circle(_e(Vector2(float(f.x) - float(f.vx) * 0.7 * f.age, float(f.y) + 0.05 + k * 0.35)), (0.05 + k * 0.16) * ppm, c)
+		Disque.d(self, _e(Vector2(float(f.x) - float(f.vx) * 0.7 * f.age, float(f.y) + 0.05 + k * 0.35)), (0.05 + k * 0.16) * ppm, c)
 	# Suspensions : ressort entre le moyeu et la caisse
 	for a in _appuis:
 		var moyeu := _e(Vector2(a.x, a.y))
@@ -519,11 +593,20 @@ func _train() -> void:
 		_ressort(moyeu, attache)
 	if D.has("chenille"):
 		_chenille()
+	var roues := []
 	for i in _appuis.size():
 		var a: Dictionary = _appuis[i]
 		if not a.has("galet") and not roues_perdues.has(i):
 			var ec: float = a.r * 0.5 * ecrasement   # pneu écrasé : le moyeu descend, le bas du pneu reste au sol
-			_roue(_e(Vector2(a.x, a.y - ec)), a.r - ec)
+			roues.append([_e(Vector2(a.x, a.y - ec)), a.r - ec])
+	if D.get("libre", false):
+		for w in roues:
+			_roue(w[0], w[1])
+		return
+	for w in roues:
+		_roue_disques(w[0], w[1])
+	for w in roues:
+		_roue_rayons(w[0], w[1])
 
 
 func _chenille() -> void:
@@ -569,13 +652,13 @@ func _chenille() -> void:
 	# Barbotin denté, galet tendeur, rouleaux, galets
 	var ang := dist / float(b[2]) * _sens()
 	var cb: Vector2 = cercles[0][0]
-	draw_circle(cb, b[2] * ppm, Color("#34332F"))
+	Disque.d(self, cb, b[2] * ppm, Color("#34332F"))
 	for k in 10:
-		draw_circle(cb + Vector2.from_angle(ang + k * TAU / 10) * b[2] * ppm * 0.92, b[2] * ppm * 0.12, Color("#25241F"))
-	draw_circle(cb, b[2] * ppm * 0.35, _teinte.darkened(0.3))
+		Disque.d(self, cb + Vector2.from_angle(ang + k * TAU / 10) * b[2] * ppm * 0.92, b[2] * ppm * 0.12, Color("#25241F"))
+	Disque.d(self, cb, b[2] * ppm * 0.35, _teinte.darkened(0.3))
 	_roue(cercles[1][0], t[2], 0.95)
 	for x in c.get("rouleaux", []):
-		draw_circle(_c(Vector2(x, b[1] + b[2] - 0.08)), 0.08 * ppm, Color("#3A3936"))
+		Disque.d(self, _c(Vector2(x, b[1] + b[2] - 0.08)), 0.08 * ppm, Color("#3A3936"))
 	for x in c.get("galets_fond", []):
 		var y := 0.0
 		for a in _appuis:   # hauteur moyenne des galets voisins
@@ -610,7 +693,7 @@ func _armes() -> void:
 			if a.type == "canon":
 				for fu in _fumee:
 					var k2: float = fu.age / 1.6
-					draw_circle(_c(bt + Vector2(0.4 + k2 * 1.4, 0.1 + k2 * 0.6)), (0.25 + k2 * 0.7) * ppm, Color(0.75, 0.72, 0.66, 0.45 * (1.0 - k2)))
+					Disque.d(self, _c(bt + Vector2(0.4 + k2 * 1.4, 0.1 + k2 * 0.6)), (0.25 + k2 * 0.7) * ppm, Color(0.75, 0.72, 0.66, 0.45 * (1.0 - k2)))
 			continue
 		if a.type == "mitrailleuse":
 			var haut := base + Vector2(0, a.pied)
@@ -643,8 +726,7 @@ func _armes() -> void:
 				_eclair(_c(bout + Vector2(0.1, 0)), 0.55)
 			for f in _fumee:
 				var k: float = f.age / 1.6
-				draw_circle(_c(bout + Vector2(0.4 + k * 1.4, 0.1 + k * 0.6)), (0.25 + k * 0.7) * ppm,
-					Color(0.75, 0.72, 0.66, 0.45 * (1.0 - k)))
+				Disque.d(self, _c(bout + Vector2(0.4 + k * 1.4, 0.1 + k * 0.6)), (0.25 + k * 0.7) * ppm, Color(0.75, 0.72, 0.66, 0.45 * (1.0 - k)))
 
 
 func _rect_c(a: Vector2, b: Vector2) -> Rect2:
@@ -659,7 +741,7 @@ func _eclair(p: Vector2, taille: float) -> void:
 		var r := taille * ppm * (1.0 if i % 2 == 0 else 0.4)
 		pts.append(p + Vector2.from_angle(i * TAU / 10 + _temps * 7) * r)
 	draw_colored_polygon(pts, Color(1.0, 0.85, 0.35, 0.95))
-	draw_circle(p, taille * ppm * 0.3, Color(1, 1, 0.85))
+	Disque.d(self, p, taille * ppm * 0.3, Color(1, 1, 0.85))
 
 
 func _equipage() -> void:
