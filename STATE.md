@@ -1,6 +1,14 @@
 # État du projet — Folie Mécanique
 
-Mis à jour : 2026-11-19. Résumé court, par thème. Journal complet : [`docs/DECISIONS.md`](docs/DECISIONS.md) ; **index par thème : [`docs/DECISIONS_INDEX.md`](docs/DECISIONS_INDEX.md)** ; navigation : [`docs/INDEX.md`](docs/INDEX.md) ; questions : [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md).
+Mis à jour : 2026-11-26. Résumé court, par thème. Journal complet : [`docs/DECISIONS.md`](docs/DECISIONS.md) ; **index par thème : [`docs/DECISIONS_INDEX.md`](docs/DECISIONS_INDEX.md)** ; navigation : [`docs/INDEX.md`](docs/INDEX.md) ; questions : [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md).
+
+## Nuit du 25 au 26/11 (chantiers choisis par le créateur, DEC-260 à 264)
+
+- **Appli iPhone native préparée (DEC-260)** : préréglage d'export iOS, icône App Store, réglages natifs, zones sûres ; **guide pas à pas [`docs/MAC_IPHONE.md`](docs/MAC_IPHONE.md)** (compte Apple gratuit). Identifiant provisoire `fr.foliemecanique.prototype` ; suites OQ-055.
+- **Transmission finie (DEC-261)** : sauts réels sur des crêtes du relief, balancement et poussée des remorques, basculement des véhicules de la grille trop hauts.
+- **Performance iPhone, lot 1 (DEC-262)** : ≈ 440 appels de dessin au lieu de ≈ 1 900 en gros combat, **compteur d'images** dans Options ; mesures à faire sur iPhone (OQ-056, [`docs/design/PERFORMANCE.md`](docs/design/PERFORMANCE.md)).
+- **Textes fr/en terminés (DEC-263)** : tout le jeu hors Kit, données traduites au chargement.
+- **Décor par région (DEC-264)** : les 12 régions ont leurs plans lointains, objets, couleurs et particules ; choix dans le Kit ; suites OQ-057.
 
 ## Cap
 
